@@ -20,7 +20,9 @@ class DocumentError(ValueError):
     """A document that cannot be posted as it stands."""
 
 
-def _checked(net: Decimal, vat: Decimal, gross: Decimal, ref: str) -> tuple[Decimal, Decimal, Decimal]:
+def _checked(
+    net: Decimal, vat: Decimal, gross: Decimal, ref: str
+) -> tuple[Decimal, Decimal, Decimal]:
     net, vat, gross = money(net), money(vat), money(gross)
     if net <= ZERO:
         raise DocumentError(f"{ref}: a net of {net} is not an invoice")

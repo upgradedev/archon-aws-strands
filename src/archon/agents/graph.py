@@ -24,25 +24,10 @@ from strands.multiagent import GraphBuilder
 
 from archon.domain.books import Books
 
-from . import tools
+from . import tools, wiring
 
-COMPOSER = "composer"
+COMPOSER = wiring.COMPOSER
 
-_READER_RULES = (
-    "You report only what your tool returns. You never estimate, round or infer "
-    "a figure the tool did not give you. If the tool says nothing is outstanding, "
-    "you say so plainly rather than looking for something to report."
-)
-
-_COMPOSER_RULES = (
-    "You decide whether a collection chase is worth sending, and if so you write "
-    "only the opening line and the closing line. You never write a number: every "
-    "figure is added by a claim the ledger has already confirmed, and your text is "
-    "refused outright if it contains a digit. Judge the tone from the whole "
-    "position, not from the debt alone. A client who has part paid is treated as "
-    "someone settling in stages, not as a defaulter. If nothing is overdue, you "
-    "say there is no chase to write and stop."
-)
 
 
 def _readers(books: Books, as_of: date, frm: date, to: date) -> list[tuple[str, Agent]]:
@@ -83,34 +68,42 @@ def _readers(books: Books, as_of: date, frm: date, to: date) -> list[tuple[str, 
         """The headline metrics as at the reporting date."""
         return tools.headline_metrics(books, as_of)
 
-    specs = (
-        ("suppliers", "what this firm owes its suppliers", suppliers_owed),
-        ("sales", "what this firm's clients owe it", sales_open),
-        ("payroll", "whether this firm has paid its people", payroll_state),
-        ("trading", "whether this firm traded at a profit", trading),
-        ("cash", "what actually moved through the bank", cash),
-        ("metrics", "the headline position", headline),
-    )
+    bound = {
+        "supplier_position": suppliers_owed,
+        "sales_position": sales_open,
+        "payroll_position": payroll_state,
+        "trading_position": trading,
+        "cash_position": cash,
+        "headline_metrics": headline,
+    }
     return [
         (
-            name,
+            reader.name,
             Agent(
-                name=name,
-                system_prompt=f"You report on {duty}. {_READER_RULES}",
-                tools=[fn],
+                name=reader.name,
+                system_prompt=reader.system_prompt,
+                tools=[bound[reader.tool]],
             ),
         )
-        for name, duty, fn in specs
+        for reader in wiring.READERS
     ]
 
 
 def _composer(books: Books, as_of: date) -> Agent:
-    @tool
-    def candidate() -> str:
-        """The single overdue receivable a chase would be about, if any."""
-        return tools.chase_candidate(books, as_of)
+    """The composer, deliberately toolless.
 
-    return Agent(name=COMPOSER, system_prompt=_COMPOSER_RULES, tools=[candidate])
+    It had a ``candidate()`` tool and that was a hole: it could answer from its
+    own lookup and never read a single reader, which would make the six domains
+    decoration and the claim about them false. Its whole view now arrives along
+    the edges.
+
+    Which invoice to chase is still not a matter of opinion, so it is decided
+    here in code and stated to the composer as a given rather than left for the
+    model to pick out of a list.
+    """
+    given = tools.chase_candidate(books, as_of)
+    brief = wiring.COMPOSER_RULES + "\n\n" + "The debt in question: " + given
+    return Agent(name=COMPOSER, system_prompt=brief, tools=[])
 
 
 def build(books: Books, as_of: date, frm: date, to: date):
@@ -120,6 +113,6 @@ def build(books: Books, as_of: date, frm: date, to: date):
     for name, agent in readers:
         builder.add_node(agent, name)
     builder.add_node(_composer(books, as_of), COMPOSER)
-    for name, _ in readers:
-        builder.add_edge(name, COMPOSER)
+    for source, target in wiring.EDGES:
+        builder.add_edge(source, target)
     return builder.build()

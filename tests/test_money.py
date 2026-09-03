@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import pytest
 
-from archon.domain.money import MoneyError, ZERO, fmt, money, total
+from archon.domain.money import ZERO, MoneyError, fmt, money, total
 
 
 def test_a_float_is_refused_rather_than_converted():

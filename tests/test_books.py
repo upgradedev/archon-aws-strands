@@ -5,8 +5,7 @@ from decimal import Decimal
 
 import pytest
 
-from archon.domain.documents import DocumentError, Payment, PurchaseInvoice, Receipt
-from archon.domain.books import Books
+from archon.domain.documents import DocumentError, PurchaseInvoice
 
 TODAY = date(2026, 9, 3)
 

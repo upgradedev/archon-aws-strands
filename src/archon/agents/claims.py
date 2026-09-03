@@ -19,7 +19,7 @@ from decimal import Decimal
 
 from archon.domain.books import Books
 from archon.domain.money import ZERO, fmt, money
-from archon.domain.reports import cashflow, metrics
+from archon.domain.reports import metrics
 
 
 class ClaimRefuted(ValueError):
@@ -122,7 +122,9 @@ class WagesDue(Claim):
         if owed == ZERO:
             raise ClaimRefuted("staff are paid; this firm has no wages outstanding to plead")
         if owed != money(self.amount):
-            raise ClaimRefuted(f"wages outstanding are {owed}, but the draft says {money(self.amount)}")
+            raise ClaimRefuted(
+                f"wages outstanding are {owed}, but the draft says {money(self.amount)}"
+            )
 
     def sentence(self) -> str:
         return f"We have {fmt(money(self.amount))} of wages to settle this month."
@@ -138,12 +140,10 @@ class CashPosition(Claim):
     def check(self, books: Books, as_of: date) -> None:
         actual = metrics(books, as_of).bank
         if actual != money(self.amount):
-            raise ClaimRefuted(f"the bank stands at {actual}, but the draft says {money(self.amount)}")
+            raise ClaimRefuted(
+                f"the bank stands at {actual}, but the draft says {money(self.amount)}"
+            )
 
     def sentence(self) -> str:
         return f"Our own bank balance stands at {fmt(money(self.amount))}."
 
-
-def cash_in_window(books: Books, frm: date, to: date) -> Decimal:
-    """Helper for an agent deciding how hard to push. Not itself a claim."""
-    return cashflow(books, frm, to).net

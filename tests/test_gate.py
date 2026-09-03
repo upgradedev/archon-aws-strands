@@ -4,18 +4,25 @@ Each test below is a way the send could go wrong in front of a client, and the
 assertion is that it does not happen.
 """
 
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from decimal import Decimal
 
 import pytest
 
-from archon.agents.claims import CashPosition, ClaimRefuted, Outstanding, Overdue, PartPaid, WagesDue
+from archon.agents.claims import (
+    CashPosition,
+    ClaimRefuted,
+    Outstanding,
+    Overdue,
+    PartPaid,
+    WagesDue,
+)
 from archon.agents.draft import ChaseDraft, UnsafeDraft
 from archon.agents.gate import Approval, assess
 from archon.domain.documents import Receipt
 
 TODAY = date(2026, 9, 3)
-NOW = datetime(2026, 9, 3, 9, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 9, 3, 9, 0, tzinfo=UTC)
 
 
 def _draft(**overrides) -> ChaseDraft:
@@ -126,7 +133,9 @@ def test_a_plea_about_wages_must_itself_be_true(books):
     good = _draft(claims=(Outstanding("SI-001", Decimal("2000.00")), WagesDue(Decimal("1100.00"))))
     assert assess(books, good, _approved(good), TODAY).allowed
 
-    invented = _draft(claims=(Outstanding("SI-001", Decimal("2000.00")), WagesDue(Decimal("5000.00"))))
+    invented = _draft(
+        claims=(Outstanding("SI-001", Decimal("2000.00")), WagesDue(Decimal("5000.00")))
+    )
     verdict = assess(books, invented, _approved(invented), TODAY)
     assert not verdict.allowed
     assert any("wages outstanding are 1100.00" in r for r in verdict.reasons)

@@ -50,7 +50,9 @@ def payroll_position(books: Books) -> str:
     if not unpaid:
         return "Staff are paid up to date."
     lines = ["Payroll not yet paid:"]
-    lines += [f"  {run.doc_id} {run.period}: {fmt(run.gross)}, run on {run.run_on}" for run in unpaid]
+    lines += [
+        f"  {run.doc_id} {run.period}: {fmt(run.gross)}, run on {run.run_on}" for run in unpaid
+    ]
     return "\n".join(lines)
 
 
