@@ -39,6 +39,22 @@ jobs:
           print("Agent:", inspect.signature(Agent.__init__))
           PY
 
+      # J4 says a graph of Strands agents is load-bearing. This builds the real
+      # one. It needs no model call and no AWS credential, so a failure here is
+      # a wiring failure and nothing else.
+      - name: the graph this project claims as its hero actually constructs
+        run: |
+          python - <<'PY'
+          from datetime import date
+          from archon.agents.graph import build, COMPOSER
+          from archon.domain.books import Books
+
+          graph = build(Books(), date(2026, 9, 3), date(2026, 7, 1), date(2026, 9, 3))
+          print("graph built:", type(graph).__name__)
+          assert graph is not None
+          print("nodes wired into", COMPOSER)
+          PY
+
       - name: lint
         run: python -m ruff check src tests
 

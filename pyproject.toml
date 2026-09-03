@@ -32,6 +32,14 @@ pythonpath = ["src"]
 [tool.coverage.run]
 source = ["src/archon"]
 branch = true
+omit = [
+    # The only module that imports the SDK. It cannot be exercised without
+    # strands installed, and counting its lines here would report a number no
+    # local test can reach, which is the coverage equivalent of inferring a
+    # pass from absent evidence. CI builds the real graph instead, in the step
+    # named "the graph this project claims as its hero actually constructs".
+    "src/archon/agents/graph.py",
+]
 
 [tool.coverage.report]
 show_missing = true
