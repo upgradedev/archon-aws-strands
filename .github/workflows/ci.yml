@@ -63,6 +63,24 @@ jobs:
               for attr in ("DEFAULT_MODEL_ID", "DEFAULT_BEDROCK_MODEL_ID", "DEFAULT_BEDROCK_REGION"):
                   if hasattr(BedrockModel, attr):
                       print(f"  BedrockModel.{attr} =", getattr(BedrockModel, attr))
+
+          import strands.models.bedrock as bedrock_mod
+          print("bedrock module constants:")
+          for name in dir(bedrock_mod):
+              if name.isupper():
+                  print(f"  {name} =", getattr(bedrock_mod, name))
+          cfg = getattr(bedrock_mod.BedrockModel, "BedrockConfig", None)
+          if cfg is not None:
+              print("BedrockConfig keys:", sorted(getattr(cfg, "__annotations__", {})))
+
+          print("strands.models exports:", [n for n in dir(__import__("strands.models", fromlist=["x"])) if not n.startswith("_")])
+
+          import strands.types.streaming as st
+          print("streaming exports:", [n for n in dir(st) if not n.startswith("_")])
+          for name in ("StreamEvent", "ContentBlockDeltaEvent", "MessageStartEvent"):
+              obj = getattr(st, name, None)
+              if obj is not None:
+                  print(f"  {name} keys:", sorted(getattr(obj, "__annotations__", {})))
           PY
 
       # J4 says a graph of Strands agents is load-bearing. This builds the real
