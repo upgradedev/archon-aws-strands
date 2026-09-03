@@ -16,10 +16,22 @@ satisfied only when all six readers have reported. Under OR semantics, no single
 edge becomes traversable until that holds, which gives AND behaviour through the
 mechanism the SDK actually provides.
 
-The state shape is read defensively on purpose. ``GraphState`` is introspected by
-a CI step rather than assumed here, and until that step has run against the
-installed version, this reads whichever of the two documented surfaces is
-present. A wrong guess about an attribute name would fail open, and failing open
+**The state shape, printed by CI run 33712269818 against strands-agents 1.54.0
+rather than assumed here.** ``GraphState`` carries ``task``, ``status``,
+``completed_nodes``, ``failed_nodes``, ``interrupted_nodes``, ``execution_order``,
+``start_time``, ``results``, ``accumulated_usage``, ``accumulated_metrics``,
+``execution_count``, ``execution_time``, ``total_nodes``, ``edges`` and
+``entry_points``. Both surfaces this module reads are confirmed present.
+
+**A reader that fails or is interrupted does not count as having reported**, and
+that is the behaviour we want rather than an oversight: it lands in
+``failed_nodes`` or ``interrupted_nodes``, never in the two sets read here, so
+the composer stays held. A graph that quietly composes a client email while the
+payroll domain errored is the outcome worth refusing, and the cost of refusing it
+is a run that ends with no draft, which is visible and safe.
+
+The union of both surfaces is still read rather than one, because either alone
+demonstrates a node ran and neither is documented as authoritative. Failing open
 is the one thing this module must not do.
 """
 

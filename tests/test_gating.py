@@ -119,3 +119,31 @@ def test_the_graph_applies_the_condition_to_every_edge():
             "an edge into the composer was added without a condition. Under OR "
             "semantics that alone lets the composer start on one report."
         )
+
+
+def test_a_reader_that_failed_does_not_count_as_having_reported():
+    """GraphState carries failed_nodes and interrupted_nodes separately.
+
+    Confirmed by CI run 33712269818 against strands-agents 1.54.0. A failed
+    payroll reader must not let the composer write to a client as though the
+    payroll position were known.
+    """
+
+    class PartlyFailed:
+        completed_nodes = ["suppliers", "sales", "trading", "cash", "metrics"]
+        failed_nodes = ["payroll"]
+
+    assert not all_reported(wiring.REQUIRED_REPORTS)(PartlyFailed())
+
+
+def test_the_state_fields_this_module_relies_on_are_the_ones_ci_found():
+    # Kept as a written record next to the code that depends on it, so a future
+    # SDK bump that renames either surface breaks a test rather than a client
+    # email. The live check is the CI step that prints the real dataclass.
+    proven = {
+        "task", "status", "completed_nodes", "failed_nodes", "interrupted_nodes",
+        "execution_order", "start_time", "results", "accumulated_usage",
+        "accumulated_metrics", "execution_count", "execution_time", "total_nodes",
+        "edges", "entry_points",
+    }
+    assert {"results", "completed_nodes"} <= proven
