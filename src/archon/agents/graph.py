@@ -24,7 +24,7 @@ from strands.multiagent import GraphBuilder
 
 from archon.domain.books import Books
 
-from . import tools, wiring
+from . import gating, tools, wiring
 
 COMPOSER = wiring.COMPOSER
 
@@ -113,6 +113,7 @@ def build(books: Books, as_of: date, frm: date, to: date):
     for name, agent in readers:
         builder.add_node(agent, name)
     builder.add_node(_composer(books, as_of), COMPOSER)
+    gate = gating.all_reported(wiring.REQUIRED_REPORTS)
     for source, target in wiring.EDGES:
-        builder.add_edge(source, target)
+        builder.add_edge(source, target, condition=gate)
     return builder.build()

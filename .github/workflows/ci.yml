@@ -55,6 +55,37 @@ jobs:
           print("nodes wired into", COMPOSER)
           PY
 
+      # agents/gating.py reads GraphState defensively because this repo does not
+      # get to assume an attribute name. This prints the real shape so the guess
+      # can be replaced with evidence, and asserts every composer edge carries a
+      # condition. Under Python's OR semantics an unconditioned edge would let
+      # the composer start on one report.
+      - name: the six-domain requirement is structural, not instructed
+        run: |
+          python - <<'PY'
+          import dataclasses
+          from datetime import date
+
+          from strands.multiagent.graph import GraphState
+
+          from archon.agents import wiring
+          from archon.agents.graph import build
+          from archon.domain.books import Books
+
+          fields = [f.name for f in dataclasses.fields(GraphState)]
+          print("GraphState fields:", fields)
+          for expected in ("results", "completed_nodes"):
+              print(f"  {expected!r} present:", expected in fields)
+
+          graph = build(Books(), date(2026, 9, 3), date(2026, 7, 1), date(2026, 9, 3))
+          edges = list(getattr(graph, "edges", []))
+          print("edges:", len(edges))
+          assert len(edges) == len(wiring.REQUIRED_REPORTS), edges
+          unconditioned = [e for e in edges if getattr(e, "condition", None) is None]
+          assert not unconditioned, f"edges with no condition: {unconditioned}"
+          print("every edge into the composer carries a condition")
+          PY
+
       - name: lint
         run: python -m ruff check src tests
 

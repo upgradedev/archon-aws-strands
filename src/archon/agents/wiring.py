@@ -63,3 +63,7 @@ EDGES: tuple[tuple[str, str], ...] = tuple((reader.name, COMPOSER) for reader in
 
 #: The composer is deliberately toolless. See the module docstring.
 COMPOSER_TOOLS: tuple[str, ...] = ()
+
+#: Every reader the composer must have heard from before it may run at all.
+#: Enforced by an edge condition, not by the prompt. See ``agents.gating``.
+REQUIRED_REPORTS: frozenset[str] = frozenset(reader.name for reader in READERS)
