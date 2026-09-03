@@ -1,0 +1,150 @@
+"""The six questions the owner asked, answered off one ledger.
+
+    1. what invoices have my suppliers sent me   -> purchases_owed / purchases_all
+    2. which of them have I paid                 -> Settlement.is_settled
+    3. what sales have I made                    -> sales_all
+    4. which of those have I collected            -> Settlement.is_settled
+    5. have I paid my staff                       -> payroll_unpaid
+    6. P&L, cashflow, metrics                     -> archon.domain.reports
+
+Every answer is derived, never stored twice. A stored "paid" flag and a ledger
+that disagrees with it is the classic way books start lying, so the flag does
+not exist: settlement is computed from the payments that reference an invoice.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from datetime import date
+from decimal import Decimal
+
+from .documents import Payment, PayrollRun, PurchaseInvoice, Receipt, SalesInvoice
+from .ledger import Ledger
+from .money import ZERO, money
+
+
+@dataclass(frozen=True, slots=True)
+class Settlement:
+    """How much of one invoice has actually been cleared."""
+
+    doc_id: str
+    counterparty: str
+    gross: Decimal
+    settled: Decimal
+    due: date
+
+    @property
+    def outstanding(self) -> Decimal:
+        return money(self.gross - self.settled)
+
+    @property
+    def is_settled(self) -> bool:
+        return self.outstanding <= ZERO
+
+    def is_overdue(self, as_of: date) -> bool:
+        return not self.is_settled and self.due < as_of
+
+    def days_overdue(self, as_of: date) -> int:
+        return max(0, (as_of - self.due).days) if not self.is_settled else 0
+
+
+@dataclass
+class Books:
+    """Every document received, and the ledger they produced."""
+
+    ledger: Ledger = field(default_factory=Ledger)
+    purchases: list[PurchaseInvoice] = field(default_factory=list)
+    sales: list[SalesInvoice] = field(default_factory=list)
+    payments: list[Payment] = field(default_factory=list)
+    receipts: list[Receipt] = field(default_factory=list)
+    payroll: list[PayrollRun] = field(default_factory=list)
+
+    # ---- taking documents in -------------------------------------------------
+
+    def record(self, document: object) -> None:
+        """Post a document and file it under the right domain.
+
+        Unknown types are refused rather than ignored. A document that silently
+        does nothing is worse than one that fails, because the books then look
+        complete while missing it.
+        """
+        bucket = {
+            PurchaseInvoice: self.purchases,
+            SalesInvoice: self.sales,
+            Payment: self.payments,
+            Receipt: self.receipts,
+            PayrollRun: self.payroll,
+        }.get(type(document))
+        if bucket is None:
+            raise TypeError(f"Archon has no posting rule for {type(document).__name__}")
+        for entry in document.entries():  # type: ignore[attr-defined]
+            self.ledger.post(entry)
+        bucket.append(document)  # type: ignore[arg-type]
+
+    # ---- 1 and 2: suppliers --------------------------------------------------
+
+    def purchase_settlements(self) -> list[Settlement]:
+        paid: dict[str, Decimal] = {}
+        for payment in self.payments:
+            paid[payment.settles] = paid.get(payment.settles, ZERO) + payment.amount
+        return [
+            Settlement(
+                doc_id=inv.doc_id,
+                counterparty=inv.supplier,
+                gross=inv.gross,
+                settled=money(paid.get(inv.doc_id, ZERO)),
+                due=inv.due,
+            )
+            for inv in self.purchases
+        ]
+
+    def owed_to_suppliers(self) -> list[Settlement]:
+        """Supplier invoices still open, soonest due first."""
+        return sorted(
+            (s for s in self.purchase_settlements() if not s.is_settled),
+            key=lambda s: (s.due, -s.outstanding),
+        )
+
+    # ---- 3 and 4: clients ----------------------------------------------------
+
+    def sales_settlements(self) -> list[Settlement]:
+        received: dict[str, Decimal] = {}
+        for receipt in self.receipts:
+            received[receipt.settles] = received.get(receipt.settles, ZERO) + receipt.amount
+        return [
+            Settlement(
+                doc_id=inv.doc_id,
+                counterparty=inv.client,
+                gross=inv.gross,
+                settled=money(received.get(inv.doc_id, ZERO)),
+                due=inv.due,
+            )
+            for inv in self.sales
+        ]
+
+    def uncollected(self) -> list[Settlement]:
+        """Open sales invoices, oldest debt first. The hero journey starts here."""
+        return sorted(
+            (s for s in self.sales_settlements() if not s.is_settled),
+            key=lambda s: (s.due, -s.outstanding),
+        )
+
+    def overdue(self, as_of: date) -> list[Settlement]:
+        return [s for s in self.uncollected() if s.is_overdue(as_of)]
+
+    def worst_overdue(self, as_of: date) -> Settlement | None:
+        """The single receivable the chase is written about.
+
+        Oldest first, and the largest of the equally old, because age is what a
+        client cannot argue with and size is what makes the email worth sending.
+        """
+        overdue = self.overdue(as_of)
+        return overdue[0] if overdue else None
+
+    # ---- 5: staff ------------------------------------------------------------
+
+    def payroll_unpaid(self) -> list[PayrollRun]:
+        return [run for run in self.payroll if not run.is_paid]
+
+    def staff_are_paid(self) -> bool:
+        return not self.payroll_unpaid()
