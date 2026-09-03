@@ -32,14 +32,12 @@ pythonpath = ["src"]
 [tool.coverage.run]
 source = ["src/archon"]
 branch = true
-omit = [
-    # The only module that imports the SDK. It cannot be exercised without
-    # strands installed, and counting its lines here would report a number no
-    # local test can reach, which is the coverage equivalent of inferring a
-    # pass from absent evidence. CI builds the real graph instead, in the step
-    # named "the graph this project claims as its hero actually constructs".
-    "src/archon/agents/graph.py",
-]
+# Nothing is omitted. An earlier version of this file excluded graph.py on the
+# stated ground that the SDK could not be installed here. That was wrong: it was
+# already installed, and the graph is exercised by tests/test_graph_runs.py
+# against a scripted model. The claim was never checked, which is the failure the
+# rest of this repo is built to avoid, so the exclusion is gone rather than
+# rewritten with a better excuse.
 
 [tool.coverage.report]
 show_missing = true

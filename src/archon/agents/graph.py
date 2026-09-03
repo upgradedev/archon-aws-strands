@@ -10,9 +10,11 @@ The composer never sends. It proposes a draft; ``archon.agents.gate`` re-derives
 every fact and demands a human fingerprint. Safety that depends on a model
 behaving is not safety, so the gate is plain code and stays that way.
 
-**Unverified until CI says otherwise.** Nothing in this module has been executed
-on this machine, because the SDK is not installed here. The CI job asserts the
-imports, the builder surface and that this graph constructs.
+**Proven, and by two versions.** `tests/test_graph_runs.py` runs this graph
+against a scripted model and asserts the six readers all execute before the
+composer. That suite passes locally on `strands-agents 1.53.0` and in CI on
+1.54.0. What is still not proven here is judgment: a scripted model walks the
+graph, it does not decide anything.
 """
 
 from __future__ import annotations
@@ -30,7 +32,9 @@ COMPOSER = wiring.COMPOSER
 
 
 
-def _readers(books: Books, as_of: date, frm: date, to: date) -> list[tuple[str, Agent]]:
+def _readers(
+    books: Books, as_of: date, frm: date, to: date, model: object | None
+) -> list[tuple[str, Agent]]:
     """One agent per question, each with exactly the tool it needs.
 
     Tools are bound to these books by closure rather than passed as arguments,
@@ -81,6 +85,7 @@ def _readers(books: Books, as_of: date, frm: date, to: date) -> list[tuple[str, 
             reader.name,
             Agent(
                 name=reader.name,
+                model=model,
                 system_prompt=reader.system_prompt,
                 tools=[bound[reader.tool]],
             ),
@@ -89,7 +94,7 @@ def _readers(books: Books, as_of: date, frm: date, to: date) -> list[tuple[str, 
     ]
 
 
-def _composer(books: Books, as_of: date) -> Agent:
+def _composer(books: Books, as_of: date, model: object | None) -> Agent:
     """The composer, deliberately toolless.
 
     It had a ``candidate()`` tool and that was a hole: it could answer from its
@@ -103,16 +108,22 @@ def _composer(books: Books, as_of: date) -> Agent:
     """
     given = tools.chase_candidate(books, as_of)
     brief = wiring.COMPOSER_RULES + "\n\n" + "The debt in question: " + given
-    return Agent(name=COMPOSER, system_prompt=brief, tools=[])
+    return Agent(name=COMPOSER, model=model, system_prompt=brief, tools=[])
 
 
-def build(books: Books, as_of: date, frm: date, to: date):
-    """Wire the graph. Construction only; nothing runs until it is called."""
+def build(books: Books, as_of: date, frm: date, to: date, model: object | None = None):
+    """Wire the graph. Construction only; nothing runs until it is called.
+
+    ``model`` is injected rather than reached for. Passing ``None`` leaves the
+    SDK to resolve its own default, passing ``bedrock_model()`` runs on Bedrock,
+    and passing a ``ScriptedModel`` walks the whole graph with no AWS account,
+    which is how S9 is satisfied by the architecture instead of by a promise.
+    """
     builder = GraphBuilder()
-    readers = _readers(books, as_of, frm, to)
+    readers = _readers(books, as_of, frm, to, model)
     for name, agent in readers:
         builder.add_node(agent, name)
-    builder.add_node(_composer(books, as_of), COMPOSER)
+    builder.add_node(_composer(books, as_of, model), COMPOSER)
     gate = gating.all_reported(wiring.REQUIRED_REPORTS)
     for source, target in wiring.EDGES:
         builder.add_edge(source, target, condition=gate)
