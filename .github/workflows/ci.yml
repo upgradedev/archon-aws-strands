@@ -39,6 +39,32 @@ jobs:
           print("Agent:", inspect.signature(Agent.__init__))
           PY
 
+      # Everything the Bedrock wiring needs, printed rather than recalled: what a
+      # Model must implement so a stub can stand in for one offline, and what
+      # BedrockModel defaults to so the model id is evidence and not a guess.
+      - name: the model surface, printed not recalled
+        run: |
+          python - <<'PY'
+          import inspect
+
+          from strands.models.model import Model
+
+          print("Model abstract methods:", sorted(getattr(Model, "__abstractmethods__", ())))
+          for name, member in inspect.getmembers(Model, predicate=inspect.isfunction):
+              if not name.startswith("_"):
+                  print(f"  Model.{name}{inspect.signature(member)}")
+
+          try:
+              from strands.models import BedrockModel
+          except ImportError as exc:
+              print("BedrockModel not importable:", exc)
+          else:
+              print("BedrockModel.__init__:", inspect.signature(BedrockModel.__init__))
+              for attr in ("DEFAULT_MODEL_ID", "DEFAULT_BEDROCK_MODEL_ID", "DEFAULT_BEDROCK_REGION"):
+                  if hasattr(BedrockModel, attr):
+                      print(f"  BedrockModel.{attr} =", getattr(BedrockModel, attr))
+          PY
+
       # J4 says a graph of Strands agents is load-bearing. This builds the real
       # one. It needs no model call and no AWS credential, so a failure here is
       # a wiring failure and nothing else.
