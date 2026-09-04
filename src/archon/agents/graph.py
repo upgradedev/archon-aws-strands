@@ -88,6 +88,10 @@ def _readers(
                 model=model,
                 system_prompt=reader.system_prompt,
                 tools=[bound[reader.tool]],
+                # Silent. The SDK's default handler streams every reply to stdout,
+                # which makes this graph unusable inside anything that has its own
+                # output. A caller who wants the text reads it off the result.
+                callback_handler=None,
             ),
         )
         for reader in wiring.READERS
@@ -108,7 +112,9 @@ def _composer(books: Books, as_of: date, model: object | None) -> Agent:
     """
     given = tools.chase_candidate(books, as_of)
     brief = wiring.COMPOSER_RULES + "\n\n" + "The debt in question: " + given
-    return Agent(name=COMPOSER, model=model, system_prompt=brief, tools=[])
+    return Agent(
+        name=COMPOSER, model=model, system_prompt=brief, tools=[], callback_handler=None
+    )
 
 
 def build(books: Books, as_of: date, frm: date, to: date, model: object | None = None):
