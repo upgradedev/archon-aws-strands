@@ -23,12 +23,17 @@ from .ledger import Ledger
 from .money import ZERO, money
 
 
+class SettlementError(ValueError):
+    """A payment that points nowhere, or pays more than is owed."""
+
+
 @dataclass(frozen=True, slots=True)
 class Settlement:
     """How much of one invoice has actually been cleared."""
 
     doc_id: str
     counterparty: str
+    contact: str
     gross: Decimal
     settled: Decimal
     due: date
@@ -67,6 +72,11 @@ class Books:
         Unknown types are refused rather than ignored. A document that silently
         does nothing is worse than one that fails, because the books then look
         complete while missing it.
+
+        **All or nothing.** A document producing two entries must post both or
+        neither. Half a payroll run, booked but unpaid because the second entry
+        raised, is a ledger that balances and lies, and every report above it
+        would inherit the lie without any of them being wrong.
         """
         bucket = {
             PurchaseInvoice: self.purchases,
@@ -77,9 +87,50 @@ class Books:
         }.get(type(document))
         if bucket is None:
             raise TypeError(f"Archon has no posting rule for {type(document).__name__}")
-        for entry in document.entries():  # type: ignore[attr-defined]
-            self.ledger.post(entry)
+
+        self._check_settles(document)
+
+        entries = list(document.entries())  # type: ignore[attr-defined]
+        posted = []
+        try:
+            for entry in entries:
+                posted.append(self.ledger.post(entry))
+        except Exception:
+            for entry in posted:
+                self.ledger.entries.remove(entry)
+            raise
         bucket.append(document)  # type: ignore[arg-type]
+
+    def _check_settles(self, document: object) -> None:
+        """A payment must point at a real invoice and must not overpay it.
+
+        Both failures are the quiet kind. A payment against a typo'd reference
+        posts happily, moves the bank, and leaves the invoice open forever; the
+        owner then chases a client who paid. An overpayment drives an invoice
+        negative and the outstanding column reads as a credit nobody granted.
+        """
+        if isinstance(document, Payment):
+            known = {inv.doc_id: inv.gross for inv in self.purchases}
+            settled = self.purchase_settlements()
+            noun = "purchase invoice"
+        elif isinstance(document, Receipt):
+            known = {inv.doc_id: inv.gross for inv in self.sales}
+            settled = self.sales_settlements()
+            noun = "sales invoice"
+        else:
+            return
+
+        if document.settles not in known:
+            raise SettlementError(
+                f"{document.doc_id} settles {document.settles}, which is not a {noun} "
+                "in these books. Archon does not post against a reference it cannot find."
+            )
+        outstanding = next(s.outstanding for s in settled if s.doc_id == document.settles)
+        if document.amount > outstanding:
+            raise SettlementError(
+                f"{document.doc_id} is {document.amount} against {document.settles}, "
+                f"which has only {outstanding} outstanding of {known[document.settles]}."
+            )
 
     # ---- 1 and 2: suppliers --------------------------------------------------
 
@@ -91,6 +142,7 @@ class Books:
             Settlement(
                 doc_id=inv.doc_id,
                 counterparty=inv.supplier,
+                contact="",
                 gross=inv.gross,
                 settled=money(paid.get(inv.doc_id, ZERO)),
                 due=inv.due,
@@ -115,6 +167,7 @@ class Books:
             Settlement(
                 doc_id=inv.doc_id,
                 counterparty=inv.client,
+                contact=inv.client_email,
                 gross=inv.gross,
                 settled=money(received.get(inv.doc_id, ZERO)),
                 due=inv.due,

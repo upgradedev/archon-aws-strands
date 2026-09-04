@@ -79,6 +79,7 @@ class SalesInvoice:
 
     doc_id: str
     client: str
+    client_email: str
     issued: date
     due: date
     net: Decimal
@@ -93,6 +94,11 @@ class SalesInvoice:
         object.__setattr__(self, "gross", gross)
         if self.due < self.issued:
             raise DocumentError(f"{self.doc_id}: due {self.due} precedes issue {self.issued}")
+        # The address lives on the invoice because that is where it can be checked.
+        # An address carried on the draft instead is an address the agent chose,
+        # and a correct chase sent to the wrong inbox is still a disclosure.
+        if "@" not in self.client_email:
+            raise DocumentError(f"{self.doc_id}: not a client address: {self.client_email!r}")
 
     def entries(self) -> tuple[JournalEntry, ...]:
         postings = [Posting(Account.RECEIVABLES, self.gross), Posting(Account.SALES, -self.net)]

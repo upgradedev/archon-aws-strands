@@ -188,3 +188,70 @@ def test_a_claim_can_be_asked_without_raising(books):
 def test_a_claim_about_an_unknown_invoice_is_refuted(books):
     with pytest.raises(ClaimRefuted, match="not a sales invoice"):
         Outstanding("SI-999", Decimal("1.00")).check(books, TODAY)
+
+
+# --- the address is ledger data, and the approval is perishable ----------------
+
+
+def test_the_chase_may_only_go_to_the_address_on_the_invoice(books):
+    """Name matching was not enough.
+
+    A correct chase delivered to the wrong inbox still discloses one client's
+    balance to somebody else, and the address is the field an agent could invent.
+    """
+    draft = _draft(to_address="accounts@somewhere-else.example")
+    verdict = assess(books, draft, _approved(draft), TODAY)
+    assert not verdict.allowed
+    assert any("would send to accounts@somewhere-else.example" in r for r in verdict.reasons)
+
+
+def test_the_right_address_comes_from_the_ledger_not_the_draft(books):
+    on_file = {s.doc_id: s.contact for s in books.sales_settlements()}
+    assert on_file["SI-001"] == "accounts@cafe.example"
+    draft = _draft(to_address=on_file["SI-001"])
+    assert assess(books, draft, _approved(draft), TODAY).allowed
+
+
+def test_an_approval_lapses(books):
+    from datetime import timedelta
+
+    draft = _draft()
+    approval = _approved(draft)
+    assert assess(books, draft, approval, TODAY, now=NOW + timedelta(minutes=29)).allowed
+
+    late = assess(books, draft, approval, TODAY, now=NOW + timedelta(minutes=31))
+    assert not late.allowed
+    assert any("lapsed at" in r for r in late.reasons)
+
+
+def test_an_approval_cannot_be_used_before_it_was_given(books):
+    from datetime import timedelta
+
+    draft = _draft()
+    verdict = assess(books, draft, _approved(draft), TODAY, now=NOW - timedelta(minutes=1))
+    assert not verdict.allowed
+
+
+def test_an_approval_needs_a_timezone_aware_moment():
+    from datetime import datetime as dt
+
+    draft = _draft()
+    with pytest.raises(ValueError, match="timezone-aware"):
+        Approval(
+            fingerprint=draft.fingerprint(),
+            approved_by="the owner",
+            approved_at=dt(2026, 9, 3),
+        )
+
+
+def test_an_approval_that_expires_before_it_is_given_is_refused():
+    from datetime import timedelta
+
+    draft = _draft()
+    with pytest.raises(ValueError, match="expires before it is given"):
+        Approval(
+            fingerprint=draft.fingerprint(),
+            approved_by="the owner",
+            approved_at=NOW,
+            lifetime=timedelta(0),
+        )

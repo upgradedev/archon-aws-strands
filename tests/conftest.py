@@ -68,6 +68,7 @@ def books() -> Books:
         SalesInvoice(
             doc_id="SI-001",
             client="Cafe on the corner",
+            client_email="accounts@cafe.example",
             issued=date(2026, 6, 10),
             due=date(2026, 7, 10),
             net="2000.00",
@@ -80,6 +81,7 @@ def books() -> Books:
         SalesInvoice(
             doc_id="SI-002",
             client="Letting agent",
+            client_email="pay@letting.example",
             issued=date(2026, 7, 20),
             due=date(2026, 8, 19),
             net="800.00",
@@ -92,6 +94,7 @@ def books() -> Books:
         SalesInvoice(
             doc_id="SI-003",
             client="New build site",
+            client_email="ap@newbuild.example",
             issued=date(2026, 8, 25),
             due=date(2026, 9, 24),
             net="1500.00",
