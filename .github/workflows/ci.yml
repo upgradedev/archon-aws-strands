@@ -156,6 +156,13 @@ jobs:
           print("screen renders,", len(html), "bytes, no external asset")
           PY
 
+      # STANDARDS asks for zero discrepancy between the README, the code, the
+      # video and the description. That row is usually kept by somebody
+      # remembering. tests/test_readme_is_true.py keeps it by failing, and this
+      # step runs it on its own so the reason is legible when it does.
+      - name: the README is still true
+        run: python -m pytest tests/test_readme_is_true.py -q
+
       - name: the domain core imports nothing it should not
         run: |
           python - <<'PY'
