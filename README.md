@@ -142,7 +142,7 @@ flowchart LR
 
 | | |
 |---|---|
-| the ledger, six domains, P&L, cash, metrics | real, 255 tests, 93% branch coverage |
+| the ledger, six domains, P&L, cash, metrics | real, 259 tests, 93% branch coverage |
 | the six-agent Strands graph | real, runs on `strands-agents` 1.53 and 1.54 |
 | Bedrock | real, `global.anthropic.claude-opus-5`, verified by a live call |
 | SES send, idempotent, with receipt | real code; **the account is in the SES sandbox**, so it can send only to verified addresses |
@@ -152,6 +152,48 @@ flowchart LR
 | a running deployment | not yet. The screen runs locally |
 
 ---
+
+## Why this is a business
+
+**The problem is measured and it is not niche.** 47% of invoices in Western Europe are overdue, 53% in
+Central and Eastern Europe. Suppliers wait 61.8 days on average, five days longer than in 2022. Small
+businesses spend close to **ten hours a week chasing payment**. Sources: Intrum's EU Payment Report 2026
+and the European Commission's EU Payment Observatory, read 2026-09-05.
+
+**Nobody sells to this person, and the reason is structural.** Accounting software assumes a bookkeeper
+operates it. The sole trader is the bookkeeper, on a Sunday, after the work. Every existing product asks
+them to migrate, to categorise, to learn a chart of accounts. So they do none of it, and the position
+they are in is invisible to them until an accountant tells them in April.
+
+**The wedge is that they already forward emails.** No migration, no data entry, no chart of accounts, no
+setup call. They forward what already arrives and the books appear behind it.
+
+**What they would pay for is not bookkeeping.** It is the money. On the fixture in this repository:
+2,000.00 EUR that reference matching reports as settled, plus 37.67 EUR of statutory interest that the
+law already owes them and nobody works out. One recovered debt pays for years of a tool like this.
+
+**Measured unit cost**, from one real run against Bedrock on 2026-09-05, on the SDK's default model
+rather than the Opus 5 this project configures: **12,070 tokens and 13 seconds for a whole month-close**,
+across seven model calls, six readers and a composer. Converting that to money needs the Bedrock price
+sheet, which this file does not quote because it has not been stamped here. The shape is the point: a
+month-close is small, bounded and priced per run, not per seat.
+
+**What defends it is the boring half.** Anyone can put an LLM in front of an inbox in a weekend, and the
+comparison in this README shows a frontier model is genuinely good at reading one. What is hard is the
+ledger that makes the model's output checkable, the claim that refuses to be stated unless the books
+confirm it, and the gate that binds a human's yes to exact bytes. That is the work, and it is the part
+that decides whether a business can let it send anything.
+
+**What would have to be true, and is not yet.** These are the questions to ask before believing any of
+the above:
+
+- that people will forward mail to a third party at all, which nothing here has tested with a real person;
+- that reading generalises past conventional invoices to the messy ones, which the twenty scenarios do not probe;
+- that one governed write is enough to be worth paying for, rather than the first of many they would want;
+- that the recovered money is attributable, so a customer can see what the tool got back for them.
+
+None of those is answered by this repository, and a version of this section that implied otherwise would
+be the same failure the comparison above refused to commit.
 
 ## Pre-existing work, disclosed
 

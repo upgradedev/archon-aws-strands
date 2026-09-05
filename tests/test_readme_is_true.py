@@ -135,3 +135,34 @@ def test_the_diagrams_are_present_and_renderable_by_github():
 
 def test_the_readme_no_longer_says_scaffolding():
     assert "Scaffolding" not in README
+
+
+def test_the_business_case_states_what_is_not_proven():
+    """An investor section that only claims is worth less than one that also doubts."""
+    assert "What would have to be true, and is not yet" in README
+    for doubt in (
+        "nothing here has tested with a real person",
+        "the twenty scenarios do not probe",
+        "None of those is answered by this repository",
+    ):
+        assert doubt in README, doubt
+
+
+def test_the_external_statistics_carry_a_source_and_a_date():
+    assert "EU Payment Report 2026" in README
+    assert "EU Payment Observatory" in README
+    assert "read 2026-09-05" in README
+
+
+def test_the_unit_cost_is_measured_and_says_which_model_produced_it():
+    assert "12,070 tokens" in README
+    assert "one real run against Bedrock" in README
+    assert "rather than the Opus 5 this project configures" in README, (
+        "a cost measured on one model and attributed to another is a wrong number"
+    )
+
+
+def test_no_market_size_is_invented():
+    """A TAM nobody computed is the fastest way to lose an investor's trust."""
+    for invented in ("TAM", "total addressable", "$1bn", "billion market"):
+        assert invented not in README, invented
