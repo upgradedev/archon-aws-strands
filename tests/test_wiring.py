@@ -81,3 +81,46 @@ def test_readers_are_built_from_the_wiring_not_hardcoded():
     src = GRAPH_SRC.read_text(encoding="utf-8")
     assert "wiring.READERS" in src
     assert "wiring.EDGES" in src
+
+
+# --- the readers are asked to judge, not to relay -----------------------------
+
+
+def test_every_reader_is_asked_a_question_only_it_can_answer():
+    """"They relay a string" is not an answer to "what are six agents for"."""
+    for reader in wiring.READERS:
+        assert reader.question.endswith("?"), reader.name
+        assert len(reader.question.split()) >= 6, reader.name
+
+
+def test_no_two_readers_are_asked_the_same_thing():
+    questions = [r.question for r in wiring.READERS]
+    assert len(set(questions)) == len(questions)
+
+
+def test_a_reader_is_told_to_give_a_view_and_to_end_with_a_verdict():
+    rules = wiring.READER_RULES
+    assert "say whether it is a problem" in rules
+    for verdict in wiring.VERDICTS:
+        assert verdict in rules
+
+
+def test_a_reader_is_still_forbidden_from_inventing_a_figure():
+    """The judgement is new; the arithmetic rule is not relaxed to make room."""
+    assert "Never estimate, round or infer a figure the tool did not" in wiring.READER_RULES
+
+
+def test_a_reader_is_told_a_colleague_may_disagree():
+    assert "may reasonably disagree" in wiring.READER_RULES
+
+
+def test_the_composer_is_told_the_disagreement_is_the_point():
+    rules = wiring.COMPOSER_RULES
+    assert "disagreement is the useful part" in rules
+    assert "following the loudest" in rules
+
+
+def test_the_question_reaches_the_prompt():
+    for reader in wiring.READERS:
+        assert reader.question in reader.system_prompt
+        assert wiring.READER_RULES in reader.system_prompt

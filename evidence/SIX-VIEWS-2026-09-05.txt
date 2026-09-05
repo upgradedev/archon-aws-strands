@@ -1,0 +1,85 @@
+### payroll
+**What the tool returned:**
+Payroll run PR-2026-08 (August 2026) was processed on 2026-08-31 for **1,100.00 EUR** and has **not yet been paid**.
+
+---
+
+One payroll run is outstanding from the end of August, meaning staff have gone unpaid for the entire subsequent month, which in a sole-operator firm almost certainly means the owner has not had the cash or has simply not acted — either way it cannot be left to slip further into the new quarter. **URGENT**
+
+### suppliers
+**What the data shows**
+
+One invoice is open:
+
+| Invoice | Supplier | Amount Outstanding | Due Date |
+|---|---|---|---|
+| PI-002 | Van Leasing B | €496.00 of €496.00 | 30 September 2026 |
+
+Nothing has been partially paid; the full €496.00 remains outstanding. No other supplier invoices are open.
+
+---
+
+**Assessment**
+
+PI-002 is due on the last day of the quarter being closed — it is not yet overdue, the amount is modest, and there is nothing else in the queue, but the due date lands exactly on quarter-close so payment must be confirmed before books are shut or it will carry over as a liability. WATCH
+
+### metrics
+**One number: 1 invoice overdue, totalling 2,000.00 EUR — oldest by 55 days.**
+
+That invoice is nearly two months outstanding and represents the overwhelming majority of client receivables (2,000 out of 3,860 EUR), while the bank holds only 232 EUR against 1,596 EUR of immediate obligations (wages + suppliers). The owner cannot clear payroll and suppliers from cash alone; this debt needs chasing today. **URGENT**
+
+### cash
+**What the bank shows — Q3 2026 (1 Jul → 3 Sep 2026)**
+
+| | EUR |
+|---|---|
+| Opening balance | 0.00 |
+| Total in | 1,472.00 |
+| Total out | 1,240.00 |
+| **Closing balance** | **232.00** |
+
+Nothing is flagged as outstanding; the tool reports no unpaid items.
+
+---
+
+**Verdict:** The quarter closed with 232.00 EUR in hand against a zero opening, which is a positive but very thin cushion — one missed payment in or one unplanned expense out could flip this negative, and with a sole operator there is no one else to cover the gap. **WATCH**
+
+### trading
+**Trading result for Q3 2026 (1 Jul – 3 Sep 2026)**
+
+| | EUR |
+|---|---|
+| Sales | 2,300.00 |
+| Purchases | 1,400.00 |
+| Wages | 1,100.00 |
+| **Net profit / (loss)** | **(200.00)** |
+| Margin | –8.70% |
+
+The firm made a loss of €200 for the quarter — wages tipped a gross profit into the red, and at a business this size one owner doing everything, that pattern can quietly compound if sales don't grow or costs aren't trimmed soon. **WATCH**
+
+### sales
+Here is what the tool returned.
+
+---
+
+**Open Receivables**
+
+| Invoice | Client | Outstanding | Status |
+|---|---|---|---|
+| SI-001 | Café on the Corner | 2,000.00 EUR | **55 days overdue** — 480.00 EUR received so far |
+| SI-003 | New Build Site | 1,860.00 EUR | Not yet due (due 2026-09-24) |
+
+**Total outstanding: 3,860.00 EUR across 2 invoices.**
+
+A note on SI-001: the 480.00 EUR already received suggests the client is paying in stages rather than going dark — but the remaining 2,000.00 EUR is 55 days past due with no indication the next stage has arrived, so that staged pattern does not excuse the delay.
+
+---
+
+**Assessment:** SI-001 (Café on the Corner) needs an immediate chase — 2,000.00 EUR is 55 days overdue, and while the partial payment shows the client has not disappeared entirely, 55 days of silence on the balance is too long for a sole trader carrying all cash-flow risk alone; SI-003 is not yet due and should be left alone. **URGENT**
+
+### composer
+Opening line: Thank you for the payment you have already made toward invoice SI-001 — it tells us you are engaging with this, and we appreciate that.
+
+Closing line: Given how long the remaining balance has now been outstanding, we would be grateful for either the next stage payment or a brief note on timing by return, so we can plan our own commitments accordingly.
+
+usage: {'inputTokens': 11092, 'outputTokens': 1366, 'totalTokens': 12458}

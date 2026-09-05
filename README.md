@@ -130,6 +130,29 @@ flowchart LR
   never -->|"refuses or releases"| out["one email"]
 ```
 
+### Why six agents and not one query
+
+It is the fair objection, and the first version of this deserved it: six agents
+that restate what a deterministic tool returned are six model calls that add
+nothing. So each reader is now asked a question only somebody looking at that
+domain can answer, told that a colleague may reasonably disagree, and asked to
+end with URGENT, WATCH or FINE.
+
+They do disagree. From a real run on 2026-09-05, captured in
+[`evidence/SIX-VIEWS-2026-09-05.txt`](evidence/SIX-VIEWS-2026-09-05.txt):
+
+> **payroll** — "staff have gone unpaid for the entire subsequent month, which in a sole-operator firm
+> almost certainly means the owner has not had the cash or has simply not acted, either way it cannot be
+> left to slip further into the new quarter. **URGENT**"
+>
+> **suppliers** — "it is not yet overdue, the amount is modest, and there is nothing else in the queue,
+> but the due date lands exactly on quarter-close so payment must be confirmed before books are shut.
+> **WATCH**"
+
+Same books, same moment, different pressure. The composer weighs six views rather than following the
+loudest, and that is the work an LLM is actually for here. Every figure in both quotations came from a
+tool; the judgement did not.
+
 ### The rules that carry it
 
 - **A journal entry that does not balance is refused at construction.** No report downstream can silently lose money.
@@ -146,7 +169,7 @@ flowchart LR
 
 | | |
 |---|---|
-| the ledger, six domains, P&L, cash, metrics | real, 291 tests, 93% branch coverage |
+| the ledger, six domains, P&L, cash, metrics | real, 300 tests, 93% branch coverage |
 | the six-agent Strands graph | real, runs on `strands-agents` 1.53 and 1.54 |
 | Bedrock | real, `global.anthropic.claude-opus-5`, verified by a live call |
 | SES send, idempotent, with receipt | real code; **the account is in the SES sandbox**, so it can send only to verified addresses |

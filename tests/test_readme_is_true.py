@@ -166,3 +166,21 @@ def test_no_market_size_is_invented():
     """A TAM nobody computed is the fastest way to lose an investor's trust."""
     for invented in ("TAM", "total addressable", "$1bn", "billion market"):
         assert invented not in README, invented
+
+
+def test_the_readme_answers_why_six_agents():
+    """The strongest objection to the design, so it is answered rather than left."""
+    assert "Why six agents and not one query" in README
+    assert "restate what a deterministic tool returned" in README
+    assert "URGENT" in README and "WATCH" in README
+
+
+def test_the_disagreement_is_shown_from_a_real_run_not_asserted():
+
+    assert "evidence/SIX-VIEWS-2026-09-05.txt" in README
+    captured = ROOT / "evidence" / "SIX-VIEWS-2026-09-05.txt"
+    assert captured.exists(), "the README quotes a run whose transcript is not in the repository"
+    text = captured.read_text(encoding="utf-8")
+    for reader in ("payroll", "suppliers", "metrics", "cash", "trading", "sales"):
+        assert f"### {reader}" in text, reader
+    assert "URGENT" in text and "WATCH" in text
