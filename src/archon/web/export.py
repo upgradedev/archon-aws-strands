@@ -80,8 +80,11 @@ def _render(session: Session, caption: str) -> str:
     # rather than left as buttons that quietly do nothing when pressed.
     html = re.sub(r"<form[^>]*>", "<div>", html)
     html = html.replace("</form>", "</div>")
-    html = html.replace("<button", "<button disabled").replace("<button disableddisabled", "<button disabled")
-    return html.replace('<p class="lede">', BANNER.format(here=caption) + NAV + '<p class="lede">', 1)
+    html = html.replace("<button", "<button disabled")
+    html = html.replace("<button disableddisabled", "<button disabled")
+    return html.replace(
+        '<p class="lede">', BANNER.format(here=caption) + NAV + '<p class="lede">', 1
+    )
 
 
 def _state(which: str) -> Session:
@@ -116,7 +119,9 @@ def _state(which: str) -> Session:
         try:
             session.receipt = session.outbox.send(draft, session.verdict(draft))
         except SendRefused as refused:  # pragma: no cover - would be a real regression
-            raise SystemExit(f"the walkthrough cannot show a send that the gate refuses: {refused}")
+            raise SystemExit(
+                f"the walkthrough cannot show a send that the gate refuses: {refused}"
+            ) from refused
         return session
 
     raise ValueError(which)  # pragma: no cover
