@@ -68,6 +68,16 @@ The screen:
 python -m uvicorn archon.web.app:app --port 8000
 ```
 
+A **static walkthrough** of the same three states, for anyone who would rather not run anything, is
+published from the real code on every push to `main`:
+
+```bash
+python -m archon.web.export site
+```
+
+It is rendered by the same functions from the same ledger, so it cannot drift from what the code does.
+It is not interactive, and every page says so.
+
 Paste an invoice into **forward it an email** and watch what gets hidden before anything reads it, then change a figure so the total stops adding up. Then press **the client pays at lunchtime** and try to send the draft you were reading.
 
 With AWS:
@@ -131,13 +141,14 @@ flowchart LR
 
 | | |
 |---|---|
-| the ledger, six domains, P&L, cash, metrics | real, 239 tests, 93% branch coverage |
+| the ledger, six domains, P&L, cash, metrics | real, 248 tests, 93% branch coverage |
 | the six-agent Strands graph | real, runs on `strands-agents` 1.53 and 1.54 |
 | Bedrock | real, `global.anthropic.claude-opus-5`, verified by a live call |
 | SES send, idempotent, with receipt | real code; **the account is in the SES sandbox**, so it can send only to verified addresses |
 | reading a forwarded email | real; redaction, typed extraction and the ledger's arithmetic check. Offline it is read by rules and the page says so, with Bedrock it reads anything |
 | the firm, its clients, its staff | **entirely invented.** No customer data is present anywhere in this repository |
-| deployment | not yet. It runs locally |
+| the static walkthrough | real, rendered from the ledger on every push, published by GitHub Pages once the repository is public |
+| a running deployment | not yet. The screen runs locally |
 
 ---
 

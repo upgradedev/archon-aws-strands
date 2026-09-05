@@ -1,0 +1,66 @@
+# The walkthrough a judge can open with nothing installed.
+#
+# Built from the real code on every push, so it cannot drift from what the
+# repository actually does: if the ledger changes, these pages change with it,
+# and if the gate stops releasing the chase the build fails rather than
+# publishing a screenshot of a thing that no longer happens.
+#
+# Needs the repository to be public and Pages enabled with "GitHub Actions" as
+# the source. Both are owner actions and neither is code.
+name: pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e ".[dev]"
+
+      - name: render the walkthrough from the real ledger
+        run: |
+          python -m archon.web.export site
+          python - <<'PY'
+          import pathlib
+
+          for name, must_contain in [
+              ("index", "Released"),
+              ("paid", "books moved while this page was open"),
+              ("sent", "message id"),
+          ]:
+              html = pathlib.Path(f"site/{name}.html").read_text(encoding="utf-8")
+              assert must_contain in html, f"{name}.html no longer shows {must_contain!r}"
+              assert "<form" not in html, f"{name}.html has a form a static host cannot post"
+              assert "A static walkthrough" in html, f"{name}.html does not say what it is"
+              print(f"{name}.html ok, {len(html):,} bytes")
+          PY
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
