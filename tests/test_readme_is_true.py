@@ -109,7 +109,7 @@ def test_the_limitations_are_not_quietly_dropped():
         "SES sandbox",
         "entirely invented",
         "no persistence",
-        "not been run against a live mailbox",
+        "No mailbox is connected",
         "Nothing is submitted to any tax authority",
     ):
         assert admission in README, f"missing admission: {admission}"
