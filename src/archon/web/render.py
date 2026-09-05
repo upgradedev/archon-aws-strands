@@ -92,6 +92,7 @@ footer { color: var(--muted); font-size: 12px; margin-top: 30px; border-top: 1px
 textarea { width: 100%; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 8px;
   padding: 12px; resize: vertical; }
+input[type=file] { font: 13px inherit; color: var(--muted); max-width: 100%; }
 code { font: 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   background: var(--bg); padding: 1px 5px; border-radius: 4px; border: 1px solid var(--line); }
 """
@@ -259,6 +260,14 @@ def _inbox(sample: str, reading: Reading | None, error: str | None) -> str:
         <textarea name="body" rows="9" spellcheck="false">{escape(sample)}</textarea>
         <div class="row"><button class="primary" type="submit">Put this in the books</button></div>
       </form>
+      <form method="post" action="/upload" enctype="multipart/form-data" class="row"
+            style="margin-top:14px; border-top:1px solid var(--line); padding-top:14px">
+        <input type="file" name="attachment" accept=".pdf,.txt,.eml">
+        <button type="submit">Read an attached invoice</button>
+      </form>
+      <p class="why" style="margin-top:8px">A PDF is opened here, not sent. The text is pulled out and
+      redacted on this machine, and only the redacted text goes to the model, because redaction cannot
+      reach inside a file. A scan is refused rather than guessed at.</p>
       {outcome}
     </div>
     """

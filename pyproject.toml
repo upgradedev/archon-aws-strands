@@ -17,6 +17,10 @@ dependencies = [
     "fastapi>=0.110",
     "uvicorn>=0.27",
     "python-multipart>=0.0.9",
+    # Real invoices arrive as PDF attachments. The text is extracted locally so
+    # that redaction still applies before anything is sent; handing the file to
+    # Bedrock would read it well and would also hand over the IBAN on it.
+    "pypdf>=5.0",
 ]
 
 [project.optional-dependencies]
@@ -53,6 +57,13 @@ src = ["src", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.flake8-bugbear]
+# B008 exists because a mutable default evaluated once is a bug. FastAPI's
+# Depends/Form/File in a default is how the framework declares where a parameter
+# comes from, and it is evaluated once on purpose. Told here rather than silenced
+# with a noqa at each call site, so the reason is in one place.
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Form", "fastapi.File", "fastapi.Query"]
 
 [tool.ruff.lint.per-file-ignores]
 # render.py holds the stylesheet and the markup as literal strings. Wrapping CSS

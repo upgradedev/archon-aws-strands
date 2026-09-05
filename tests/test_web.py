@@ -247,3 +247,47 @@ def test_an_email_ordering_the_agent_about_cannot_send_anything(client):
         r"<textarea.*?</textarea>", "", client.get("/").text, flags=re.S
     )
     assert "attacker@example.com" not in outside_the_box
+
+
+def test_an_attached_pdf_lands_in_the_books(client):
+    import pathlib
+
+    pdf = (pathlib.Path(__file__).parent / "fixtures" / "invoice.pdf").read_bytes()
+    before = len(session.books.ledger.entries)
+    client.post("/upload", files={"attachment": ("invoice.pdf", pdf, "application/pdf")})
+    html = client.get("/").text
+
+    assert "Posted" in html and "WA-7788" in html
+    assert len(session.books.ledger.entries) == before + 1
+
+
+def test_nothing_printed_on_an_uploaded_pdf_appears_on_the_page(client):
+    import pathlib
+
+    pdf = (pathlib.Path(__file__).parent / "fixtures" / "invoice.pdf").read_bytes()
+    client.post("/upload", files={"attachment": ("invoice.pdf", pdf, "application/pdf")})
+    html = client.get("/").text
+
+    # These appear nowhere else on the page, unlike the sample email's own
+    # details, which the textarea correctly echoes back.
+    for secret in ("DE89 3704", "DE811569869", "+49 30 9876543"):
+        assert secret not in html, secret
+
+
+def test_a_scanned_pdf_is_refused_on_screen(client):
+    import pathlib
+
+    scan = (pathlib.Path(__file__).parent / "fixtures" / "scanned.pdf").read_bytes()
+    before = len(session.books.ledger.entries)
+    client.post("/upload", files={"attachment": ("scan.pdf", scan, "application/pdf")})
+    html = client.get("/").text
+
+    assert "Not posted" in html
+    assert "no text layer" in html
+    assert len(session.books.ledger.entries) == before
+
+
+def test_the_page_says_the_file_is_opened_here_not_sent(client):
+    html = client.get("/").text
+    assert "opened here, not sent" in html
+    assert "redaction cannot" in html

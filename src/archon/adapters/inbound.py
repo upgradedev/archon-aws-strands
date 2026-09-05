@@ -29,6 +29,7 @@ here reaches it. The test suite contains that email.
 
 from __future__ import annotations
 
+import io
 import json
 import re
 from dataclasses import dataclass
@@ -247,3 +248,70 @@ class LocalReader:
             "vat": one(self._VAT),
             "gross": one(self._GROSS),
         }
+
+#: What a page must yield before it is treated as readable. A PDF that extracts
+#: two stray characters is a scan with a stray character, not a document.
+MIN_EXTRACTED_CHARS = 40
+
+
+class UnreadableAttachment(UnreadablePost):
+    """An attachment nothing here can turn into text worth reading."""
+
+
+def text_of_pdf(data: bytes) -> str:
+    """Pull the text out of a PDF **on this machine**.
+
+    This is the whole reason attachments are handled this way rather than by
+    handing the file to Bedrock, which would read it perfectly well. **Redaction
+    cannot reach inside a PDF.** Sending the file means sending the IBAN, the tax
+    number and the phone number printed on it, and the promise this project makes
+    about what leaves the machine would be true only of the emails whose invoice
+    happened to be in the body.
+
+    So the text is extracted locally, redacted locally, and only the redacted text
+    is sent. The bytes never leave.
+
+    A scan raises rather than returning almost nothing. Archon has no OCR, and a
+    document read as four stray characters is worse than one refused, because the
+    refusal is visible and the four characters are not.
+    """
+    from pypdf import PdfReader
+    from pypdf.errors import PdfReadError
+
+    try:
+        reader = PdfReader(io.BytesIO(data))
+        pages = [page.extract_text() or "" for page in reader.pages]
+    except (PdfReadError, ValueError, OSError) as broken:
+        raise UnreadableAttachment(f"this PDF will not open: {broken}") from broken
+
+    text = chr(10).join(pages).strip()
+    if len(text) < MIN_EXTRACTED_CHARS:
+        raise UnreadableAttachment(
+            "this PDF carries no text layer, so it is a scan. Archon does not read "
+            "scans: it would have to guess, and a guessed figure is the one thing "
+            "that must not reach a client. Forward the email body instead, or send "
+            "a PDF that was generated rather than photographed."
+        )
+    return text
+
+
+def read_attachment(
+    data: bytes,
+    filename: str,
+    source_ref: str,
+    client=None,
+    model_id: str = MODEL_ID,
+) -> Reading:
+    """Read an attached invoice. Text is extracted here, never remotely."""
+    name = filename.lower()
+    if name.endswith(".pdf"):
+        body = text_of_pdf(data)
+    elif name.endswith((".txt", ".eml", ".msg")):
+        body = data.decode("utf-8", errors="replace")
+    else:
+        raise UnreadableAttachment(
+            f"{filename}: Archon reads PDFs and plain text. Anything else would "
+            "need a converter it does not have, and pretending otherwise would "
+            "mean guessing."
+        )
+    return read_email(body, source_ref, client=client, model_id=model_id)

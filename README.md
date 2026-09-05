@@ -82,7 +82,7 @@ python -m archon.web.export site
 It is rendered by the same functions from the same ledger, so it cannot drift from what the code does.
 It is not interactive, and every page says so.
 
-Paste an invoice into **forward it an email** and watch what gets hidden before anything reads it, then change a figure so the total stops adding up. Then press **the client pays at lunchtime** and try to send the draft you were reading.
+Attach a PDF invoice, or paste one into **forward it an email**, and watch what gets hidden before anything reads it, then change a figure so the total stops adding up. Then press **the client pays at lunchtime** and try to send the draft you were reading.
 
 With AWS:
 
@@ -146,10 +146,11 @@ flowchart LR
 
 | | |
 |---|---|
-| the ledger, six domains, P&L, cash, metrics | real, 274 tests, 93% branch coverage |
+| the ledger, six domains, P&L, cash, metrics | real, 291 tests, 93% branch coverage |
 | the six-agent Strands graph | real, runs on `strands-agents` 1.53 and 1.54 |
 | Bedrock | real, `global.anthropic.claude-opus-5`, verified by a live call |
 | SES send, idempotent, with receipt | real code; **the account is in the SES sandbox**, so it can send only to verified addresses |
+| reading an attached PDF | real. The text is extracted **on this machine**, redacted here, and only the redacted text is sent, because redaction cannot reach inside a file. A scan is refused rather than guessed at: there is no OCR |
 | reading a forwarded email | real; redaction, typed extraction and the ledger's arithmetic check. Offline it is read by rules and the page says so, with Bedrock it reads anything |
 | the firm, its clients, its staff | **entirely invented.** No customer data is present anywhere in this repository |
 | the static walkthrough | real, rendered from the ledger on every push, published by GitHub Pages once the repository is public |
@@ -213,7 +214,8 @@ No code from any of them is in this repository. The shapes of `pyproject.toml` a
 ## Limitations
 
 - One firm. There is no tenancy: `ARCHON_STORE` keeps one set of books, not one per person.
-- The inbound reader is exercised against pasted text, fixtures and a fake Bedrock client. No mailbox is connected: nothing polls IMAP and no SES receipt rule is deployed.
+- The inbound reader is exercised against pasted text, PDFs and a fake Bedrock client. No mailbox is connected: nothing polls IMAP and no SES receipt rule is deployed.
+- There is no OCR. A photographed or scanned invoice is refused rather than guessed at, and that refusal says what to do instead.
 - Payroll is ledger state only. No payroll provider is called and no real person's pay is handled.
 - VAT is recorded, not filed. Nothing is submitted to any tax authority.
 - The statutory interest rate is the ECB reference rate as at 2026-07-01 plus eight points. It moves twice a year and Archon does not fetch it; the date it was true is in the source and on the record.

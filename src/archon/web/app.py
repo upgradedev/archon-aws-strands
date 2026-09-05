@@ -16,10 +16,16 @@ from __future__ import annotations
 import os
 from datetime import date, datetime
 
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from archon.adapters.inbound import LocalReader, Reading, UnreadablePost, read_email
+from archon.adapters.inbound import (
+    LocalReader,
+    Reading,
+    UnreadablePost,
+    read_attachment,
+    read_email,
+)
 from archon.adapters.ses import Outbox, Receipt, SendRefused
 from archon.agents.draft import ChaseDraft
 from archon.agents.gate import Approval, Release, assess
@@ -215,6 +221,32 @@ def post_an_email(body: str = Form(...)) -> RedirectResponse:
         reading = read_email(
             body,
             f"email:pasted-{len(session.books.ledger.entries)}",
+            client=LocalReader(),
+        )
+        session.books.record(reading.document)
+        session.last_reading = reading
+        session._remember()
+    except (UnreadablePost, ValueError) as refused:
+        session.reading_error = str(refused)
+    return RedirectResponse("/", status_code=303)
+
+
+@app.post("/upload")
+async def upload_an_invoice(attachment: UploadFile = File(...)) -> RedirectResponse:
+    """Read an attached invoice. The file is opened here and stays here.
+
+    The text is extracted on this machine, redacted on this machine, and only the
+    redacted text is sent. Handing the PDF to Bedrock would read it perfectly well
+    and would also hand over the IBAN printed on it.
+    """
+    session.reading_error = None
+    session.last_reading = None
+    data = await attachment.read()
+    try:
+        reading = read_attachment(
+            data,
+            attachment.filename or "attachment",
+            f"email:attached-{len(session.books.ledger.entries)}",
             client=LocalReader(),
         )
         session.books.record(reading.document)
