@@ -133,6 +133,7 @@ flowchart LR
 - **Settlement is derived, never stored.** A "paid" flag that can disagree with the ledger is how books start lying.
 - **No digit reaches a client except through a verified claim.** The agent writes the greeting and the sign-off, and a draft whose free text contains a number is refused outright.
 - **Approval binds to a SHA-256 of the exact bytes.** One edited character invalidates it, and the gate re-derives every fact at send time — so a client who paid at lunchtime is not chased with a draft that was correct that morning.
+- **It claims what the law already owes them.** A late commercial debt accrues statutory interest under Directive 2011/7/EU, and almost nobody claims it, because working it out means knowing the ECB reference rate and the day count. Archon knows both and puts the figure in the email that is asking for the money anyway. It is checked like every other figure and refused inside the thirty-day statutory window, where a small number would only invite an argument the sender would lose.
 - **Every agent tool is a read.** No sequence of tool calls an agent invents can change the books or reach a client.
 
 ---
@@ -141,7 +142,7 @@ flowchart LR
 
 | | |
 |---|---|
-| the ledger, six domains, P&L, cash, metrics | real, 248 tests, 93% branch coverage |
+| the ledger, six domains, P&L, cash, metrics | real, 255 tests, 93% branch coverage |
 | the six-agent Strands graph | real, runs on `strands-agents` 1.53 and 1.54 |
 | Bedrock | real, `global.anthropic.claude-opus-5`, verified by a live call |
 | SES send, idempotent, with receipt | real code; **the account is in the SES sandbox**, so it can send only to verified addresses |
@@ -168,6 +169,7 @@ No code from any of them is in this repository. The shapes of `pyproject.toml` a
 - The inbound reader is exercised against pasted text, fixtures and a fake Bedrock client. No mailbox is connected: nothing polls IMAP and no SES receipt rule is deployed.
 - Payroll is ledger state only. No payroll provider is called and no real person's pay is handled.
 - VAT is recorded, not filed. Nothing is submitted to any tax authority.
+- The statutory interest rate is the ECB reference rate as at 2026-07-01 plus eight points. It moves twice a year and Archon does not fetch it; the date it was true is in the source and on the record.
 - The comparison is twenty clean scenarios. It says nothing about behaviour under noise.
 
 ## Licence

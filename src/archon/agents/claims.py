@@ -18,6 +18,11 @@ from datetime import date
 from decimal import Decimal
 
 from archon.domain.books import Books
+from archon.domain.completeness import (
+    ECB_REFERENCE_RATE,
+    STATUTORY_MARGIN,
+    statutory_interest,
+)
 from archon.domain.money import ZERO, fmt, money
 from archon.domain.reports import metrics
 
@@ -147,3 +152,44 @@ class CashPosition(Claim):
     def sentence(self) -> str:
         return f"Our own bank balance stands at {fmt(money(self.amount))}."
 
+
+@dataclass(frozen=True, slots=True)
+class StatutoryInterest(Claim):
+    """"Interest of 37.67 EUR has accrued under Directive 2011/7/EU."
+
+    The one claim here that is about money nobody has invoiced. A late commercial
+    debt accrues statutory interest by law, the persona is entitled to it, and
+    almost nobody claims it because working it out means knowing the reference
+    rate and the day count. Archon knows both, so it can put the figure in the
+    email that is asking for the money anyway.
+
+    It is checked like every other figure, and it is refused inside the thirty-day
+    statutory window rather than stated as a small amount, because nothing is owed
+    there and a small number invites an argument the sender would lose.
+    """
+
+    invoice_id: str
+    amount: Decimal
+
+    def check(self, books: Books, as_of: date) -> None:
+        found = {s.doc_id: s for s in books.sales_settlements()}.get(self.invoice_id)
+        if found is None:
+            raise ClaimRefuted(f"{self.invoice_id} is not a sales invoice in these books")
+        due = statutory_interest(found.outstanding, found.days_overdue(as_of))
+        if due == ZERO:
+            raise ClaimRefuted(
+                f"{self.invoice_id} is within the thirty-day statutory window, "
+                "so no interest has accrued"
+            )
+        if due != money(self.amount):
+            raise ClaimRefuted(
+                f"{self.invoice_id} has accrued {due} of statutory interest, "
+                f"but the draft says {money(self.amount)}"
+            )
+
+    def sentence(self) -> str:
+        rate = (ECB_REFERENCE_RATE + STATUTORY_MARGIN) * 100
+        return (
+            f"Under Directive 2011/7/EU this debt has accrued {fmt(money(self.amount))} "
+            f"of statutory interest, at {rate.normalize()}% a year."
+        )

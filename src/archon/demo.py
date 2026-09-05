@@ -27,11 +27,19 @@ from datetime import UTC, date, datetime
 from archon.adapters.scripted import ScriptedModel
 from archon.adapters.ses import Outbox, SendRefused
 from archon.agents import tools, wiring
-from archon.agents.claims import Claim, Outstanding, Overdue, PartPaid, WagesDue
+from archon.agents.claims import (
+    Claim,
+    Outstanding,
+    Overdue,
+    PartPaid,
+    StatutoryInterest,
+    WagesDue,
+)
 from archon.agents.draft import ChaseDraft, UnsafeDraft
 from archon.agents.gate import Approval, assess
 from archon.agents.graph import build
 from archon.domain.books import Books
+from archon.domain.completeness import statutory_interest
 from archon.domain.documents import (
     Payment,
     PayrollRun,
@@ -277,6 +285,12 @@ def _claims_for(books: Books, worst) -> tuple[Claim, ...]:
     ]
     if worst.settled > ZERO:
         claims.append(PartPaid(worst.doc_id, worst.settled))
+    # Money the owner is owed by law and almost never asks for, because working it
+    # out means knowing the reference rate and the day count. Offered only when it
+    # has actually accrued; the claim refuses itself inside the statutory window.
+    interest = statutory_interest(worst.outstanding, worst.days_overdue(TODAY))
+    if interest > ZERO:
+        claims.append(StatutoryInterest(worst.doc_id, interest))
     owed_to_staff = metrics(books, TODAY).owed_to_staff
     if owed_to_staff > ZERO:
         claims.append(WagesDue(owed_to_staff))

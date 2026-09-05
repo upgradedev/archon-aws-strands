@@ -12,6 +12,7 @@ Implements forensic financial verification principles:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from decimal import ROUND_HALF_UP, Decimal
 from enum import StrEnum
 
 
@@ -97,6 +98,38 @@ def audit_discrepancy(
     return None
 
 
+#: The ECB main refinancing rate the statutory calculation starts from. It moves,
+#: twice a year by the Directive's own schedule, and a rate that is wrong is a
+#: figure sent to a client that is wrong. Stated here with its date so that being
+#: stale is visible rather than silent, and overridable by the caller.
+ECB_REFERENCE_RATE = Decimal("0.045")
+ECB_RATE_AS_AT = "2026-07-01"
+
+#: Article 2(6) of Directive 2011/7/EU: the reference rate plus eight points.
+STATUTORY_MARGIN = Decimal("0.08")
+
+
+def statutory_interest(
+    outstanding: Decimal,
+    days_overdue: int,
+    ecb_rate: Decimal = ECB_REFERENCE_RATE,
+) -> Decimal:
+    """Interest accrued on a late commercial debt, computed exactly.
+
+    One implementation, because two would drift and this figure can end up in an
+    email to a client. Decimal throughout: the version this replaced multiplied
+    money by a float, which is the one thing `archon.domain.money` refuses.
+
+    Returns zero inside the thirty-day statutory window rather than a small
+    number, because nothing is owed there and a small number invites a claim.
+    """
+    if days_overdue <= 30 or outstanding <= 0:
+        return Decimal("0.00")
+    rate = Decimal(ecb_rate) + STATUTORY_MARGIN
+    accrued = outstanding * rate * (Decimal(days_overdue) / Decimal(365))
+    return accrued.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+
 def audit_statutory_interest(
     days_overdue: int,
     disputed_amount_cents: int,
@@ -105,10 +138,13 @@ def audit_statutory_interest(
 ) -> CompletenessFinding | None:
     """Evaluate interest liability under EU Late Payment Directive 2011/7/EU (Base + 8%)."""
     if days_overdue > 30 and disputed_amount_cents > 0:
-        statutory_rate = ecb_rate + 0.08  # 12.5% statutory rate
-        accrued_interest_cents = round(
-            disputed_amount_cents * (statutory_rate * (days_overdue / 365.0))
+        # Delegated so there is one implementation of a figure that can reach a
+        # client, and so the arithmetic is exact rather than done in floats.
+        accrued = statutory_interest(
+            Decimal(disputed_amount_cents) / 100, days_overdue, Decimal(str(ecb_rate))
         )
+        accrued_interest_cents = int(accrued * 100)
+        statutory_rate = float(Decimal(str(ecb_rate)) + STATUTORY_MARGIN)
         return CompletenessFinding(
             kind=FindingKind.STATUTORY_INTEREST_RISK,
             reference=reference,

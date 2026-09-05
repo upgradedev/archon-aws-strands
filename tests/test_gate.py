@@ -255,3 +255,79 @@ def test_an_approval_that_expires_before_it_is_given_is_refused():
             approved_at=NOW,
             lifetime=timedelta(0),
         )
+
+
+# --- money the law owes them, which nobody claims ----------------------------
+
+
+def test_statutory_interest_is_offered_and_checked(books):
+    from decimal import Decimal as D
+
+    from archon.agents.claims import StatutoryInterest
+    from archon.domain.completeness import statutory_interest
+
+    worst = books.worst_overdue(TODAY)
+    due = statutory_interest(worst.outstanding, worst.days_overdue(TODAY))
+    assert due == D("37.67"), "55 days on 2,000.00 at 12.5% a year"
+
+    good = _draft(claims=(Outstanding("SI-001", D("2000.00")), StatutoryInterest("SI-001", due)))
+    assert assess(books, good, _approved(good), TODAY).allowed
+
+
+def test_an_invented_interest_figure_is_refused(books):
+    from decimal import Decimal as D
+
+    from archon.agents.claims import StatutoryInterest
+
+    draft = _draft(
+        claims=(Outstanding("SI-001", D("2000.00")), StatutoryInterest("SI-001", D("500.00")))
+    )
+    verdict = assess(books, draft, _approved(draft), TODAY)
+    assert not verdict.allowed
+    assert any("accrued 37.67" in r for r in verdict.reasons)
+
+
+def test_no_interest_is_claimed_inside_the_statutory_window(books):
+    """A small number here invites an argument the sender would lose."""
+    from decimal import Decimal as D
+
+    from archon.agents.claims import ClaimRefuted, StatutoryInterest
+
+    with pytest.raises(ClaimRefuted, match="thirty-day statutory window"):
+        StatutoryInterest("SI-003", D("1.00")).check(books, TODAY)
+
+
+def test_the_sentence_names_the_directive_and_the_rate(books):
+    from decimal import Decimal as D
+
+    from archon.agents.claims import StatutoryInterest
+
+    sentence = StatutoryInterest("SI-001", D("37.67")).sentence()
+    assert "2011/7/EU" in sentence and "12.5%" in sentence and "37.67 EUR" in sentence
+
+
+def test_the_interest_is_computed_in_decimal_not_float():
+    """The version this replaced multiplied money by a float."""
+    import ast
+    import inspect
+    from decimal import Decimal as D
+
+    from archon.domain import completeness
+
+    # The docstring mentions floats on purpose, so the check reads the code.
+    tree = ast.parse(inspect.getsource(completeness.statutory_interest).strip())
+    literals = [
+        node.value
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Constant) and isinstance(node.value, float)
+    ]
+    assert not literals, f"float literals in a money calculation: {literals}"
+    assert isinstance(completeness.statutory_interest(D("2000.00"), 55), D)
+
+
+def test_the_reference_rate_carries_the_date_it_was_true():
+    """A stale rate is a wrong figure in an email, so being stale must be visible."""
+    from archon.domain.completeness import ECB_RATE_AS_AT, ECB_REFERENCE_RATE
+
+    assert ECB_RATE_AS_AT
+    assert 0 < ECB_REFERENCE_RATE < 1
