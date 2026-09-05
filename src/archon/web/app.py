@@ -13,6 +13,7 @@ would be another place for the arithmetic to be wrong.
 
 from __future__ import annotations
 
+import os
 from datetime import date, datetime
 
 from fastapi import FastAPI, Form
@@ -37,6 +38,7 @@ from archon.domain.books import Books
 from archon.domain.money import fmt
 from archon.domain.reports import cashflow, metrics, profit_and_loss
 from archon.evidence.compare import score_all, wilson
+from archon.store.sqlite import forget, load, save
 
 from .render import page
 
@@ -44,17 +46,33 @@ app = FastAPI(title="Archon", docs_url=None, redoc_url=None)
 
 
 class Session:
-    """One firm's books for the life of the process.
+    """One firm's books, kept between restarts when a store is configured.
 
-    Deliberately in memory and deliberately one. This is a demonstration surface
-    for a single invented firm, not a tenancy, and pretending otherwise with a
-    database would be scaffolding that says something untrue about what exists.
+    Still one firm and still not a tenancy: this is a demonstration surface and
+    pretending otherwise would say something untrue about what exists. What it
+    does now is survive the process. Set `ARCHON_STORE` to a path and the post is
+    written down, so closing the laptop does not lose the month.
+
+    Without it everything is in memory, which is what the tests and the public
+    walkthrough want: a visitor pressing buttons should not be able to leave the
+    next visitor somebody else's books.
     """
 
-    def __init__(self) -> None:
-        self.reset()
+    def __init__(self, store_path: str | None = None) -> None:
+        self.store_path = store_path if store_path is not None else os.environ.get("ARCHON_STORE")
+        # Constructing must not destroy. An earlier version called reset() here,
+        # which forgot the store before reopen() could read it, so starting the
+        # process was indistinguishable from throwing the month away.
+        self._fresh()
 
     def reset(self) -> None:
+        """The visitor's start-again button, which is the only thing that forgets."""
+        if self.store_path:
+            forget(self.store_path)
+        self._fresh()
+        self._remember()
+
+    def _fresh(self) -> None:
         self.books: Books = keep_the_books(the_post())
         self.outbox: Outbox = build_outbox(False, "books@archon.example")
         self.receipt: Receipt | None = None
@@ -78,6 +96,25 @@ class Session:
             as_of=TODAY,
         )
 
+    def _remember(self) -> None:
+        """Write the post down. Cheap, and it means a crash costs nothing."""
+        if self.store_path:
+            save(self.books, self.store_path)
+
+    def reopen(self) -> None:
+        """Load what was written, or start fresh if nothing was.
+
+        A store that will not open stops the process rather than starting with
+        half a month, because half a month is the shape of a wrong figure in an
+        email to a client.
+        """
+        if not self.store_path:
+            return
+        self.books = load(self.store_path) or self.books
+        if not self.books.ledger.entries:
+            self.books = keep_the_books(the_post())
+            self._remember()
+
     def verdict(self, draft: ChaseDraft, now: datetime | None = None) -> Release:
         approval = Approval(
             fingerprint=draft.fingerprint(), approved_by="the owner", approved_at=NOW
@@ -86,6 +123,7 @@ class Session:
 
 
 session = Session()
+session.reopen()
 
 
 def _stats(books: Books, as_of: date = TODAY) -> list[tuple[str, str, str]]:
@@ -181,6 +219,7 @@ def post_an_email(body: str = Form(...)) -> RedirectResponse:
         )
         session.books.record(reading.document)
         session.last_reading = reading
+        session._remember()
     except (UnreadablePost, ValueError) as refused:
         session.reading_error = str(refused)
     return RedirectResponse("/", status_code=303)
@@ -221,4 +260,5 @@ def client_pays() -> RedirectResponse:
                 source_ref="email:paid-at-lunchtime",
             )
         )
+        session._remember()
     return RedirectResponse("/", status_code=303)

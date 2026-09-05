@@ -108,7 +108,7 @@ def test_the_limitations_are_not_quietly_dropped():
     for admission in (
         "SES sandbox",
         "entirely invented",
-        "no persistence",
+        "There is no tenancy",
         "No mailbox is connected",
         "Nothing is submitted to any tax authority",
     ):

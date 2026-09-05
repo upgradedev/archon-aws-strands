@@ -68,6 +68,10 @@ The screen:
 python -m uvicorn archon.web.app:app --port 8000
 ```
 
+Add `ARCHON_STORE=books.db` in front of that and the month survives a restart. Without it everything is
+in memory, which is what the public walkthrough wants: one visitor should not leave the next visitor
+somebody else's books.
+
 A **static walkthrough** of the same three states, for anyone who would rather not run anything, is
 published from the real code on every push to `main`:
 
@@ -142,13 +146,14 @@ flowchart LR
 
 | | |
 |---|---|
-| the ledger, six domains, P&L, cash, metrics | real, 259 tests, 93% branch coverage |
+| the ledger, six domains, P&L, cash, metrics | real, 274 tests, 93% branch coverage |
 | the six-agent Strands graph | real, runs on `strands-agents` 1.53 and 1.54 |
 | Bedrock | real, `global.anthropic.claude-opus-5`, verified by a live call |
 | SES send, idempotent, with receipt | real code; **the account is in the SES sandbox**, so it can send only to verified addresses |
 | reading a forwarded email | real; redaction, typed extraction and the ledger's arithmetic check. Offline it is read by rules and the page says so, with Bedrock it reads anything |
 | the firm, its clients, its staff | **entirely invented.** No customer data is present anywhere in this repository |
 | the static walkthrough | real, rendered from the ledger on every push, published by GitHub Pages once the repository is public |
+| the books between sessions | real. Set `ARCHON_STORE` to a path and the post is written down; loading replays it through the same validation, so a store cannot hold books that do not balance |
 | a running deployment | not yet. The screen runs locally |
 
 ---
@@ -207,7 +212,7 @@ No code from any of them is in this repository. The shapes of `pyproject.toml` a
 
 ## Limitations
 
-- One firm, held in memory. There is no tenancy and no persistence.
+- One firm. There is no tenancy: `ARCHON_STORE` keeps one set of books, not one per person.
 - The inbound reader is exercised against pasted text, fixtures and a fake Bedrock client. No mailbox is connected: nothing polls IMAP and no SES receipt rule is deployed.
 - Payroll is ledger state only. No payroll provider is called and no real person's pay is handled.
 - VAT is recorded, not filed. Nothing is submitted to any tax authority.
