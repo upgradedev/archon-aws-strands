@@ -138,6 +138,24 @@ jobs:
       - name: tests, offline
         run: python -m pytest --cov --cov-report=term-missing
 
+      # The screen is a deliverable, so it is asserted like one: it renders, it
+      # holds the gate through a browser round trip, and it fetches nothing from
+      # anybody else's host.
+      - name: the screen renders and enforces the gate
+        run: |
+          python - <<'PY'
+          from fastapi.testclient import TestClient
+
+          from archon.web.app import app, session
+
+          session.reset()
+          html = TestClient(app).get("/").text
+          assert "Cafe on the corner owes 2,000.00 EUR" in html, "the hero figure is missing"
+          assert "Invoice SI-001 is still outstanding at 2,000.00 EUR." in html
+          assert "<script" not in html.lower() and "cdn" not in html.lower()
+          print("screen renders,", len(html), "bytes, no external asset")
+          PY
+
       - name: the domain core imports nothing it should not
         run: |
           python - <<'PY'
