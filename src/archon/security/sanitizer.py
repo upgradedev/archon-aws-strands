@@ -32,9 +32,14 @@ _RE_PAYMENT_CARD = re.compile(
     r"\b(?:\d{4}[-\s]){3}\d{4}\b|\b\d{15,16}\b"
 )
 
-# IBAN pattern: 2 alpha chars, 2 digits, at least 4 alphanumeric chars
+# IBAN: two letters, two check digits, then the body. Real ones are printed in
+# groups of four and the contiguous-only pattern this replaced matched none of
+# them, so a real IBAN survived into the prompt. Groups are matched explicitly
+# rather than by allowing an optional space before every character, because
+# that form runs into the following sentence: it eats the " A" of "at Alpha
+# Bank" and leaves "lpha Bank" behind.
 _RE_IBAN = re.compile(
-    r"\b([A-Z]{2}[0-9]{2})([A-Z0-9]{4,30})\b"
+    r"\b([A-Z]{2}[0-9]{2})((?:[ ][A-Z0-9]{4})+(?:[ ][A-Z0-9]{1,4})?|[A-Z0-9]{4,30})\b"
 )
 
 # SWIFT / BIC pattern when preceded by keyword
@@ -43,9 +48,12 @@ _RE_SWIFT = re.compile(
     re.IGNORECASE,
 )
 
-# International and standard phone numbers with prefix
+# A number counts as a phone only when it is announced as one, by a keyword or
+# an international prefix. The pattern this replaced made every part optional,
+# which matches invoice totals and reference numbers, and redacting the
+# commercial content would be a worse failure than sending a phone number.
 _RE_PHONE = re.compile(
-    r"\b(?:TEL|PHONE|MOBILE|CELL|FAX)?[\s:#]*(?:\+?\d{1,3}[-.\s]?)?\(?\d{2,4}\)?[-.\s]?\d{3,4}[-.\s]?\d{3,4}\b",
+    r"(?:(?:TEL|PHONE|MOBILE|CELL|FAX)[\s:#]*|\+)\d[\d\s().-]{6,18}\d",
     re.IGNORECASE,
 )
 
@@ -67,7 +75,7 @@ class SanitizedDocument:
 
 def _mask_iban(match: re.Match[str]) -> str:
     prefix = match.group(1)  # Country + 2 check digits
-    body = match.group(2)
+    body = match.group(2).replace(" ", "")  # grouped IBANs carry spaces
     if len(body) <= 4:
         return f"{prefix}{'*' * len(body)}"
     masked_inner = "*" * (len(body) - 4)
@@ -76,7 +84,25 @@ def _mask_iban(match: re.Match[str]) -> str:
 
 
 def sanitize_text(text: str) -> tuple[str, int, list[str]]:
-    """Sanitize raw text by redacting PII and sensitive banking identifiers.
+    """Redact identifiers, keep the commerce.
+
+    **Order is the correctness here, not a detail.** Each rule runs over the
+    output of the last, so a greedy early rule can leave a later one nothing to
+    match and a real identifier half exposed. Three orderings were wrong before
+    this comment existed, and each was invisible until the filter was wired to
+    something real:
+
+    * the payment-card rule ran first and matched four-digit groups inside a
+      grouped IBAN, turning `GR16 0110 1250 0000 0001 2300 695` into
+      `GR16 [REDACTED_PAYMENT_CARD] 2300 695`, which leaks the tail;
+    * the IBAN rule ran before the tax rule and matched `EL123456789`, masking a
+      VAT number as though it were an account and leaving eight of its eleven
+      characters visible;
+    * the phone rule was defined and never applied at all.
+
+    So: the most specific and keyword-anchored rules run first, the longest
+    structures before the ones that could match inside them, and the loosest
+    last.
 
     Returns:
         (sanitized_text, redactions_count, redacted_categories)
@@ -87,56 +113,35 @@ def sanitize_text(text: str) -> tuple[str, int, list[str]]:
     redactions = 0
     categories: list[str] = []
 
-    # 1. Redact Payment Cards
-    def _mask_card(m: re.Match[str]) -> str:
+    def redact(label: str) -> object:
+        def replace(_: re.Match[str]) -> str:
+            nonlocal redactions
+            redactions += 1
+            return f"[REDACTED_{label}]"
+
+        return replace
+
+    def mask_iban(match: re.Match[str]) -> str:
         nonlocal redactions
         redactions += 1
-        return "[REDACTED_PAYMENT_CARD]"
+        return _mask_iban(match)
 
-    new_text, count = _RE_PAYMENT_CARD.subn(_mask_card, text)
-    if count > 0:
-        categories.append("payment_card")
+    #: (category, pattern, replacement). Order is load-bearing; see the docstring.
+    rules = [
+        ("swift_bic", _RE_SWIFT, redact("BIC")),
+        ("tax_id", _RE_TAX_ID, redact("TAX_ID")),
+        ("tax_id", _RE_EU_VAT, redact("TAX_ID")),
+        ("iban", _RE_IBAN, mask_iban),
+        ("payment_card", _RE_PAYMENT_CARD, redact("PAYMENT_CARD")),
+        ("phone", _RE_PHONE, redact("PHONE")),
+        ("email", _RE_EMAIL, redact("EMAIL")),
+    ]
 
-    # 2. Redact IBANs
-    def _mask_iban_count(m: re.Match[str]) -> str:
-        nonlocal redactions
-        redactions += 1
-        return _mask_iban(m)
-
-    new_text, count = _RE_IBAN.subn(_mask_iban_count, new_text)
-    if count > 0:
-        categories.append("iban")
-
-    # 3. Redact SWIFT/BIC
-    def _mask_swift(m: re.Match[str]) -> str:
-        nonlocal redactions
-        redactions += 1
-        return "[REDACTED_BIC]"
-
-    new_text, count = _RE_SWIFT.subn(_mask_swift, new_text)
-    if count > 0:
-        categories.append("swift_bic")
-
-    # 4. Redact Tax / VAT IDs
-    def _mask_tax(m: re.Match[str]) -> str:
-        nonlocal redactions
-        redactions += 1
-        return "[REDACTED_TAX_ID]"
-
-    new_text, count = _RE_TAX_ID.subn(_mask_tax, new_text)
-    new_text, count_eu = _RE_EU_VAT.subn(_mask_tax, new_text)
-    if count + count_eu > 0:
-        categories.append("tax_id")
-
-    # 5. Redact Emails
-    def _mask_email(m: re.Match[str]) -> str:
-        nonlocal redactions
-        redactions += 1
-        return "[REDACTED_EMAIL]"
-
-    new_text, count = _RE_EMAIL.subn(_mask_email, new_text)
-    if count > 0:
-        categories.append("email")
+    new_text = text
+    for category, pattern, replacement in rules:
+        new_text, count = pattern.subn(replacement, new_text)
+        if count > 0 and category not in categories:
+            categories.append(category)
 
     return new_text, redactions, categories
 

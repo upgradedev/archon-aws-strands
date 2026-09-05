@@ -85,3 +85,62 @@ def test_sanitize_payload_wrapper():
     assert "iban" in doc.redacted_categories
     assert doc.original_length == len(content)
     assert "GR16*******************5678" in doc.sanitized_text
+
+
+# --- regressions, all five found by wiring the filter to a real email ---------
+
+
+REAL_EMAIL = (
+    "Our bank details: IBAN GR16 0110 1250 0000 0001 2300 695, VAT EL123456789.\n"
+    "Any queries call +30 210 1234567 or email billing@wholesaler.example.\n"
+    "Invoice WA-5512 dated 2026-09-01, net 1,000.00 EUR, VAT 240.00, total 1,240.00 EUR."
+)
+
+
+def test_an_iban_printed_in_groups_of_four_is_masked():
+    """The contiguous-only pattern matched no real IBAN, because none are printed that way."""
+    text, _, categories = sanitize_text(REAL_EMAIL)
+    assert "iban" in categories
+    assert "0110 1250" not in text
+    assert "2300 695" not in text
+    assert "GR16*******************0695" in text
+
+
+def test_the_card_rule_no_longer_eats_the_middle_of_an_iban():
+    """It ran first and left `GR16 [REDACTED_PAYMENT_CARD] 2300 695`, tail exposed."""
+    text, _, _ = sanitize_text(REAL_EMAIL)
+    assert "[REDACTED_PAYMENT_CARD]" not in text
+
+
+def test_a_vat_number_is_redacted_not_weakly_masked():
+    """The IBAN rule used to match it and leave eight of eleven characters."""
+    text, _, categories = sanitize_text(REAL_EMAIL)
+    assert "tax_id" in categories
+    assert "EL123456789" not in text
+    assert "EL12***6789" not in text
+    assert "[REDACTED_TAX_ID]" in text
+
+
+def test_the_phone_rule_is_actually_applied():
+    """It was defined and never called, so every phone number went to the model."""
+    text, _, categories = sanitize_text(REAL_EMAIL)
+    assert "phone" in categories
+    assert "+30 210 1234567" not in text
+    assert "[REDACTED_PHONE]" in text
+
+
+def test_redaction_leaves_the_commerce_alone():
+    """Redacting the figures would be a worse failure than sending a phone number."""
+    text, _, _ = sanitize_text(REAL_EMAIL)
+    for kept in ("WA-5512", "2026-09-01", "1,000.00", "240.00", "1,240.00"):
+        assert kept in text, kept
+
+
+def test_an_iban_does_not_run_into_the_following_sentence():
+    text, _, _ = sanitize_text("IBAN GR16 0110 1250 0000 0001 2300 695 at Alpha Bank.")
+    assert "at Alpha Bank." in text
+
+
+def test_a_category_is_listed_once_however_many_rules_hit_it():
+    _, _, categories = sanitize_text("VAT EL123456789 and TAX ID: DE999888777")
+    assert categories.count("tax_id") == 1
