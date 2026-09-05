@@ -18,6 +18,7 @@ from datetime import date, datetime
 from fastapi import FastAPI, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 
+from archon.adapters.inbound import LocalReader, Reading, UnreadablePost, read_email
 from archon.adapters.ses import Outbox, Receipt, SendRefused
 from archon.agents.draft import ChaseDraft
 from archon.agents.gate import Approval, Release, assess
@@ -58,6 +59,8 @@ class Session:
         self.outbox: Outbox = build_outbox(False, "books@archon.example")
         self.receipt: Receipt | None = None
         self.last_refusal: str | None = None
+        self.last_reading: Reading | None = None
+        self.reading_error: str | None = None
 
     def draft(self) -> ChaseDraft | None:
         worst = self.books.worst_overdue(TODAY)
@@ -116,6 +119,9 @@ def home() -> str:
         verdict_for=session.verdict,
         receipt=session.receipt,
         refusal=session.last_refusal,
+        reading=session.last_reading,
+        reading_error=session.reading_error,
+        sample=SAMPLE_EMAIL,
         evidence=[(t, wilson(t.wrong_money, t.n)) for t in score_all()],
     )
 
@@ -145,6 +151,38 @@ def approve(fingerprint: str = Form(...)) -> RedirectResponse:
         session.receipt = session.outbox.send(draft, session.verdict(draft))
     except SendRefused as refused:
         session.last_refusal = str(refused)
+    return RedirectResponse("/", status_code=303)
+
+
+SAMPLE_EMAIL = """From: accounts@wholesaler.example
+Subject: Invoice WA-9001
+
+Invoice WA-9001 dated 2026-09-02, due 2026-10-02.
+Net 500.00 EUR, VAT 120.00 EUR, total 620.00 EUR.
+Please pay to IBAN GR16 0110 1250 0000 0001 2300 695, VAT EL123456789.
+Any queries call +30 210 1234567."""
+
+
+@app.post("/post")
+def post_an_email(body: str = Form(...)) -> RedirectResponse:
+    """Read a pasted email and put it in the books, or say why not.
+
+    Offline this is read by rules and the page says so. The redaction, the typed
+    proposal and the ledger's arithmetic check are the same either way, because
+    those are the parts that must not depend on which reader ran.
+    """
+    session.reading_error = None
+    session.last_reading = None
+    try:
+        reading = read_email(
+            body,
+            f"email:pasted-{len(session.books.ledger.entries)}",
+            client=LocalReader(),
+        )
+        session.books.record(reading.document)
+        session.last_reading = reading
+    except (UnreadablePost, ValueError) as refused:
+        session.reading_error = str(refused)
     return RedirectResponse("/", status_code=303)
 
 

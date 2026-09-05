@@ -68,7 +68,7 @@ The screen:
 python -m uvicorn archon.web.app:app --port 8000
 ```
 
-Then press **the client pays at lunchtime** and try to send the draft you were reading.
+Paste an invoice into **forward it an email** and watch what gets hidden before anything reads it, then change a figure so the total stops adding up. Then press **the client pays at lunchtime** and try to send the draft you were reading.
 
 With AWS:
 
@@ -131,10 +131,11 @@ flowchart LR
 
 | | |
 |---|---|
-| the ledger, six domains, P&L, cash, metrics | real, 232 tests, 93% branch coverage |
+| the ledger, six domains, P&L, cash, metrics | real, 239 tests, 93% branch coverage |
 | the six-agent Strands graph | real, runs on `strands-agents` 1.53 and 1.54 |
 | Bedrock | real, `global.anthropic.claude-opus-5`, verified by a live call |
 | SES send, idempotent, with receipt | real code; **the account is in the SES sandbox**, so it can send only to verified addresses |
+| reading a forwarded email | real; redaction, typed extraction and the ledger's arithmetic check. Offline it is read by rules and the page says so, with Bedrock it reads anything |
 | the firm, its clients, its staff | **entirely invented.** No customer data is present anywhere in this repository |
 | deployment | not yet. It runs locally |
 
@@ -153,7 +154,7 @@ No code from any of them is in this repository. The shapes of `pyproject.toml` a
 ## Limitations
 
 - One firm, held in memory. There is no tenancy and no persistence.
-- The inbound reader is exercised against fixtures and a fake Bedrock client; it has not been run against a live mailbox.
+- The inbound reader is exercised against pasted text, fixtures and a fake Bedrock client. No mailbox is connected: nothing polls IMAP and no SES receipt rule is deployed.
 - Payroll is ledger state only. No payroll provider is called and no real person's pay is handled.
 - VAT is recorded, not filed. Nothing is submitted to any tax authority.
 - The comparison is twenty clean scenarios. It says nothing about behaviour under noise.

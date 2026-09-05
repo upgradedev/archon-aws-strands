@@ -174,3 +174,76 @@ def read_email(raw: str, source_ref: str, client=None, model_id: str = MODEL_ID)
         redacted_categories=tuple(safe.redacted_categories),
         raw_reply=reply,
     )
+
+
+class LocalReader:
+    """A stand-in for Bedrock that reads the fields with rules, not a model.
+
+    **Why this ships rather than living in the tests.** A judge with no AWS
+    account still has to be able to paste an email and watch it post, and the
+    honest way to give them that is not to fake a model's answer but to say
+    plainly that no model ran. This reads a conventional invoice or remittance
+    and refuses anything else, which is exactly what a rule can do and exactly
+    what a model is for.
+
+    It goes through the same pipeline: the text is redacted before it gets here,
+    and every figure it proposes is checked by the ledger afterwards. Only the
+    reading differs.
+    """
+
+    #: What the page should say when this is what ran.
+    label = "read by rules, offline; no model was called"
+
+    _ID = re.compile(r"\b(?:invoice|inv\.?|ref(?:erence)?)[\s:#]*([A-Z]{1,4}[-_ ]?\d{1,8})\b", re.I)
+    _DATED = re.compile(r"\b(?:dated|issued|invoice date)[\s:]*(\d{4}-\d{2}-\d{2})", re.I)
+    _DUE = re.compile(r"\bdue[\s:]*(?:on[\s:]*)?(\d{4}-\d{2}-\d{2})", re.I)
+    _NET = re.compile(r"\bnet[\s:]*([\d,]+\.\d{2})", re.I)
+    _VAT = re.compile(r"\bvat[\s:]*([\d,]+\.\d{2})", re.I)
+    _GROSS = re.compile(r"\b(?:total|gross|amount due)[\s:]*([\d,]+\.\d{2})", re.I)
+    _PAID = re.compile(r"\b(?:paid|remitted|transferred)[\s:]*([\d,]+\.\d{2})", re.I)
+    _SETTLES = re.compile(r"\bagainst[\s:]*(?:invoice[\s:]*)?([A-Z]{1,4}[-_ ]?\d{1,8})\b", re.I)
+    _FROM = re.compile(r"^From:\s*(.+)$", re.M)
+
+    @staticmethod
+    def _counterparty(sender: str | None) -> str:
+        """A name, or an honest absence. Never a redaction marker.
+
+        The sender line has already been redacted by the time this reads it, so
+        the naive answer is the placeholder itself, and "[REDACTED_EMAIL] owes
+        you 620.00" is worse than saying the name is not known. The redaction is
+        right; showing its scar as a supplier name is not.
+        """
+        if not sender or "[REDACTED" in sender:
+            return "supplier, name redacted"
+        return sender.split("@")[0].strip() or "unnamed"
+
+    def converse(self, **kwargs) -> dict:
+        body = kwargs["messages"][0]["content"][0]["text"]
+        fields = self._fields(body)
+        return {"output": {"message": {"content": [{"text": json.dumps(fields)}]}}}
+
+    def _fields(self, body: str) -> dict:
+        def one(pattern: re.Pattern[str]) -> str | None:
+            found = pattern.search(body)
+            return found.group(1).strip() if found else None
+
+        paid, settles = one(self._PAID), one(self._SETTLES)
+        if paid and settles:
+            return {
+                "kind": "receipt",
+                "doc_id": f"RC-{settles.replace(' ', '')}",
+                "settles": settles.replace(" ", ""),
+                "issued": one(self._DATED),
+                "amount": paid,
+            }
+        doc_id = one(self._ID)
+        return {
+            "kind": "purchase_invoice",
+            "doc_id": doc_id.replace(" ", "") if doc_id else None,
+            "counterparty": self._counterparty(one(self._FROM)),
+            "issued": one(self._DATED),
+            "due": one(self._DUE),
+            "net": one(self._NET),
+            "vat": one(self._VAT),
+            "gross": one(self._GROSS),
+        }

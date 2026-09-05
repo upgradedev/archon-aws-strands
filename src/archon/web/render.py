@@ -15,6 +15,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from html import escape
 
+from archon.adapters.inbound import Reading
 from archon.adapters.ses import Receipt
 from archon.agents.draft import ChaseDraft
 from archon.agents.gate import Release
@@ -88,6 +89,9 @@ thead th { color: var(--muted); font-weight: 600; font-size: 12px; text-transfor
 tr.us td { font-weight: 600; }
 .scroll { overflow-x: auto; }
 footer { color: var(--muted); font-size: 12px; margin-top: 30px; border-top: 1px solid var(--line); padding-top: 14px; }
+textarea { width: 100%; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 8px;
+  padding: 12px; resize: vertical; }
 code { font: 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   background: var(--bg); padding: 1px 5px; border-radius: 4px; border: 1px solid var(--line); }
 """
@@ -224,6 +228,42 @@ def _evidence(rows: list[tuple[Tally, tuple[float, float]]]) -> str:
     """
 
 
+def _inbox(sample: str, reading: Reading | None, error: str | None) -> str:
+    """Where a visitor does the thing the owner would actually do."""
+    if error:
+        outcome = (
+            f'<div class="verdict held"><strong>Not posted</strong>'
+            f'<div style="margin-top:6px">{escape(error)}</div>'
+            "<div style=\"margin-top:6px\">The ledger checks the reader, not the other way "
+            "round. Nothing that does not add up reaches the books.</div></div>"
+        )
+    elif reading is not None:
+        doc = reading.document
+        hidden = ", ".join(reading.redacted_categories) or "nothing"
+        outcome = (
+            f'<div class="verdict ok"><strong>Posted</strong>'
+            f"<div style=\"margin-top:6px\">{escape(type(doc).__name__)} "
+            f"<code>{escape(doc.doc_id)}</code></div>"
+            f"<div>hidden before the reader saw it: {reading.redactions} items, {escape(hidden)}</div>"
+            "</div>"
+        )
+    else:
+        outcome = ""
+    return f"""
+    <div class="card" style="margin-top:18px">
+      <h2>Forward it an email</h2>
+      <p class="why">Redacted on this machine first, then read for fields only, then checked by the
+      ledger. Offline the reading is done by rules and no model is called, which the result says.
+      Try changing a figure so the total stops adding up.</p>
+      <form method="post" action="/post">
+        <textarea name="body" rows="9" spellcheck="false">{escape(sample)}</textarea>
+        <div class="row"><button class="primary" type="submit">Put this in the books</button></div>
+      </form>
+      {outcome}
+    </div>
+    """
+
+
 def page(
     *,
     books: Books,
@@ -232,6 +272,9 @@ def page(
     verdict_for: Callable[[ChaseDraft], Release],
     receipt: Receipt | None,
     refusal: str | None,
+    reading: Reading | None = None,
+    reading_error: str | None = None,
+    sample: str = "",
     evidence: list[tuple[Tally, tuple[float, float]]],
 ) -> str:
     if receipt is not None:
@@ -259,6 +302,7 @@ def page(
   {note}
   {_tiles(stats)}
   <div class="cols">{_domains(books)}{right}</div>
+  {_inbox(sample, reading, reading_error)}
   {_evidence(evidence)}
   <footer>
     Archon {escape(__version__)} &middot; six Strands agents, one per domain, and the composer holds no
