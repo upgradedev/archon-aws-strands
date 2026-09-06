@@ -24,8 +24,8 @@ from archon.domain.money import fmt
 from archon.evidence.compare import Tally
 
 from .. import __version__
-from ..agents import tools, wiring
-from ..demo import QUARTER_FROM, TODAY
+from ..agents import wiring
+from ..demo import TODAY
 
 CSS = """
 :root {
@@ -93,6 +93,19 @@ textarea { width: 100%; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Cons
   background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 8px;
   padding: 12px; resize: vertical; }
 input[type=file] { font: 13px inherit; color: var(--muted); max-width: 100%; }
+.view { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0;
+  border-top: 1px solid var(--line); font-size: 13.5px; line-height: 1.5; }
+.view:first-of-type { border-top: 0; }
+.badge { flex: none; font-size: 10px; font-weight: 700; letter-spacing: .06em; padding: 3px 7px;
+  border-radius: 5px; margin-top: 2px; }
+.badge.urgent { background: color-mix(in srgb, var(--bad) 18%, transparent); color: var(--bad);
+  border: 1px solid var(--bad); }
+.badge.watch { background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent);
+  border: 1px solid var(--accent); }
+.badge.fine { background: color-mix(in srgb, var(--good) 14%, transparent); color: var(--good);
+  border: 1px solid var(--good); }
+.vn { font-weight: 600; font-size: 13px; }
+.vq { color: var(--muted); font-size: 12px; margin-bottom: 6px; font-style: italic; }
 code { font: 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   background: var(--bg); padding: 1px 5px; border-radius: 4px; border: 1px solid var(--line); }
 """
@@ -107,24 +120,78 @@ def _tiles(stats: list[tuple[str, str, str]]) -> str:
     return f'<section class="grid">{cells}</section>'
 
 
-def _domains(books: Books) -> str:
-    readings = [
-        ("what you owe", tools.supplier_position(books)),
-        ("what you are owed", tools.sales_position(books, TODAY)),
-        ("your people", tools.payroll_position(books)),
-        ("trading", tools.trading_position(books, QUARTER_FROM, TODAY)),
-        ("cash", tools.cash_position(books, QUARTER_FROM, TODAY)),
-    ]
-    body = "".join(
-        f'<div class="domain"><div class="n">{escape(name)}</div><pre>{escape(text)}</pre></div>'
-        for name, text in readings
+def _open_items(books: Books) -> str:
+    """The actual lines, which is what someone scans for.
+
+    The tiles say how much is owed; this says by whom and when. Replacing the
+    old monospace dump with the six views alone lost that, and "you are owed
+    3,860.00" without a name is a number nobody can act on.
+    """
+    rows = ""
+    for item in books.uncollected():
+        late = item.days_overdue(TODAY)
+        state = (
+            f'<span style="color:var(--bad)">{late} days late</span>'
+            if late
+            else f"due {item.due}"
+        )
+        part = f"{fmt(item.settled)} received" if item.settled else ""
+        rows += (
+            f"<tr><td>owed to you</td><td>{escape(item.counterparty)}</td>"
+            f"<td>{fmt(item.outstanding)}</td><td>{state}</td><td>{part}</td></tr>"
+        )
+    for item in books.owed_to_suppliers():
+        rows += (
+            f"<tr><td>you owe</td><td>{escape(item.counterparty)}</td>"
+            f"<td>{fmt(item.outstanding)}</td><td>due {item.due}</td><td></td></tr>"
+        )
+    for run in books.payroll_unpaid():
+        rows += (
+            f"<tr><td>wages</td><td>{escape(run.period)}</td><td>{fmt(run.gross)}</td>"
+            f"<td>run {run.run_on}</td><td>not paid</td></tr>"
+        )
+    if not rows:
+        return ""
+    return (
+        '<div class="card" style="margin-top:18px"><h2>What is actually open</h2>'
+        '<p class="why">Every line came from a document, and every document named the email it '
+        "arrived in.</p>"
+        '<div class="scroll"><table><thead><tr><th></th><th>who</th><th>amount</th>'
+        "<th>when</th><th></th></tr></thead>"
+        f"<tbody>{rows}</tbody></table></div></div>"
+    )
+
+
+def _views(views: list, captured_on: str | None) -> str:
+    """The six judgements, most pressing first.
+
+    This card used to be the tools' own output in monospace, which is what the
+    stat tiles above already say in numbers. The interesting thing the product
+    does is the reading of it, so that is what is on screen.
+    """
+    if not views:
+        return ""
+    rows = ""
+    for view in views:
+        rows += (
+            f'<div class="view"><span class="badge {view.verdict.lower()}">'
+            f"{escape(view.verdict)}</span>"
+            f'<div><div class="vn">{escape(view.name)}</div>'
+            f'<div class="vq">{escape(view.question)}</div>'
+            f"<div>{escape(view.body)}</div></div></div>"
+        )
+    provenance = (
+        f"Captured from a real Bedrock run on {escape(captured_on)} and committed to the "
+        "repository, because the offline model walks the graph and does not judge, and six "
+        "identical placeholders would say something untrue about what this does."
+        if captured_on
+        else "From this run, just now."
     )
     return (
-        '<div class="card"><h2>The books, kept from the post</h2>'
-        f'<p class="why">{len(books.ledger.entries)} journal entries, every one naming the email it '
-        f"came from. Trial balance {books.ledger.trial_balance()}, which is the only value that is "
-        "not a bug.</p>"
-        f"{body}</div>"
+        '<div class="card"><h2>What the six of them made of it</h2>'
+        f'<p class="why">One agent per domain, each asked something only a reader of that '
+        f"domain can answer, each told a colleague may disagree. {provenance}</p>"
+        f"{rows}</div>"
     )
 
 
@@ -281,6 +348,8 @@ def page(
     verdict_for: Callable[[ChaseDraft], Release],
     receipt: Receipt | None,
     refusal: str | None,
+    views: list | None = None,
+    captured_on: str | None = None,
     reading: Reading | None = None,
     reading_error: str | None = None,
     sample: str = "",
@@ -310,7 +379,8 @@ def page(
   <p class="lede">{hero} Nine documents arrived this quarter. Nobody typed any of this in.</p>
   {note}
   {_tiles(stats)}
-  <div class="cols">{_domains(books)}{right}</div>
+  {_open_items(books)}
+  <div class="cols">{_views(views, captured_on)}{right}</div>
   {_inbox(sample, reading, reading_error)}
   {_evidence(evidence)}
   <footer>

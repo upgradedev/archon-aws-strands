@@ -169,7 +169,7 @@ tool; the judgement did not.
 
 | | |
 |---|---|
-| the ledger, six domains, P&L, cash, metrics | real, 300 tests, 93% branch coverage |
+| the ledger, six domains, P&L, cash, metrics | real, 323 tests, 93% branch coverage |
 | the six-agent Strands graph | real, runs on `strands-agents` 1.53 and 1.54 |
 | Bedrock | real, `global.anthropic.claude-opus-5`, verified by a live call |
 | SES send, idempotent, with receipt | real code; **the account is in the SES sandbox**, so it can send only to verified addresses |

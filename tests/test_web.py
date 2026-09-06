@@ -210,7 +210,7 @@ def test_a_redaction_marker_is_never_shown_as_a_supplier_name(client):
     client.post("/post", data={"body": SAMPLE_INVOICE})
     html = client.get("/").text
     assert "[REDACTED" not in html
-    assert "name redacted" in html
+    assert "supplier, name redacted" in html, "the open-items table should name it honestly"
 
 
 def test_an_email_whose_figures_do_not_add_up_is_refused(client):
@@ -291,3 +291,37 @@ def test_the_page_says_the_file_is_opened_here_not_sent(client):
     html = client.get("/").text
     assert "opened here, not sent" in html
     assert "redaction cannot" in html
+
+
+# --- the six judgements on screen ---------------------------------------------
+
+
+def test_the_screen_shows_what_the_six_made_of_it(client):
+    html = client.get("/").text
+    assert "What the six of them made of it" in html
+    assert html.count('class="view"') == 6
+
+
+def test_the_most_pressing_domain_is_shown_first(client):
+    html = client.get("/").text
+    first = html.index('class="view"')
+    urgent = html.index("URGENT")
+    watch = html.index("WATCH")
+    assert first < urgent < watch, "a calm domain is shown above an urgent one"
+
+
+def test_the_page_says_the_views_are_captured_not_live(client):
+    """The offline model does not judge, and the page must not imply it did."""
+    html = client.get("/").text
+    assert "Captured from a real Bedrock run" in html
+    assert "does not judge" in html
+
+
+def test_the_judgements_are_prose_not_markdown_tables(client):
+    import re
+
+    html = client.get("/").text
+    start = html.index("What the six of them made of it")
+    card = html[start : html.index("The one thing it will do")]
+    assert "|---|" not in card
+    assert not re.search(r"\*\*\w", card)

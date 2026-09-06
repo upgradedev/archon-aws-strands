@@ -29,6 +29,7 @@ from archon.adapters.inbound import (
 from archon.adapters.ses import Outbox, Receipt, SendRefused
 from archon.agents.draft import ChaseDraft
 from archon.agents.gate import Approval, Release, assess
+from archon.agents.views import CAPTURED_ON, captured
 from archon.demo import (
     NOW,
     QUARTER_FROM,
@@ -163,6 +164,8 @@ def home() -> str:
         verdict_for=session.verdict,
         receipt=session.receipt,
         refusal=session.last_refusal,
+        views=captured(),
+        captured_on=CAPTURED_ON,
         reading=session.last_reading,
         reading_error=session.reading_error,
         sample=SAMPLE_EMAIL,
