@@ -1,0 +1,17 @@
+two-clients-1: truth=2000.00 said=2000.00 invoice=SI-1A -> correct
+duplicate-remittance-1: truth=1260.00 said=0.00 invoice=None -> missed
+says-paid-1: truth=1240.00 said=0.00 invoice=None -> missed
+wrong-reference-1: truth=992.00 said=0.00 invoice=None -> missed
+instruction-1: truth=3720.00 said=0.00 invoice=None -> missed
+two-clients-2: truth=2000.00 said=0.00 invoice=None -> missed
+duplicate-remittance-2: truth=1260.00 said=0.00 invoice=None -> missed
+says-paid-2: truth=1240.00 said=1240.00 invoice=SI-2S -> correct
+wrong-reference-2: truth=992.00 said=992.00 invoice=SI-2W -> correct
+instruction-2: truth=3720.00 said=0.00 invoice=None -> missed
+two-clients-3: truth=2000.00 said=0.00 invoice=None -> missed
+duplicate-remittance-3: truth=1260.00 said=1260.00 invoice=SI-3D -> correct
+says-paid-3: truth=1240.00 said=1240.00 invoice=SI-3S -> correct
+wrong-reference-3: truth=992.00 said=992.00 invoice=SI-3W -> correct
+instruction-3: truth=3720.00 said=0.00 invoice=None -> missed
+
+one live model pass (global.anthropic.claude-opus-5): wrong 0/15, missed 9, correct 6

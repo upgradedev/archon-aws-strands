@@ -127,7 +127,14 @@ def run(client=None, scenarios: tuple[Scenario, ...] | None = None) -> tuple[Tal
 
 
 if __name__ == "__main__":  # pragma: no cover
-    tally, transcript = run()
+    import sys
+
+    if "--hard" in sys.argv:
+        from .hard import all_hard_scenarios
+
+        tally, transcript = run(scenarios=all_hard_scenarios())
+    else:
+        tally, transcript = run()
     low, high = wilson(tally.wrong_money, tally.n)
     print("\n".join(transcript))
     print()

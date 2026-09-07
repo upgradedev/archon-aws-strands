@@ -121,7 +121,7 @@ def test_wilson_is_honest_at_both_edges():
 def test_the_report_shows_missed_beside_wrong_money():
     text = compare.report()
     assert "wrong money" in text and "missed" in text
-    assert "n=20" in text
+    assert text.startswith("20 months of"), "the count comes from the run, not a heading"
     assert "would otherwise look perfect" in text
 
 

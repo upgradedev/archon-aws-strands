@@ -184,3 +184,26 @@ def test_the_disagreement_is_shown_from_a_real_run_not_asserted():
     for reader in ("payroll", "suppliers", "metrics", "cash", "trading", "sales"):
         assert f"### {reader}" in text, reader
     assert "URGENT" in text and "WATCH" in text
+
+
+def test_the_hard_table_matches_what_the_code_computes():
+    from archon.evidence.compare import score_all
+    from archon.evidence.hard import all_hard_scenarios
+
+    by_method = {t.method: t for t in score_all(all_hard_scenarios())}
+    assert by_method["reference matching"].missed == 6
+    assert by_method["Archon"].correct == 15
+
+    assert "| 0 / 15 | **6** | 9 |" in README
+    assert "| 0 / 15 | 0 | 15 |" in README
+
+
+def test_the_injection_finding_is_stated_with_its_own_caveat():
+    assert "complied three times out of three" in README
+    assert "a real attacker would write a better one" in README
+    assert "cannot reach a decision that no model makes" in README
+
+
+def test_the_hard_writeup_is_in_the_repository():
+    assert (ROOT / "evidence" / "RESULTS-HARD-2026-09-08.md").exists()
+    assert (ROOT / "evidence" / "HARD-LIVE-2026-09-08.txt").exists()

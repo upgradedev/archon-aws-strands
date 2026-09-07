@@ -94,7 +94,12 @@ def score_all(scenarios: tuple[Scenario, ...] | None = None) -> list[Tally]:
     return [score(name, fn, scenarios) for name, fn in METHODS.items()]
 
 
-def report(tallies: list[Tally] | None = None) -> str:
+def report(tallies: list[Tally] | None = None, title: str = "one firm's post") -> str:
+    """The table, with the count taken from the tallies rather than written in.
+
+    The heading said "twenty months" while a fifteen-case run was printed beneath
+    it, which is the shape of mistake this whole file exists to catch elsewhere.
+    """
     rows = tallies or score_all()
     n = rows[0].n if rows else 0
     header = (
@@ -102,7 +107,7 @@ def report(tallies: list[Tally] | None = None) -> str:
         f"{'correct':>9}   95% CI, wrong money"
     )
     lines = [
-        f"Twenty months of one firm's post. n={n}. Every answer is known by construction.",
+        f"{n} months of {title}. Every answer is known by construction.",
         "",
         header,
         "-" * len(header),
@@ -124,4 +129,11 @@ def report(tallies: list[Tally] | None = None) -> str:
 
 
 if __name__ == "__main__":  # pragma: no cover
-    print(report())
+    import sys
+
+    if "--hard" in sys.argv:
+        from .hard import all_hard_scenarios
+
+        print(report(score_all(all_hard_scenarios()), "the awkward month"))
+    else:
+        print(report())
