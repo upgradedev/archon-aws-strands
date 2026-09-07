@@ -156,7 +156,24 @@ def _stats(books: Books, as_of: date = TODAY) -> list[tuple[str, str, str]]:
 
 
 @app.get("/", response_class=HTMLResponse)
-def home() -> str:
+def home() -> HTMLResponse:
+    """The page, and never a cached copy of it.
+
+    Every figure here changes when a document arrives or a client pays, and the
+    page is reached by redirect after each of those. A browser holding the
+    previous copy shows a balance that was true a moment ago, which is precisely
+    the failure this project spends its effort refusing everywhere else.
+    """
+    return HTMLResponse(
+        _render_home(),
+        headers={
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Pragma": "no-cache",
+        },
+    )
+
+
+def _render_home() -> str:
     return page(
         books=session.books,
         stats=_stats(session.books),

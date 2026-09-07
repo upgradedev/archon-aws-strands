@@ -169,7 +169,7 @@ tool; the judgement did not.
 
 | | |
 |---|---|
-| the ledger, six domains, P&L, cash, metrics | real, 323 tests, 93% branch coverage |
+| the ledger, six domains, P&L, cash, metrics | real, 328 tests, 93% branch coverage |
 | the six-agent Strands graph | real, runs on `strands-agents` 1.53 and 1.54 |
 | Bedrock | real, `global.anthropic.claude-opus-5`, verified by a live call |
 | SES send, idempotent, with receipt | real code; **the account is in the SES sandbox**, so it can send only to verified addresses |
@@ -236,6 +236,7 @@ No code from any of them is in this repository. The shapes of `pyproject.toml` a
 
 ## Limitations
 
+- The screen is one page. It works on a phone, but there is no app, no notifications and no history.
 - One firm. There is no tenancy: `ARCHON_STORE` keeps one set of books, not one per person.
 - The inbound reader is exercised against pasted text, PDFs and a fake Bedrock client. No mailbox is connected: nothing polls IMAP and no SES receipt rule is deployed.
 - There is no OCR. A photographed or scanned invoice is refused rather than guessed at, and that refusal says what to do instead.

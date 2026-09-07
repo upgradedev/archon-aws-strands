@@ -325,3 +325,34 @@ def test_the_judgements_are_prose_not_markdown_tables(client):
     card = html[start : html.index("The one thing it will do")]
     assert "|---|" not in card
     assert not re.search(r"\*\*\w", card)
+
+
+# --- the phone, and the browser's memory --------------------------------------
+
+
+def test_the_page_is_never_served_from_cache(client):
+    """Every figure changes on a redirect, and a held copy shows a stale balance."""
+    headers = client.get("/").headers
+    assert "no-store" in headers.get("cache-control", "")
+
+
+def test_the_tiles_are_two_across_on_a_phone_not_one(client):
+    """Six full-height cards stacked means scrolling past everything first."""
+    css = client.get("/").text
+    assert "@media (max-width: 860px) { .grid { grid-template-columns: repeat(2, 1fr); } }" in css
+    assert "@media (max-width: 340px)" in css, "one column only on the very narrowest"
+
+
+def test_a_wide_table_scrolls_inside_its_own_box(client):
+    """The page must not scroll sideways; the table may."""
+    html = client.get("/").text
+    assert '<div class="scroll"><table>' in html
+    assert ".scroll { overflow-x: auto" in html
+    assert ".scroll table { min-width: 460px; }" in html
+
+
+def test_the_phone_gets_smaller_type_rather_than_the_same_type_squeezed(client):
+    css = client.get("/").text
+    block = css[css.index("@media (max-width: 520px) {") :]
+    for rule in (".tile .v { font-size: 18px; }", ".wrap { padding: 18px 14px 44px; }"):
+        assert rule in block, rule

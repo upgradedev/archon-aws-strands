@@ -53,7 +53,20 @@ h1 { font-size: 22px; margin: 0; letter-spacing: -0.01em; }
 .lede { color: var(--muted); margin: 6px 0 24px; max-width: 78ch; font-size: 15px; }
 .grid { display: grid; gap: 14px; grid-template-columns: repeat(3, 1fr); }
 @media (max-width: 860px) { .grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 520px) { .grid { grid-template-columns: 1fr; } }
+/* Two across on a phone, not one. Six full-height cards stacked means scrolling
+   past everything before reaching anything that can be acted on, and this is a
+   screen someone opens standing up. */
+@media (max-width: 520px) {
+  .grid { gap: 10px; }
+  .tile { padding: 11px 12px; }
+  .tile .v { font-size: 18px; }
+  .tile .s { font-size: 11px; }
+  .wrap { padding: 18px 14px 44px; }
+  h1 { font-size: 20px; }
+  .lede { font-size: 14px; }
+  .card { padding: 14px 15px; }
+}
+@media (max-width: 340px) { .grid { grid-template-columns: 1fr; } }
 .tile { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
 .tile .k { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
 .tile .v { font-size: 21px; font-weight: 600; margin: 4px 0 2px; font-variant-numeric: tabular-nums; }
@@ -87,7 +100,15 @@ th, td { text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--li
 th:first-child, td:first-child { text-align: left; }
 thead th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
 tr.us td { font-weight: 600; }
-.scroll { overflow-x: auto; }
+.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+@media (max-width: 520px) {
+  th, td { padding: 7px 8px; font-size: 12px; }
+  /* Let it overflow its own box and scroll, rather than squeezing "Cafe on the
+     corner" onto three lines and "55 days late" onto two. A cramped table is
+     harder to read than one you slide. */
+  .scroll table { min-width: 460px; }
+  td { white-space: nowrap; }
+}
 footer { color: var(--muted); font-size: 12px; margin-top: 30px; border-top: 1px solid var(--line); padding-top: 14px; }
 textarea { width: 100%; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 8px;
