@@ -160,6 +160,27 @@ jobs:
       # video and the description. That row is usually kept by somebody
       # remembering. tests/test_readme_is_true.py keeps it by failing, and this
       # step runs it on its own so the reason is legible when it does.
+      # S4 asks that the repository hold everything needed for the project to be
+      # functional, which is the row that fails silently: a file listing looks
+      # complete right up until somebody clones it. This runs the quickstart the
+      # README prints, on a clean runner, from a clean checkout, with nothing on
+      # the machine but what pyproject declares. A command that only works
+      # because of something on the author's laptop dies here.
+      - name: the quickstart a judge is told to run
+        run: |
+          python -m archon.demo | tail -3
+          python -m archon.evidence.compare | tail -4
+          python -m archon.evidence.compare --hard | tail -4
+          python -m archon.web.export "$RUNNER_TEMP/site"
+          test -s "$RUNNER_TEMP/site/index.html"
+          python -m archon.evidence.licences | tail -3
+          timeout 20 python -m uvicorn archon.web.app:app --port 8123 &
+          for _ in $(seq 1 20); do
+            curl -sf http://127.0.0.1:8123/ >/dev/null && break || sleep 1
+          done
+          curl -sf http://127.0.0.1:8123/ | grep -q "Cafe on the corner owes"
+          echo "the screen served the hero figure from a clean install"
+
       - name: the README is still true
         run: python -m pytest tests/test_readme_is_true.py -q
 

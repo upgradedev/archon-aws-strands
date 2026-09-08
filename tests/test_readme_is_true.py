@@ -269,3 +269,28 @@ def test_the_diagram_shows_the_gate_branching_rather_than_chaining():
     text = (ROOT / "docs" / "architecture.svg").read_text(encoding="utf-8")
     assert ">released<" in text and ">held<" in text
     assert "Held — nothing is sent" in text
+
+
+def test_ci_runs_the_quickstart_the_readme_prints():
+    """S4 fails silently: a file listing looks complete until somebody clones it."""
+    workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    assert "the quickstart a judge is told to run" in workflow
+
+    quickstart = README[README.index("## Run it") : README.index("## How it is put together")]
+    commands = {
+        line.strip()
+        for block in re.findall(r"```bash\n(.*?)```", quickstart, re.S)
+        for line in block.splitlines()
+        if line.strip() and not line.strip().startswith("#")
+    }
+    # Everything the README tells someone to run, except the two that need AWS
+    # and the pip install the workflow does in its own step.
+    offline = {
+        c.split("#")[0].strip()
+        for c in commands
+        if "--live" not in c and not c.startswith("pip install")
+    }
+    for command in offline:
+        module = re.search(r"python -m ([\w.]+)", command)
+        assert module, command
+        assert module.group(1) in workflow, f"{module.group(1)} is not exercised by CI"

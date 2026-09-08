@@ -356,3 +356,50 @@ def test_the_phone_gets_smaller_type_rather_than_the_same_type_squeezed(client):
     block = css[css.index("@media (max-width: 520px) {") :]
     for rule in (".tile .v { font-size: 18px; }", ".wrap { padding: 18px 14px 44px; }"):
         assert rule in block, rule
+
+
+# --- what a visitor sees when something breaks --------------------------------
+
+
+def _breaking(monkeypatch):
+    import archon.web.app as web
+
+    monkeypatch.setattr(
+        web.session, "draft", lambda: (_ for _ in ()).throw(RuntimeError("the ledger fell over"))
+    )
+    return TestClient(app, raise_server_exceptions=False)
+
+
+def test_an_unexpected_failure_says_what_failed(monkeypatch):
+    """"Internal Server Error" on a demonstration says nothing and looks like a stop."""
+    response = _breaking(monkeypatch).get("/")
+    assert response.status_code == 500
+    assert "the ledger fell over" in response.text
+    assert "RuntimeError" in response.text
+
+
+def test_the_failure_page_says_what_did_not_happen(monkeypatch):
+    text = _breaking(monkeypatch).get("/").text
+    assert "Nothing was sent and nothing was written" in text
+    assert "the one write needs a human approval that no failure can supply" in text
+
+
+def test_the_failure_page_offers_the_way_back(monkeypatch):
+    assert "Start the month again" in _breaking(monkeypatch).get("/").text
+
+
+def test_the_failure_page_is_this_product_not_the_web_server(monkeypatch):
+    text = _breaking(monkeypatch).get("/").text
+    assert "<h1>Archon</h1>" in text
+    assert "--bg:" in text, "the page's own stylesheet, so it does not look like a crash"
+
+
+def test_the_failure_page_admits_why_it_shows_the_fault(monkeypatch):
+    """Showing an exception is a demo choice, so the page says it is one."""
+    text = _breaking(monkeypatch).get("/").text
+    assert "running against an invented firm" in text
+    assert "would log it and tell you only that something failed" in text
+
+
+def test_a_failure_is_never_served_from_cache(monkeypatch):
+    assert "no-store" in _breaking(monkeypatch).get("/").headers.get("cache-control", "")

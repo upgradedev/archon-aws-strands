@@ -361,6 +361,32 @@ def _inbox(sample: str, reading: Reading | None, error: str | None) -> str:
     """
 
 
+def broke(detail: str) -> str:
+    """The page when something unexpected failed.
+
+    Same shell, same colours, so it reads as this product rather than as the
+    web server underneath it. It says what failed and what did not happen,
+    because a blank "Internal Server Error" on a demonstration says neither.
+    """
+    return f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Archon</title><style>{CSS}</style></head>
+<body><div class="wrap">
+  <header><h1>Archon</h1><span class="tag">something went wrong, and here is what</span></header>
+  <div class="verdict held" style="margin-top:18px">
+    <strong>The screen failed. Nothing was sent and nothing was written.</strong>
+    <div style="margin-top:8px"><code>{escape(detail)}</code></div>
+  </div>
+  <p class="lede">The books are unchanged: every route that changes them commits or fails as a whole,
+  and the one write needs a human approval that no failure can supply. Start the month again below, or
+  reload; if it keeps happening the fault is in the code rather than in what you did.</p>
+  <form method="post" action="/reset" class="row"><button class="primary" type="submit">Start the month again</button></form>
+  <footer>This page shows the fault because it is a demonstration running against an invented firm.
+  A deployment holding real books would log it and tell you only that something failed.</footer>
+</div></body></html>"""
+
+
 def page(
     *,
     books: Books,

@@ -16,7 +16,7 @@ from __future__ import annotations
 import os
 from datetime import date, datetime
 
-from fastapi import FastAPI, File, Form, UploadFile
+from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from archon.adapters.inbound import (
@@ -47,9 +47,32 @@ from archon.domain.reports import cashflow, metrics, profit_and_loss
 from archon.evidence.compare import score_all, wilson
 from archon.store.sqlite import forget, load, save
 
-from .render import page
+from .render import broke, page
 
 app = FastAPI(title="Archon", docs_url=None, redoc_url=None)
+
+
+@app.exception_handler(Exception)
+async def anything_unexpected(request: Request, failure: Exception) -> HTMLResponse:
+    """Say what went wrong, in the page's own voice, and admit it plainly.
+
+    The default is a bare "Internal Server Error", which on a demonstration
+    someone is watching says nothing and looks like the product simply stopped.
+    This is a project whose whole argument is that a system should say what it
+    knows and refuse rather than guess, so its own failure page should do the
+    same thing: name the fault, say what was not done, and offer the way back.
+
+    The exception type and message go on the page. That is a deliberate choice
+    for a demonstration running against an invented firm with no customer data
+    in it; a deployment holding real books would log this and show the visitor
+    only that something failed.
+    """
+    detail = f"{type(failure).__name__}: {failure}"
+    return HTMLResponse(
+        broke(detail),
+        status_code=500,
+        headers={"Cache-Control": "no-store"},
+    )
 
 
 class Session:
