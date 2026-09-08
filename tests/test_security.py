@@ -129,11 +129,43 @@ def test_a_document_id_that_looks_like_sql_is_stored_as_a_string(tmp_path):
     assert load(path).purchases[0].doc_id.startswith("PI-1'")
 
 
-def test_every_statement_in_the_store_is_parameterised():
+def test_no_sql_in_the_store_is_built_by_string_formatting():
+    """What "parameterised" actually means, checked on the syntax tree.
+
+    The first version of this read the file a line at a time and asserted a "?"
+    appeared on the same line as `execute`. It passed for the wrong reason and
+    then failed for the wrong reason the moment a statement wrapped onto two
+    lines. What matters is not where the "?" sits: it is that no SQL string is
+    ever built from a value.
+    """
+    import ast
+    import pathlib
+
     source = pathlib.Path("src/archon/store/sqlite.py").read_text(encoding="utf-8")
-    for line in source.splitlines():
-        if ".execute(" in line and "executescript" not in line:
-            assert "?" in line or "SELECT kind, doc_id, body" in line, line
+    tree = ast.parse(source)
+
+    calls = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr in {"execute", "executemany", "executescript"}
+    ]
+    assert calls, "the store stopped talking to sqlite, which this test assumed"
+
+    for call in calls:
+        sql = call.args[0] if call.args else None
+        # A statement may be a literal, or several literals concatenated. It may
+        # never be an f-string, a %, a .format() or a + with a value in it.
+        assert not isinstance(sql, ast.JoinedStr), ast.unparse(call)[:80]
+        for node in ast.walk(sql) if sql is not None else []:
+            assert not isinstance(node, ast.JoinedStr), ast.unparse(call)[:80]
+            if isinstance(node, ast.BinOp):
+                assert isinstance(node.op, ast.Add), ast.unparse(call)[:80]
+                assert all(
+                    isinstance(side, (ast.Constant, ast.BinOp))
+                    for side in (node.left, node.right)
+                ), ast.unparse(call)[:80]
 
 
 # --- what an invoice can tell the reader to do --------------------------------

@@ -26,6 +26,7 @@ import contextlib
 import json
 import pathlib
 import sqlite3
+from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 
@@ -45,6 +46,34 @@ CREATE TABLE IF NOT EXISTS documents (
     received INTEGER NOT NULL,
     body     TEXT NOT NULL,
     PRIMARY KEY (kind, doc_id)
+);
+
+-- What was sent, or attempted, keyed by the fingerprint of the exact bytes.
+--
+-- This is the only table that has to survive a crash to be correct. The send
+-- ledger used to live in the Outbox, in memory, so restarting the process
+-- emptied it and one approved draft became two emails to a client. That was
+-- measured, not theorised: the fake SES client received two.
+--
+-- The states are deliberately not a single "sent" flag:
+--   requested          the row exists and SES has not been called yet, or the
+--                      process died between calling it and hearing back
+--   provider-accepted  SES returned a MessageId. That is acceptance by the
+--                      provider and nothing more; it is not evidence that
+--                      anybody received anything
+--   failed             SES refused, with the reason kept
+--
+-- There is no "delivered" state, because nothing here has delivery evidence. A
+-- column that could only ever be filled in by guessing does not exist.
+CREATE TABLE IF NOT EXISTS sends (
+    fingerprint TEXT PRIMARY KEY,
+    state       TEXT NOT NULL,
+    message_id  TEXT,
+    to_address  TEXT NOT NULL,
+    invoice_id  TEXT NOT NULL,
+    amount      TEXT NOT NULL,
+    at          TEXT NOT NULL,
+    error       TEXT
 );
 """
 
@@ -165,3 +194,112 @@ def load(path: str | pathlib.Path) -> Books:
 def forget(path: str | pathlib.Path) -> None:
     """Remove the store. Used by the demo's reset, never by the product."""
     pathlib.Path(path).unlink(missing_ok=True)
+
+
+# --- the send ledger, which has to survive a crash ----------------------------
+
+REQUESTED = "requested"
+PROVIDER_ACCEPTED = "provider-accepted"
+FAILED = "failed"
+
+
+@dataclass(frozen=True, slots=True)
+class SendRecord:
+    """One attempt to send one exact draft."""
+
+    fingerprint: str
+    state: str
+    to_address: str
+    invoice_id: str
+    amount: str
+    at: str
+    message_id: str | None = None
+    error: str | None = None
+
+    @property
+    def reached_the_provider(self) -> bool:
+        return self.state == PROVIDER_ACCEPTED
+
+    @property
+    def in_flight(self) -> bool:
+        """Written down, and nobody knows whether SES saw it.
+
+        A crash between the call and the reply lands here. It must never be
+        retried automatically: the provider may well have accepted it, and a
+        second attempt is a second email to a client who is already annoyed.
+        """
+        return self.state == REQUESTED
+
+
+class SendLog:
+    """The record of what has been sent, kept on disk rather than in memory.
+
+    Writing happens in two steps on purpose. The row is written **before** SES is
+    called, not after, because a process that dies between the call and the write
+    would otherwise restart with no memory of an email that is already gone.
+    Recording the intention first means the worst case is an email nobody is sure
+    about, which a person can check, rather than an email sent twice, which a
+    person cannot unsend.
+    """
+
+    def __init__(self, path: str | pathlib.Path) -> None:
+        self.path = pathlib.Path(path)
+
+    def _open(self):
+        db = sqlite3.connect(str(self.path))
+        db.executescript(SCHEMA)
+        return db
+
+    def find(self, fingerprint: str) -> SendRecord | None:
+        with contextlib.closing(self._open()) as db:
+            row = db.execute(
+                "SELECT fingerprint, state, message_id, to_address, invoice_id, amount, at, error "
+                "FROM sends WHERE fingerprint = ?",
+                (fingerprint,),
+            ).fetchone()
+        if row is None:
+            return None
+        fp, state, message_id, to_address, invoice_id, amount, at, error = row
+        return SendRecord(
+            fingerprint=fp,
+            state=state,
+            message_id=message_id,
+            to_address=to_address,
+            invoice_id=invoice_id,
+            amount=amount,
+            at=at,
+            error=error,
+        )
+
+    def requested(self, record: SendRecord) -> None:
+        """Write the intention down before anything leaves."""
+        with contextlib.closing(self._open()) as db, db:
+            db.execute(
+                "INSERT OR REPLACE INTO sends "
+                "(fingerprint, state, message_id, to_address, invoice_id, amount, at, error) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    record.fingerprint,
+                    REQUESTED,
+                    None,
+                    record.to_address,
+                    record.invoice_id,
+                    record.amount,
+                    record.at,
+                    None,
+                ),
+            )
+
+    def settle(self, fingerprint: str, *, message_id: str | None, error: str | None) -> None:
+        """Say how it ended: accepted by the provider, or refused."""
+        state = PROVIDER_ACCEPTED if message_id else FAILED
+        with contextlib.closing(self._open()) as db, db:
+            db.execute(
+                "UPDATE sends SET state = ?, message_id = ?, error = ? WHERE fingerprint = ?",
+                (state, message_id, error, fingerprint),
+            )
+
+    def all(self) -> list[SendRecord]:
+        with contextlib.closing(self._open()) as db:
+            rows = db.execute("SELECT fingerprint FROM sends ORDER BY at").fetchall()
+        return [record for (fp,) in rows if (record := self.find(fp)) is not None]

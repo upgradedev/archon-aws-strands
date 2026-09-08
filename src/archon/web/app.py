@@ -106,6 +106,13 @@ class Session:
     def _fresh(self) -> None:
         self.books: Books = keep_the_books(the_post())
         self.outbox: Outbox = build_outbox(False, "books@archon.example")
+        # The send ledger goes on disk whenever the books do. Without a store
+        # everything is in memory anyway and a restart loses the books too, so
+        # there is nothing for a durable send record to be consistent with.
+        if self.store_path:
+            from archon.store.sqlite import SendLog
+
+            self.outbox.log = SendLog(self.store_path)
         self.receipt: Receipt | None = None
         self.last_refusal: str | None = None
         self.last_reading: Reading | None = None
