@@ -5,7 +5,7 @@
 Built for **Agents for Humans (AWS)**, track **Professional Agents**, on the **Strands Agents SDK** and **Amazon Bedrock**.
 
 [![CI](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml)
-[![tests](https://img.shields.io/badge/tests-413%20offline%2C%20no%20key%2C%20no%20network-22c55e)](#run-it)
+[![tests](https://img.shields.io/badge/tests-419%20offline%2C%20no%20key%2C%20no%20network-22c55e)](#run-it)
 [![coverage](https://img.shields.io/badge/branch%20coverage-93%25-22c55e)](#run-it)
 [![model](https://img.shields.io/badge/Bedrock-claude--opus--5-8b5cf6)](#how-it-is-put-together)
 [![licence](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
@@ -232,7 +232,7 @@ tool; the judgement did not.
 
 | | |
 |---|---|
-| the ledger, six domains, P&L, cash, metrics | real, 413 tests, 93% branch coverage |
+| the ledger, six domains, P&L, cash, metrics | real, 419 tests, 93% branch coverage |
 | the six-agent Strands graph | real, runs on `strands-agents` 1.53 and 1.54 |
 | Bedrock | real, `global.anthropic.claude-opus-5`, verified by a live call |
 | SES send, idempotent, with receipt | real code; **the account is in the SES sandbox**, so it can send only to verified addresses |
@@ -242,6 +242,7 @@ tool; the judgement did not.
 | the static walkthrough | real, rendered from the ledger on every push, published by GitHub Pages once the repository is public |
 | the books between sessions | real. Set `ARCHON_STORE` to a path and the post is written down; loading replays it through the same validation, so a store cannot hold books that do not balance |
 | a running deployment | not yet. The screen runs locally |
+| Bedrock AgentCore | **no.** [`docs/BEDROCK_AGENTCORE_ARCHITECTURE.md`](docs/BEDROCK_AGENTCORE_ARCHITECTURE.md) sketches what it would look like and says on its first line that none of it is built |
 
 ---
 

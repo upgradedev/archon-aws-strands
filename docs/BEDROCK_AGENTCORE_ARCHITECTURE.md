@@ -1,6 +1,38 @@
-# Archon: Enterprise Amazon Bedrock AgentCore Alignment Architecture
+# Bedrock AgentCore: a design note, not a description of what runs
 
-This document specifies how Archon's autonomous multi-agent dispute resolution and double-entry accounting engine maps to the **Amazon Bedrock AgentCore** architecture and enterprise runtime primitives.
+> **Read this first.** **None of the AgentCore runtime described below is implemented.** This document
+> is a sketch of what Archon would look like deployed on Bedrock AgentCore, kept because the rules note
+> that AgentCore strengthens a Technical Implementation score and because the mapping is worth having
+> written down before anyone attempts it. It is a plan. Nothing in the repository calls an AgentCore
+> API, and `grep -ri agentcore src/` returns nothing.
+>
+> It also predates parts of the product it describes, and two of its claims were simply wrong when read
+> today. Both are corrected below rather than left to be found by a judge:
+>
+> - it called Archon a **dispute resolution** engine. Archon chases an unpaid invoice; it does not
+>   arbitrate disputes, and no dispute logic exists anywhere in the code.
+> - it named **Claude 3.5 Sonnet**. The model is `global.anthropic.claude-opus-5`, verified by a live
+>   call, and `python -m archon.evidence.licences` prints what is actually installed.
+>
+> **What of it does exist today**, and where:
+>
+> | described here | in the repository | evidence |
+> |---|---|---|
+> | the pre-LLM redaction filter | **yes**, and it is the only place untrusted text meets a model | `archon.security.sanitizer`, `archon.adapters.inbound` |
+> | the deterministic ledger with a balance invariant | **yes** | `archon.domain.ledger` |
+> | human-in-the-loop before the one write | **yes**, and bound to exact bytes rather than to a threshold | `archon.agents.gate` |
+> | session memory as an audit trail | **yes**, as documents replayed through the same validation | `archon.store.sqlite` |
+> | AgentCore runtime, Action Groups, Guardrails as a service | **no** | nothing; the graph runs on the Strands SDK against `bedrock-runtime` |
+> | API Gateway, Lambda, S3 audit seals, DynamoDB | **no** | nothing is deployed at all |
+>
+> The threshold in the mapping below, holding a draft when an amount exceeds €5,000, is **not** how the
+> gate works and never was. The gate holds on facts that stopped being true, on an approval that does
+> not match the bytes, and on an address that is not the one on the invoice. There is no amount at which
+> it stops caring.
+
+---
+
+The rest of this document is the original sketch, kept as written apart from the corrections above, so that what was planned can be compared with what was built.
 
 ---
 
