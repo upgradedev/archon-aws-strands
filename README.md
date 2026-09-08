@@ -5,7 +5,7 @@
 Built for **Agents for Humans (AWS)**, track **Professional Agents**, on the **Strands Agents SDK** and **Amazon Bedrock**.
 
 [![CI](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml)
-[![tests](https://img.shields.io/badge/tests-351%20offline%2C%20no%20key%2C%20no%20network-22c55e)](#run-it)
+[![tests](https://img.shields.io/badge/tests-369%20offline%2C%20no%20key%2C%20no%20network-22c55e)](#run-it)
 [![coverage](https://img.shields.io/badge/branch%20coverage-93%25-22c55e)](#run-it)
 [![model](https://img.shields.io/badge/Bedrock-claude--opus--5-8b5cf6)](#how-it-is-put-together)
 [![licence](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
@@ -221,7 +221,7 @@ tool; the judgement did not.
 
 | | |
 |---|---|
-| the ledger, six domains, P&L, cash, metrics | real, 351 tests, 93% branch coverage |
+| the ledger, six domains, P&L, cash, metrics | real, 369 tests, 93% branch coverage |
 | the six-agent Strands graph | real, runs on `strands-agents` 1.53 and 1.54 |
 | Bedrock | real, `global.anthropic.claude-opus-5`, verified by a live call |
 | SES send, idempotent, with receipt | real code; **the account is in the SES sandbox**, so it can send only to verified addresses |
@@ -296,6 +296,16 @@ No code from any of them is in this repository. The shapes of `pyproject.toml` a
 - VAT is recorded, not filed. Nothing is submitted to any tax authority.
 - The statutory interest rate is the ECB reference rate as at 2026-07-01 plus eight points. It moves twice a year and Archon does not fetch it; the date it was true is in the source and on the record.
 - The comparison is twenty clean scenarios. It says nothing about behaviour under noise.
+
+## For whoever submits this
+
+- [`docs/SUBMISSION-DESCRIPTION.md`](docs/SUBMISSION-DESCRIPTION.md) — the text description, ready to paste.
+- [`docs/VIDEO-SCRIPT.md`](docs/VIDEO-SCRIPT.md) — five minutes, shot by shot, 295 seconds of targets against a
+  300-second cap, with a written fallback for the one shot that needs SES.
+
+Both are tested like the README is: every figure in them is produced by code here, the admissions cannot
+be quietly dropped, and the script's own timings have to add up. If the product changes and they do not,
+the build fails.
 
 ## Licence
 
