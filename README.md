@@ -5,7 +5,7 @@
 Built for **Agents for Humans (AWS)**, track **Professional Agents**, on the **Strands Agents SDK** and **Amazon Bedrock**.
 
 [![CI](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml)
-[![tests](https://img.shields.io/badge/tests-369%20offline%2C%20no%20key%2C%20no%20network-22c55e)](#run-it)
+[![tests](https://img.shields.io/badge/tests-375%20offline%2C%20no%20key%2C%20no%20network-22c55e)](#run-it)
 [![coverage](https://img.shields.io/badge/branch%20coverage-93%25-22c55e)](#run-it)
 [![model](https://img.shields.io/badge/Bedrock-claude--opus--5-8b5cf6)](#how-it-is-put-together)
 [![licence](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
@@ -149,6 +149,15 @@ Offline mode uses a scripted model. It walks the graph; **it does not judge**. T
 
 ## How it is put together
 
+<img src="docs/architecture.svg" alt="Archon architecture: an email arrives through SES, is redacted on
+the host, is read for fields only by Bedrock, and is posted to a double-entry ledger; six Strands agents
+read one domain each and feed a composer that holds no tools; a gate re-derives every fact and matches a
+human approval bound to the exact bytes, then either releases one email or holds it." width="100%">
+
+*The same thing as Mermaid below, because the submission FAQ does not say whether an inline diagram
+counts as the architecture diagram it asks for, and an image is the reading that satisfies both. It is
+also the one that survives being pasted into a form that renders no Mermaid.*
+
 ```mermaid
 flowchart TB
   mail["Email arrives"] --> san["Redact locally<br/>IBAN, cards, tax IDs, phones"]
@@ -221,7 +230,7 @@ tool; the judgement did not.
 
 | | |
 |---|---|
-| the ledger, six domains, P&L, cash, metrics | real, 369 tests, 93% branch coverage |
+| the ledger, six domains, P&L, cash, metrics | real, 375 tests, 93% branch coverage |
 | the six-agent Strands graph | real, runs on `strands-agents` 1.53 and 1.54 |
 | Bedrock | real, `global.anthropic.claude-opus-5`, verified by a live call |
 | SES send, idempotent, with receipt | real code; **the account is in the SES sandbox**, so it can send only to verified addresses |

@@ -228,3 +228,44 @@ def test_the_badge_numbers_match_the_ones_below_them():
 def test_the_badge_does_not_claim_more_than_ci_checks():
     assert "asserts the Strands API surface" in README
     assert "fails if a number in this README stops matching" in README
+
+
+def test_the_architecture_diagram_exists_as_an_image_not_only_as_mermaid():
+    """The FAQ never said whether inline Mermaid counts, and a form renders none."""
+    svg = ROOT / "docs" / "architecture.svg"
+    assert svg.exists()
+    assert 'src="docs/architecture.svg"' in README
+    assert "no Mermaid" in README
+
+
+def test_the_diagram_is_valid_and_self_contained():
+    import xml.etree.ElementTree as ET
+
+    text = (ROOT / "docs" / "architecture.svg").read_text(encoding="utf-8")
+    ET.fromstring(text)
+    assert "http://" not in text.replace("http://www.w3.org/2000/svg", "")
+    assert "<image" not in text and "@import" not in text
+
+
+def test_the_diagram_describes_itself_for_a_reader_who_cannot_see_it():
+    text = (ROOT / "docs" / "architecture.svg").read_text(encoding="utf-8")
+    assert "<title" in text and "<desc" in text
+    assert 'alt="Archon architecture' in README
+
+
+def test_the_diagram_names_what_the_code_actually_does():
+    from archon.agents import wiring
+
+    text = (ROOT / "docs" / "architecture.svg").read_text(encoding="utf-8")
+    for reader in wiring.READERS:
+        assert f">{reader.name}<" in text, reader.name
+    assert "holds no tools" in text
+    for verdict in wiring.VERDICTS:
+        assert verdict in text
+
+
+def test_the_diagram_shows_the_gate_branching_rather_than_chaining():
+    """Gate to Held to SES would read as if a held draft still goes out."""
+    text = (ROOT / "docs" / "architecture.svg").read_text(encoding="utf-8")
+    assert ">released<" in text and ">held<" in text
+    assert "Held — nothing is sent" in text

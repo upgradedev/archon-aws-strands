@@ -67,6 +67,14 @@ Archon's own column above is circular in both sets, for the same reason: its ans
 
 The account is in the SES sandbox, so it sends only to verified addresses. No mailbox is connected. There is no OCR: a scanned invoice is refused rather than guessed at. The firm in the demo is invented and no customer data is anywhere in the repository.
 
+### Architecture
+
+Upload `docs/architecture.svg` from the repository as the architecture diagram. It shows the whole path:
+an email in through SES, redacted on the host before anything reads it, read for fields only by Bedrock,
+posted to a double-entry ledger; six Strands agents one domain each into a composer that holds no tools;
+a gate that re-derives every fact and matches a human approval byte for byte, and then either one email
+out or nothing at all.
+
 ### Built with
 
 Strands Agents SDK · Amazon Bedrock (`global.anthropic.claude-opus-5`) · Amazon SES · Python 3.11+ · FastAPI · SQLite
