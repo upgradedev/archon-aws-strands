@@ -75,6 +75,16 @@ posted to a double-entry ledger; six Strands agents one domain each into a compo
 a gate that re-derives every fact and matches a human approval byte for byte, and then either one email
 out or nothing at all.
 
+### What Archon is that our other entry is not
+
+We have a second entry in this track, LastTake, and the rules make uniqueness the Sponsor's call, so here it is in plain words.
+
+**LastTake stops a film crew being released while a required shot is missing.** Its buyer is a script supervisor, its unit is one shoot day, and nothing it produces ever leaves the production: the output is a hold, addressed inward.
+
+**Archon keeps a sole trader's books out of their inbox and sends one email to somebody outside the firm asking for money.** Its buyer has no bookkeeper and no accounting software, its unit is the month, and that outbound message *is* the product.
+
+One holds an internal decision back. The other reaches a third party — which is why every figure in it has to be provable, and why half this repository is the machinery that proves them.
+
 ### Built with
 
 Strands Agents SDK · Amazon Bedrock (`global.anthropic.claude-opus-5`) · Amazon SES · Python 3.11+ · FastAPI · SQLite

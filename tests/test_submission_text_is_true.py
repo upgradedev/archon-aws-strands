@@ -158,3 +158,20 @@ def test_the_description_names_the_sdk_and_the_model_actually_used():
 def test_the_disclosure_travels_with_the_description():
     assert "Ten earlier Archon repositories" in DESCRIPTION
     assert "No code from any of them is in this repository" in DESCRIPTION
+
+
+def test_the_description_says_plainly_what_this_is_that_lasttake_is_not():
+    """Uniqueness is the Sponsor's sole discretion, so it is stated rather than left."""
+    section = DESCRIPTION[DESCRIPTION.index("What Archon is that our other entry is not") :]
+    assert "script supervisor" in section, "the other buyer is named"
+    assert "sole trader" in section, "this buyer is named"
+    assert "one shoot day" in section and "the month" in section, "the units differ"
+    assert "ever leaves the production" in section
+    assert "outside the firm" in section
+    assert "holds an internal decision back" in said(section)
+
+
+def test_the_uniqueness_claim_is_one_mechanism_and_one_buyer_not_a_feature_list():
+    section = DESCRIPTION[DESCRIPTION.index("What Archon is that our other entry is not") :]
+    section = section[: section.index("### Built with")]
+    assert len(section.split()) < 200, "if it takes a page to say, it is not a distinction"
