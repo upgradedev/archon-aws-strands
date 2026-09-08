@@ -218,6 +218,14 @@ def approve(fingerprint: str = Form(...)) -> RedirectResponse:
     return RedirectResponse("/", status_code=303)
 
 
+#: The most an attachment or a pasted body may be. An invoice is a page; nothing
+#: legitimate here is megabytes. The cap exists because the alternative is
+#: reading whatever arrives into memory and finding out afterwards, and "afterwards"
+#: for a large enough upload is after the process has died.
+MAX_UPLOAD = 4 * 1024 * 1024
+MAX_PASTED = 256 * 1024
+
+
 SAMPLE_EMAIL = """From: accounts@wholesaler.example
 Subject: Invoice WA-9001
 
@@ -237,6 +245,12 @@ def post_an_email(body: str = Form(...)) -> RedirectResponse:
     """
     session.reading_error = None
     session.last_reading = None
+    if len(body) > MAX_PASTED:
+        session.reading_error = (
+            f"That is longer than {MAX_PASTED // 1024} KB of text, which no email is. "
+            "Nothing was read."
+        )
+        return RedirectResponse("/", status_code=303)
     try:
         reading = read_email(
             body,
@@ -261,7 +275,17 @@ async def upload_an_invoice(attachment: UploadFile = File(...)) -> RedirectRespo
     """
     session.reading_error = None
     session.last_reading = None
-    data = await attachment.read()
+
+    # Read a bounded amount rather than everything and then measuring. One byte
+    # over the cap is enough to know, and it is the only amount worth reading.
+    data = await attachment.read(MAX_UPLOAD + 1)
+    if len(data) > MAX_UPLOAD:
+        session.reading_error = (
+            f"That file is larger than {MAX_UPLOAD // (1024 * 1024)} MB, which no invoice is. "
+            "Nothing was read."
+        )
+        return RedirectResponse("/", status_code=303)
+
     try:
         reading = read_attachment(
             data,
