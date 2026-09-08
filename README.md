@@ -5,7 +5,7 @@
 Built for **Agents for Humans (AWS)**, track **Professional Agents**, on the **Strands Agents SDK** and **Amazon Bedrock**.
 
 [![CI](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml)
-[![tests](https://img.shields.io/badge/tests-420%20offline%2C%20no%20key%2C%20no%20network-22c55e)](#run-it)
+[![tests](https://img.shields.io/badge/tests-440%20offline%2C%20no%20key%2C%20no%20network-22c55e)](#run-it)
 [![coverage](https://img.shields.io/badge/branch%20coverage-93%25-22c55e)](#run-it)
 [![model](https://img.shields.io/badge/Bedrock-claude--opus--5-8b5cf6)](#how-it-is-put-together)
 [![licence](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
@@ -247,6 +247,7 @@ tool; the judgement did not.
 - **No digit reaches a client except through a verified claim.** The agent writes the greeting and the sign-off, and a draft whose free text contains a number is refused outright.
 - **Approval binds to a SHA-256 of the exact bytes.** One edited character invalidates it, and the gate re-derives every fact at send time — so a client who paid at lunchtime is not chased with a draft that was correct that morning.
 - **It claims what the law already owes them.** A late commercial debt accrues statutory interest under Directive 2011/7/EU, and almost nobody claims it, because working it out means knowing the ECB reference rate and the day count. Archon knows both and puts the figure in the email that is asking for the money anyway. It is checked like every other figure and refused inside the thirty-day statutory window, where a small number would only invite an argument the sender would lose.
+- **A client can say when they will pay, and that is a promise rather than a payment.** An arrangement posts no journal entry and does not reduce what is owed; it changes when the chase fires, never how much. A missed instalment makes the whole balance chaseable again, because the balance never moved. The model turns "half on the 20th" into dated instalments; the books decide whether they add up, and refuse saying so when they do not. A dispute is never turned into a proposal.
 - **One approved draft is one email, even if the process dies.** The send record is written to disk before anything leaves and consulted before anything leaves again, so a restart cannot turn one approval into two demands for money. It was two, measured, before this existed. An attempt that never settled is never retried on its own: it may already have gone.
 - **When it breaks it says so.** An unexpected failure gets a page in this product's own voice naming the fault and stating that nothing was sent and nothing was written, rather than a bare Internal Server Error that on a demonstration says neither.
 - **Every input is treated as something a stranger wrote.** A supplier's own name is escaped before it reaches the page, an attachment is capped and refused before it is read rather than after, a document id that looks like SQL is stored as the string it is, and an email giving the reader orders becomes a document or nothing. The page runs no script of its own, which leaves the escaping as the only thing that has to be right.
@@ -258,7 +259,7 @@ tool; the judgement did not.
 
 | | |
 |---|---|
-| the ledger, six domains, P&L, cash, metrics | real, 420 tests, 93% branch coverage |
+| the ledger, six domains, P&L, cash, metrics | real, 440 tests, 93% branch coverage |
 | the six-agent Strands graph | real, runs on `strands-agents` 1.53 and 1.54 |
 | Bedrock | real, `global.anthropic.claude-opus-5`, verified by a live call |
 | SES send, idempotent, with receipt | real code; **the account is in the SES sandbox**, so it can send only to verified addresses |

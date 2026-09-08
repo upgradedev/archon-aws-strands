@@ -63,6 +63,10 @@ class Books:
     payments: list[Payment] = field(default_factory=list)
     receipts: list[Receipt] = field(default_factory=list)
     payroll: list[PayrollRun] = field(default_factory=list)
+    #: Promises, keyed by invoice. Deliberately not documents: nothing in here
+    #: has ever produced a journal entry, and nothing in here ever will. An
+    #: arrangement changes when a chase fires, never what is owed.
+    arrangements: dict = field(default_factory=dict)
 
     # ---- taking documents in -------------------------------------------------
 
@@ -175,6 +179,35 @@ class Books:
             for inv in self.sales
         ]
 
+    # ---- arrangements, which change when a chase fires and never what is owed --
+
+    def agree(self, arrangement) -> None:
+        """Record a promise. Deliberately not `record`, which posts.
+
+        `Books.record` takes documents and writes journal entries. This takes a
+        promise and writes nothing, and the two are separate methods so that
+        nobody can reach an arrangement through the door that posts.
+        """
+        self.arrangements[arrangement.invoice_id] = arrangement
+
+    def arrangement_for(self, invoice_id: str):
+        return self.arrangements.get(invoice_id)
+
+    def is_held_by_arrangement(self, settlement, as_of: date) -> bool:
+        """True when a live promise says this debt is not chaseable today.
+
+        A promise that has been kept so far holds the chase. A promise that has
+        been broken does not, and the debt it was about is chaseable for its
+        whole outstanding balance, because an arrangement never moved it.
+        """
+        arrangement = self.arrangements.get(settlement.doc_id)
+        if arrangement is None:
+            return False
+        received = settlement.gross - settlement.outstanding
+        if arrangement.is_broken(as_of, received):
+            return False
+        return not arrangement.is_finished(as_of)
+
     def uncollected(self) -> list[Settlement]:
         """Open sales invoices, oldest debt first. The hero journey starts here."""
         return sorted(
@@ -183,7 +216,12 @@ class Books:
         )
 
     def overdue(self, as_of: date) -> list[Settlement]:
-        return [s for s in self.uncollected() if s.is_overdue(as_of)]
+        """Overdue and not held by a promise somebody is still keeping."""
+        return [
+            s
+            for s in self.uncollected()
+            if s.is_overdue(as_of) and not self.is_held_by_arrangement(s, as_of)
+        ]
 
     def worst_overdue(self, as_of: date) -> Settlement | None:
         """The single receivable the chase is written about.
