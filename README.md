@@ -5,7 +5,7 @@
 Built for **Agents for Humans (AWS)**, track **Professional Agents**, on the **Strands Agents SDK** and **Amazon Bedrock**.
 
 [![CI](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml)
-[![tests](https://img.shields.io/badge/tests-408%20offline%2C%20no%20key%2C%20no%20network-22c55e)](#run-it)
+[![tests](https://img.shields.io/badge/tests-413%20offline%2C%20no%20key%2C%20no%20network-22c55e)](#run-it)
 [![coverage](https://img.shields.io/badge/branch%20coverage-93%25-22c55e)](#run-it)
 [![model](https://img.shields.io/badge/Bedrock-claude--opus--5-8b5cf6)](#how-it-is-put-together)
 [![licence](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
@@ -217,7 +217,7 @@ tool; the judgement did not.
 ### The rules that carry it
 
 - **A journal entry that does not balance is refused at construction.** No report downstream can silently lose money.
-- **Every entry names the email it came from.** A number on screen walks back to the document.
+- **Every entry names the email it came from, and the screen shows it.** A number walks back to the document that produced it, in a table on the page rather than in a claim you have to take on trust.
 - **Settlement is derived, never stored.** A "paid" flag that can disagree with the ledger is how books start lying.
 - **No digit reaches a client except through a verified claim.** The agent writes the greeting and the sign-off, and a draft whose free text contains a number is refused outright.
 - **Approval binds to a SHA-256 of the exact bytes.** One edited character invalidates it, and the gate re-derives every fact at send time — so a client who paid at lunchtime is not chased with a draft that was correct that morning.
@@ -232,7 +232,7 @@ tool; the judgement did not.
 
 | | |
 |---|---|
-| the ledger, six domains, P&L, cash, metrics | real, 408 tests, 93% branch coverage |
+| the ledger, six domains, P&L, cash, metrics | real, 413 tests, 93% branch coverage |
 | the six-agent Strands graph | real, runs on `strands-agents` 1.53 and 1.54 |
 | Bedrock | real, `global.anthropic.claude-opus-5`, verified by a live call |
 | SES send, idempotent, with receipt | real code; **the account is in the SES sandbox**, so it can send only to verified addresses |

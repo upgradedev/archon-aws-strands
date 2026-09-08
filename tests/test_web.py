@@ -403,3 +403,54 @@ def test_the_failure_page_admits_why_it_shows_the_fault(monkeypatch):
 
 def test_a_failure_is_never_served_from_cache(monkeypatch):
     assert "no-store" in _breaking(monkeypatch).get("/").headers.get("cache-control", "")
+
+
+# --- the audit trail, which was always there and never shown ------------------
+
+
+def test_every_entry_names_the_email_it_arrived_in(client):
+    html = client.get("/").text
+    assert "Where every figure came from" in html
+    for entry in session.books.ledger.entries:
+        assert entry.source_ref in html, entry.entry_id
+        assert entry.entry_id in html, entry.entry_id
+
+
+def test_the_trail_states_the_trial_balance_it_depends_on(client):
+    """A provenance table over an unbalanced ledger would be lying tidily."""
+    html = client.get("/").text
+    assert f"is {session.books.ledger.trial_balance()}" in html
+    assert "any other value would mean this table is lying" in html
+
+
+def test_a_pasted_document_appears_in_the_trail(client):
+    client.post("/post", data={"body": SAMPLE_INVOICE})
+    html = client.get("/").text
+    added = session.books.ledger.entries[-1]
+    assert added.source_ref in html
+    assert "WA-9001" in html
+
+
+def test_the_trail_is_folded_away_rather_than_dominating_the_page(client):
+    """It is evidence, not the first thing somebody needs."""
+    html = client.get("/").text
+    assert "<details" in html
+    assert html.index("The one thing it will do") < html.index("Where every figure came from")
+
+
+def test_the_trail_shows_both_sides_of_a_known_entry(client):
+    """A trail showing only one side of a double entry is not a trail.
+
+    The first version of this asserted "cr" appeared somewhere in the page,
+    which matches almost any English text and could not have failed.
+    """
+    import re
+
+    html = client.get("/").text
+    trail = html[html.index("Where every figure came from") :]
+    row = next(line for line in trail.splitlines() if "PI-001:booked" in line)
+    posted = re.search(r"<td>([^<]*Trade creditors[^<]*)</td>", row).group(1)
+
+    assert "Purchases 1,000.00 EUR de" in posted, posted
+    assert "Trade creditors 1,240.00 EUR cr" in posted, posted
+    assert "VAT on purchases 240.00 EUR de" in posted, "the VAT leg is shown too"

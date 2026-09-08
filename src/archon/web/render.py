@@ -127,6 +127,11 @@ input[type=file] { font: 13px inherit; color: var(--muted); max-width: 100%; }
   border: 1px solid var(--good); }
 .vn { font-weight: 600; font-size: 13px; }
 .vq { color: var(--muted); font-size: 12px; margin-bottom: 6px; font-style: italic; }
+details.card > summary { cursor: pointer; font-size: 15px; list-style: none; }
+details.card > summary::-webkit-details-marker { display: none; }
+details.card > summary::before { content: "▸ "; color: var(--muted); }
+details.card[open] > summary::before { content: "▾ "; }
+details.card > summary strong { font-weight: 600; }
 code { font: 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   background: var(--bg); padding: 1px 5px; border-radius: 4px; border: 1px solid var(--line); }
 """
@@ -139,6 +144,40 @@ def _tiles(stats: list[tuple[str, str, str]]) -> str:
         for k, v, s in stats
     )
     return f'<section class="grid">{cells}</section>'
+
+
+def _provenance(books: Books) -> str:
+    """Where every figure came from, laid out so the claim can be checked.
+
+    The ledger has always carried this: an entry cannot be posted without naming
+    the document it came from, and `Ledger.by_source` walks it back. It has never
+    been on screen, so "every number walks back to the email that produced it"
+    was a sentence a reader had to take on trust from a project whose entire
+    argument is that nobody should have to.
+    """
+    rows = ""
+    for entry in books.ledger.entries:
+        postings = ", ".join(
+            f"{p.account.value} {fmt(abs(p.amount))} {p.side.value[:2]}" for p in entry.postings
+        )
+        rows += (
+            f"<tr><td><code>{escape(entry.source_ref)}</code></td>"
+            f"<td>{escape(entry.entry_id)}</td>"
+            f"<td>{entry.on}</td>"
+            f"<td>{escape(entry.narrative)}</td>"
+            f"<td>{escape(postings)}</td></tr>"
+        )
+    return (
+        '<details class="card" style="margin-top:18px"><summary><strong>Where every figure came '
+        'from</strong></summary>'
+        f'<p class="why">{len(books.ledger.entries)} entries, each naming the email it arrived in. '
+        "An entry cannot be posted without one, and debits and credits have to agree before it is "
+        f"posted at all: the trial balance below is {books.ledger.trial_balance()}, and any other "
+        "value would mean this table is lying.</p>"
+        '<div class="scroll"><table><thead><tr><th>from</th><th>entry</th><th>on</th>'
+        "<th>what</th><th>posted</th></tr></thead>"
+        f"<tbody>{rows}</tbody></table></div></details>"
+    )
 
 
 def _open_items(books: Books) -> str:
@@ -429,6 +468,7 @@ def page(
   {_open_items(books)}
   <div class="cols">{_views(views, captured_on)}{right}</div>
   {_inbox(sample, reading, reading_error)}
+  {_provenance(books)}
   {_evidence(evidence)}
   <footer>
     Archon {escape(__version__)} &middot; six Strands agents, one per domain, and the composer holds no
