@@ -67,7 +67,10 @@ PAGES = (
 
 
 def _render(session: Session, caption: str) -> str:
+    # The static walkthrough is written from a run that reasoned or did not, and
+    # it must say which rather than leaving a reader of a published page to guess.
     html = page(
+        reasoning=session.reasoning,
         books=session.books,
         stats=_stats(session.books),
         draft=session.draft(),

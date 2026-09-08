@@ -33,8 +33,8 @@ from archon.agents.views import CAPTURED_ON, captured
 from archon.demo import (
     NOW,
     QUARTER_FROM,
-    SCRIPTED_REPLY,
     TODAY,
+    _composer_reply,
     keep_the_books,
     the_post,
     two_lines,
@@ -45,6 +45,7 @@ from archon.domain.books import Books
 from archon.domain.money import fmt
 from archon.domain.reports import cashflow, metrics, profit_and_loss
 from archon.evidence.compare import score_all, wilson
+from archon.runtime import Reasoning
 from archon.store.sqlite import forget, load, save
 
 from .render import broke, page
@@ -109,12 +110,41 @@ class Session:
         self.last_refusal: str | None = None
         self.last_reading: Reading | None = None
         self.reading_error: str | None = None
+        # What actually produced the tone on screen. Until somebody asks for a
+        # live run this is a constant, and the page says so rather than letting a
+        # visitor assume six agents reasoned about their books.
+        self.reasoning: Reasoning = Reasoning.scripted()
+
+    def run_the_agents(self) -> None:
+        """Run the real graph on Bedrock, or fail saying so.
+
+        The screen used to return `SCRIPTED_REPLY`, a constant, and never built
+        the graph at all: the six agents this project is about were exercised
+        only by the command line. A judge pressing buttons saw none of it.
+
+        There is no fallback. If Bedrock cannot be reached the page says that and
+        keeps the scripted tone it already had, clearly labelled. Quietly serving
+        a script while claiming a live run is the one thing this must not do.
+        """
+        from archon.agents.graph import build
+        from archon.agents.views import from_graph_result
+
+        try:
+            graph = build(self.books, TODAY, QUARTER_FROM, TODAY, model=None)
+            result = graph("Close the quarter and decide whether a chase is warranted.")
+        except Exception as failure:  # noqa: BLE001 - reported, never swallowed
+            self.reasoning = Reasoning.unreachable(f"{type(failure).__name__}: {failure}")
+            return
+        self.reasoning = Reasoning.live(
+            reply=_composer_reply(result),
+            views=tuple(from_graph_result(result)),
+        )
 
     def draft(self) -> ChaseDraft | None:
         worst = self.books.worst_overdue(TODAY)
         if worst is None:
             return None
-        opening, closing = two_lines(SCRIPTED_REPLY)
+        opening, closing = two_lines(self.reasoning.reply)
         return ChaseDraft(
             invoice_id=worst.doc_id,
             client=worst.counterparty,
@@ -198,6 +228,7 @@ def home() -> HTMLResponse:
 
 def _render_home() -> str:
     return page(
+        reasoning=session.reasoning,
         books=session.books,
         stats=_stats(session.books),
         draft=session.draft(),
@@ -321,6 +352,18 @@ async def upload_an_invoice(attachment: UploadFile = File(...)) -> RedirectRespo
         session._remember()
     except (UnreadablePost, ValueError) as refused:
         session.reading_error = str(refused)
+    return RedirectResponse("/", status_code=303)
+
+
+@app.post("/reason")
+def run_the_agents() -> RedirectResponse:
+    """Ask the six agents, for real, on Bedrock.
+
+    Deliberately a button rather than something the page does on load: the graph
+    takes about thirteen seconds and costs money, and a screen that spent both on
+    every refresh would be a screen nobody leaves open.
+    """
+    session.run_the_agents()
     return RedirectResponse("/", status_code=303)
 
 

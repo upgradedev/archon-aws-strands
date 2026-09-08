@@ -5,7 +5,7 @@
 Built for **Agents for Humans (AWS)**, track **Professional Agents**, on the **Strands Agents SDK** and **Amazon Bedrock**.
 
 [![CI](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml)
-[![tests](https://img.shields.io/badge/tests-419%20offline%2C%20no%20key%2C%20no%20network-22c55e)](#run-it)
+[![tests](https://img.shields.io/badge/tests-412%20offline%2C%20no%20key%2C%20no%20network-22c55e)](#run-it)
 [![coverage](https://img.shields.io/badge/branch%20coverage-93%25-22c55e)](#run-it)
 [![model](https://img.shields.io/badge/Bedrock-claude--opus--5-8b5cf6)](#how-it-is-put-together)
 [![licence](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
@@ -60,6 +60,31 @@ So the claim is narrower, and it survives the model being good:
 **That was a friendly test**, and it said so: twenty clean months, one client each, no contradictory
 messages, no adversarial text. Full write-up: [`evidence/RESULTS-2026-09-04.md`](evidence/RESULTS-2026-09-04.md).
 
+### Archon's own row is withdrawn, 2026-09-08
+
+**The comparison was not a comparison.** Archon's method read `scenario.books`, a set of books the
+fixture had already posted correctly, while the method it was measured against read the raw text. It was
+never asked to build the books it then reasoned over.
+
+It reads the same raw post as everything else now, and the answer changes completely: **6 correct of 20
+instead of 20, and 0 of 15 instead of 15.** A live Bedrock reader scores exactly the same as the offline
+one, to the case, so the reader is not the bottleneck.
+
+The cause is in the transcript, and it is the same two lines throughout: *a sales invoice with no client
+address cannot be chased*, and *the email does not identify a document*. **The fixtures are one-line
+summaries written to exercise a naive extractor, not emails.** Archon refuses to chase a debt when it
+does not know who to send it to, which is correct, and which means these fixtures cannot measure it.
+
+**What survives:** Archon demands wrong money in 0 of 35 cases across both sets and both readers. It goes
+silent rather than inventing a figure or a recipient.
+
+**What does not:** any claim that it collects more than the alternatives. On this evidence it collects
+less, and `reference matching` beats it on both sets. That row stays withdrawn until the fixtures are
+rewritten as emails a person would actually receive — by a different hand from the one that writes the
+reader, or the circularity returns one layer down.
+
+Full working: [`evidence/RESULTS-CORRECTED-2026-09-08.md`](evidence/RESULTS-CORRECTED-2026-09-08.md).
+
 ### The awkward month
 
 So here is the set that answers it. Fifteen months containing two clients at once, the same payment
@@ -75,7 +100,7 @@ python -m archon.evidence.compare --hard
 | reference matching | 0 / 15 | **6** | 9 | 0.0% to 20.4% |
 | naive text extraction | 15 / 15 | 0 | 0 | 79.6% to 100.0% |
 | **a real Claude model, one pass, no ledger** | **0 / 15** | **9** | 6 | 0.0% to 20.4% |
-| **Archon** | 0 / 15 | 0 | 15 | 0.0% to 20.4% |
+| ~~**Archon**~~ | **withdrawn** | | | see below |
 
 **On clean months the model went quiet on 3 of 20. On these it went quiet on 9 of 15.** It still demanded
 no wrong figure, which is to its credit. What changed is how often it said nothing where money was owed.
@@ -232,7 +257,7 @@ tool; the judgement did not.
 
 | | |
 |---|---|
-| the ledger, six domains, P&L, cash, metrics | real, 419 tests, 93% branch coverage |
+| the ledger, six domains, P&L, cash, metrics | real, 412 tests, 93% branch coverage |
 | the six-agent Strands graph | real, runs on `strands-agents` 1.53 and 1.54 |
 | Bedrock | real, `global.anthropic.claude-opus-5`, verified by a live call |
 | SES send, idempotent, with receipt | real code; **the account is in the SES sandbox**, so it can send only to verified addresses |

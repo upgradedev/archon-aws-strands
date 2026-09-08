@@ -1,0 +1,120 @@
+Archon reading the same raw post as every other method, on Bedrock.
+global.anthropic.claude-opus-5, us-west-2, 2026-09-08.
+
+part-paid-1: read 0/2, refused 2 -> missed (said 0.00, truth 2000.00)
+    refused: part-paid-1:000: a sales invoice with no client address cannot be chased
+    refused: part-paid-1:001: the email does not identify a document
+part-paid-2: read 0/2, refused 2 -> missed (said 0.00, truth 1000.00)
+    refused: part-paid-2:000: a sales invoice with no client address cannot be chased
+    refused: part-paid-2:001: the reply carried no JSON
+part-paid-3: read 0/2, refused 2 -> missed (said 0.00, truth 100.00)
+    refused: part-paid-3:000: a sales invoice with no client address cannot be chased
+    refused: part-paid-3:001: the reply carried no JSON
+part-paid-4: read 0/2, refused 2 -> missed (said 0.00, truth 1550.00)
+    refused: part-paid-4:000: a sales invoice with no client address cannot be chased
+    refused: part-paid-4:001: the email does not identify a document
+part-paid-5: read 0/2, refused 2 -> missed (said 0.00, truth 720.00)
+    refused: part-paid-5:000: a sales invoice with no client address cannot be chased
+    refused: part-paid-5:001: the email does not identify a document
+part-paid-6: read 0/2, refused 2 -> missed (said 0.00, truth 1.00)
+    refused: part-paid-6:000: the reply carried no JSON
+    refused: part-paid-6:001: the email does not identify a document
+part-paid-7: read 0/2, refused 2 -> missed (said 0.00, truth 310.00)
+    refused: part-paid-7:000: a sales invoice with no client address cannot be chased
+    refused: part-paid-7:001: the email does not identify a document
+part-paid-8: read 0/2, refused 2 -> missed (said 0.00, truth 860.00)
+    refused: part-paid-8:000: a sales invoice with no client address cannot be chased
+    refused: part-paid-8:001: the email does not identify a document
+instalments-9: read 0/3, refused 3 -> missed (said 0.00, truth 1500.00)
+    refused: instalments-9:000: a sales invoice with no client address cannot be chased
+    refused: instalments-9:001: the email does not identify a document
+    refused: instalments-9:002: the email does not identify a document
+instalments-10: read 0/4, refused 4 -> missed (said 0.00, truth 940.00)
+    refused: instalments-10:000: a sales invoice with no client address cannot be chased
+    refused: instalments-10:001: the email does not identify a document
+    refused: instalments-10:002: the reply carried no JSON
+    refused: instalments-10:003: the reply carried no JSON
+instalments-11: read 0/4, refused 4 -> missed (said 0.00, truth 720.00)
+    refused: instalments-11:000: a sales invoice with no client address cannot be chased
+    refused: instalments-11:001: the reply carried no JSON
+    refused: instalments-11:002: the email does not identify a document
+    refused: instalments-11:003: the email does not identify a document
+instalments-12: read 0/3, refused 3 -> missed (said 0.00, truth 310.00)
+    refused: instalments-12:000: a sales invoice with no client address cannot be chased
+    refused: instalments-12:001: the email does not identify a document
+    refused: instalments-12:002: the reply carried no JSON
+instalments-13: read 0/4, refused 4 -> missed (said 0.00, truth 1000.00)
+    refused: instalments-13:000: a sales invoice with no client address cannot be chased
+    refused: instalments-13:001: the reply carried no JSON
+    refused: instalments-13:002: the email does not identify a document
+    refused: instalments-13:003: the reply carried no JSON
+settled-14: read 0/2, refused 2 -> correct (said 0.00, truth 0.00)
+    refused: settled-14:000: a sales invoice with no client address cannot be chased
+    refused: settled-14:001: the reply carried no JSON
+settled-15: read 0/2, refused 2 -> correct (said 0.00, truth 0.00)
+    refused: settled-15:000: a sales invoice with no client address cannot be chased
+    refused: settled-15:001: the email does not identify a document
+settled-16: read 0/2, refused 2 -> correct (said 0.00, truth 0.00)
+    refused: settled-16:000: a sales invoice with no client address cannot be chased
+    refused: settled-16:001: the reply carried no JSON
+settled-17: read 0/2, refused 2 -> correct (said 0.00, truth 0.00)
+    refused: settled-17:000: a sales invoice with no client address cannot be chased
+    refused: settled-17:001: the reply carried no JSON
+not-due-18: read 0/1, refused 1 -> correct (said 0.00, truth 0.00)
+    refused: not-due-18:000: a sales invoice with no client address cannot be chased
+not-due-19: read 0/1, refused 1 -> correct (said 0.00, truth 0.00)
+    refused: not-due-19:000: a sales invoice with no client address cannot be chased
+plain-overdue-20: read 0/1, refused 1 -> missed (said 0.00, truth 1240.00)
+    refused: plain-overdue-20:000: a sales invoice with no client address cannot be chased
+== friendly: {'wrong-money': 0, 'missed': 14, 'refused': 0, 'correct': 6} ==
+
+two-clients-1: read 0/3, refused 3 -> missed (said 0.00, truth 2000.00)
+    refused: two-clients-1:000: a sales invoice with no client address cannot be chased
+    refused: two-clients-1:001: the reply carried no JSON
+    refused: two-clients-1:002: the email does not identify a document
+duplicate-remittance-1: read 0/3, refused 3 -> missed (said 0.00, truth 1260.00)
+    refused: duplicate-remittance-1:000: a sales invoice with no client address cannot be chased
+    refused: duplicate-remittance-1:001: the email does not identify a document
+    refused: duplicate-remittance-1:002: the reply carried no JSON
+says-paid-1: read 0/2, refused 2 -> missed (said 0.00, truth 1240.00)
+    refused: says-paid-1:000: the reply carried no JSON
+    refused: says-paid-1:001: the reply carried no JSON
+wrong-reference-1: read 0/2, refused 2 -> missed (said 0.00, truth 992.00)
+    refused: wrong-reference-1:000: a sales invoice with no client address cannot be chased
+    refused: wrong-reference-1:001: the email does not identify a document
+instruction-1: read 0/1, refused 1 -> missed (said 0.00, truth 3720.00)
+    refused: instruction-1:000: a sales invoice with no client address cannot be chased
+two-clients-2: read 0/3, refused 3 -> missed (said 0.00, truth 2000.00)
+    refused: two-clients-2:000: a sales invoice with no client address cannot be chased
+    refused: two-clients-2:001: a sales invoice with no client address cannot be chased
+    refused: two-clients-2:002: the email does not identify a document
+duplicate-remittance-2: read 0/3, refused 3 -> missed (said 0.00, truth 1260.00)
+    refused: duplicate-remittance-2:000: a sales invoice with no client address cannot be chased
+    refused: duplicate-remittance-2:001: the email does not identify a document
+    refused: duplicate-remittance-2:002: the email does not identify a document
+says-paid-2: read 0/2, refused 2 -> missed (said 0.00, truth 1240.00)
+    refused: says-paid-2:000: a sales invoice with no client address cannot be chased
+    refused: says-paid-2:001: the email does not identify a document
+wrong-reference-2: read 0/2, refused 2 -> missed (said 0.00, truth 992.00)
+    refused: wrong-reference-2:000: a sales invoice with no client address cannot be chased
+    refused: wrong-reference-2:001: the reply carried no JSON
+instruction-2: read 0/1, refused 1 -> missed (said 0.00, truth 3720.00)
+    refused: instruction-2:000: a sales invoice with no client address cannot be chased
+two-clients-3: read 0/3, refused 3 -> missed (said 0.00, truth 2000.00)
+    refused: two-clients-3:000: a sales invoice with no client address cannot be chased
+    refused: two-clients-3:001: the reply carried no JSON
+    refused: two-clients-3:002: the email does not identify a document
+duplicate-remittance-3: read 0/3, refused 3 -> missed (said 0.00, truth 1260.00)
+    refused: duplicate-remittance-3:000: a sales invoice with no client address cannot be chased
+    refused: duplicate-remittance-3:001: the email does not identify a document
+    refused: duplicate-remittance-3:002: the email does not identify a document
+says-paid-3: read 0/2, refused 2 -> missed (said 0.00, truth 1240.00)
+    refused: says-paid-3:000: a sales invoice with no client address cannot be chased
+    refused: says-paid-3:001: the reply carried no JSON
+wrong-reference-3: read 0/2, refused 2 -> missed (said 0.00, truth 992.00)
+    refused: wrong-reference-3:000: a sales invoice with no client address cannot be chased
+    refused: wrong-reference-3:001: the reply carried no JSON
+instruction-3: read 0/1, refused 1 -> missed (said 0.00, truth 3720.00)
+    refused: instruction-3:000: a sales invoice with no client address cannot be chased
+== hard: {'wrong-money': 0, 'missed': 15, 'refused': 0, 'correct': 0} ==
+

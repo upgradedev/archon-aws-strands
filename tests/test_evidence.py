@@ -10,9 +10,10 @@ from decimal import Decimal
 
 import pytest
 
-from archon.evidence import compare, methods
+from archon.domain.money import ZERO
+from archon.evidence import compare
 from archon.evidence.live import _parse, _text_of, ask_model
-from archon.evidence.methods import Answer
+from archon.evidence.methods import Answer, archon
 from archon.evidence.scenarios import AS_OF, all_scenarios
 
 CASES = all_scenarios()
@@ -101,8 +102,8 @@ def test_the_table_the_readme_quotes():
     assert by_method["naive text extraction"].wrong_money == 19
 
     assert by_method["Archon"].wrong_money == 0
-    assert by_method["Archon"].missed == 0
-    assert by_method["Archon"].correct == 20
+    assert by_method["Archon"].missed == 14  # corrected 2026-09-08
+    assert by_method["Archon"].correct == 6  # corrected 2026-09-08
 
 
 def test_a_zero_never_publishes_as_certainty():
@@ -200,7 +201,20 @@ def test_the_live_call_asks_with_the_post_and_no_ledger():
 
 
 def test_archon_refuses_rather_than_guessing_when_a_claim_is_refuted():
-    """The refusal path is a real outcome, so it is exercised rather than assumed."""
-    case = next(c for c in CASES if c.truth > 0)
-    answer = methods.archon(case)
-    assert answer.sends and answer.amount == case.truth
+    """Corrected 2026-09-08.
+
+    This exercised a claim refutation against books the fixture had posted. Archon
+    now builds its own books from the raw post, and on these fixtures it usually
+    builds none, so a refuted claim is no longer reachable this way. What is
+    asserted instead is the property that matters and that survived the
+    correction: across every scenario in both sets, Archon never returns an amount
+    that is not owed.
+    """
+    from archon.evidence.hard import all_hard_scenarios
+
+    for case in list(all_scenarios()) + list(all_hard_scenarios()):
+        answer = archon(case)
+        if answer.sends:
+            assert answer.amount == case.truth, case.name
+        else:
+            assert answer.amount == ZERO, case.name

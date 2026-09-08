@@ -35,15 +35,16 @@ def said(text: str) -> str:
 # --- the figures ---------------------------------------------------------------
 
 
-def test_the_description_quotes_the_friendly_table_the_code_computes():
+def test_the_description_does_not_quote_the_withdrawn_archon_row():
+    """Corrected 2026-09-08. The description must not carry a number the README withdrew."""
     from archon.evidence.compare import score_all
 
     by_method = {t.method: t for t in score_all()}
     assert by_method["reference matching"].missed == 13
-    assert by_method["Archon"].missed == 0
+    assert by_method["Archon"].correct == 6, "reading the post itself, not handed books"
 
     assert "| 0 / 20 | **13** |" in DESCRIPTION
-    assert "| 0 / 20 | 0 |" in DESCRIPTION
+    assert "withdrawn" in DESCRIPTION, "the description has to carry the correction too"
 
 
 def test_the_description_quotes_the_hard_table_the_code_computes():
@@ -52,9 +53,9 @@ def test_the_description_quotes_the_hard_table_the_code_computes():
 
     by_method = {t.method: t for t in score_all(all_hard_scenarios())}
     assert by_method["reference matching"].missed == 6
+    assert by_method["Archon"].correct == 0
 
     assert "| 0 / 15 | **6** |" in DESCRIPTION
-    assert "| 0 / 15 | 0 |" in DESCRIPTION
 
 
 def test_the_statutory_interest_figure_is_the_one_the_ledger_produces():

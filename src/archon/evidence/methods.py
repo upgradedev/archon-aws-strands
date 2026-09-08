@@ -76,19 +76,27 @@ def one_pass_reading(scenario: Scenario) -> Answer:
 
 
 def archon(scenario: Scenario) -> Answer:
-    """Pick deterministically, then let the claim be checked.
+    """Read the post, keep the books, then decide from the books it kept.
 
-    The Outstanding claim is built and verified exactly as the gate verifies it
-    before a send, so a claim the books refute becomes a refusal here too. That
-    is reported as a refusal rather than as a silent pass, because refusing is a
-    real cost and hiding it would flatter this column.
+    This used to start from `scenario.books`, which the fixture had already
+    posted correctly, while the method it was compared against started from raw
+    text. That is not a comparison. It reads the same strings as everything else
+    now, and a month it cannot read is a month it gets wrong, which is the point.
+
+    The Outstanding claim is then built and verified exactly as the gate verifies
+    it before a send, so a claim the books refute becomes a refusal here too.
     """
-    worst = scenario.books.worst_overdue(AS_OF)
+    from archon.runtime import OFFLINE, read_the_post
+
+    kept = read_the_post(list(scenario.post), OFFLINE, prefix=scenario.name)
+    books = kept.books
+
+    worst = books.worst_overdue(AS_OF)
     if worst is None:
         return Answer(invoice=None, amount=ZERO, note="nothing overdue")
     claim = Outstanding(worst.doc_id, worst.outstanding)
     try:
-        claim.check(scenario.books, AS_OF)
+        claim.check(books, AS_OF)
     except ClaimRefuted as refuted:
         return Answer(invoice=worst.doc_id, amount=ZERO, refused=True, note=str(refuted))
     return Answer(invoice=worst.doc_id, amount=worst.outstanding)

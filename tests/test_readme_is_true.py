@@ -31,7 +31,7 @@ def test_the_comparison_table_matches_what_the_code_computes():
     by_method = {t.method: t for t in score_all()}
     assert by_method["reference matching"].missed == 13
     assert by_method["naive text extraction"].wrong_money == 19
-    assert by_method["Archon"].correct == 20
+    assert by_method["Archon"].correct == 6
 
     assert "| 0 / 20 | **13** | 7 |" in README
     assert "| 19 / 20 | 0 | 1 |" in README
@@ -192,10 +192,10 @@ def test_the_hard_table_matches_what_the_code_computes():
 
     by_method = {t.method: t for t in score_all(all_hard_scenarios())}
     assert by_method["reference matching"].missed == 6
-    assert by_method["Archon"].correct == 15
+    assert by_method["Archon"].correct == 0
 
     assert "| 0 / 15 | **6** | 9 |" in README
-    assert "| 0 / 15 | 0 | 15 |" in README
+    assert "withdrawn" in README
 
 
 def test_the_injection_finding_is_stated_with_its_own_caveat():

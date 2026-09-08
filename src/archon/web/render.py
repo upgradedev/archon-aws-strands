@@ -146,6 +146,45 @@ def _tiles(stats: list[tuple[str, str, str]]) -> str:
     return f'<section class="grid">{cells}</section>'
 
 
+def _reasoning(reasoning) -> str:
+    """Say what produced the tone, in the three states it can be in.
+
+    The screen used to show a constant and let a visitor assume six agents had
+    reasoned about their books. Whatever else is true, this must not be.
+    """
+    if reasoning.is_live:
+        rows = "".join(
+            f'<div class="row" style="align-items:flex-start;gap:10px;margin-top:10px">'
+            f'<span class="pill {v.verdict.lower()}">{escape(v.verdict)}</span>'
+            f"<div><strong>{escape(v.name)}</strong>"
+            f'<div class="why">{escape(v.body[:240])}</div></div></div>'
+            for v in reasoning.views
+        )
+        return (
+            '<div class="card" style="margin-top:18px"><strong>What the six of them made of it</strong>'
+            '<p class="why">Six agents reasoned about these books on Bedrock just now. They are asked '
+            "what only a reader of that domain can judge, and they disagree.</p>"
+            f"{rows}</div>"
+        )
+    if reasoning.failed:
+        return (
+            '<div class="verdict held" style="margin-top:18px">'
+            "<strong>A live run was asked for and Bedrock could not be reached.</strong>"
+            f'<div class="why" style="margin-top:6px">{escape(reasoning.error or "")}</div>'
+            '<div class="why">The tone below is the scripted one this page already had. '
+            "Nothing reasoned. It is said here rather than left for you to assume.</div></div>"
+        )
+    return (
+        '<div class="card" style="margin-top:18px"><strong>No model has reasoned yet</strong>'
+        '<p class="why">The two lines of tone below are a constant, not an agent\'s judgement. '
+        "The books, the figures and the refusals are all real and computed; only the wording is "
+        "canned. Ask the six agents to look, and they will run on Bedrock, which takes about "
+        "thirteen seconds and costs money, which is why it is a button.</p>"
+        '<form method="post" action="/reason"><button class="primary" type="submit">'
+        "Ask the six agents, on Bedrock</button></form></div>"
+    )
+
+
 def _provenance(books: Books) -> str:
     """Where every figure came from, laid out so the claim can be checked.
 
@@ -428,6 +467,7 @@ def broke(detail: str) -> str:
 
 def page(
     *,
+    reasoning,
     books: Books,
     stats: list[tuple[str, str, str]],
     draft: ChaseDraft | None,
@@ -468,6 +508,7 @@ def page(
   {_open_items(books)}
   <div class="cols">{_views(views, captured_on)}{right}</div>
   {_inbox(sample, reading, reading_error)}
+  {_reasoning(reasoning)}
   {_provenance(books)}
   {_evidence(evidence)}
   <footer>

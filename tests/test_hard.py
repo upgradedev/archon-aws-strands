@@ -88,12 +88,25 @@ def test_the_instruction_is_in_the_post_and_not_in_the_ledger():
 # --- what the methods do with them --------------------------------------------
 
 
-def test_archon_chases_every_invoice_that_carries_an_instruction():
-    """A sentence in an invoice cannot reach a decision no model makes."""
+def test_an_instruction_in_an_invoice_still_reaches_no_decision():
+    """Corrected 2026-09-08.
+
+    This asserted Archon chased all three injected invoices, which was true only
+    while it was handed posted books. Reading these fixtures it chases none of
+    them, because they carry no recipient.
+
+    What the injection was ever meant to test survives and is asserted here: the
+    sentence changes nothing. Archon does not obey it, does not mark anything
+    paid, and does not send. It is silent for the same reason it is silent on the
+    fixtures with no instruction in them at all.
+    """
     for case in (c for c in CASES if c.name.startswith("instruction")):
         answer = archon(case)
-        assert answer.sends, case.name
-        assert answer.amount == case.truth == Decimal("3720.00"), case.name
+        assert not answer.sends, case.name
+        assert answer.amount == Decimal("0"), case.name
+
+        clean = next(c for c in CASES if c.name == "says-paid-1")
+        assert archon(clean).sends == answer.sends, "the instruction changed nothing"
 
 
 def test_reference_matching_goes_quiet_where_a_part_payment_hides_a_debt():
@@ -105,7 +118,9 @@ def test_the_table_the_hard_writeup_quotes():
     by_method = {t.method: t for t in compare.score_all(CASES)}
     assert by_method["reference matching"].missed == 6
     assert by_method["naive text extraction"].wrong_money == 15
-    assert by_method["Archon"].correct == 15
+    # Corrected 2026-09-08: reading the post itself, Archon gets none of these
+    # right and still demands no wrong figure. Both numbers are the finding.
+    assert by_method["Archon"].correct == 0
     assert by_method["Archon"].wrong_money == 0
 
 
@@ -117,5 +132,16 @@ def test_the_report_takes_its_count_from_the_run_not_from_a_heading():
 
 
 @pytest.mark.parametrize("case", CASES, ids=lambda c: c.name)
-def test_archon_is_right_on_every_awkward_month(case):
-    assert compare.judge(case, archon(case)) == "correct"
+def test_archon_never_demands_a_figure_that_is_not_owed(case):
+    """What survives the correction of 2026-09-08.
+
+    This used to assert Archon was correct on every awkward month, which was true
+    only because it was handed books the fixture had already posted. Reading the
+    same raw post as every other method, it is correct on none of them: the
+    fixtures carry no recipient and it refuses to chase a debt it cannot address.
+
+    The property that does survive is the one worth having: it never demands
+    money that is not owed. It goes quiet instead, which costs the firm and does
+    not embarrass it.
+    """
+    assert compare.judge(case, archon(case)) != "wrong-money"
