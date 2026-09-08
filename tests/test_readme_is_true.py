@@ -207,3 +207,24 @@ def test_the_injection_finding_is_stated_with_its_own_caveat():
 def test_the_hard_writeup_is_in_the_repository():
     assert (ROOT / "evidence" / "RESULTS-HARD-2026-09-08.md").exists()
     assert (ROOT / "evidence" / "HARD-LIVE-2026-09-08.txt").exists()
+
+
+def test_the_badges_point_at_this_repository_and_this_branch():
+    """A badge from another repo or a dead branch is a broken promise on line five."""
+    assert "upgradedev/archon-aws-strands/actions/workflows/ci.yml/badge.svg?branch=main" in README
+    assert "licence-MIT-blue" in README
+
+
+def test_the_badge_numbers_match_the_ones_below_them():
+    claimed = re.search(r"branch%20coverage-(\d+)%25", README).group(1)
+    stated = re.search(r"(\d+)% branch coverage", README).group(1)
+    assert claimed == stated, f"badge says {claimed}%, the table says {stated}%"
+
+    badge_tests = re.search(r"tests-(\d+)%20offline", README).group(1)
+    stated_tests = re.search(r"(\d+) tests, \d+% branch coverage", README).group(1)
+    assert badge_tests == stated_tests, f"badge says {badge_tests}, the table says {stated_tests}"
+
+
+def test_the_badge_does_not_claim_more_than_ci_checks():
+    assert "asserts the Strands API surface" in README
+    assert "fails if a number in this README stops matching" in README

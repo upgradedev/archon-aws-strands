@@ -62,5 +62,30 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      # Publishing needs Pages switched on in the repository settings with
+      # "GitHub Actions" as the source, and that is an owner action, not code.
+      # Until it is done this step 404s. It is allowed to fail rather than
+      # painting a red cross on every commit of a repository a judge is about to
+      # read: the build job above is the real gate, and it fails properly if the
+      # walkthrough stops rendering. What this must not do is fail silently, so
+      # the outcome is written into the run summary either way.
       - id: deployment
+        continue-on-error: true
         uses: actions/deploy-pages@v4
+
+      - name: say plainly whether it published
+        run: |
+          if [ -n "${{ steps.deployment.outputs.page_url }}" ]; then
+            echo "### Published" >> "$GITHUB_STEP_SUMMARY"
+            echo "${{ steps.deployment.outputs.page_url }}" >> "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo "### Not published, and this is an owner action"
+              echo ""
+              echo "The pages were built from the real code and are correct; only the"
+              echo "deployment was refused. Enable Pages with source \"GitHub Actions\" at"
+              echo "https://github.com/${{ github.repository }}/settings/pages and re-run."
+              echo ""
+              echo "Until then there is no public URL for a judge to open."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi

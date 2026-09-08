@@ -4,6 +4,16 @@
 
 Built for **Agents for Humans (AWS)**, track **Professional Agents**, on the **Strands Agents SDK** and **Amazon Bedrock**.
 
+[![CI](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml)
+[![tests](https://img.shields.io/badge/tests-351%20offline%2C%20no%20key%2C%20no%20network-22c55e)](#run-it)
+[![coverage](https://img.shields.io/badge/branch%20coverage-93%25-22c55e)](#run-it)
+[![model](https://img.shields.io/badge/Bedrock-claude--opus--5-8b5cf6)](#how-it-is-put-together)
+[![licence](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
+
+*The CI badge covers more than a test run: it asserts the Strands API surface this build depends on,
+constructs the real six-agent graph, renders the screen, checks that the domain core imports no SDK, and
+fails if a number in this README stops matching the thing it describes.*
+
 ---
 
 ## The person this is for
@@ -211,7 +221,7 @@ tool; the judgement did not.
 
 | | |
 |---|---|
-| the ledger, six domains, P&L, cash, metrics | real, 348 tests, 93% branch coverage |
+| the ledger, six domains, P&L, cash, metrics | real, 351 tests, 93% branch coverage |
 | the six-agent Strands graph | real, runs on `strands-agents` 1.53 and 1.54 |
 | Bedrock | real, `global.anthropic.claude-opus-5`, verified by a live call |
 | SES send, idempotent, with receipt | real code; **the account is in the SES sandbox**, so it can send only to verified addresses |
