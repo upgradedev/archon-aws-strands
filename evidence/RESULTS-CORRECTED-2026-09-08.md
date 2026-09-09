@@ -1,5 +1,15 @@
 # The comparison was not a comparison, and here is what it says now
 
+> Historical evaluation record, not current acceptance or performance evidence. Earlier
+> comparisons remain withdrawn. The retained independent run made zero Archon chases;
+> the evaluator has since gained exact invoice and nonempty-recipient checks. No new benchmark.
+
+For the joiner reconciling inbox invoices: [live AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/).
+Try Records → invoice → payment → Workspace → Run Strands → exact review → History.
+Public extraction is bounded, the model scripted and acceptance simulated; the real Strands graph
+must finish all six reports before drafting. [Evidence and limits](../README.md#evidence-and-limits) ·
+[Required disclosures](../README.md#pre-existing-work-disclosed).
+
 **This supersedes the Archon column in `RESULTS-2026-09-04.md` and
 `RESULTS-HARD-2026-09-08.md`. Those numbers should not be quoted.**
 

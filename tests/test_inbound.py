@@ -191,13 +191,16 @@ def test_an_unreadable_date_is_refused():
 def test_a_sales_invoice_with_no_client_address_is_refused():
     """It could never be chased, so posting it would store a dead end."""
     sale = dict(PURCHASE, kind="sales_invoice", counterparty_email=None)
-    with pytest.raises(UnreadablePost, match="no client address"):
-        read_email(INVOICE_EMAIL, "email:001", client=FakeBedrock(sale))
+    raw = INVOICE_EMAIL.replace("accounts@wholesaler.example", "me@myjoinery.example")
+    with pytest.raises(UnreadablePost, match="direction is ambiguous"):
+        read_email(raw, "email:001", client=FakeBedrock(sale))
 
 
 def test_a_sales_invoice_with_an_address_is_read():
     sale = dict(PURCHASE, kind="sales_invoice", counterparty_email="pay@client.example")
-    reading = read_email(INVOICE_EMAIL, "email:001", client=FakeBedrock(sale))
+    raw = INVOICE_EMAIL.replace("accounts@wholesaler.example",
+                                "me@myjoinery.example\nTo: pay@client.example")
+    reading = read_email(raw, "email:001", client=FakeBedrock(sale))
     assert isinstance(reading.document, SalesInvoice)
     assert reading.document.client_email == "pay@client.example"
 
@@ -210,7 +213,8 @@ def test_a_remittance_becomes_a_receipt():
         "issued": "2026-09-02",
         "amount": "480.00",
     }
-    reading = read_email("we paid you", "email:rc", client=FakeBedrock(remittance))
+    reading = read_email("we paid you\nTransfer ID: TEST-BANK-480", "email:rc",
+                         client=FakeBedrock(remittance))
     assert isinstance(reading.document, Receipt)
     assert reading.document.settles == "SI-001"
 

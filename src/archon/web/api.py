@@ -52,9 +52,10 @@ class SessionRequest(BaseModel):
 
 class ResolutionRequest(Mutation):
     source_id: str = Field(min_length=1, max_length=40)
-    decision: Literal["duplicate-payment", "resume-collection"]
+    decision: Literal["duplicate-payment", "resume-collection", "attest-legacy-payments"]
     note: str = Field(min_length=20, max_length=2000)
     duplicate_of: str | None = Field(default=None, max_length=40)
+    identities: dict[str, str] | None = Field(default=None, max_length=50)
 
 
 @app.middleware("http")

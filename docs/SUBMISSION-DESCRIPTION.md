@@ -1,94 +1,59 @@
 # Devpost description, ready to paste
 
-Written to be pasted into the submission form's text description. Every figure
-in it is produced by code in this repository and checked by
-`tests/test_submission_text_is_true.py`, so if the product changes and this does
-not, the build fails.
+[Evidence and limits](../README.md#evidence-and-limits) · [Required disclosures](../README.md#pre-existing-work-disclosed)
 
----
+Archon helps a joiner reconcile inbox invoices and approve an exact collection draft with the
+source evidence beside it.
 
-## Archon
+[Try the AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/).
+Records → Sample invoice → post → Sample payment → post → Workspace → Run Strands →
+inspect the draft → approve simulated acceptance → History.
 
-**Archon reads the invoices landing in your inbox, keeps your books current, and sends the one email chasing what you are owed once you approve.**
+The joiner works alone, checking invoice and remittance emails before chasing a client. Archon
+brings those records together with the amount still outstanding and the reason collection is
+ready or held. Text is pasted in this demonstration; no mailbox is connected.
 
-### The person
+The public route executes real HTTP requests, durable synthetic sessions and the Strands Agents
+SDK graph. Six ledger reader tools must finish before a composer with no tools can prepare the
+draft. The model is scripted, the reader uses bounded rules and the outbox is simulated.
+No real email leaves and no public model call occurs.
 
-A sole trader who runs the whole back office alone, out of an inbox. Supplier invoices to enter, payments to make, money to collect, payroll, tax deadlines, and no view of how any of it connects. Nothing is delegated because there is nobody to delegate to.
+The sample invoice is 1,860.00 EUR and its remittance is 600.00 EUR: 1,260.00 EUR remains.
+Change the text before posting. An unreadable amount, missing transfer identity or conflicting
+invoice direction holds collection. Correct source retains the original. Distinct equal
+instalments need distinct supplied bank references; a changed email subject cannot credit the
+same reference twice. A supplied reference is not external bank verification.
 
-They do not have accounting software. That is the point: it assumes a bookkeeper operates it, and they are the bookkeeper, at the kitchen table, on a Sunday night.
+Human decisions are bounded: link a duplicate to its original receipt, or record the outcome of
+an invoice-linked client dispute already resolved by a person. Neither action changes the debt.
+Both invalidate the draft so its evidence and exact bytes must be reviewed again.
 
-47% of invoices in Western Europe are overdue. Small businesses spend close to ten hours a week chasing payment.
+History exports readable evidence with redacted source excerpts, decisions, corrections, backend
+and ledger revisions, model/mode labels and recovery limits. A hash identifies bytes, not truth,
+bank settlement or compliance. Dashboard outcomes count this session's recorded actions.
+Human active time, money recovered and time saved are unknown.
 
-### What it does
+Two earlier comparisons remain withdrawn. The retained independent benchmark reported zero
+Archon chases, earned by not acting. It is not a current success claim. Its evaluator omitted
+exact invoice and nonempty recipient checks; fresh synthetic oracles now test those conditions.
+No new benchmark result or held-out reuse is claimed. The injection finding was measured on one
+of the withdrawn sets and does not establish a current advantage.
 
-Forward it an email, or attach a PDF invoice. Archon reads it, keeps double-entry books across six domains, and shows you what you are owed, what you owe, whether you can pay your people, and whether you are making money or just busy.
+The public firm is invented. No bank or mailbox integration, OCR, payroll execution or real
+delivery is available. Human UAT is NOT_RUN. An operator may configure separate Bedrock reasoning
+with eu.anthropic.claude-opus-5 in eu-west-1; that is not the public scripted mode. SES requires
+separate operator authorization and verified account/recipient eligibility; old SES sandbox
+observations do not prove current delivery readiness.
 
-Then it does **one** thing: it sends the email chasing your oldest unpaid invoice, after you approve that exact text.
-
-### Why it does not get the number wrong
-
-**No digit reaches a client except through a claim the ledger confirmed.** The agent writes the greeting and the sign-off, and a draft whose free text contains a number is refused outright. Every figure in the email is rendered by the claim that proved it.
-
-**Approval binds to a SHA-256 of the exact bytes.** One edited character invalidates it, and the gate re-derives every fact at send time. A client who paid at lunchtime is not chased with a draft that was correct that morning.
-
-**Six Strands agents, one per domain, and the composer holds no tools.** Every edge into it is conditioned on all six having reported. They are asked what only a reader of that domain can judge, and they disagree: on a real run, payroll returned URGENT while suppliers returned WATCH on the same books at the same moment.
-
-**It claims the interest the law already owes you.** A late commercial debt accrues statutory interest under Directive 2011/7/EU and almost nobody claims it. On the demo month that is 37.67 EUR nobody was going to ask for.
-
-### The number, and it does not flatter this
-
-Two earlier comparisons were withdrawn: they scored Archon from books the fixture had already posted
-correctly, while the method it was measured against read raw text.
-
-So the inputs were written by somebody else. Twenty-four independent agents each wrote one month of a
-small firm's post, told only the business situation and nothing about how any of this reads an email.
-Four cases are held out of every figure. Twenty scored, thirteen of which genuinely owed a chase:
-
-| method | wrong money | sends | sends and is right |
-|---|---|---|---|
-| reference matching, the declared baseline | 10 / 20 | 10 | **0** |
-| naive text extraction | 11 / 20 | 11 | **0** |
-| **Archon** | **0 / 20** | **0** | **0** |
-
-**Nobody collects any money correctly on this benchmark.** The baselines send ten and eleven times and
-get the figure wrong every time. **Archon sends nothing at all**, so its zero is earned by not acting
-rather than by being right.
-
-On independently written post this product is **safe and not yet useful**, and reading real post is the
-unsolved part: every case had at least one email it could not read. That is the honest state of it, and
-it is worth more than the flattering version because it says exactly where the work is.
-
-### Honest limits
-
-**Archon sends nothing on the independent benchmark**, so its clean wrong-money column is earned by not
-acting. The two earlier comparisons are withdrawn because they scored it from books already posted for
-it. Twenty and twenty-four cases are small numbers; the fixture authors and their auditors were agents,
-not the firms themselves, and the inputs are labelled synthetic wherever they appear.
-
-The account is in the SES sandbox, so it sends only to verified addresses we control and never to a real
-debtor. No mailbox is connected: nothing polls IMAP and no receipt rule is deployed. There is no OCR — a
-scanned invoice is refused rather than guessed at. There is no public deployment. The firm in the demo is
-invented and no customer data is anywhere in the repository.
-
-The prompt-injection finding was measured on one of the withdrawn sets, and a real attacker would write a
-better line than the one I wrote.
-
-### What Archon is that our other entry is not
-
-We have a second entry in this track, LastTake, and the rules make uniqueness the Sponsor's call, so here it is in plain words.
-
-**LastTake stops a film crew being released while a required shot is missing.** Its buyer is a script supervisor, its unit is one shoot day, and nothing it produces ever leaves the production: the output is a hold, addressed inward.
-
-**Archon keeps a sole trader's books out of their inbox and sends one email to somebody outside the firm asking for money.** Its buyer has no bookkeeper and no accounting software, its unit is the month, and that outbound message *is* the product.
-
-One holds an internal decision back. The other reaches a third party — which is why every figure in it has to be provable, and why half this repository is the machinery that proves them.
-
-### Built with
-
-Strands Agents SDK · Amazon Bedrock (`eu.anthropic.claude-opus-5`) · Amazon SES · Python 3.11+ · FastAPI · SQLite
-
-Runs offline with no AWS account: `pip install -e ".[dev]"` then `python -m archon.demo`.
+[Frontend identity](https://d2ssmv59q16d0b.cloudfront.net/release.json) and
+[backend identity](https://d2ssmv59q16d0b.cloudfront.net/api/health) report current deployments.
+[CI evidence](https://github.com/upgradedev/archon-aws-strands/actions) is scoped to each exact SHA.
+The public path uses CloudFront, private S3, API Gateway, Lambda, Python, React and TypeScript.
+Strands is load-bearing for graph execution; removing it prevents draft preparation.
 
 ### Disclosure
 
-Archon is a product line and this is a new build. Ten earlier Archon repositories exist from other hackathons, two of them on AWS, and all ten are named in the README. No code from any of them is in this repository. The persona, the trigger, the hero mechanism and the write are all different here: this one is triggered by an inbox and ends in one governed email.
+Ten earlier Archon repositories exist and are named in the README. No code from any of them is
+in this repository. Pre-existing package/CI patterns and visual design direction are disclosed
+there and third-party licences are retained in docs/THIRD-PARTY.md. Eligibility is the organizer's
+decision; this text makes no competitive-superiority or guaranteed eligibility claim.

@@ -1,4 +1,11 @@
 @import "tailwindcss";
+
+.workflow-guide, .resolution-form { padding: 1rem; margin-block: 1rem; border: 1px solid #536178; border-radius: .6rem; min-width: 0; }
+.resolution-form { display: grid; gap: .8rem; }
+.resolution-form label { display: grid; gap: .4rem; }
+.resolution-form .check-line { display: flex; }
+.resolution-form input, .resolution-form textarea, .resolution-form select { max-width: 100%; min-width: 0; }
+.evidence-text { white-space: pre-wrap; overflow-wrap: anywhere; max-width: 100%; }
 @theme { --font-sans: "Segoe UI", system-ui, sans-serif; }
 :root { color-scheme: dark; font-family: var(--font-sans); color: #e8ebf5; background: #0b0f1e; font-size: 16px; font-synthesis: none; text-rendering: optimizeLegibility; --panel: #141a2e; --raised: #182043; --line: #232a45; --muted: #aab2c8; --accent: #bcb6ff; }
 * { box-sizing: border-box; }

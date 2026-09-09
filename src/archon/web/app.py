@@ -454,6 +454,8 @@ def client_pays() -> RedirectResponse:
                 received_on=TODAY,
                 amount=str(part),
                 source_ref="email:paid-at-lunchtime",
+                # This button creates a new invented demo event, not an imported payment.
+                transfer_id=f"SIMULATED-CLICK-{len(session.books.receipts)}",
             )
         )
         session._remember()

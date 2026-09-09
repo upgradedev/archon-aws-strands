@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from datetime import UTC, date, datetime
 from decimal import Decimal
 
@@ -17,6 +17,7 @@ from archon.agents.gate import APPROVAL_LIFETIME, Approval, assess
 from archon.agents.proposal import read_reply
 from archon.domain.arrangement import Arrangement, Instalment, consider
 from archon.domain.books import Books
+from archon.domain.documents import Payment, Receipt, transfer_identity
 from archon.domain.queue import build as build_queue
 from archon.domain.reports import cashflow, metrics, profit_and_loss
 from archon.store.sessions import Conflict
@@ -65,7 +66,7 @@ def fresh() -> dict:
         "draft": None,
         "sends": {},
         "activity": [],
-    "requests": {},
+        "requests": {},
     }
 
 
@@ -73,8 +74,12 @@ def books_for(state: dict) -> Books:
     books = Books()
     for source in state["sources"]:
         if source["status"] == "posted":
-            books.record(_decode(source["kind"], json.dumps(source["document"])),
-                         replay_legacy=True)
+            document = _decode(source["kind"], json.dumps(source["document"]))
+            attested = state.get("transfer_attestations", {}).get(document.doc_id)
+            if attested and isinstance(document, (Receipt, Payment)) and not document.transfer_id:
+                # An additive human attestation changes the projection, never stored evidence.
+                document = replace(document, transfer_id=attested)
+            books.record(document, replay_legacy=True)
     for saved in state["arrangements"]:
         fields = dict(saved)
         fields["agreed_on"] = date.fromisoformat(fields["agreed_on"])
@@ -100,8 +105,15 @@ def holds(state: dict) -> list[dict]:
                       and s["document"]["doc_id"] == doc_id)
         held.append({**source, "kind": "LegacyPaymentReview", "status": "refused",
                      "error": "Historical equal payments lack bank identities. Records are "
-                              "retained; reconcile them with a person before collections."})
+                              "retained; reconcile them with a person before collections.",
+                     "legacy_documents": legacy_documents(state)})
     return held
+
+
+def legacy_documents(state: dict) -> list[dict]:
+    return [s["document"] for s in state["sources"] if s["status"] == "posted"
+            and s["kind"] in ("Receipt", "Payment") and not s["document"].get("transfer_id")
+            and s["document"]["doc_id"] not in state.get("transfer_attestations", {})]
 
 
 def intake(state: dict, body: str, replace_id: str | None = None) -> None:
@@ -356,14 +368,36 @@ def propose(state: dict, invoice_id: str, body: str) -> None:
 
 
 def resolve(state: dict, source_id: str, decision: str, note: str,
-            duplicate_of: str | None = None) -> None:
+            duplicate_of: str | None = None, identities: dict[str, str] | None = None) -> None:
     """Record a human resolution, never a replacement journal entry or automatic resend."""
     source = next((s for s in holds(state) if s["id"] == source_id), None)
     if source is None:
         raise Conflict("That source is no longer held. Refresh and inspect the current record.")
     if len(note.strip()) < 20:
         raise ValueError("Record the human evidence and reason in at least 20 characters.")
-    if decision == "duplicate-payment":
+    if decision == "attest-legacy-payments":
+        expected = {d["doc_id"] for d in legacy_documents(state)}
+        if source["kind"] != "LegacyPaymentReview" or not expected or not identities:
+            raise ValueError("Select a historical payment hold and supply its bank references.")
+        if set(identities) != expected or len(identities) > 50:
+            raise ValueError("Supply references for every listed historical payment, and only those.")
+        if any(not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9 _/-]{2,79}", v)
+               for v in identities.values()):
+            raise ValueError("Each supplied bank reference must be 3–80 letters, digits, spaces, /, _ or -.")
+        attested = {**state.get("transfer_attestations", {}),
+                    **{k: transfer_identity(v) for k, v in identities.items()}}
+        # Validate the entire replay before storing any attestation. Duplicate events stay held;
+        # they require an operator's accounting correction, not a fabricated second reference.
+        candidate = {**state, "transfer_attestations": attested}
+        if books_for(candidate).legacy_payment_holds:
+            raise ValueError("Historical payment ambiguity remains. No resolution recorded.")
+        state["transfer_attestations"] = attested
+        state.setdefault("resolutions", []).append({
+            "source_id": source_id, "decision": decision, "note": note.strip(),
+            "identities": dict(identities), "at": now(), "revision": state["revision"],
+            "approved_by": "demo visitor", "verification": "Human supplied; not bank verified",
+        })
+    elif decision == "duplicate-payment":
         target = next((s for s in state["sources"] if s["id"] == duplicate_of
                        and s["status"] == "posted" and s["kind"] == "Receipt"), None)
         if source["kind"] != "Receipt" or target is None:
@@ -379,8 +413,9 @@ def resolve(state: dict, source_id: str, decision: str, note: str,
             raise ValueError("This invoice is no longer outstanding. Review the current books.")
     else:
         raise ValueError("Choose a supported human resolution.")
-    source["status"] = "resolved"
-    source["resolution"] = {"decision": decision, "note": note.strip(), "at": now(),
+    if decision != "attest-legacy-payments":
+        source["status"] = "resolved"
+        source["resolution"] = {"decision": decision, "note": note.strip(), "at": now(),
                             "duplicate_of": duplicate_of, "approved_by": "demo visitor",
                             "revision": state["revision"]}
     state["draft"], state["graph"], state["proposal"] = None, None, None
@@ -437,6 +472,7 @@ def snapshot(state: dict) -> dict:
         reader="Bounded local rules; no model call",
         provider="Simulated outbox; no real email",
         holds=holds(state),
+        resolutions=state.get("resolutions", []),
         samples=SAMPLES,
         queue=asdict(queue),
         sales=[{**asdict(s), "outstanding": s.outstanding} for s in books.sales_settlements()],

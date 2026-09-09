@@ -1,6 +1,7 @@
 export interface Source {
   id: string; body: string; at: string; status: 'posted' | 'refused' | 'corrected' | 'resolved';
   error: string; kind: string; redactions: number; corrected_by?: string;
+  legacy_documents?: { doc_id: string; amount: string }[];
   resolution?: { decision: string; note: string; at: string; duplicate_of: string | null };
   document: { doc_id: string; source_ref: string; settles?: string; amount?: string; transfer_id?: string } | null;
 }
@@ -23,6 +24,7 @@ export interface Receipt {
 export interface Workspace {
   revision: number; as_of: string; synthetic: true; reader: string; provider: string;
   business?: { name: string; email: string; source: string };
+  resolutions?: { decision: string; note: string; at: string }[];
   sources: Source[]; holds: Source[]; sales: Settlement[]; purchases: Settlement[];
   queue: { ready: QueueItem[]; blocked: QueueItem[]; currency: string };
   samples: Record<'invoice' | 'payment' | 'supplier' | 'refusal', string>;

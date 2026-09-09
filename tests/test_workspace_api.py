@@ -71,6 +71,53 @@ def test_empty_session_is_isolated_and_has_no_seeded_outcome(client):
     assert read(client, second)["metrics"]["owed_by_clients"] == "0.00"
 
 
+def test_evidence_is_session_scoped_redacted_and_tracks_corrections(client):
+    session = create(client)
+    change(client, session, "intake", body=workspace.SAMPLES["invoice"])
+    raw = workspace.SAMPLES["payment"].split("\nTransfer ID:", 1)[0]
+    refused = change(client, session, "intake", body=raw).json()
+    original = refused["sources"][-1]
+    assert original["kind"] == "Receipt" and original["body"] == raw
+    corrected = change(client, session, "intake", body=workspace.SAMPLES["payment"],
+                       replace_id=original["id"]).json()
+    assert corrected["sources"][-2]["status"] == "corrected"
+    response = client.get("/api/evidence", headers={"X-Archon-Session": session})
+    assert response.status_code == 200
+    bundle = response.json()
+    assert bundle["revision"] == corrected["revision"]
+    assert "Correction:" in bundle["text"] and "FAILURE AND RECOVERY" in bundle["text"]
+    assert "accounts@buildco.example" not in bundle["text"]
+    assert "not truth" in bundle["text"] and "scripted" in bundle["text"].lower()
+    assert client.get("/api/evidence").status_code == 422
+    assert client.get("/api/evidence", headers={"X-Archon-Session": "absent"}).status_code == 401
+    other = create(client)
+    empty = client.get("/api/evidence", headers={"X-Archon-Session": other}).json()
+    assert "JN-4410" not in empty["text"]
+
+
+def test_legacy_resolution_is_revision_bound_durable_and_does_not_rewrite(client):
+    from test_reliable_workflows import historical_state
+    session = create(client)
+    state, version = api.store().get(session)
+    state["sources"] = historical_state()["sources"]
+    api.store().put(session, state, version)
+    shown = read(client, session)
+    assert shown["holds"][0]["kind"] == "LegacyPaymentReview"
+    payload = dict(source_id="email:old-2", decision="attest-legacy-payments",
+                   note="Operator reviewed two distinct supplied bank references.",
+                   identities={"OLD-1": "BANK-A", "OLD-2": "BANK-B"})
+    bad = change(client, session, "resolve", **{**payload, "identities": {"OLD-1": "BANK-A"}})
+    assert bad.status_code == 422 and read(client, session)["holds"]
+    assert change(client, session, "resolve", revision=99, **payload).status_code == 409
+    resolved = change(client, session, "resolve", **payload)
+    assert resolved.status_code == 200, resolved.text
+    assert resolved.json()["sources"] == shown["sources"]
+    assert not read(client, session)["holds"]
+    assert read(client, session)["resolutions"][0]["decision"] == "attest-legacy-payments"
+    assert change(client, session, "resolve", **payload).status_code == 409
+    assert change(client, session, "reason").json()["draft"] is not None
+
+
 def test_raw_post_real_strands_exact_approval_and_durable_receipt(client):
     session = create(client)
     state = drafted(client, session)
@@ -133,7 +180,8 @@ def test_retry_approval_across_new_api_client_retains_one_receipt(client):
 def test_late_payment_invalidates_exact_approval(client):
     session = create(client)
     old = drafted(client, session)
-    extra = workspace.SAMPLES["payment"].replace("600.00", "200.00").replace("08-20", "09-09")
+    extra = (workspace.SAMPLES["payment"].replace("600.00", "200.00")
+             .replace("08-20", "09-09").replace("DEMO-BANK-600-A", "TEST-BANK-LATE-200"))
     assert change(client, session, "intake", body=extra).status_code == 200
     assert (
         change(

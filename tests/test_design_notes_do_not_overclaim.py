@@ -45,7 +45,7 @@ def test_the_model_it_names_is_the_one_actually_configured():
 
 def test_it_no_longer_calls_archon_a_dispute_engine_without_saying_that_was_wrong():
     assert "it called Archon a **dispute resolution** engine" in PROSE
-    assert "no dispute logic exists anywhere in the code" in PROSE
+    assert "records bounded human resolutions; it is not a dispute engine" in PROSE
 
 
 def test_the_threshold_it_describes_is_named_as_not_how_the_gate_works():

@@ -21,6 +21,7 @@ one command.
 
 from __future__ import annotations
 
+import json
 import pathlib
 import re
 import sys
@@ -161,7 +162,7 @@ def evidence_bundle(state: dict, commit: str) -> dict:
     for source in state["sources"]:
         lines += [
             f"{source['id']} / {source['status']} / {source['kind'] or 'unreadable'}",
-            f"Evidence SHA256: {source['hash']}",
+            f"Evidence SHA256 (JSON-encoded source): {source['hash']}",
             f"Source excerpt (redacted, at most 500 characters): {safe(source['body'])[:500]}",
             f"Decision: {safe(source['error']) or 'Posted to the ledger'}",
         ]
@@ -170,6 +171,14 @@ def evidence_bundle(state: dict, commit: str) -> dict:
         if source.get("resolution"):
             resolution = source["resolution"]
             lines.append(f"Human resolution: {resolution['decision']} / {safe(resolution['note'])}")
+    for resolution in state.get("resolutions", []):
+        lines.append(f"Human attestation: {safe(json.dumps(resolution))}")
+    lines += ["GRAPH AND APPROVAL", safe(json.dumps(state.get("graph"))),
+              "Current draft: " + safe(json.dumps(state.get("draft"))),
+              "Recorded provider outcomes: " + safe(json.dumps(state["sends"]))]
+    from archon.web.workspace import holds
+    for held in holds(state):
+        lines.append(f"ACTIVE HOLD: {held['id']} / {safe(held['error'])}")
     lines.append("OBSERVED WORKFLOW")
     for item in state["activity"]:
         lines.append(f"{item['at']} / {safe(item['title'])} / {safe(item['detail'])}")

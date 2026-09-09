@@ -207,8 +207,12 @@ def _usable_address(value: object) -> bool:
 
 def original_message(raw: str) -> str:
     """Read the innermost explicitly forwarded message; retain the full source elsewhere."""
+    # Quote prefixes are presentation, not new parties. Unseparated threads then expose
+    # conflicting headers to the direction guard instead of hiding an inner supplier.
+    unquoted = re.sub(r"(?m)^[ \t]*(?:>[ \t]*)+", "", raw)
     return re.split(
-        r"(?im)^\s*(?:-+\s*Forwarded message\s*-+|Begin forwarded message:)\s*$", raw
+        r"(?im)^[ \t]*(?:-+[ \t]*(?:Forwarded message|Original Message)[ \t]*-+"
+        r"|Begin forwarded message:)[ \t]*$", unquoted
     )[-1]
 
 
@@ -224,28 +228,31 @@ def invoice_direction(raw: str, ours: str, business_name: str) -> str:
     sender = here.get("From", "").casefold()
     recipient = here.get("To", "").casefold()
     name = " ".join(business_name.casefold().split()).strip(" .")
-    customer = re.search(
-        r"(?im)\b(?:billed to|invoice to|our invoice to|customer:)\s*([^\n]+)", raw
+    customers = re.findall(
+        r"(?im)\b(?:billed to|invoice to|our invoice to|customer:)\s*:?\s*([^\n]+)", raw
     )
-    issuer = re.search(r"(?im)^(?:issued by|supplier|seller):\s*([^\n]+)", raw)
+    issuers = re.findall(r"(?im)^(?:issued by|supplier|seller):\s*([^\n]+)", raw)
+    for header in ("From", "To"):
+        values = {address.casefold().rstrip(">,;") for key, address
+                  in _HEADER_ADDRESS.findall(raw) if key.casefold() == header.casefold()}
+        if len(values) > 1:
+            raise UnreadablePost("Invoice direction has conflicting original headers.")
 
     def is_ours(value):
         value = " ".join(value.casefold().split()).strip(" .")
-        return bool(name) and (value == name or value.startswith(name + "."))
+        return bool(name) and (value == name or value.startswith((name + ".", name + ",")))
 
-    customer_ours = bool(customer and is_ours(customer.group(1)))
-    issuer_ours = bool(issuer and is_ours(issuer.group(1)))
     if not own or not sender or sender == recipient:
         raise UnreadablePost(
             "Invoice direction is ambiguous. Include the original issuer and customer "
             "with the configured business identity."
         )
     if sender == own and recipient and recipient != own:
-        if customer_ours or (issuer and not issuer_ours):
+        if any(is_ours(c) for c in customers) or any(not is_ours(i) for i in issuers):
             raise UnreadablePost("Invoice direction conflicts with the issuer/customer evidence.")
         return "sales_invoice"
     if sender != own and (recipient == own or not recipient):
-        if issuer_ours or (customer and not customer_ours):
+        if any(is_ours(i) for i in issuers) or any(not is_ours(c) for c in customers):
             raise UnreadablePost(
                 "Invoice direction conflicts with the configured business. "
                 "Include the original From and To headers."
@@ -269,13 +276,16 @@ def _whose_books(here: dict[str, str], ours: str) -> str:
 
 _TRANSFER = re.compile(
     r"(?im)^\s*(?:bank\s+)?(?:transfer|transaction|payment)\s+"
-    r"(?:id|ref(?:erence)?)\s*:\s*([A-Z0-9][A-Z0-9 _/-]{2,79})\s*$"
+    r"(?:id|ref(?:erence)?)\s*:[ \t]*([^\r\n]*)$"
 )
 
 
 def payment_reference(raw: str) -> str:
-    references = {transfer_identity(value) for value in _TRANSFER.findall(raw)}
-    if len(references) != 1:
+    values = _TRANSFER.findall(raw)
+    references = {transfer_identity(value) for value in values}
+    if len(references) != 1 or any(
+        not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9 _/-]{2,79}", v.strip()) for v in values
+    ):
         raise UnreadablePost(
             "Payment identity is missing or conflicting. A person must check "
             "the bank event and add one Transfer ID: reference. "

@@ -88,6 +88,9 @@ def assess(
     """
     refusals: list[str] = []
 
+    if books.legacy_payment_holds:
+        refusals.append("historical payment identities need human reconciliation before collection")
+
     if books.ledger.trial_balance() != ZERO:
         refusals.append(
             "the books do not balance, so no figure in this email can be trusted"

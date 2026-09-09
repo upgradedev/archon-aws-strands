@@ -1,8 +1,110 @@
 {
+  "reliable_workflows_revision": {
+    "status": "NOT_RUN",
+    "scope": "Payment identity, economic direction, bounded human resolution, evidence export, observed outcomes, configured operator model, evaluator contract. Prior blocks remain historical only.",
+    "human_signoff": "NOT_RUN",
+    "live_aws_acceptance": "NOT_RUN; parent owns backend/frontend deployment and final live acceptance",
+    "prior_acceptance_archive": {
+      "status": "CI_PASS",
+      "run": 34375770102,
+      "artifact": 10113786818,
+      "original_run": 34357703424,
+      "original_artifact": 10106786411,
+      "retention_days": 90,
+      "artifact_sha256": "a6c8484b3748e885c4ed79075012c69459e5517b594ac9e509ec6a80efde4ede",
+      "limits": "Opaque source bytes and SHA256 manifest, not reexecution or current application acceptance."
+    }
+  },
   "title": "ARCHON synthetic workspace UAT testbook",
   "version": 2,
   "scope": "React UI, real Python HTTP API, Strands scripted tool calls, durable demo sessions. No live email/model calls. Human signoff is independent of automation.",
   "cases": [
+    {
+      "id": "AR-UAT-18",
+      "requirement": "Semantic payment identity and retained correction",
+      "steps": [
+        "Post Sample invoice",
+        "Try identity refusal; submit missing Transfer ID",
+        "Correct held payment with distinct supplied reference",
+        "Forward same reference with changed subject; link original as duplicate",
+        "Post equal amount with a different real-event reference"
+      ],
+      "expected": "Missing identity and duplicates hold; correction retains original; same bank event credits once; distinct equal instalments remain valid.",
+      "mapping": "test_missing_identity_holds_then_corrects_with_original_retained; test_same_bank_event_never_credits_twice; editable payment refusal correction and semantic duplicate resolution use real HTTP",
+      "persona": "Joiner reconciling inbox evidence",
+      "preconditions": "Isolated synthetic session on candidate SHA; historical seed requires controlled CI/API fixture",
+      "observed result/evidence": "NOT_RUN for this scope until exact candidate CI completes",
+      "human signoff": "NOT_RUN",
+      "negative/recovery case": "Missing identity and duplicates hold; correction retains original; same bank event credits once; distinct equal instalments remain valid."
+    },
+    {
+      "id": "AR-UAT-19",
+      "requirement": "Supplier and sales economic direction",
+      "steps": [
+        "Use original issuer/customer headers with configured My Joinery identity",
+        "Forward supplier Billed to: My Joinery through owner/accountant",
+        "Post a genuine outbound invoice",
+        "Try conflicting and unsupported threads"
+      ],
+      "expected": "Supplier remains payable, outbound remains receivable with correct recipient, ambiguity visibly refuses; redaction remains.",
+      "mapping": "test_common_forward_formats_never_turn_supplier_debt_into_a_sale; supplier direction and externally resolved dispute retain evidence and require fresh review",
+      "persona": "Joiner reconciling inbox evidence",
+      "preconditions": "Isolated synthetic session on candidate SHA; historical seed requires controlled CI/API fixture",
+      "observed result/evidence": "NOT_RUN for this scope until exact candidate CI completes",
+      "human signoff": "NOT_RUN",
+      "negative/recovery case": "Supplier remains payable, outbound remains receivable with correct recipient, ambiguity visibly refuses; redaction remains."
+    },
+    {
+      "id": "AR-UAT-20",
+      "requirement": "Human dispute and historical-payment resolution",
+      "steps": [
+        "Open a persisted session with two equal pre-upgrade receipts missing identity",
+        "Read hold and original source bytes",
+        "Attest distinct supplied bank references and review note",
+        "Try same reference for both; it must remain held",
+        "After a valid attestation, run Strands and review a fresh draft"
+      ],
+      "expected": "Original posted records unchanged. Valid distinct-event attestation is additive. Suspected duplicate legacy entries need operator accounting correction; no fabricated identities or journal reversal.",
+      "mapping": "test_historical_equal_receipts_view_attest_and_progress_without_rewriting; test_legacy_resolution_is_revision_bound_durable_and_does_not_rewrite; generated legacy hold is visible and takes additive explicit references, never intake. Legacy seed is covered by API/unit tests; human browser legacy UAT is NOT_RUN.",
+      "persona": "Joiner reconciling inbox evidence",
+      "preconditions": "Isolated synthetic session on candidate SHA; historical seed requires controlled CI/API fixture",
+      "observed result/evidence": "NOT_RUN for this scope until exact candidate CI completes",
+      "human signoff": "NOT_RUN",
+      "negative/recovery case": "Original posted records unchanged. Valid distinct-event attestation is additive. Suspected duplicate legacy entries need operator accounting correction; no fabricated identities or journal reversal."
+    },
+    {
+      "id": "AR-UAT-21",
+      "requirement": "Readable evidence and session-isolated recovery",
+      "steps": [
+        "Open History and Prepare evidence bundle",
+        "Inspect source decisions, revisions, mode, hashes and limits",
+        "Lose an evidence HTTP response, retry the read",
+        "Start a new workspace while staying in History; old/late evidence must disappear"
+      ],
+      "expected": "Redacted human-readable bundle, actual revisions and outcomes, no truth/authenticity claim. New session cannot inherit old evidence.",
+      "mapping": "test_evidence_is_session_scoped_redacted_and_tracks_corrections; evidence export is read on demand, retryable, literal and revision scoped; a late evidence response cannot appear in a different session",
+      "persona": "Joiner reconciling inbox evidence",
+      "preconditions": "Isolated synthetic session on candidate SHA; historical seed requires controlled CI/API fixture",
+      "observed result/evidence": "NOT_RUN for this scope until exact candidate CI completes",
+      "human signoff": "NOT_RUN",
+      "negative/recovery case": "Redacted human-readable bundle, actual revisions and outcomes, no truth/authenticity claim. New session cannot inherit old evidence."
+    },
+    {
+      "id": "AR-UAT-22",
+      "requirement": "Observed outcomes and model/evaluator contracts",
+      "steps": [
+        "Read Dashboard after posting, correction and resolution",
+        "Inspect current mode and backend revision in History",
+        "Inspect CI model factory and fresh evaluator oracle cases"
+      ],
+      "expected": "Actual session counts only. Human active time/benefits Unknown; public model scripted, no delivery. Exact invoice, nonempty correct recipient and amount required by evaluator.",
+      "mapping": "dashboard counts observed human resolutions while benefits remain unknown; test_factory_arguments_reach_real_graph_without_live_inference; test_fresh_evaluator_oracles",
+      "persona": "Joiner reconciling inbox evidence",
+      "preconditions": "Isolated synthetic session on candidate SHA; historical seed requires controlled CI/API fixture",
+      "observed result/evidence": "NOT_RUN for this scope until exact candidate CI completes",
+      "human signoff": "NOT_RUN",
+      "negative/recovery case": "Actual session counts only. Human active time/benefits Unknown; public model scripted, no delivery. Exact invoice, nonempty correct recipient and amount required by evaluator."
+    },
     {
       "id": "AR-UAT-01",
       "persona": "Sole-trader owner",
