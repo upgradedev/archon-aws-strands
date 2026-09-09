@@ -18,7 +18,7 @@
       "observed result/evidence": "Mapped automation PASS — CI https://github.com/upgradedev/archon-aws-strands/actions/runs/34326637050 at 2c2a6ce. See verification counts and frontend-evidence-34326637050 (JUnit, coverage, desktop/mobile traces and screenshots). Pipeline evidence only, not human execution of every step or live AWS acceptance.",
       "human signoff": "NOT_RUN",
       "historical evidence scope": "Only the commits and run URLs in observed result/evidence; not acceptance of current UX.",
-      "current UX verification": "PENDING_CI"
+      "current UX verification": "AUTOMATION_PASS for implementation commit 9a6bfe6adfd79cda9b20d67fdb5e39bfa155168c only. GitHub Actions https://github.com/upgradedev/archon-aws-strands/actions/runs/34356632094: npm test 49 passed; Python regression 518 passed; Playwright real-HTTP desktop/mobile 30 passed. Mapped automated coverage, not human execution or live AWS acceptance of this UX. Current release identity and exact-run artifacts remain authoritative."
     },
     {
       "id": "AR-UAT-02",
@@ -36,7 +36,7 @@
       "observed result/evidence": "Mapped automation PASS — CI https://github.com/upgradedev/archon-aws-strands/actions/runs/34326637050 at 2c2a6ce. See verification counts and frontend-evidence-34326637050 (JUnit, coverage, desktop/mobile traces and screenshots). Pipeline evidence only, not human execution of every step or live AWS acceptance. UI polish mapped automation PASS — https://github.com/upgradedev/archon-aws-strands/actions/runs/34336011792 at 12814e10013e798bc9f064a0d1ef05d4365088d8 on 2026-09-09. 30 unit tests, 518 Python tests and 20 real-HTTP browser journeys (10 desktop, 10 mobile) passed; zero failures/errors/skips. Original 16 browser journeys retained. Font-size floors, mobile sample reflow, actual source deep links, unchanged exact draft and reduced motion passed. Human signoff NOT_RUN; high-contrast manual review and live AWS acceptance for this revision NOT_RUN.",
       "human signoff": "NOT_RUN",
       "historical evidence scope": "Only the commits and run URLs in observed result/evidence; not acceptance of current UX.",
-      "current UX verification": "PENDING_CI"
+      "current UX verification": "AUTOMATION_PASS for implementation commit 9a6bfe6adfd79cda9b20d67fdb5e39bfa155168c only. GitHub Actions https://github.com/upgradedev/archon-aws-strands/actions/runs/34356632094: npm test 49 passed; Python regression 518 passed; Playwright real-HTTP desktop/mobile 30 passed. Mapped automated coverage, not human execution or live AWS acceptance of this UX. Current release identity and exact-run artifacts remain authoritative."
     },
     {
       "id": "AR-UAT-03",
@@ -53,7 +53,7 @@
       "observed result/evidence": "Mapped automation PASS — CI https://github.com/upgradedev/archon-aws-strands/actions/runs/34326637050 at 2c2a6ce. See verification counts and frontend-evidence-34326637050 (JUnit, coverage, desktop/mobile traces and screenshots). Pipeline evidence only, not human execution of every step or live AWS acceptance.",
       "human signoff": "NOT_RUN",
       "historical evidence scope": "Only the commits and run URLs in observed result/evidence; not acceptance of current UX.",
-      "current UX verification": "PENDING_CI"
+      "current UX verification": "AUTOMATION_PASS for implementation commit 9a6bfe6adfd79cda9b20d67fdb5e39bfa155168c only. GitHub Actions https://github.com/upgradedev/archon-aws-strands/actions/runs/34356632094: npm test 49 passed; Python regression 518 passed; Playwright real-HTTP desktop/mobile 30 passed. Mapped automated coverage, not human execution or live AWS acceptance of this UX. Current release identity and exact-run artifacts remain authoritative."
     },
     {
       "id": "AR-UAT-04",
@@ -72,7 +72,7 @@
       "observed result/evidence": "Mapped automation PASS — CI https://github.com/upgradedev/archon-aws-strands/actions/runs/34326637050 at 2c2a6ce. See verification counts and frontend-evidence-34326637050 (JUnit, coverage, desktop/mobile traces and screenshots). Pipeline evidence only, not human execution of every step or live AWS acceptance. UI polish mapped automation PASS — https://github.com/upgradedev/archon-aws-strands/actions/runs/34336011792 at 12814e10013e798bc9f064a0d1ef05d4365088d8 on 2026-09-09. 30 unit tests, 518 Python tests and 20 real-HTTP browser journeys (10 desktop, 10 mobile) passed; zero failures/errors/skips. Original 16 browser journeys retained. Font-size floors, mobile sample reflow, actual source deep links, unchanged exact draft and reduced motion passed. Human signoff NOT_RUN; high-contrast manual review and live AWS acceptance for this revision NOT_RUN.",
       "human signoff": "NOT_RUN",
       "historical evidence scope": "Only the commits and run URLs in observed result/evidence; not acceptance of current UX.",
-      "current UX verification": "PENDING_CI"
+      "current UX verification": "AUTOMATION_PASS for implementation commit 9a6bfe6adfd79cda9b20d67fdb5e39bfa155168c only. GitHub Actions https://github.com/upgradedev/archon-aws-strands/actions/runs/34356632094: npm test 49 passed; Python regression 518 passed; Playwright real-HTTP desktop/mobile 30 passed. Mapped automated coverage, not human execution or live AWS acceptance of this UX. Current release identity and exact-run artifacts remain authoritative."
     },
     {
       "id": "AR-UAT-05",
@@ -90,7 +90,7 @@
       "observed result/evidence": "Mapped automation PASS — CI https://github.com/upgradedev/archon-aws-strands/actions/runs/34326637050 at 2c2a6ce. See verification counts and frontend-evidence-34326637050 (JUnit, coverage, desktop/mobile traces and screenshots). Pipeline evidence only, not human execution of every step or live AWS acceptance.",
       "human signoff": "NOT_RUN",
       "historical evidence scope": "Only the commits and run URLs in observed result/evidence; not acceptance of current UX.",
-      "current UX verification": "PENDING_CI"
+      "current UX verification": "AUTOMATION_PASS for implementation commit 9a6bfe6adfd79cda9b20d67fdb5e39bfa155168c only. GitHub Actions https://github.com/upgradedev/archon-aws-strands/actions/runs/34356632094: npm test 49 passed; Python regression 518 passed; Playwright real-HTTP desktop/mobile 30 passed. Mapped automated coverage, not human execution or live AWS acceptance of this UX. Current release identity and exact-run artifacts remain authoritative."
     },
     {
       "id": "AR-UAT-06",
@@ -110,7 +110,7 @@
       "observed result/evidence": "Mapped automation PASS — CI https://github.com/upgradedev/archon-aws-strands/actions/runs/34326637050 at 2c2a6ce. See verification counts and frontend-evidence-34326637050 (JUnit, coverage, desktop/mobile traces and screenshots). Pipeline evidence only, not human execution of every step or live AWS acceptance.",
       "human signoff": "NOT_RUN",
       "historical evidence scope": "Only the commits and run URLs in observed result/evidence; not acceptance of current UX.",
-      "current UX verification": "PENDING_CI"
+      "current UX verification": "AUTOMATION_PASS for implementation commit 9a6bfe6adfd79cda9b20d67fdb5e39bfa155168c only. GitHub Actions https://github.com/upgradedev/archon-aws-strands/actions/runs/34356632094: npm test 49 passed; Python regression 518 passed; Playwright real-HTTP desktop/mobile 30 passed. Mapped automated coverage, not human execution or live AWS acceptance of this UX. Current release identity and exact-run artifacts remain authoritative."
     },
     {
       "id": "AR-UAT-07",
@@ -128,7 +128,7 @@
       "observed result/evidence": "Mapped automation PASS — CI https://github.com/upgradedev/archon-aws-strands/actions/runs/34326637050 at 2c2a6ce. See verification counts and frontend-evidence-34326637050 (JUnit, coverage, desktop/mobile traces and screenshots). Pipeline evidence only, not human execution of every step or live AWS acceptance.",
       "human signoff": "NOT_RUN",
       "historical evidence scope": "Only the commits and run URLs in observed result/evidence; not acceptance of current UX.",
-      "current UX verification": "PENDING_CI"
+      "current UX verification": "AUTOMATION_PASS for implementation commit 9a6bfe6adfd79cda9b20d67fdb5e39bfa155168c only. GitHub Actions https://github.com/upgradedev/archon-aws-strands/actions/runs/34356632094: npm test 49 passed; Python regression 518 passed; Playwright real-HTTP desktop/mobile 30 passed. Mapped automated coverage, not human execution or live AWS acceptance of this UX. Current release identity and exact-run artifacts remain authoritative."
     },
     {
       "id": "AR-UAT-08",
@@ -145,7 +145,7 @@
       "observed result/evidence": "Mapped automation PASS — CI https://github.com/upgradedev/archon-aws-strands/actions/runs/34326637050 at 2c2a6ce. See verification counts and frontend-evidence-34326637050 (JUnit, coverage, desktop/mobile traces and screenshots). Pipeline evidence only, not human execution of every step or live AWS acceptance.",
       "human signoff": "NOT_RUN",
       "historical evidence scope": "Only the commits and run URLs in observed result/evidence; not acceptance of current UX.",
-      "current UX verification": "PENDING_CI"
+      "current UX verification": "AUTOMATION_PASS for implementation commit 9a6bfe6adfd79cda9b20d67fdb5e39bfa155168c only. GitHub Actions https://github.com/upgradedev/archon-aws-strands/actions/runs/34356632094: npm test 49 passed; Python regression 518 passed; Playwright real-HTTP desktop/mobile 30 passed. Mapped automated coverage, not human execution or live AWS acceptance of this UX. Current release identity and exact-run artifacts remain authoritative."
     },
     {
       "id": "AR-UAT-09",
@@ -165,7 +165,7 @@
       "observed result/evidence": "Mapped automation PASS — CI https://github.com/upgradedev/archon-aws-strands/actions/runs/34326637050 at 2c2a6ce. See verification counts and frontend-evidence-34326637050 (JUnit, coverage, desktop/mobile traces and screenshots). Pipeline evidence only, not human execution of every step or live AWS acceptance. UI polish mapped automation PASS — https://github.com/upgradedev/archon-aws-strands/actions/runs/34336011792 at 12814e10013e798bc9f064a0d1ef05d4365088d8 on 2026-09-09. 30 unit tests, 518 Python tests and 20 real-HTTP browser journeys (10 desktop, 10 mobile) passed; zero failures/errors/skips. Original 16 browser journeys retained. Font-size floors, mobile sample reflow, actual source deep links, unchanged exact draft and reduced motion passed. Human signoff NOT_RUN; high-contrast manual review and live AWS acceptance for this revision NOT_RUN.",
       "human signoff": "NOT_RUN",
       "historical evidence scope": "Only the commits and run URLs in observed result/evidence; not acceptance of current UX.",
-      "current UX verification": "PENDING_CI"
+      "current UX verification": "AUTOMATION_PASS for implementation commit 9a6bfe6adfd79cda9b20d67fdb5e39bfa155168c only. GitHub Actions https://github.com/upgradedev/archon-aws-strands/actions/runs/34356632094: npm test 49 passed; Python regression 518 passed; Playwright real-HTTP desktop/mobile 30 passed. Mapped automated coverage, not human execution or live AWS acceptance of this UX. Current release identity and exact-run artifacts remain authoritative."
     },
     {
       "id": "AR-UAT-10",
@@ -181,7 +181,7 @@
       "observed result/evidence": "Mapped automation PASS — CI https://github.com/upgradedev/archon-aws-strands/actions/runs/34326637050 at 2c2a6ce. See verification counts and frontend-evidence-34326637050 (JUnit, coverage, desktop/mobile traces and screenshots). Pipeline evidence only, not human execution of every step or live AWS acceptance.",
       "human signoff": "NOT_RUN",
       "historical evidence scope": "Only the commits and run URLs in observed result/evidence; not acceptance of current UX.",
-      "current UX verification": "PENDING_CI"
+      "current UX verification": "AUTOMATION_PASS for implementation commit 9a6bfe6adfd79cda9b20d67fdb5e39bfa155168c only. GitHub Actions https://github.com/upgradedev/archon-aws-strands/actions/runs/34356632094: npm test 49 passed; Python regression 518 passed; Playwright real-HTTP desktop/mobile 30 passed. Mapped automated coverage, not human execution or live AWS acceptance of this UX. Current release identity and exact-run artifacts remain authoritative."
     },
     {
       "id": "AR-UAT-11",
@@ -199,7 +199,7 @@
       "observed result/evidence": "Mapped automation PASS — CI https://github.com/upgradedev/archon-aws-strands/actions/runs/34326637050 at 2c2a6ce. See verification counts and frontend-evidence-34326637050 (JUnit, coverage, desktop/mobile traces and screenshots). Pipeline evidence only, not human execution of every step or live AWS acceptance.",
       "human signoff": "NOT_RUN",
       "historical evidence scope": "Only the commits and run URLs in observed result/evidence; not acceptance of current UX.",
-      "current UX verification": "PENDING_CI"
+      "current UX verification": "AUTOMATION_PASS for implementation commit 9a6bfe6adfd79cda9b20d67fdb5e39bfa155168c only. GitHub Actions https://github.com/upgradedev/archon-aws-strands/actions/runs/34356632094: npm test 49 passed; Python regression 518 passed; Playwright real-HTTP desktop/mobile 30 passed. Mapped automated coverage, not human execution or live AWS acceptance of this UX. Current release identity and exact-run artifacts remain authoritative."
     },
     {
       "id": "AR-UAT-12",
@@ -218,7 +218,7 @@
       "observed result/evidence": "Mapped automation PASS — CI https://github.com/upgradedev/archon-aws-strands/actions/runs/34326637050 at 2c2a6ce. See verification counts and frontend-evidence-34326637050 (JUnit, coverage, desktop/mobile traces and screenshots). Pipeline evidence only, not human execution of every step or live AWS acceptance.",
       "human signoff": "NOT_RUN",
       "historical evidence scope": "Only the commits and run URLs in observed result/evidence; not acceptance of current UX.",
-      "current UX verification": "PENDING_CI"
+      "current UX verification": "AUTOMATION_PASS for implementation commit 9a6bfe6adfd79cda9b20d67fdb5e39bfa155168c only. GitHub Actions https://github.com/upgradedev/archon-aws-strands/actions/runs/34356632094: npm test 49 passed; Python regression 518 passed; Playwright real-HTTP desktop/mobile 30 passed. Mapped automated coverage, not human execution or live AWS acceptance of this UX. Current release identity and exact-run artifacts remain authoritative."
     },
     {
       "id": "AR-UAT-13",
@@ -238,7 +238,7 @@
       "observed result/evidence": "UI polish mapped automation PASS — https://github.com/upgradedev/archon-aws-strands/actions/runs/34336011792 at 12814e10013e798bc9f064a0d1ef05d4365088d8 on 2026-09-09. 30 unit tests, 518 Python tests and 20 real-HTTP browser journeys (10 desktop, 10 mobile) passed; zero failures/errors/skips. Original 16 browser journeys retained. Font-size floors, mobile sample reflow, actual source deep links, unchanged exact draft and reduced motion passed. Human signoff NOT_RUN; high-contrast manual review and live AWS acceptance for this revision NOT_RUN.",
       "human signoff": "NOT_RUN",
       "historical evidence scope": "Only the commits and run URLs in observed result/evidence; not acceptance of current UX.",
-      "current UX verification": "PENDING_CI"
+      "current UX verification": "AUTOMATION_PASS for implementation commit 9a6bfe6adfd79cda9b20d67fdb5e39bfa155168c only. GitHub Actions https://github.com/upgradedev/archon-aws-strands/actions/runs/34356632094: npm test 49 passed; Python regression 518 passed; Playwright real-HTTP desktop/mobile 30 passed. Mapped automated coverage, not human execution or live AWS acceptance of this UX. Current release identity and exact-run artifacts remain authoritative."
     },
     {
       "id": "AR-UAT-14",
@@ -253,8 +253,9 @@
       "expected outcome": "Actual ledger totals and exact cents; unknown is not zero; no duplicate counting, invented trends or bank verification.",
       "negative/recovery case": "Duplicate source and malformed/unknown amount tests; held arrangements remain owed but not actionable.",
       "automation mapping": "Dashboard metrics drill into actual records and selected workspace screenshots; workspaces.test.tsx metric cases",
-      "observed result/evidence": "PENDING_CI: use exact branch run and attached artifacts; no current PASS is asserted.",
-      "human signoff": "NOT_RUN"
+      "observed result/evidence": "AUTOMATION_PASS for implementation commit 9a6bfe6adfd79cda9b20d67fdb5e39bfa155168c only. GitHub Actions https://github.com/upgradedev/archon-aws-strands/actions/runs/34356632094: npm test 49 passed; Python regression 518 passed; Playwright real-HTTP desktop/mobile 30 passed. Mapped automated coverage, not human execution or live AWS acceptance of this UX. Current release identity and exact-run artifacts remain authoritative.",
+      "human signoff": "NOT_RUN",
+      "current UX verification": "AUTOMATION_PASS for implementation commit 9a6bfe6adfd79cda9b20d67fdb5e39bfa155168c only. GitHub Actions https://github.com/upgradedev/archon-aws-strands/actions/runs/34356632094: npm test 49 passed; Python regression 518 passed; Playwright real-HTTP desktop/mobile 30 passed. Mapped automated coverage, not human execution or live AWS acceptance of this UX. Current release identity and exact-run artifacts remain authoritative."
     },
     {
       "id": "AR-UAT-15",
@@ -269,8 +270,9 @@
       "expected outcome": "Same invoice/source context after page navigation and reload. Search remains focused as query changes.",
       "negative/recovery case": "Missing/foreign source cannot authorize another case; unknown route remains recoverable.",
       "automation mapping": "query typing keeps focus and case context survives navigation, browser back and reload; route aliases and encoded context are retained with no arbitrary target action",
-      "observed result/evidence": "PENDING_CI: use exact branch run and attached artifacts; no current PASS is asserted.",
-      "human signoff": "NOT_RUN"
+      "observed result/evidence": "AUTOMATION_PASS for implementation commit 9a6bfe6adfd79cda9b20d67fdb5e39bfa155168c only. GitHub Actions https://github.com/upgradedev/archon-aws-strands/actions/runs/34356632094: npm test 49 passed; Python regression 518 passed; Playwright real-HTTP desktop/mobile 30 passed. Mapped automated coverage, not human execution or live AWS acceptance of this UX. Current release identity and exact-run artifacts remain authoritative.",
+      "human signoff": "NOT_RUN",
+      "current UX verification": "AUTOMATION_PASS for implementation commit 9a6bfe6adfd79cda9b20d67fdb5e39bfa155168c only. GitHub Actions https://github.com/upgradedev/archon-aws-strands/actions/runs/34356632094: npm test 49 passed; Python regression 518 passed; Playwright real-HTTP desktop/mobile 30 passed. Mapped automated coverage, not human execution or live AWS acceptance of this UX. Current release identity and exact-run artifacts remain authoritative."
     },
     {
       "id": "AR-UAT-16",
@@ -285,8 +287,9 @@
       "expected outcome": "Reason mutation contains no invoice_id. The resulting stored draft stays associated with its actual invoice. No late navigation or automatic approval.",
       "negative/recovery case": "Recipient-less priority, ambiguous arrangement projection, duplicate or missing evidence hold preparation.",
       "automation mapping": "late reasoning response cannot attach a draft to another selected case; backend target includes recipient-less priority and never substitutes a ready invoice",
-      "observed result/evidence": "PENDING_CI: use exact branch run and attached artifacts; no current PASS is asserted.",
-      "human signoff": "NOT_RUN"
+      "observed result/evidence": "AUTOMATION_PASS for implementation commit 9a6bfe6adfd79cda9b20d67fdb5e39bfa155168c only. GitHub Actions https://github.com/upgradedev/archon-aws-strands/actions/runs/34356632094: npm test 49 passed; Python regression 518 passed; Playwright real-HTTP desktop/mobile 30 passed. Mapped automated coverage, not human execution or live AWS acceptance of this UX. Current release identity and exact-run artifacts remain authoritative.",
+      "human signoff": "NOT_RUN",
+      "current UX verification": "AUTOMATION_PASS for implementation commit 9a6bfe6adfd79cda9b20d67fdb5e39bfa155168c only. GitHub Actions https://github.com/upgradedev/archon-aws-strands/actions/runs/34356632094: npm test 49 passed; Python regression 518 passed; Playwright real-HTTP desktop/mobile 30 passed. Mapped automated coverage, not human execution or live AWS acceptance of this UX. Current release identity and exact-run artifacts remain authoritative."
     },
     {
       "id": "AR-UAT-17",
@@ -301,8 +304,9 @@
       "expected outcome": "Expired/changed consent disabled; known 400/422 refusal remains editable; unknown/timeout/409 requires durable refresh and explicit renewed consent.",
       "negative/recovery case": "Payment-invalidated approval, lost-response retry, no duplicated receipt and isolated session recovery remain mandatory.",
       "automation mapping": "checked consent expires on an open page and no simulated receipt is created; duplicate intake leaves ledger metrics intact and offline records require explicit refresh; existing stale and lost-response journeys",
-      "observed result/evidence": "PENDING_CI: use exact branch run and attached artifacts; no current PASS is asserted.",
-      "human signoff": "NOT_RUN"
+      "observed result/evidence": "AUTOMATION_PASS for implementation commit 9a6bfe6adfd79cda9b20d67fdb5e39bfa155168c only. GitHub Actions https://github.com/upgradedev/archon-aws-strands/actions/runs/34356632094: npm test 49 passed; Python regression 518 passed; Playwright real-HTTP desktop/mobile 30 passed. Mapped automated coverage, not human execution or live AWS acceptance of this UX. Current release identity and exact-run artifacts remain authoritative.",
+      "human signoff": "NOT_RUN",
+      "current UX verification": "AUTOMATION_PASS for implementation commit 9a6bfe6adfd79cda9b20d67fdb5e39bfa155168c only. GitHub Actions https://github.com/upgradedev/archon-aws-strands/actions/runs/34356632094: npm test 49 passed; Python regression 518 passed; Playwright real-HTTP desktop/mobile 30 passed. Mapped automated coverage, not human execution or live AWS acceptance of this UX. Current release identity and exact-run artifacts remain authoritative."
     }
   ],
   "verification": {
@@ -398,11 +402,20 @@
     "release_scope": "Historical release only: 12814e10013e798bc9f064a0d1ef05d4365088d8. Not current Dashboard/Workspace acceptance."
   },
   "current_workspace_revision": {
-    "status": "PENDING_CI",
+    "status": "AUTOMATION_PASS",
     "scope": "Dashboard, selected collections Workspace, filtered Records and History. Frontend only; API/backend contracts unchanged.",
     "evidence_source": "Exact branch GitHub Actions artifacts; deployed frontend /release.json and API /api/health. Historical verification blocks below cover only their named commits.",
     "human_signoff": "NOT_RUN",
     "live_aws_acceptance": "NOT_RUN for this UX revision; parent owns merge and release",
-    "screenshots": "Successful Dashboard metrics journey attaches dashboard.png and selected-workspace.png in both Playwright projects. ui-screenshots-<run_id> is PNG-only; full evidence remains unchanged."
+    "screenshots": "Successful Dashboard metrics journey attaches dashboard.png and selected-workspace.png in both Playwright projects. ui-screenshots-<run_id> is PNG-only; full evidence remains unchanged.",
+    "verified_implementation_commit": "9a6bfe6adfd79cda9b20d67fdb5e39bfa155168c",
+    "run_url": "https://github.com/upgradedev/archon-aws-strands/actions/runs/34356632094",
+    "results": {
+      "frontend_unit": "49 passed (npm test)",
+      "python": "518 passed (python -m pytest --cov)",
+      "browser": "30 passed (npm run test:e2e; real HTTP; desktop and mobile)",
+      "hosting_contract": "11 hosting + 4 API stack + 8 release workflow tests printed by https://github.com/upgradedev/archon-aws-strands/actions/runs/34356809399"
+    },
+    "scope_note": "This checked-in evidence is pinned to the named implementation commit. Subsequent documentation commits require their own green CI. It does not claim live deployment or human acceptance."
   }
 }
