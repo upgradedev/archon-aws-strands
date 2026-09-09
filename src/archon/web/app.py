@@ -43,6 +43,7 @@ from archon.demo import _claims_for as claims_for
 from archon.demo import _outbox as build_outbox
 from archon.domain.books import Books
 from archon.domain.money import fmt
+from archon.domain.queue import build as build_queue
 from archon.domain.reports import cashflow, metrics, profit_and_loss
 from archon.evidence.compare import score_all, wilson
 from archon.runtime import Reasoning
@@ -117,6 +118,8 @@ class Session:
         self.last_refusal: str | None = None
         self.last_reading: Reading | None = None
         self.reading_error: str | None = None
+        #: Which reader produced the last reading, so the page can say.
+        self.read_by: str = "rules"
         # What actually produced the tone on screen. Until somebody asks for a
         # live run this is a constant, and the page says so rather than letting a
         # visitor assume six agents reasoned about their books.
@@ -236,6 +239,7 @@ def home() -> HTMLResponse:
 def _render_home() -> str:
     return page(
         reasoning=session.reasoning,
+        queue=build_queue(session.books, TODAY),
         books=session.books,
         stats=_stats(session.books),
         draft=session.draft(),
@@ -297,12 +301,19 @@ Any queries call +30 210 1234567."""
 
 
 @app.post("/post")
-def post_an_email(body: str = Form(...)) -> RedirectResponse:
+def post_an_email(body: str = Form(...), reader: str = Form("rules")) -> RedirectResponse:
     """Read a pasted email and put it in the books, or say why not.
 
-    Offline this is read by rules and the page says so. The redaction, the typed
-    proposal and the ledger's arithmetic check are the same either way, because
-    those are the parts that must not depend on which reader ran.
+    Which reader runs is chosen on the page and never guessed. `rules` is the
+    offline extractor and `bedrock` is the real model; the page says which ran
+    and neither stands in for the other. If a live read is asked for and cannot
+    be done, that is reported. **It must never fall back to the rules and call
+    the result a success**, because a screen that quietly downgrades is a screen
+    that lies at the moment somebody is watching it.
+
+    The redaction, the typed proposal and the ledger's arithmetic check are the
+    same either way, because those are the parts that must not depend on which
+    reader ran.
     """
     session.reading_error = None
     session.last_reading = None
@@ -316,13 +327,15 @@ def post_an_email(body: str = Form(...)) -> RedirectResponse:
         reading = read_email(
             body,
             f"email:pasted-{len(session.books.ledger.entries)}",
-            client=LocalReader(),
+            client=_reader_for(reader),
         )
         session.books.record(reading.document)
         session.last_reading = reading
+        session.read_by = reader
         session._remember()
     except (UnreadablePost, ValueError) as refused:
         session.reading_error = str(refused)
+        session.read_by = reader
     return RedirectResponse("/", status_code=303)
 
 
@@ -360,6 +373,23 @@ async def upload_an_invoice(attachment: UploadFile = File(...)) -> RedirectRespo
     except (UnreadablePost, ValueError) as refused:
         session.reading_error = str(refused)
     return RedirectResponse("/", status_code=303)
+
+
+def _reader_for(choice: str):
+    """The client `read_email` should use, chosen rather than defaulted.
+
+    `None` means the real Bedrock client. Returning `LocalReader()` for an
+    unrecognised value would be a silent downgrade, so an unrecognised value is
+    an error instead.
+    """
+    if choice == "bedrock":
+        return None
+    if choice == "rules":
+        return LocalReader()
+    raise ValueError(
+        f"{choice!r} is not a reader. It is 'rules' for the offline extractor or "
+        "'bedrock' for the model, and there is no third thing that quietly means one of them."
+    )
 
 
 @app.post("/reason")

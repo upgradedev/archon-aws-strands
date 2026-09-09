@@ -28,6 +28,7 @@ from dataclasses import dataclass
 
 from archon.adapters.ses import SendRefused
 from archon.demo import TODAY
+from archon.domain.queue import build as build_queue
 from archon.web.app import Session, _stats
 from archon.web.render import page
 
@@ -71,6 +72,7 @@ def _render(session: Session, caption: str) -> str:
     # it must say which rather than leaving a reader of a published page to guess.
     html = page(
         reasoning=session.reasoning,
+        queue=build_queue(session.books, TODAY),
         books=session.books,
         stats=_stats(session.books),
         draft=session.draft(),

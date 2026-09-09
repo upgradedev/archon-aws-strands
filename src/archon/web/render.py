@@ -146,6 +146,56 @@ def _tiles(stats: list[tuple[str, str, str]]) -> str:
     return f'<section class="grid">{cells}</section>'
 
 
+def _queue(q) -> str:
+    """What to do next, and what nobody can do yet.
+
+    Both halves are on the page. The second is the one tools like this leave out,
+    and leaving it out is what makes them untrustworthy: an invoice with no reply
+    address quietly disappears, the owner never learns it exists, and the screen
+    looks tidy while the money sits there.
+    """
+    def row(item, blocked=False):
+        late = (
+            f'<span class="late">{item.days_overdue} days late</span>'
+            if item.days_overdue and not blocked
+            else f"{item.days_overdue} days late"
+            if item.days_overdue
+            else "not late"
+        )
+        tail = (
+            f'<td class="why">{escape(item.reason)}</td>'
+            if blocked
+            else f"<td>{escape(item.recipient)}</td>"
+        )
+        return (
+            f"<tr><td>{escape(item.invoice_id)}</td><td>{escape(item.client)}</td>"
+            f"<td>{fmt(item.outstanding)}</td><td>{late}</td>{tail}</tr>"
+        )
+
+    ready = "".join(row(i) for i in q.ready) or (
+        '<tr><td colspan="5" class="why">Nothing can be chased today.</td></tr>'
+    )
+    blocked = "".join(row(i, blocked=True) for i in q.blocked)
+    blocked_block = (
+        '<p class="why" style="margin-top:18px"><strong>Waiting on somebody, not on Archon.</strong> '
+        "These are not chased and not forgotten. Each line says the one thing that has to change, "
+        "and none of it is guessed at.</p>"
+        '<div class="scroll"><table><thead><tr><th>invoice</th><th>client</th><th>amount</th>'
+        f"<th>age</th><th>what is missing</th></tr></thead><tbody>{blocked}</tbody></table></div>"
+        if blocked
+        else ""
+    )
+    return (
+        '<div class="card" style="margin-top:18px"><strong>What is worth doing next</strong>'
+        f'<p class="why">{fmt(q.at_stake)} can be chased today, oldest first. '
+        "The order is arithmetic on the ledger: age, then size. No model ranks this, because a "
+        "ranking nobody can check against the books is not a ranking.</p>"
+        '<div class="scroll"><table><thead><tr><th>invoice</th><th>client</th><th>amount</th>'
+        f"<th>age</th><th>chase goes to</th></tr></thead><tbody>{ready}</tbody></table></div>"
+        f"{blocked_block}</div>"
+    )
+
+
 def _reasoning(reasoning) -> str:
     """Say what produced the tone, in the three states it can be in.
 
@@ -468,6 +518,7 @@ def broke(detail: str) -> str:
 def page(
     *,
     reasoning,
+    queue,
     books: Books,
     stats: list[tuple[str, str, str]],
     draft: ChaseDraft | None,
@@ -508,6 +559,7 @@ def page(
   {_open_items(books)}
   <div class="cols">{_views(views, captured_on)}{right}</div>
   {_inbox(sample, reading, reading_error)}
+  {_queue(queue)}
   {_reasoning(reasoning)}
   {_provenance(books)}
   {_evidence(evidence)}

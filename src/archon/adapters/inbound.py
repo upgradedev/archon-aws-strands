@@ -125,13 +125,23 @@ def _document(fields: dict, source_ref: str):
         source_ref=source_ref,
     )
     if kind == "purchase_invoice":
-        return PurchaseInvoice(supplier=str(fields.get("counterparty") or "unnamed"), **common)
+        supplier = str(fields.get("counterparty") or "").strip()
+        if not supplier:
+            # "unnamed" posts money owed to nobody, which is a guess wearing a
+            # label. An invoice whose sender cannot be identified is a specific
+            # thing for a person to fix, not a debt to file away.
+            raise UnreadablePost(
+                "this invoice does not say who sent it, so there is nobody to owe. "
+                "Forward the original email rather than the text of it, or add the "
+                "sender, and it will post."
+            )
+        return PurchaseInvoice(supplier=supplier, **common)
     if kind == "sales_invoice":
         email = fields.get("counterparty_email")
         if not email or "@" not in str(email):
             raise UnreadablePost("a sales invoice with no client address cannot be chased")
         return SalesInvoice(
-            client=str(fields.get("counterparty") or "unnamed"),
+            client=str(fields.get("counterparty") or "").strip() or "unnamed",
             client_email=str(email),
             **common,
         )
@@ -209,12 +219,24 @@ class LocalReader:
     def _counterparty(sender: str | None) -> str:
         """A name, or an honest absence. Never a redaction marker.
 
-        The sender line has already been redacted by the time this reads it, so
-        the naive answer is the placeholder itself, and "[REDACTED_EMAIL] owes
-        you 620.00" is worse than saying the name is not known. The redaction is
-        right; showing its scar as a supplier name is not.
+        Two situations that look alike and are not:
+
+        * **the sender was redacted.** We know who it is; the name is masked on
+          the way to the model. "supplier, name redacted" is the honest answer,
+          and it is far better than "[REDACTED_EMAIL] owes you 620.00", which
+          shows the scar of the redaction as if it were a company.
+        * **there is no sender at all.** We do not know who it is, and inventing
+          a placeholder posts money owed to nobody. That is a guess, and the
+          caller refuses rather than making it. This method returns an empty
+          string to say so.
+
+        These were the same branch until 2026-09-09, so an email with no From
+        line became a purchase invoice from "supplier, name redacted" and the
+        owner saw a debt to somebody who did not exist.
         """
-        if not sender or "[REDACTED" in sender:
+        if not sender:
+            return ""
+        if "[REDACTED" in sender:
             return "supplier, name redacted"
         return sender.split("@")[0].strip() or "unnamed"
 
