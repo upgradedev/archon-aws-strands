@@ -123,7 +123,7 @@
         "Enter 'I dispute this debt' as client reply",
         "read terms"
       ],
-      "expected outcome": "No arrangement agreed; dispute visible; collections held pending corrected evidence",
+      "expected outcome": "No arrangement agreed; dispute visible; collections held. Replacing the reply with an invoice cannot release it; separate human resolution is outside this demo",
       "negative/recovery case": "Ambiguous 'soon' is also held, never guessed into dated money",
       "automation mapping": "test_ambiguous_or_disputed_reply_holds_collection",
       "observed result/evidence": "AUTOMATED_PASS — CI https://github.com/upgradedev/archon-aws-strands/actions/runs/34325690376 at 13ab746. See mapped tests and frontend-evidence-34325690376 artifacts (junit, coverage, desktop/mobile traces and screenshots). Repository/pipeline evidence only; live AWS and human acceptance are not attested.",

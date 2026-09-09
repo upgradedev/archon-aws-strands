@@ -108,6 +108,38 @@ test('lost approval response reconciles to one durable receipt without resending
   await expect(page.locator('.receipt-list article')).toHaveCount(1);
 });
 
+test('approval lost before reaching the API retries the same intent after durable refresh', async ({ page }) => {
+  await draft(page);
+  const attempts: { request_id: string }[] = [];
+  await page.route('**/api/approve', async route => {
+    attempts.push(route.request().postDataJSON());
+    if (attempts.length === 1) await route.abort('failed');
+    else await route.continue();
+  });
+  await page.getByLabel(/I reviewed this recipient/).check();
+  await page.getByRole('button', { name: /Approve exact draft/ }).click();
+  await expect(page.getByRole('alert')).toBeVisible();
+  await page.getByRole('button', { name: 'Refresh durable state', exact: true }).click();
+  await expect(page.getByRole('alert')).toHaveCount(0);
+  await page.getByRole('button', { name: /Approve exact draft/ }).click();
+  await expect(page.getByRole('heading', { name: 'Activity & delivery', exact: true })).toBeVisible();
+  expect(attempts).toHaveLength(2);
+  expect(attempts[1].request_id).toBe(attempts[0].request_id);
+  await page.reload();
+  await expect(page.locator('.receipt-list article')).toHaveCount(1);
+});
+
+test('unavailable session recovers by explicitly creating a new workspace', async ({ page }) => {
+  await books(page);
+  await page.evaluate(() => localStorage.setItem('archon.demo.session.v1', 'f'.repeat(64)));
+  await page.reload();
+  await expect(page.getByRole('alert')).toContainText('Session not found');
+  await page.getByRole('button', { name: 'New workspace', exact: true }).click();
+  await page.getByRole('button', { name: 'Start new workspace', exact: true }).click();
+  await expect(page.getByText('No matching sources', { exact: true })).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem('archon.demo.session.v1'))).not.toBe('f'.repeat(64));
+});
+
 test('independent visitors, deep links, keyboard skip, and new workspace', async ({ page, browser }) => {
   await books(page);
   const other = await browser.newContext(); const visitor = await other.newPage();
