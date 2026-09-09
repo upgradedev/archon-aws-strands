@@ -127,6 +127,9 @@ the shapes, and the adversarial line is one I wrote: a real attacker would write
 ## React workstation usage
 
 The new `frontend/` application is a React, TypeScript and Tailwind ledger workstation.
+AWS hosting target: [ARCHON workstation](https://d2ssmv59q16d0b.cloudfront.net/).
+**Pending deployment:** the frontend has not yet been uploaded or verified at this target.
+GitHub Pages is not the live product hosting path; the HTML export is a legacy local/CI artifact.
 Its routes are `#/queue`, `#/documents`, `#/approvals` and `#/activity`; source links use
 `#/documents?source=JN-4410`. Every public workspace starts empty and is labelled synthetic.
 In Documents, post the sample invoice and then the sample payment. The domain calculates
@@ -153,6 +156,12 @@ must be integrated and CI rerun immutably before release. Tests and dependency i
 for this migration run in GitHub Actions. No passing run or human acceptance is implied by
 these instructions. `frontend/UAT.testbook.html` and `.json` are shipped with the build and
 retain **NOT_RUN** human signoff until a person actually performs the checks.
+
+For the same browser suite against the deployed AWS target, set
+`ARCHON_UI_URL=https://d2ssmv59q16d0b.cloudfront.net` when running `npm run test:e2e`
+in GitHub Actions. This disables both local web servers and runs every desktop/mobile
+journey against CloudFront's same-origin API, without credentials or real email/model calls.
+The local CI journey uses SQLite; the AWS journey must independently verify the S3 boundary.
 
 The command-line live sender is a separate operator gate. In addition to `--live-send`, it
 requires `ARCHON_OPERATOR_SEND_AUTHORIZATION=I_AUTHORIZE_CONTROLLED_SEND`, an
@@ -306,7 +315,7 @@ tool; the judgement did not.
 | reading an attached PDF | real. The text is extracted **on this machine**, redacted here, and only the redacted text is sent, because redaction cannot reach inside a file. A scan is refused rather than guessed at: there is no OCR |
 | reading a forwarded email | real; redaction, typed extraction and the ledger's arithmetic check. Offline it is read by rules and the page says so, with Bedrock it reads anything |
 | the firm, its clients, its staff | **entirely invented.** No customer data is present anywhere in this repository |
-| the static walkthrough | real, rendered from the ledger on every push, published by GitHub Pages once the repository is public |
+| the static walkthrough | legacy local/CI export from the ledger, not the interactive AWS product; GitHub Pages is not the live hosting path |
 | the books between sessions | real. Set `ARCHON_STORE` to a path and the post is written down; loading replays it through the same validation, so a store cannot hold books that do not balance |
 | a running deployment | not yet. The screen runs locally |
 | Bedrock AgentCore | **no.** [`docs/BEDROCK_AGENTCORE_ARCHITECTURE.md`](docs/BEDROCK_AGENTCORE_ARCHITECTURE.md) sketches what it would look like and says on its first line that none of it is built |
