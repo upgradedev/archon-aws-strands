@@ -1,0 +1,196 @@
+{
+  "title": "ARCHON synthetic workspace UAT testbook",
+  "version": 1,
+  "scope": "React UI, real Python HTTP API, Strands scripted tool calls, durable demo sessions. No live email/model calls. Human signoff is independent of automation.",
+  "cases": [
+    {
+      "id": "AR-UAT-01",
+      "persona": "Sole-trader owner",
+      "requirement": "Isolated empty workspace",
+      "preconditions": "No session handle",
+      "steps": [
+        "Open #/queue",
+        "open a second browser context"
+      ],
+      "expected outcome": "Each visitor has independent empty books",
+      "negative/recovery case": "Unavailable/expired handle permits a new session",
+      "automation mapping": "test_empty_session_is_isolated_and_has_no_seeded_outcome; independent visitors, deep links, keyboard skip, and new workspace",
+      "observed result/evidence": "NOT_RUN — first CI checkpoint pending. Workflow artifacts will contain junit, coverage, Playwright traces and screenshots.",
+      "human signoff": "NOT_RUN"
+    },
+    {
+      "id": "AR-UAT-02",
+      "persona": "Owner receiving client post",
+      "requirement": "Exact partial payment arithmetic",
+      "preconditions": "Empty synthetic workspace",
+      "steps": [
+        "Documents: Sample invoice → Read & post",
+        "Sample payment → Read & post"
+      ],
+      "expected outcome": "Invoice 1860.00 EUR less receipt 600.00 EUR gives 1260.00 EUR outstanding; source links reveal original post",
+      "negative/recovery case": "Missing reference, USD or contradictory totals produce visible refusal",
+      "automation mapping": "test_raw_post_real_strands_exact_approval_and_durable_receipt; raw emails → real HTTP / Strands → exact draft → simulated durable receipt",
+      "observed result/evidence": "NOT_RUN — first CI checkpoint pending. Workflow artifacts will contain junit, coverage, Playwright traces and screenshots.",
+      "human signoff": "NOT_RUN"
+    },
+    {
+      "id": "AR-UAT-03",
+      "persona": "Owner collecting an overdue invoice",
+      "requirement": "Strands remains load-bearing",
+      "preconditions": "Supported invoice and payment posted",
+      "steps": [
+        "Action queue → Run Strands & prepare draft",
+        "expand six reports"
+      ],
+      "expected outcome": "Six real ledger tools report through Strands before composer; scripted model and no AI judgment labelled",
+      "negative/recovery case": "Any refused source holds draft generation",
+      "automation mapping": "test_raw_post_real_strands_exact_approval_and_durable_receipt; raw emails → real HTTP / Strands → exact draft → simulated durable receipt",
+      "observed result/evidence": "NOT_RUN — first CI checkpoint pending. Workflow artifacts will contain junit, coverage, Playwright traces and screenshots.",
+      "human signoff": "NOT_RUN"
+    },
+    {
+      "id": "AR-UAT-04",
+      "persona": "Owner approving collection",
+      "requirement": "Exact content approval",
+      "preconditions": "A current draft",
+      "steps": [
+        "Read recipient, subject, body and fingerprint",
+        "tick review",
+        "approve exact draft"
+      ],
+      "expected outcome": "One simulated provider-accepted receipt, same fingerprint; no real email; delivery unproven",
+      "negative/recovery case": "Approval disabled without confirmation; altered evidence or old draft refused",
+      "automation mapping": "test_late_payment_invalidates_exact_approval; stale approval after another tab posts payment is refused by actual API",
+      "observed result/evidence": "NOT_RUN — first CI checkpoint pending. Workflow artifacts will contain junit, coverage, Playwright traces and screenshots.",
+      "human signoff": "NOT_RUN"
+    },
+    {
+      "id": "AR-UAT-05",
+      "persona": "Owner recovering after lost connection",
+      "requirement": "Retry safety and durable readback",
+      "preconditions": "Current draft",
+      "steps": [
+        "Approve while response is dropped after actual HTTP success",
+        "refresh durable state",
+        "open Activity"
+      ],
+      "expected outcome": "One durable receipt; UI prevents a second approval; same intent ID retained if retry is needed",
+      "negative/recovery case": "Unknown outcome never automatically resent",
+      "automation mapping": "test_retry_approval_across_new_api_client_retains_one_receipt; lost approval response reconciles to one durable receipt without resending",
+      "observed result/evidence": "NOT_RUN — first CI checkpoint pending. Workflow artifacts will contain junit, coverage, Playwright traces and screenshots.",
+      "human signoff": "NOT_RUN"
+    },
+    {
+      "id": "AR-UAT-06",
+      "persona": "Owner arranging payment",
+      "requirement": "Exact proposal approval and durable hold",
+      "preconditions": "1260.00 EUR outstanding",
+      "steps": [
+        "Propose 2026-09-20: 600.00 EUR and 2026-10-05: 660.00 EUR",
+        "inspect",
+        "tick",
+        "approve",
+        "reload queue"
+      ],
+      "expected outcome": "Held collection, debt still 1260.00 EUR; previous 600.00 EUR is baseline, not a future instalment",
+      "negative/recovery case": "Wrong total, past dates, stale fingerprint or duplicate dates refused",
+      "automation mapping": "test_arrangement_exact_approval_survives_store_reopen_without_changing_debt; arrangement approval holds collections across reload without reducing the debt",
+      "observed result/evidence": "NOT_RUN — first CI checkpoint pending. Workflow artifacts will contain junit, coverage, Playwright traces and screenshots.",
+      "human signoff": "NOT_RUN"
+    },
+    {
+      "id": "AR-UAT-07",
+      "persona": "Owner triaging unclear post",
+      "requirement": "Refusal recovery without weakening the gate",
+      "preconditions": "Posted supported invoice",
+      "steps": [
+        "Post refusal sample",
+        "see collection held",
+        "correct refused source with supplier sample"
+      ],
+      "expected outcome": "Original refusal retained and linked to correction; collections enabled only after valid correction",
+      "negative/recovery case": "Posted source immutable; duplicate email is not posted twice",
+      "automation mapping": "test_refused_input_holds_every_chase_until_corrected; refused raw evidence holds collections and a corrected source releases them",
+      "observed result/evidence": "NOT_RUN — first CI checkpoint pending. Workflow artifacts will contain junit, coverage, Playwright traces and screenshots.",
+      "human signoff": "NOT_RUN"
+    },
+    {
+      "id": "AR-UAT-08",
+      "persona": "Owner handling a dispute",
+      "requirement": "Human escalation",
+      "preconditions": "Open sales invoice",
+      "steps": [
+        "Enter 'I dispute this debt' as client reply",
+        "read terms"
+      ],
+      "expected outcome": "No arrangement agreed; dispute visible; collections held pending corrected evidence",
+      "negative/recovery case": "Ambiguous 'soon' is also held, never guessed into dated money",
+      "automation mapping": "test_ambiguous_or_disputed_reply_holds_collection",
+      "observed result/evidence": "NOT_RUN — first CI checkpoint pending. Workflow artifacts will contain junit, coverage, Playwright traces and screenshots.",
+      "human signoff": "NOT_RUN"
+    },
+    {
+      "id": "AR-UAT-09",
+      "persona": "Owner using a phone or keyboard",
+      "requirement": "Accessible persistent navigation",
+      "preconditions": "Desktop and mobile browser",
+      "steps": [
+        "Use all navigation links",
+        "reload document deep link",
+        "Tab to skip link and press Enter"
+      ],
+      "expected outcome": "Correct page persists; main receives focus; document evidence opens; no page-wide horizontal overflow",
+      "negative/recovery case": "Unknown route provides return link; loading/empty/error states remain operable",
+      "automation mapping": "independent visitors, deep links, keyboard skip, and new workspace; raw emails → real HTTP / Strands → exact draft → simulated durable receipt",
+      "observed result/evidence": "NOT_RUN — first CI checkpoint pending. Workflow artifacts will contain junit, coverage, Playwright traces and screenshots.",
+      "human signoff": "NOT_RUN"
+    },
+    {
+      "id": "AR-UAT-10",
+      "persona": "Operator reviewing delivery evidence",
+      "requirement": "Five truthful receipt states",
+      "preconditions": "Activity view",
+      "steps": [
+        "Read queued, unknown, provider-accepted, delivered and failed descriptions"
+      ],
+      "expected outcome": "Acceptance explicitly does not prove arrival; delivered unavailable without independent evidence",
+      "negative/recovery case": "Live adapter requires separate authorization, durable ledger and controlled verified recipient",
+      "automation mapping": "test_live_adapter_requires_operator_authorization_and_durable_log; test_the_transport_does_not_retry_underneath_the_record",
+      "observed result/evidence": "NOT_RUN — first CI checkpoint pending. Workflow artifacts will contain junit, coverage, Playwright traces and screenshots.",
+      "human signoff": "NOT_RUN"
+    },
+    {
+      "id": "AR-UAT-11",
+      "persona": "Operator validating AWS package",
+      "requirement": "Lambda and storage contract",
+      "preconditions": "CI dependencies; local SQLite or fake S3 client",
+      "steps": [
+        "Pass API Gateway v2 events through actual handler",
+        "create/read/post",
+        "race conditional state writes"
+      ],
+      "expected outcome": "Commit/model labels correct; isolated persisted state; concurrent write conflicts recoverable",
+      "negative/recovery case": "S3 AccessDenied says unavailable, logs code only; no ListBucket/SES/Bedrock permission needed",
+      "automation mapping": "test_real_lambda_handler_http_api_v2_health_commit_and_session_journey; test_s3_no_list_bucket_denial_is_unavailable_not_claimed_missing",
+      "observed result/evidence": "NOT_RUN — first CI checkpoint pending. Workflow artifacts will contain junit, coverage, Playwright traces and screenshots.",
+      "human signoff": "NOT_RUN"
+    },
+    {
+      "id": "AR-UAT-12",
+      "persona": "Owner with restricted browser settings",
+      "requirement": "Bounded network and blocked storage recovery",
+      "preconditions": "Storage blocked or API unresponsive",
+      "steps": [
+        "Open workspace",
+        "read warning",
+        "trigger timed-out action",
+        "refresh before retry"
+      ],
+      "expected outcome": "Memory-only session remains usable with limitation stated; request aborts after 35 seconds",
+      "negative/recovery case": "Session creation is single-flight; no automatic retry of uncertain approval",
+      "automation mapping": "blocked storage still opens a session and discloses its lifetime; requests abort after 35 seconds and clear their timer",
+      "observed result/evidence": "NOT_RUN — first CI checkpoint pending. Workflow artifacts will contain junit, coverage, Playwright traces and screenshots.",
+      "human signoff": "NOT_RUN"
+    }
+  ]
+}
