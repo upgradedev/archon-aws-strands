@@ -125,6 +125,21 @@ class Session:
         # visitor assume six agents reasoned about their books.
         self.reasoning: Reasoning = Reasoning.scripted()
 
+    def delivery_record(self):
+        """What the durable log knows about the current draft, if anything.
+
+        None without a store, because without one there is nothing durable to
+        report and a panel that always says "queued" would be decoration.
+        """
+        if not self.store_path:
+            return None
+        draft = self.draft()
+        if draft is None:
+            return None
+        from archon.store.sqlite import SendLog
+
+        return SendLog(self.store_path).find(draft.fingerprint())
+
     def run_the_agents(self) -> None:
         """Run the real graph on Bedrock, or fail saying so.
 
@@ -240,6 +255,7 @@ def _render_home() -> str:
     return page(
         reasoning=session.reasoning,
         queue=build_queue(session.books, TODAY),
+        delivery=session.delivery_record(),
         books=session.books,
         stats=_stats(session.books),
         draft=session.draft(),

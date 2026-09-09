@@ -146,6 +146,63 @@ def _tiles(stats: list[tuple[str, str, str]]) -> str:
     return f'<section class="grid">{cells}</section>'
 
 
+def _delivery(record) -> str:
+    """What is actually known about the one email, and what is not.
+
+    Five states, kept apart on purpose. A provider handing back an identifier is
+    acceptance by that provider; it is not evidence that anything arrived in
+    anybody's inbox. Collapsing the two would let this screen tell its owner a
+    debt was chased when all that happened was an API said "received".
+    """
+    if record is None:
+        return ""
+
+    said = {
+        "queued": (
+            "held",
+            "Written down and not yet sent.",
+            "The record exists so that a process dying here cannot lose the attempt.",
+        ),
+        "unknown": (
+            "held",
+            "Sent, and nobody knows whether it arrived.",
+            "The connection did not answer. It may well have gone. Nothing is tried again "
+            "on its own, because a second demand for money cannot be recalled. Check the "
+            "mailbox, then clear this deliberately.",
+        ),
+        "provider-accepted": (
+            "sent",
+            "Accepted by Amazon SES.",
+            "That is the provider saying it has the message. It is not evidence that anyone "
+            "received it, and this screen will not pretend otherwise.",
+        ),
+        "delivered": (
+            "sent",
+            "Delivered, with evidence.",
+            "Nothing here can produce this today. It exists so the difference from provider "
+            "acceptance stays visible rather than being quietly assumed.",
+        ),
+        "failed": (
+            "held",
+            "Refused by the provider.",
+            "SES answered and said no, so nothing was sent and trying again is safe.",
+        ),
+    }
+    tone, headline, detail = said.get(
+        record.state, ("held", f"State {record.state!r}.", "This state has no explanation, which is itself worth looking at.")
+    )
+    return (
+        f'<div class="verdict {tone}" style="margin-top:14px">'
+        f"<strong>{escape(headline)}</strong>"
+        f'<div class="why" style="margin-top:6px">{escape(detail)}</div>'
+        f'<div class="why" style="margin-top:8px">'
+        f"invoice {escape(record.invoice_id)} &middot; {escape(record.amount)} &middot; "
+        f"to {escape(record.to_address)}"
+        + (f" &middot; provider id {escape(record.message_id)}" if record.message_id else "")
+        + "</div></div>"
+    )
+
+
 def _queue(q) -> str:
     """What to do next, and what nobody can do yet.
 
@@ -519,6 +576,7 @@ def page(
     *,
     reasoning,
     queue,
+    delivery=None,
     books: Books,
     stats: list[tuple[str, str, str]],
     draft: ChaseDraft | None,
@@ -559,6 +617,7 @@ def page(
   {_open_items(books)}
   <div class="cols">{_views(views, captured_on)}{right}</div>
   {_inbox(sample, reading, reading_error)}
+  {_delivery(delivery)}
   {_queue(queue)}
   {_reasoning(reasoning)}
   {_provenance(books)}

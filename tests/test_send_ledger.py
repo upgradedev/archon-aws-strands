@@ -8,7 +8,10 @@ live SES that is a second demand for money to somebody who has already had one.
 
 from __future__ import annotations
 
+import pathlib
+
 import pytest
+from fastapi.testclient import TestClient
 
 from archon.adapters.ses import Outbox, SendRefused
 from archon.store.sqlite import FAILED, PROVIDER_ACCEPTED, REQUESTED, SendLog, SendRecord
@@ -173,3 +176,69 @@ def test_there_is_no_delivered_state_because_there_is_no_evidence_of_delivery():
     assert "delivered" not in states
     assert "delivered" not in store_module.SCHEMA.lower().split("--")[0]
     assert "not evidence that" in store_module.SCHEMA
+
+
+# --- what the screen says about a send ----------------------------------------
+
+
+def test_the_five_states_are_explained_apart_on_the_page(store):
+    """AR-02: queued, unknown, provider-accepted, delivered and failed, kept apart."""
+    from archon.web import render
+
+    source = render.__file__
+    text = pathlib.Path(source).read_text(encoding="utf-8")
+    for state in ("queued", "unknown", "provider-accepted", "delivered", "failed"):
+        assert f'"{state}"' in text, state
+
+
+@pytest.fixture
+def screen_session(store):
+    """Swap the module-level session, and put the old one back.
+
+    Leaving a replacement in place leaked into every later test in the run and
+    failed two of them for reasons that had nothing to do with what they check.
+    """
+    import archon.web.app as web
+    from archon.web.app import Session
+
+    original = web.session
+    web.session = Session(store_path=store)
+    try:
+        yield web.session
+    finally:
+        web.session = original
+
+
+def test_provider_acceptance_is_not_presented_as_delivery(store, screen_session):
+    import archon.web.app as web
+    from archon.web.app import app
+    web.session.outbox = outbox_for(store, Counting())
+    draft = web.session.draft()
+    web.session.outbox.send(draft, web.session.verdict(draft))
+
+    with TestClient(app) as client:
+        html = client.get("/").text
+
+    assert "Accepted by Amazon SES" in html
+    assert "not evidence that anyone received it" in html
+    assert "Delivered, with evidence" not in html
+
+
+def test_an_unknown_send_says_so_on_the_page(store, screen_session):
+    import archon.web.app as web
+    from archon.web.app import app
+
+    class LostAck:
+        def send_email(self, **kwargs):
+            raise TimeoutError("read timeout")
+
+    web.session.outbox = outbox_for(store, LostAck())
+    draft = web.session.draft()
+    with pytest.raises(SendRefused):
+        web.session.outbox.send(draft, web.session.verdict(draft))
+
+    with TestClient(app) as client:
+        html = client.get("/").text
+
+    assert "nobody knows whether it arrived" in html
+    assert "cannot be recalled" in html
