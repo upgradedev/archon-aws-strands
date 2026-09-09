@@ -209,7 +209,7 @@ def original_message(raw: str) -> str:
     """Read the innermost explicitly forwarded message; retain the full source elsewhere."""
     # Quote prefixes are presentation, not new parties. Unseparated threads then expose
     # conflicting headers to the direction guard instead of hiding an inner supplier.
-    unquoted = re.sub(r"(?m)^[ \t]*(?:>[ \t]*)+", "", raw)
+    unquoted = re.sub(r"(?m)^[ \t]*(?:>[ \t]*)+", "", raw.replace("\r\n", "\n"))
     return re.split(
         r"(?im)^[ \t]*(?:-+[ \t]*(?:Forwarded message|Original Message)[ \t]*-+"
         r"|Begin forwarded message:)[ \t]*$", unquoted
@@ -433,7 +433,7 @@ class LocalReader:
 
     #: A client's name as a person writes it in the sentence that names them.
     _BILLED_TO_NAME = re.compile(
-        r"\b(?:invoice (?:to|for)|billed to|charged to|our invoice to)\s+"
+        r"\b(?:invoice (?:to|for)|billed to|charged to|our invoice to)(?:\s*:\s*|\s+)"
         r"([A-Z][\w&.'-]*(?:\s+[A-Z][\w&.'-]*){0,3})",
     )
 

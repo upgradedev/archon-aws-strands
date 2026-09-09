@@ -31,6 +31,7 @@ def opened():
     lambda raw: "From: me@myjoinery.example\n\n----- Forwarded message -----\n" + raw,
     lambda raw: raw.replace("Transfer ID:", "Bank transaction reference:").replace(
         "DEMO-BANK-600-A", "demo-bank-600-a"),
+    lambda raw: raw.replace("\n", "\r\n"),
 ])
 def test_same_bank_event_never_credits_twice(change):
     state = opened()
@@ -323,6 +324,8 @@ def test_common_forward_formats_never_turn_supplier_debt_into_a_sale(
     result = read_email(outbound, "sales-forward", client=reader).document
     assert isinstance(result, SalesInvoice)
     assert result.client_email == "accounts@buildco.example"
+    if reader_kind == "local":
+        assert result.client == "BuildCo Ltd"
 
 
 def test_unseparated_quoted_thread_is_refused_not_reinterpreted():

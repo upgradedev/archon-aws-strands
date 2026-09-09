@@ -99,6 +99,7 @@ test('evidence export is read on demand, retryable, literal and revision scoped'
   const load = vi.fn().mockRejectedValueOnce(new Error('API unavailable')).mockResolvedValueOnce(result);
   const { rerender } = render(<EvidenceBundle revision={4} />);
   expect(screen.getByRole('button')).toBeDisabled();
+  expect(screen.getByText(/Evidence export is unavailable in this embedded view/)).toBeVisible();
   rerender(<EvidenceBundle revision={4} load={load} />);
   expect(load).not.toHaveBeenCalled();
   await userEvent.click(screen.getByRole('button'));
