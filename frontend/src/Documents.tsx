@@ -27,7 +27,16 @@ export function Documents({ data, busy, mutate, route }: { data: Workspace; busy
   const sources = unique(data.sources, s => s.id).filter(s => (filter === 'all' || s.status === filter) && matches(`${s.id} ${s.document?.doc_id ?? ''} ${s.body}`));
   const rows = (view === 'purchases' ? data.purchases : data.sales).filter(s => matches(`${s.doc_id} ${s.counterparty}`) && (urlFilter === 'outstanding' ? (cents(s.outstanding) ?? -1n) > 0n : urlFilter === 'overdue' ? (cents(s.outstanding) ?? -1n) > 0n && s.due < data.as_of : true));
   const payments = unique(data.sources.filter(s => s.status === 'posted' && s.kind === 'Receipt' && matches(`${s.document?.doc_id ?? ''} ${s.document?.settles ?? ''} ${s.id}`)), s => s.document?.doc_id ?? s.id);
-  function changeParam(key: string, value: string) { const next = new URLSearchParams(params); if (value) next.set(key, value); else next.delete(key); location.hash = `/records?${next}`; }
+  function changeParam(key: string, value: string) {
+    const next = new URLSearchParams(params);
+    if (value) next.set(key, value); else next.delete(key);
+    if (key === 'q') {
+      // A native hashchange is asynchronous: fast typing could render the old
+      // controlled value between keystrokes. Update route state in this event.
+      history.replaceState(null, '', `#/records?${next}`);
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    } else location.hash = `/records?${next}`;
+  }
   const selectedSample = samples.findIndex(key => body.length > 0 && body === data.samples[key]);
   return <>
     <Heading eyebrow="INBOX → BOOKS" title="Records">Find the posted documents and retained evidence behind every balance.</Heading>

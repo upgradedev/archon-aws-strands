@@ -18,7 +18,8 @@ export function Approvals({ data, busy, mutate, mode = 'all', selectedInvoice, s
   const termsBinding = JSON.stringify([data.revision, data.proposal, invoice, terms]);
   const termsChecked = termsConsent === termsBinding;
   const proposalMatches = !selectedInvoice || data.proposal?.invoice_id === selectedInvoice;
-  const termsExpired = !!data.proposal?.at && now >= Date.parse(data.proposal.at) + 30 * 60 * 1000;
+  const proposalTime = Date.parse(data.proposal?.at ?? '');
+  const termsExpired = !!data.proposal && (!Number.isFinite(proposalTime) || proposalTime > now || now >= proposalTime + 30 * 60 * 1000);
   const receipt = data.receipts.find(r => r.fingerprint === draft?.fingerprint);
   return <>
     {mode === 'all' ? <Heading eyebrow="HUMAN DECISIONS" title="Approvals & arrangements">Your approval belongs to these exact words, this recipient, and this evidence.</Heading> : null}
@@ -29,7 +30,7 @@ export function Approvals({ data, busy, mutate, mode = 'all', selectedInvoice, s
           <label className="checkbox"><input type="checkbox" checked={checked && status === 'pending' && !stale} onChange={e => setConsent(e.target.checked ? binding : '')} disabled={busy || status !== 'pending' || stale} /><span>I reviewed this recipient, subject, body and balance.</span></label>
           <button className="primary" disabled={busy || !checked || status !== 'pending' || stale} onClick={async () => { const origin = location.hash; if (await mutate('/approve', { fingerprint: draft.fingerprint })) { setConsent(''); if (location.hash === origin) location.hash = '/history'; } }}>Approve exact draft · simulate</button>
           <p className="field-help">{receipt ? 'This exact draft already has a receipt. Read it in History.' : stale ? 'Refresh durable state and review again before approving.' : status === 'expired' ? 'This draft expired. Run the graph and review a newly prepared draft.' : status === 'unavailable' ? 'The draft time is unavailable. Refresh and prepare again.' : status === 'held' ? 'Unresolved evidence holds approval.' : busy ? 'An action is pending. Wait for durable state.' : 'Tick the review confirmation to enable approval.'}</p>
-        </aside></div> : <Empty title="No draft awaiting approval">{data.holds.length ? 'Unresolved source evidence holds collections. Correct it in Documents & payments.' : <>Run the Strands graph from the <a href="#/queue">action queue</a> to prepare a source-backed draft.</>}</Empty>}
+        </aside></div> : <Empty title="No draft awaiting approval">{data.holds.length ? 'Unresolved source evidence holds collections. Correct it in Records.' : <>Run the Strands graph from the <a href="#/workspace">action queue</a> to prepare a source-backed draft.</>}</Empty>}
     </section> : null}
     {mode !== 'draft' ? <section className="panel terms-panel"><div className="panel-heading"><div><h2>Agree a payment arrangement</h2><p>A promise changes when you chase. It never changes how much is owed.</p></div></div>
       <div className="terms-grid"><form onSubmit={async e => { e.preventDefault(); setTermsConsent(''); await mutate('/arrangements/propose', { invoice_id: invoice, body: terms }); }}>

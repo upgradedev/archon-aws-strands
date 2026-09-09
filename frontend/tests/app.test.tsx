@@ -132,3 +132,30 @@ test('offline and expired sessions show last known records and block mutations u
   await userEvent.click(screen.getByRole('button', { name: 'Refresh durable state' }));
   expect(screen.getByRole('button', { name: /Run Strands/ })).toBeEnabled();
 });
+
+test('new session clears intake text and correction context without resetting them on a query change', async () => {
+  location.hash = '/records?intake=open';
+  render(<App />); await screen.findByRole('heading', { name: 'Records' });
+  await userEvent.type(screen.getByLabelText(/Email headers/), 'unfinished source');
+  await route('/records?intake=open&q=invoice');
+  expect(screen.getByLabelText(/Email headers/)).toHaveValue('unfinished source');
+  vi.mocked(api.openWorkspace).mockResolvedValue({ session: 'new-handle', workspace: empty() });
+  await userEvent.click(screen.getByRole('button', { name: 'New workspace' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Start new workspace' }));
+  expect(screen.getByLabelText(/Email headers/)).toHaveValue('');
+  expect(screen.getByText('No matching sources')).toBeInTheDocument();
+});
+
+test('late approval response does not navigate away from the user selected page', async () => {
+  location.hash = '/workspace?invoice=JN-4410';
+  let resolve!: (value: ReturnType<typeof received>) => void;
+  vi.mocked(api.request).mockImplementationOnce(() => new Promise(done => { resolve = done as typeof resolve; }));
+  render(<App />); await screen.findByRole('heading', { name: 'Workspace' });
+  await userEvent.click(screen.getByLabelText(/I reviewed this recipient/));
+  await userEvent.click(screen.getByRole('button', { name: /Approve exact draft/ }));
+  await route('/records?invoice=OTHER');
+  await act(async () => resolve(received()));
+  expect(location.hash).toBe('#/records?invoice=OTHER');
+  expect(screen.getByRole('heading', { name: 'Records' })).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: /Approve exact draft/ })).not.toBeInTheDocument();
+});

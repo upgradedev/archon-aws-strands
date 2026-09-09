@@ -25,8 +25,11 @@ async function books(page: Page) {
 async function draft(page: Page) {
   await books(page);
   await go(page, 'Action queue');
+  const completed = page.waitForResponse(response => response.url().endsWith('/api/reason'));
   await page.getByRole('button', { name: /Run Strands/ }).click();
+  expect((await completed).status()).toBe(200);
   await expect(page.getByRole('heading', { name: 'Workspace', exact: true })).toBeVisible();
+  await expect(page.locator('.email > pre')).toBeVisible();
 }
 
 test('raw emails → real HTTP / Strands → exact draft → simulated durable receipt', async ({ page }, info) => {

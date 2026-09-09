@@ -32,7 +32,7 @@ export function refusal(data = filled()): Workspace {
   return data;
 }
 export function proposal(data = filled()): Workspace {
-  data.proposal = { invoice_id: 'JN-4410', outcome: 'proposed', why: 'Explicit dates and amounts', fingerprint: 'b'.repeat(64), plan: { invoice_id: 'JN-4410', agreed_on: '2026-09-09', baseline: '600.00', approved_by: 'demo visitor', instalments: [{ due: '2026-09-20', amount: '1260.00' }] } };
+  data.proposal = { invoice_id: 'JN-4410', outcome: 'proposed', why: 'Explicit dates and amounts', fingerprint: 'b'.repeat(64), at: new Date().toISOString(), body: '2026-09-20: 1260.00 EUR', plan: { invoice_id: 'JN-4410', agreed_on: '2026-09-09', baseline: '600.00', approved_by: 'demo visitor', instalments: [{ due: '2026-09-20', amount: '1260.00' }] } };
   return data;
 }
 export function received(data = filled()): Workspace {
