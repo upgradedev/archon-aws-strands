@@ -7,6 +7,7 @@ import { Activity } from './Activity';
 import { Icon } from './ui';
 import { Dashboard } from './Dashboard';
 import { reasonTarget, routeInfo, workspaceLink } from './ledger';
+import type { Bundle } from './EvidenceBundle';
 
 const navigation = [
   ['dashboard', 'Dashboard'], ['workspace', 'Workspace'], ['records', 'Records'], ['history', 'History'],
@@ -19,6 +20,7 @@ export function App() {
   const intent = useRef<{ key: string; id: string; needsRefresh: boolean } | null>(null);
   const [route, setRoute] = useState(() => location.hash.slice(1) || '/dashboard');
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState('Reading durable workspace…');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [newSession, setNewSession] = useState(false);
@@ -39,7 +41,7 @@ export function App() {
   }
   async function refresh(fresh = false) {
     if (inFlight.current) return;
-    inFlight.current = true; setBusy(true); setError(''); setNotice('');
+    inFlight.current = true; setBusy(true); setProgress('Reading durable workspace…'); setError(''); setNotice('');
     try {
       const opened = await openWorkspace(fresh);
       session.current = opened.session; setData(opened.workspace); setNewSession(false); setStale(false); setReviewEpoch(e => e + 1);
@@ -64,6 +66,7 @@ export function App() {
       setError('Refresh durable state before retrying an uncertain action.'); return false;
     }
     const key = JSON.stringify({ path, payload });
+    setProgress(path === '/reason' ? 'Running Strands and waiting for all six reports…' : path === '/intake' ? 'Reading source and checking ledger rules…' : path === '/resolve' ? 'Recording human resolution and invalidating old drafts…' : 'Saving the reviewed decision…');
     if (intent.current?.key !== key) intent.current = { key, id: crypto.randomUUID(), needsRefresh: false };
     inFlight.current = true; setBusy(true); setError(''); setNotice('');
     try {
@@ -94,8 +97,8 @@ export function App() {
         {storageWarning ? <p className="notice warning">{storageWarning}</p> : null}
         {newSession ? <section className="notice" role="region" aria-label="Start a new workspace"><h2>Start an empty synthetic workspace?</h2><p>Session access expires after seven days. Stored records may be retained longer. This browser will receive a new session handle.</p><div className="flex gap-3"><button className="primary" onClick={() => void refresh(true)} disabled={busy}>Start new workspace</button><button className="secondary" onClick={() => setNewSession(false)}>Keep current workspace</button></div></section> : null}
         {error ? <div className="notice error" role="alert"><strong>We couldn't complete that action</strong><p>{error}</p><button className="secondary" onClick={() => void refresh()} disabled={busy}>Refresh durable state</button><p className="field-help">Review current evidence before approving again. An uncertain send must never be retried automatically.</p></div> : null}
-        <div className="status-line" role="status" aria-live="polite">{busy ? 'Working with your ledger…' : notice}</div>
-        {data ? <>{page === 'dashboard' ? <Dashboard data={data} stale={stale} /> : page === 'workspace' ? <Queue data={data} busy={busy} mutate={mutate} route={route} stale={stale} reviewEpoch={reviewEpoch} /> : page === 'records' ? <Documents key={session.current} data={data} busy={busy || stale} mutate={mutate} route={route} /> : page === 'history' ? <Activity data={data} /> : <div className="empty"><h1 tabIndex={-1}>Page not found</h1><p><a href="#/dashboard">Return to Dashboard</a></p></div>}</> : !error ? <div className="loading" role="status"><div className="loading-bar" /><h1>Opening your ledger</h1><p>Creating or reading your isolated demo session.</p></div> : null}
+        <div className="status-line" role="status" aria-live="polite">{busy ? progress : notice}</div>
+        {data ? <>{page === 'dashboard' ? <Dashboard data={data} stale={stale} /> : page === 'workspace' ? <Queue data={data} busy={busy} mutate={mutate} route={route} stale={stale} reviewEpoch={reviewEpoch} /> : page === 'records' ? <Documents key={session.current} data={data} busy={busy || stale} mutate={mutate} route={route} /> : page === 'history' ? <Activity data={data} loadEvidence={() => request<Bundle>('/evidence', session.current)} /> : <div className="empty"><h1 tabIndex={-1}>Page not found</h1><p><a href="#/dashboard">Return to Dashboard</a></p></div>}</> : !error ? <div className="loading" role="status"><div className="loading-bar" /><h1>Opening your ledger</h1><p>Creating or reading your isolated demo session.</p></div> : null}
         <footer className="footer"><span>ARCHON / Source-backed bookkeeping</span><span>EUR only · Synthetic data only · No real messages</span></footer>
       </main>
     </div>

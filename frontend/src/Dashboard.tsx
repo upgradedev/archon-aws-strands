@@ -8,6 +8,7 @@ export function Dashboard({ data, stale }: { data: Workspace; stale: boolean }) 
   const target = reasonTarget(data);
   return <>
     <Heading eyebrow="FINOPS / MY JOINERY" title="Dashboard">Your posted ledger, the work it needs, and the evidence behind it.</Heading>
+    <section className="notice"><strong>For the joiner reconciling client invoices from an inbox</strong><p>Try Records → sample invoice → sample payment → Workspace → Run Strands → review the exact draft. The graph runs; its model is scripted and its receipt is simulated.</p><a href="#/records?intake=open">Try editable workflows →</a></section>
     <div className="scope-line"><span>All records in this synthetic session · As of {data.as_of}</span><Badge tone={stale || data.holds.length ? 'amber' : 'blue'}>{stale ? 'Last known snapshot' : `Ledger revision ${data.revision}`}</Badge></div>
     <section className="stats dashboard-stats" aria-label="Ledger balances">{metrics.map(metric => <a key={metric.id} className="stat" data-testid={`metric-${metric.id}`} href={metric.href}>
       <p>{metric.label}<span aria-hidden="true"> ↗</span></p><strong>{'amount' in metric ? money(metric.amount) : metric.count === null ? 'Unknown' : metric.count}</strong><small>{metric.note}</small>
@@ -19,6 +20,7 @@ export function Dashboard({ data, stale }: { data: Workspace; stale: boolean }) 
     </section><section className="panel"><div className="panel-heading"><div><h2>Recent activity</h2><p>Recorded events · latest first</p></div><a href="#/history">All history →</a></div>
       {data.activity.length ? <ol className="timeline">{data.activity.slice(-5).reverse().map(event => <li key={event.id}><span className="timeline-dot" aria-hidden="true" /><div><h3>{event.title}</h3><p>{event.detail}</p><time>{event.at}</time></div></li>)}</ol> : <Empty title="No recorded activity">Post your first synthetic email from Records. Reading a page creates no financial event.</Empty>}
     </section></div>
+    <section className="panel" aria-label="Observed session outcomes"><div className="panel-heading"><h2>Observed session outcomes</h2></div><dl className="report-grid"><div><dt>Posted sources</dt><dd>{data.sources.filter(s => s.status === 'posted').length}</dd></div><div><dt>Unresolved sources</dt><dd>{data.holds.length}</dd></div><div><dt>Corrections retained</dt><dd>{data.sources.filter(s => s.status === 'corrected').length}</dd></div><div><dt>Human resolutions</dt><dd>{data.sources.filter(s => s.status === 'resolved').length}</dd></div><div><dt>Recorded approval outcomes</dt><dd>{data.receipts.length}</dd></div></dl><p className="section-note">Human active time, time saved and money recovered: Unknown. These are counts of this session's recorded outcomes, not measured benefits.</p><a href="#/history">Inspect decisions and evidence →</a></section>
     <p className="section-note">Recorded receipts are retained remittances, not independent proof of bank settlement. Email delivery is simulated. No estimated savings or trends.</p>
   </>;
 }

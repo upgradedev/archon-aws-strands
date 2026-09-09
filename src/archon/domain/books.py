@@ -74,10 +74,11 @@ class Books:
     #: has ever produced a journal entry, and nothing in here ever will. An
     #: arrangement changes when a chase fires, never what is owed.
     arrangements: dict = field(default_factory=dict)
+    legacy_payment_holds: list[str] = field(default_factory=list)
 
     # ---- taking documents in -------------------------------------------------
 
-    def record(self, document: object) -> None:
+    def record(self, document: object, *, replay_legacy: bool = False) -> None:
         """Post a document and file it under the right domain.
 
         Unknown types are refused rather than ignored. A document that silently
@@ -99,7 +100,7 @@ class Books:
         if bucket is None:
             raise TypeError(f"Archon has no posting rule for {type(document).__name__}")
 
-        self._check_settles(document)
+        self._check_settles(document, replay_legacy=replay_legacy)
 
         entries = list(document.entries())  # type: ignore[attr-defined]
         posted = []
@@ -112,7 +113,7 @@ class Books:
             raise
         bucket.append(document)  # type: ignore[arg-type]
 
-    def _check_settles(self, document: object) -> None:
+    def _check_settles(self, document: object, *, replay_legacy: bool = False) -> None:
         """A payment must point at a real invoice and must not overpay it.
 
         Both failures are the quiet kind. A payment against a typo'd reference
@@ -148,6 +149,9 @@ class Books:
                 and previous.amount == document.amount
                 and (not identity or not previous_identity)
             ):
+                if replay_legacy and not identity and not previous_identity:
+                    self.legacy_payment_holds.append(document.doc_id)
+                    continue
                 raise SettlementError(
                     "Ambiguous payment identity: equal amounts may be distinct instalments. "
                     "A person must reconcile the bank references before another posting."
@@ -248,6 +252,8 @@ class Books:
 
     def overdue(self, as_of: date) -> list[Settlement]:
         """Overdue and not held by a promise somebody is still keeping."""
+        if self.legacy_payment_holds:
+            return []
         return [
             s
             for s in self.uncollected()

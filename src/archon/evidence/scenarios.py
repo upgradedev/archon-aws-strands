@@ -96,6 +96,8 @@ def _build(
                 received_on=when,
                 amount=money(amount),
                 source_ref=f"email:rc-{invoice.doc_id}-{i}",
+                # A distinct event in this constructed ledger, not an inferred email identity.
+                transfer_id=f"SYNTHETIC-EVENT-{invoice.doc_id}-{i}",
             )
         )
         post.append(_remittance(invoice, money(amount), when))

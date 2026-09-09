@@ -73,7 +73,8 @@ def books_for(state: dict) -> Books:
     books = Books()
     for source in state["sources"]:
         if source["status"] == "posted":
-            books.record(_decode(source["kind"], json.dumps(source["document"])))
+            books.record(_decode(source["kind"], json.dumps(source["document"])),
+                         replay_legacy=True)
     for saved in state["arrangements"]:
         fields = dict(saved)
         fields["agreed_on"] = date.fromisoformat(fields["agreed_on"])
@@ -93,7 +94,14 @@ def event(state: dict, title: str, detail: str) -> None:
 
 
 def holds(state: dict) -> list[dict]:
-    return [source for source in state["sources"] if source["status"] == "refused"]
+    held = [source for source in state["sources"] if source["status"] == "refused"]
+    for doc_id in books_for(state).legacy_payment_holds:
+        source = next(s for s in state["sources"] if s["document"]
+                      and s["document"]["doc_id"] == doc_id)
+        held.append({**source, "kind": "LegacyPaymentReview", "status": "refused",
+                     "error": "Historical equal payments lack bank identities. Records are "
+                              "retained; reconcile them with a person before collections."})
+    return held
 
 
 def intake(state: dict, body: str, replace_id: str | None = None) -> None:

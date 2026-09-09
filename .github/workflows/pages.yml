@@ -46,4 +46,4 @@ jobs:
         with:
           name: legacy-walkthrough
           path: site
-          retention-days: 14
+          retention-days: 90

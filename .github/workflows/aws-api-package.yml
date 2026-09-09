@@ -1,6 +1,11 @@
 name: Package AWS API
 on:
   workflow_dispatch:
+    inputs:
+      archive_previous:
+        description: Preserve only the fixed previously accepted AWS evidence, no packaging
+        type: boolean
+        default: false
   push:
     branches: ["codex/aws-*"]
     paths: ["src/**", "pyproject.toml", "infra/archon_api_stack.py", ".github/workflows/aws-api-package.yml"]
@@ -8,6 +13,7 @@ permissions:
   contents: read
 jobs:
   package:
+    if: inputs.archive_previous != true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,7 +45,20 @@ jobs:
           assert response["statusCode"] == 200, response
           body = json.loads(response["body"])
           assert os.environ["ARCHON_COMMIT_SHA"] in json.dumps(body), body
-          print(json.dumps({"health": body, "package_import": "passed"}, indent=2))
+          from unittest.mock import patch
+          from archon.adapters import bedrock
+          from archon.adapters.ledger_script import LedgerScriptModel
+          from archon.agents.graph import build
+          from archon.domain.books import Books
+          from datetime import date
+          scripted = LedgerScriptModel(default="Hello.\nMany thanks.")
+          with patch("strands.models.BedrockModel", return_value=scripted) as factory:
+              graph = build(Books(), date(2026,9,9), date(2026,7,1), date(2026,9,9))
+              assert graph("Review.").results
+              factory.assert_called_once_with(region_name=bedrock.REGION, model_id=bedrock.MODEL_ID,
+                                               max_tokens=bedrock.MAX_TOKENS, streaming=True)
+          print(json.dumps({"health": body, "package_import": "passed",
+                            "configured_graph_factory": "passed; scripted execution only"}, indent=2))
           PY
       - name: Archive exact package and checksum
         run: |
@@ -55,4 +74,62 @@ jobs:
             build/archon-api.zip.sha256
             build/requirements-resolved.txt
             build/commit.txt
-          retention-days: 14
+          retention-days: 90
+
+  archive-previous-acceptance:
+    if: github.event_name == 'workflow_dispatch' && inputs.archive_previous == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Preserve fixed accepted evidence bytes without extracting or executing them
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir retained-evidence
+          gh api repos/upgradedev/archon-aws-strands/actions/runs/34357703424 > retained-evidence/original-run.json
+          gh api repos/upgradedev/archon-aws-strands/actions/artifacts/10106786411 > retained-evidence/original-artifact.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path("retained-evidence")
+          run = json.loads((p / "original-run.json").read_text())
+          artifact = json.loads((p / "original-artifact.json").read_text())
+          assert run["id"] == 34357703424 and run["conclusion"] == "success"
+          assert run["head_sha"] == "519a1e7c11a995529113161344192240fd031459"
+          assert artifact["id"] == 10106786411 and not artifact["expired"]
+          assert artifact["workflow_run"]["id"] == run["id"]
+          assert artifact["name"] == "aws-acceptance-34357703424"
+          assert 0 < artifact["size_in_bytes"] < 200 * 1024 * 1024
+          PY
+          gh api repos/upgradedev/archon-aws-strands/actions/artifacts/10106786411/zip > retained-evidence/accepted-evidence.zip
+          python - <<'PY'
+          import hashlib, json
+          from datetime import datetime, timezone
+          from pathlib import Path
+          p = Path("retained-evidence")
+          artifact = json.loads((p / "original-artifact.json").read_text())
+          payload = p / "accepted-evidence.zip"
+          assert 0 < payload.stat().st_size < 200 * 1024 * 1024
+          digest = hashlib.sha256(payload.read_bytes()).hexdigest()
+          if artifact.get("digest"):
+              assert artifact["digest"] == "sha256:" + digest
+          manifest = {
+              "repository": "upgradedev/archon-aws-strands",
+              "original_run_id": 34357703424, "original_artifact_id": 10106786411,
+              "original_head_sha": "519a1e7c11a995529113161344192240fd031459",
+              "archived_at": datetime.now(timezone.utc).isoformat(),
+              "files": {f.name: hashlib.sha256(f.read_bytes()).hexdigest() for f in p.iterdir()},
+              "limits": "Original bytes only; no extraction or execution; hash is not truth."
+          }
+          (p / "SHA256-MANIFEST.json").write_text(json.dumps(manifest, indent=2) + "\n")
+          PY
+      - name: Retain immutable copy for ninety days
+        uses: actions/upload-artifact@v4
+        with:
+          name: retained-aws-34357703424-10106786411-${{ github.run_id }}
+          path: retained-evidence/
+          retention-days: 90
+          if-no-files-found: error
