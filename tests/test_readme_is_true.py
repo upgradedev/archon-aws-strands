@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pathlib
 import re
+import tomllib
 
 import pytest
 
@@ -220,3 +221,18 @@ def test_prior_acceptance_and_full_history_retention_have_exact_provenance():
     assert "--log-opts=-1" not in workflow
     assert "thresholds: { lines: 85, functions: 85, statements: 85, branches: 85 }" in (
         ROOT / "frontend/vite.config.ts").read_text(encoding="utf-8")
+
+
+def test_python_coverage_floor_is_enforced_without_source_or_branch_exclusions():
+    config = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    coverage = config["tool"]["coverage"]
+    assert coverage["report"]["fail_under"] == 85
+    assert coverage["run"]["branch"] is True
+    assert coverage["run"]["source"] == ["src/archon"]
+    assert not coverage["run"].get("omit")
+    assert not coverage["report"].get("omit")
+    for name in ("ci.yml", "frontend-ci.yml"):
+        workflow = (ROOT / ".github/workflows" / name).read_text(encoding="utf-8")
+        assert "--cov" in workflow
+        overrides = re.findall(r"--cov-fail-under[= ](\d+)", workflow)
+        assert all(int(floor) >= 85 for floor in overrides)
