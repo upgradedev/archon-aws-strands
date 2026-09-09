@@ -50,6 +50,13 @@ class SessionRequest(BaseModel):
     mode: Literal["synthetic"] = "synthetic"
 
 
+class ResolutionRequest(Mutation):
+    source_id: str = Field(min_length=1, max_length=40)
+    decision: Literal["duplicate-payment", "resume-collection"]
+    note: str = Field(min_length=20, max_length=2000)
+    duplicate_of: str | None = Field(default=None, max_length=40)
+
+
 @app.middleware("http")
 async def boundary(request: Request, call_next):
     # Bound the bytes before JSON decoding, including chunked clients. No session
@@ -159,3 +166,16 @@ def propose(request: ProposalRequest, handle: SESSION_HEADER):
 @app.post("/api/arrangements/approve")
 def agree(request: ApprovalRequest, handle: SESSION_HEADER):
     return mutate(handle, request, "agree", workspace.agree)
+
+
+@app.post("/api/resolve")
+def resolve(request: ResolutionRequest, handle: SESSION_HEADER):
+    return mutate(handle, request, "resolve", workspace.resolve)
+
+
+@app.get("/api/evidence")
+def evidence(handle: SESSION_HEADER):
+    from archon.web.export import evidence_bundle
+
+    state, _ = load(handle)
+    return evidence_bundle(state, os.environ.get("ARCHON_COMMIT_SHA", "local-unversioned"))

@@ -24,6 +24,7 @@ from datetime import date
 from strands import Agent, tool
 from strands.multiagent import GraphBuilder
 
+from archon.adapters import bedrock
 from archon.domain.books import Books
 
 from . import gating, tools, wiring
@@ -120,11 +121,13 @@ def _composer(books: Books, as_of: date, model: object | None) -> Agent:
 def build(books: Books, as_of: date, frm: date, to: date, model: object | None = None):
     """Wire the graph. Construction only; nothing runs until it is called.
 
-    ``model`` is injected rather than reached for. Passing ``None`` leaves the
-    SDK to resolve its own default, passing ``bedrock_model()`` runs on Bedrock,
+    ``model`` is injected rather than reached for. Passing ``None`` uses the
+    configured Archon Bedrock factory, passing ``bedrock_model()`` runs on Bedrock,
     and passing a ``ScriptedModel`` walks the whole graph with no AWS account,
     which is how S9 is satisfied by the architecture instead of by a promise.
     """
+    if model is None:
+        model = bedrock.bedrock_model()
     builder = GraphBuilder()
     readers = _readers(books, as_of, frm, to, model)
     for name, agent in readers:

@@ -9,7 +9,7 @@ from dataclasses import asdict
 from datetime import UTC, date, datetime
 from decimal import Decimal
 
-from archon.adapters.inbound import LocalReader, read_email
+from archon.adapters.inbound import BUSINESS_EMAIL, BUSINESS_NAME, LocalReader, read_email
 from archon.adapters.ses import Outbox
 from archon.agents.claims import Outstanding, Overdue, PartPaid
 from archon.agents.draft import ChaseDraft
@@ -31,7 +31,8 @@ SAMPLES = {
     "Invoice JN-4410 dated 2026-07-02, due 2026-08-01. "
     "Net 1500.00 EUR, VAT 360.00 EUR, total 1860.00 EUR.",
     "payment": "From: accounts@buildco.example\nSubject: Remittance\n\n"
-    "We have paid 600.00 EUR on 2026-08-20 against invoice JN-4410.",
+    "We have paid 600.00 EUR on 2026-08-20 against invoice JN-4410.\n"
+    "Transfer ID: DEMO-BANK-600-A",
     "supplier": "From: billing@wholesaler.example\nSubject: Invoice WS-77\n\n"
     "Invoice WS-77 dated 2026-08-02, due 2026-10-01. "
     "Net 100.00 EUR, VAT 24.00 EUR, total 124.00 EUR.",
@@ -64,7 +65,7 @@ def fresh() -> dict:
         "draft": None,
         "sends": {},
         "activity": [],
-        "requests": {},
+    "requests": {},
     }
 
 
@@ -125,7 +126,19 @@ def intake(state: dict, body: str, replace_id: str | None = None) -> None:
         # Mixed/unsupported currencies cannot silently become euro debt.
         if re.search(r"\b(?:USD|GBP|CHF|JPY|CAD|AUD)\b|[$£¥]", body, re.I):
             raise ValueError("Only EUR is supported. No exchange rate has been authorized.")
-        reading = read_email(body, source_id, client=LocalReader())
+        reading = read_email(
+            body, source_id, client=LocalReader(), ours=BUSINESS_EMAIL,
+            business_name=BUSINESS_NAME,
+        )
+        source.update(kind=type(reading.document).__name__,
+                      document=json.loads(_encode(reading.document)),
+                      redactions=reading.redactions)
+        if previous and previous["kind"] == "Receipt":
+            if source["kind"] != "Receipt" or (
+                previous["document"] and
+                previous["document"]["settles"] != source["document"]["settles"]
+            ):
+                raise ValueError("Correct the same payment evidence; an invoice cannot resolve it.")
         books_for(state).record(reading.document)
         source.update(
             status="posted",
@@ -138,6 +151,8 @@ def intake(state: dict, body: str, replace_id: str | None = None) -> None:
             previous["corrected_by"] = source_id
     except ValueError as exc:
         source["error"] = str(exc)
+        if "Payment identity" in source["error"]:
+            source["kind"] = "Receipt"
     state["sources"].append(source)
     state["draft"], state["graph"], state["proposal"] = None, None, None
     event(
@@ -323,12 +338,45 @@ def propose(state: dict, invoice_id: str, body: str) -> None:
                 "status": "refused",
                 "error": reading.why,
                 "kind": "ClientReply",
+                "invoice_id": invoice_id,
                 "document": None,
                 "redactions": reading.redactions,
                 "at": now(),
             }
         )
     event(state, "Payment terms read", f"{invoice_id}: {reading.why}")
+
+
+def resolve(state: dict, source_id: str, decision: str, note: str,
+            duplicate_of: str | None = None) -> None:
+    """Record a human resolution, never a replacement journal entry or automatic resend."""
+    source = next((s for s in holds(state) if s["id"] == source_id), None)
+    if source is None:
+        raise Conflict("That source is no longer held. Refresh and inspect the current record.")
+    if len(note.strip()) < 20:
+        raise ValueError("Record the human evidence and reason in at least 20 characters.")
+    if decision == "duplicate-payment":
+        target = next((s for s in state["sources"] if s["id"] == duplicate_of
+                       and s["status"] == "posted" and s["kind"] == "Receipt"), None)
+        if source["kind"] != "Receipt" or target is None:
+            raise ValueError("Select the posted receipt for this duplicate payment.")
+        candidate = source["document"]
+        if candidate and any(candidate[k] != target["document"][k]
+                             for k in ("settles", "amount", "received_on")):
+            raise ValueError("The payment facts conflict. Correct the source before resolving it.")
+    elif decision == "resume-collection":
+        if source["kind"] != "ClientReply" or not source.get("invoice_id"):
+            raise ValueError("Only an invoice-linked client reply can have this resolution.")
+        if not any(s.doc_id == source["invoice_id"] for s in books_for(state).uncollected()):
+            raise ValueError("This invoice is no longer outstanding. Review the current books.")
+    else:
+        raise ValueError("Choose a supported human resolution.")
+    source["status"] = "resolved"
+    source["resolution"] = {"decision": decision, "note": note.strip(), "at": now(),
+                            "duplicate_of": duplicate_of, "approved_by": "demo visitor",
+                            "revision": state["revision"]}
+    state["draft"], state["graph"], state["proposal"] = None, None, None
+    event(state, "Human resolution recorded", f"{source_id}: {decision}; fresh review required.")
 
 
 def agree(state: dict, fingerprint: str) -> None:
@@ -375,6 +423,8 @@ def snapshot(state: dict) -> dict:
     }
     result.update(
         as_of=str(AS_OF),
+        business={"name": BUSINESS_NAME, "email": BUSINESS_EMAIL,
+                  "source": "Received post; explicit original headers for outbound/forwarded mail"},
         synthetic=True,
         reader="Bounded local rules; no model call",
         provider="Simulated outbox; no real email",

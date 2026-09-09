@@ -18,7 +18,14 @@ from dataclasses import dataclass, field
 from datetime import date
 from decimal import Decimal
 
-from .documents import Payment, PayrollRun, PurchaseInvoice, Receipt, SalesInvoice
+from .documents import (
+    Payment,
+    PayrollRun,
+    PurchaseInvoice,
+    Receipt,
+    SalesInvoice,
+    transfer_identity,
+)
 from .ledger import Ledger
 from .money import ZERO, money
 
@@ -123,6 +130,28 @@ class Books:
             noun = "sales invoice"
         else:
             return
+
+        # A reference names a bank event across messages, invoices and directions.
+        # Old/manual documents can lack one; repeated equal amounts then require
+        # human evidence rather than an inference that two instalments are one.
+        identity = transfer_identity(document.transfer_id)
+        for previous in (*self.payments, *self.receipts):
+            previous_identity = transfer_identity(previous.transfer_id)
+            if identity and identity == previous_identity:
+                raise SettlementError(
+                    "This transfer identity is already recorded. Review the original payment; "
+                    "a forwarded or corrected email cannot credit it again."
+                )
+            if (
+                type(previous) is type(document)
+                and previous.settles == document.settles
+                and previous.amount == document.amount
+                and (not identity or not previous_identity)
+            ):
+                raise SettlementError(
+                    "Ambiguous payment identity: equal amounts may be distinct instalments. "
+                    "A person must reconcile the bank references before another posting."
+                )
 
         if document.settles not in known:
             raise SettlementError(

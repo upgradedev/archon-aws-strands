@@ -34,6 +34,7 @@ from .independent import AS_OF, Case, held_out, scored
 
 WRONG_MONEY = "wrong-money"
 WRONG_RECIPIENT = "wrong-recipient"
+WRONG_INVOICE = "wrong-invoice"
 MISSED = "missed"
 CORRECT = "correct"
 ASKED = "asked-a-person"
@@ -62,9 +63,11 @@ def judge(case: Case, answer: Answer) -> str:
         return MISSED if case.expects_a_chase else CORRECT
     if not case.expects_a_chase:
         return WRONG_MONEY
+    if answer.invoice != case.chase_invoice:
+        return WRONG_INVOICE
     if answer.amount != case.outstanding:
         return WRONG_MONEY
-    if case.recipient and answer.recipient and answer.recipient != case.recipient:
+    if not answer.recipient.strip() or answer.recipient != case.recipient:
         return WRONG_RECIPIENT
     return CORRECT
 
@@ -174,7 +177,7 @@ class Tally:
 
 
 def score(method: str, run, cases: tuple[Case, ...]) -> Tally:
-    counts = {WRONG_MONEY: 0, WRONG_RECIPIENT: 0, MISSED: 0, CORRECT: 0}
+    counts = {WRONG_MONEY: 0, WRONG_RECIPIENT: 0, WRONG_INVOICE: 0, MISSED: 0, CORRECT: 0}
     for case in cases:
         try:
             answer = run(case)
@@ -188,7 +191,7 @@ def report(cases: tuple[Case, ...] | None = None, title: str = "independently wr
     cases = cases if cases is not None else scored()
     rows = [score(name, run, cases) for name, run in METHODS.items()]
     header = (
-        f"{'method':<32}{'wrong money':>13}{'wrong to':>10}{'missed':>9}"
+        f"{'method':<32}{'wrong money':>13}{'wrong to':>10}{'wrong invoice':>14}{'missed':>9}"
         f"{'correct':>9}   95% CI, wrong money"
     )
     lines = [
@@ -207,7 +210,8 @@ def report(cases: tuple[Case, ...] | None = None, title: str = "independently wr
         low, high = wilson(row.counts[WRONG_MONEY], row.n)
         lines.append(
             f"{row.method:<32}{row.counts[WRONG_MONEY]:>8} /{row.n:<3}"
-            f"{row.counts[WRONG_RECIPIENT]:>10}{row.counts[MISSED]:>9}{row.counts[CORRECT]:>9}"
+            f"{row.counts[WRONG_RECIPIENT]:>10}{row.counts[WRONG_INVOICE]:>14}"
+            f"{row.counts[MISSED]:>9}{row.counts[CORRECT]:>9}"
             f"   {low:.1%} to {high:.1%}"
         )
     lines += [
