@@ -195,7 +195,7 @@
   ],
   "verification": {
     "deployment_target": "https://d2ssmv59q16d0b.cloudfront.net/",
-    "deployment_status": "PENDING: frontend upload and CloudFront-to-Lambda-to-S3 acceptance have not been verified by this testbook. ARCHON_UI_URL selects this target for the same complete browser suite; no local servers then run.",
+    "deployment_status": "PASS: all 16 desktop/mobile journeys against CloudFront/Lambda/private S3, run https://github.com/upgradedev/archon-aws-strands/actions/runs/34327809017 on 2026-09-09. Tested frontend d83b611c9e3e360cefa1428d27beab0e4b4420bf; API 08fd7f8c266409891475fbc7bad878d103ec3dcc. Command: ARCHON_UI_URL=https://d2ssmv59q16d0b.cloudfront.net/ npm run test:e2e. Automated synthetic acceptance, not human signoff.",
     "evidence_level": "Pipeline — synthetic data only",
     "verified_commit": "2c2a6ce6e7322c8536b207f1cc4151fbe543e715",
     "run_url": "https://github.com/upgradedev/archon-aws-strands/actions/runs/34326637050",
@@ -233,7 +233,7 @@
       "frontend-lock-34326637050"
     ],
     "artifact_contents": "dist, Python/unit/browser JUnit, measured coverage, full npm audit, desktop/mobile traces and screenshots",
-    "limitations": "Mapped automation passed; this does not attest human execution of every testbook step. Live AWS/S3 behavior and independent delivery are separate owner gates. Public model is scripted and provider simulated; no real model or email calls occurred.",
+    "limitations": "Mapped automation passed; this does not attest human execution of every testbook step. Live AWS/S3 browser acceptance is recorded separately above. Human UAT and independent real delivery remain unverified. Public model is scripted and provider simulated; no real model or email calls occurred.",
     "human_signoff": "NOT_RUN"
   }
 }
