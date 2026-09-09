@@ -329,13 +329,19 @@ def test_s3_private_prefix_and_conditional_writes():
         store.put(handle, state, None)
 
 
-def test_s3_no_list_bucket_denial_is_unavailable_not_claimed_missing(caplog):
+def test_s3_no_list_bucket_denial_is_unavailable_not_claimed_missing(client, monkeypatch, caplog):
     class Denied:
         def get_object(self, **kwargs):
             raise S3Error("AccessDenied")
 
+    denied_store = S3Sessions("private-bucket", client=Denied())
     with pytest.raises(MissingSession, match="unavailable or expired"):
-        S3Sessions("private-bucket", client=Denied()).get("a" * 64)
+        denied_store.get("a" * 64)
+    monkeypatch.setattr(api, "store", lambda: denied_store)
+    response = client.get("/api/workspace", headers={"X-Archon-Session": "a" * 64})
+    assert response.status_code == 401
+    assert "unavailable or expired" in response.json()["detail"]
+    assert "AccessDenied" not in response.text and "private-bucket" not in response.text
     assert "AccessDenied" in caplog.text
     assert "private-bucket" not in caplog.text
 
