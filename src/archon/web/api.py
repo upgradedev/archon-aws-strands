@@ -110,10 +110,17 @@ def mutate(handle: str, request: Mutation, operation: str, action):
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "mode": "synthetic", "live_send": False, "live_model": False,
-            "commit": os.environ.get("ARCHON_COMMIT_SHA", "local-unversioned"),
-            "reader": "bounded-local-rules", "model": "LedgerScriptModel",
-            "orchestration": "Strands", "provider": "SimulatedProvider"}
+    return {
+        "status": "ok",
+        "mode": "synthetic",
+        "live_send": False,
+        "live_model": False,
+        "commit": os.environ.get("ARCHON_COMMIT_SHA", "local-unversioned"),
+        "reader": "bounded-local-rules",
+        "model": "LedgerScriptModel",
+        "orchestration": "Strands",
+        "provider": "SimulatedProvider",
+    }
 
 
 @app.post("/api/sessions", status_code=201)
