@@ -93,6 +93,16 @@ figure in this repository was measured through that** and none is carried over.
 invoice and a sales invoice are the same email seen from two sides, so it
 guessed, and turned money owed *to* the firm into money owed *by* it.
 
+## The baseline is weaker here than real software would be
+
+An adversarial review found that `reference_matching` reads anglophone number formats and a hard-coded
+list of reference prefixes. Several fixtures are Dutch and Irish, and on those it fails for reasons a real
+reconciliation tool would not.
+
+**So its 10-of-20 is an upper bound on its error rate rather than a measurement of it.** Fixing it can
+only narrow the gap this page reports, never widen it. That is stated here rather than left for somebody
+else to find, because a baseline nobody has tried to strengthen is not a baseline.
+
 ## What this still does not show
 
 Twenty-four cases is small. The authors were agents, not the firms themselves,
