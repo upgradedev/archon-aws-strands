@@ -1,8 +1,14 @@
 import { test, expect, type Page } from '@playwright/test';
 
 async function go(page: Page, name: string) {
+  const legacy = name;
+  name = ({ 'Action queue': 'Workspace', 'Approvals & arrangements': 'Workspace', 'Documents & payments': 'Records', 'Activity & delivery': 'History' } as Record<string, string>)[name] ?? name;
   await page.getByRole('navigation', { name: 'Workspace' }).getByRole('link', { name, exact: true }).click();
   await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
+  if (legacy === 'Action queue' || legacy === 'Approvals & arrangements') {
+    const tab = page.getByRole('link', { name: 'Draft & signoff', exact: true });
+    if (await tab.count()) await tab.click();
+  }
 }
 async function sample(page: Page, name: string) {
   await page.getByRole('button', { name: `Sample ${name}`, exact: true }).click();
@@ -13,14 +19,17 @@ async function sample(page: Page, name: string) {
 }
 async function books(page: Page) {
   await page.goto('/#/documents');
-  await expect(page.getByRole('heading', { name: 'Documents & payments', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Records', exact: true })).toBeVisible();
   await sample(page, 'invoice'); await sample(page, 'payment');
 }
 async function draft(page: Page) {
   await books(page);
   await go(page, 'Action queue');
+  const completed = page.waitForResponse(response => response.url().endsWith('/api/reason'));
   await page.getByRole('button', { name: /Run Strands/ }).click();
-  await expect(page.getByRole('heading', { name: 'Approvals & arrangements', exact: true })).toBeVisible();
+  expect((await completed).status()).toBe(200);
+  await expect(page.getByRole('heading', { name: 'Workspace', exact: true })).toBeVisible();
+  await expect(page.locator('.email > pre')).toBeVisible();
 }
 
 test('raw emails → real HTTP / Strands → exact draft → simulated durable receipt', async ({ page }, info) => {
@@ -28,12 +37,13 @@ test('raw emails → real HTTP / Strands → exact draft → simulated durable r
   await draft(page);
   await expect(page.locator('.email')).toContainText('1,260.00 EUR');
   await expect(page.locator('.email')).toContainText('accounts@buildco.example');
+  await page.getByText('Six domain reports · inspect', { exact: true }).click();
   await expect(page.locator('.domain-reports details')).toHaveCount(6);
   await expect(page.getByRole('button', { name: /Approve exact draft/ })).toBeDisabled();
   await page.screenshot({ path: info.outputPath('approval.png'), fullPage: true });
   await page.getByLabel(/I reviewed this recipient/).check();
   await page.getByRole('button', { name: /Approve exact draft/ }).click();
-  await expect(page.getByRole('heading', { name: 'Activity & delivery', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'History', exact: true })).toBeVisible();
   await expect(page.locator('.receipt-list')).toContainText('Simulated · provider-accepted');
   const id = await page.locator('.receipt-list dd').first().textContent();
   await page.reload();
@@ -47,7 +57,8 @@ test('raw emails → real HTTP / Strands → exact draft → simulated durable r
 
 test('arrangement approval holds collections across reload without reducing the debt', async ({ page }, info) => {
   await books(page); await go(page, 'Approvals & arrangements');
-  await page.getByLabel('Outstanding invoice', { exact: true }).selectOption('JN-4410');
+  await page.getByRole('link', { name: 'Payment arrangement', exact: true }).click();
+  await expect(page.getByLabel('Outstanding invoice', { exact: true })).toHaveValue('JN-4410');
   await page.getByLabel("Client's proposed terms").fill('2026-09-20: 600.00 EUR\n2026-10-05: 660.00 EUR');
   await page.getByRole('button', { name: 'Read proposed terms', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Approve arrangement', exact: true })).toBeDisabled();
@@ -121,8 +132,11 @@ test('approval lost before reaching the API retries the same intent after durabl
   await expect(page.getByRole('alert')).toBeVisible();
   await page.getByRole('button', { name: 'Refresh durable state', exact: true }).click();
   await expect(page.getByRole('alert')).toHaveCount(0);
+  await expect(page.getByLabel(/I reviewed this recipient/)).not.toBeChecked();
+  await expect(page.getByRole('button', { name: /Approve exact draft/ })).toBeDisabled();
+  await page.getByLabel(/I reviewed this recipient/).check();
   await page.getByRole('button', { name: /Approve exact draft/ }).click();
-  await expect(page.getByRole('heading', { name: 'Activity & delivery', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'History', exact: true })).toBeVisible();
   expect(attempts).toHaveLength(2);
   expect(attempts[1].request_id).toBe(attempts[0].request_id);
   await page.reload();
@@ -160,6 +174,7 @@ test('independent visitors, deep links, keyboard skip, and new workspace', async
 
 test('draft ledger badges open actual invoice and receipt sources without approving', async ({ page }, info) => {
   await draft(page);
+  await page.getByText('Linked ledger evidence', { exact: true }).click();
   const session = await page.evaluate(() => localStorage.getItem('archon.demo.session.v1'));
   const state = await (await page.request.get('/api/workspace', { headers: { 'X-Archon-Session': session! } })).json();
   const evidence = page.getByRole('region', { name: 'Draft ledger evidence' });
@@ -182,9 +197,11 @@ test('draft ledger badges open actual invoice and receipt sources without approv
     await page.reload();
     await expect(opened).toHaveAttribute('open', '');
     await go(page, 'Approvals & arrangements');
+    await page.getByText('Linked ledger evidence', { exact: true }).click();
   }
   await expect(page.getByRole('button', { name: /Approve exact draft/ })).toBeDisabled();
   await go(page, 'Action queue');
+  await go(page, 'Dashboard');
   await expect(page.getByRole('region', { name: 'Ledger balances' })).toContainText('1,260.00 EUR');
   expect(await page.locator('.stat p').first().evaluate(element => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(14);
   expect(await page.getByRole('navigation').getByRole('link').first().evaluate(element => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(14);
@@ -217,7 +234,134 @@ test('sample sliding pill preserves keyboard selection and reduced-motion prefer
   await expect(group.getByRole('button', { pressed: true })).toHaveCount(0);
   await go(page, 'Action queue');
   await expect(page.getByText('Nothing to chase yet', { exact: true })).toBeVisible();
+  await go(page, 'Dashboard');
   const tile = page.locator('.stat').first();
   await tile.hover();
   expect(await tile.evaluate(element => getComputedStyle(element).transform)).toBe('none');
+});
+
+test('Dashboard metrics drill into actual records and selected workspace screenshots', async ({ page }, info) => {
+  await books(page); await go(page, 'Dashboard');
+  await expect(page.getByTestId('metric-outstanding')).toContainText('1,260.00 EUR');
+  await expect(page.getByTestId('metric-overdue')).toContainText('1,260.00 EUR');
+  await expect(page.getByTestId('metric-payments')).toContainText('600.00 EUR');
+  await expect(page.getByTestId('metric-drafts').locator('strong')).toHaveText('0');
+  await expect(page.getByTestId('metric-holds').locator('strong')).toHaveText('0');
+  for (const metric of ['outstanding', 'overdue']) {
+    await page.getByTestId(`metric-${metric}`).click();
+    await expect(page.getByRole('table')).toContainText('JN-4410');
+    await expect(page.getByRole('table')).toContainText('1,260.00 EUR');
+    await page.reload(); await expect(page.getByRole('table')).toContainText('JN-4410');
+    await go(page, 'Dashboard');
+  }
+  await page.getByTestId('metric-payments').click();
+  await expect(page.getByRole('heading', { name: 'Recorded client receipts' })).toBeVisible();
+  await expect(page.locator('.hold-list')).toContainText('600.00 EUR');
+  await page.getByRole('link', { name: 'Inspect linked case →', exact: true }).click();
+  await expect(page.locator('.source-preview pre')).toContainText('We have paid 600.00 EUR');
+  await page.getByRole('button', { name: /Run Strands/ }).click();
+  await expect(page.locator('.email > pre')).toContainText('1,260.00 EUR');
+  await expect(page.getByRole('button', { name: /Approve exact draft/ })).toBeDisabled();
+  const workspaceShot = info.outputPath('selected-workspace.png');
+  await page.screenshot({ path: workspaceShot, fullPage: true });
+  await info.attach('Selected Workspace', { path: workspaceShot, contentType: 'image/png' });
+  await go(page, 'Dashboard');
+  await expect(page.getByTestId('metric-drafts').locator('strong')).toHaveText('1');
+  const dashboardShot = info.outputPath('dashboard.png');
+  await page.screenshot({ path: dashboardShot, fullPage: true });
+  await info.attach('Dashboard', { path: dashboardShot, contentType: 'image/png' });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test('query typing keeps focus and case context survives navigation, browser back and reload', async ({ page }) => {
+  await books(page); await go(page, 'Workspace');
+  await page.getByRole('link', { name: /Recorded receipt ·/ }).click();
+  const selected = page.url().split('#')[1];
+  await go(page, 'Dashboard'); await page.reload(); await go(page, 'Workspace');
+  expect(page.url().split('#')[1]).toBe(selected);
+  await expect(page.locator('.source-preview pre')).toContainText('600.00 EUR');
+  await go(page, 'Records');
+  const search = page.getByRole('searchbox', { name: 'Search records' });
+  await search.pressSequentially('JN-4410');
+  await expect(search).toBeFocused(); await expect(search).toHaveValue('JN-4410');
+  expect(page.url()).toContain('q=JN-4410');
+  await search.pressSequentially('does-not-exist');
+  await expect(page.getByText('No matching sources', { exact: true })).toBeVisible();
+  await search.fill('JN-4410');
+  await page.reload(); await expect(search).toHaveValue('JN-4410');
+  await go(page, 'History'); await page.goBack();
+  await expect(search).toHaveValue('JN-4410');
+  await go(page, 'Workspace');
+  await expect(page.locator('.source-preview pre')).toContainText('600.00 EUR');
+  await page.getByRole('link', { name: /Invoice · JN-4410/ }).click();
+  await expect(page.locator('.source-preview pre')).toContainText('Net 1500.00 EUR');
+  await page.goBack();
+  await expect(page.locator('.source-preview pre')).toContainText('600.00 EUR');
+});
+
+test('late reasoning response cannot attach a draft to another selected case', async ({ page }) => {
+  await books(page);
+  await page.getByRole('button', { name: 'Sample invoice', exact: true }).click();
+  const raw = page.getByLabel(/Email headers/);
+  await raw.fill((await raw.inputValue()).replaceAll('JN-4410', 'JN-4420').replace('due 2026-08-01', 'due 2026-08-08'));
+  await page.getByRole('button', { name: 'Read & post email', exact: true }).click();
+  await expect(raw).toHaveValue(''); await go(page, 'Workspace');
+  await page.getByRole('link', { name: /BuildCo Ltd JN-4420/ }).click();
+  await expect(page.getByRole('button', { name: /Run Strands/ })).toBeDisabled();
+  await expect(page.getByRole('button', { name: /Approve exact draft/ })).toHaveCount(0);
+  await page.getByRole('link', { name: /Open backend priority JN-4410/ }).click();
+  let release!: () => void;
+  let reached!: () => void;
+  const backendDone = new Promise<void>(resolve => { reached = resolve; });
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  await page.route('**/api/reason', async route => {
+    expect(route.request().postDataJSON()).not.toHaveProperty('invoice_id');
+    const response = await route.fetch(); expect(response.ok()).toBe(true); reached();
+    await gate; await route.fulfill({ response });
+  }, { times: 1 });
+  await page.getByRole('button', { name: /Run Strands/ }).click(); await backendDone;
+  await page.getByRole('link', { name: /BuildCo Ltd JN-4420/ }).click(); release();
+  await expect(page.getByText('Draft belongs to another invoice', { exact: true })).toBeVisible();
+  expect(page.url()).toContain('invoice=JN-4420');
+  await expect(page.getByRole('button', { name: /Approve exact draft/ })).toHaveCount(0);
+  await page.reload(); await expect(page.getByText('Draft belongs to another invoice', { exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'Review that exact draft →', exact: true }).click();
+  await expect(page.locator('.email > pre')).toContainText('JN-4410');
+  await expect(page.getByRole('button', { name: /Approve exact draft/ })).toBeDisabled();
+});
+
+test('duplicate intake leaves ledger metrics intact and offline records require explicit refresh', async ({ page, context }) => {
+  await books(page);
+  await page.getByRole('button', { name: 'Sample payment', exact: true }).click();
+  await page.getByRole('button', { name: 'Read & post email', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('already posted');
+  await page.getByRole('button', { name: 'Refresh durable state', exact: true }).click();
+  await go(page, 'Dashboard');
+  await expect(page.getByTestId('metric-payments')).toContainText('600.00 EUR');
+  await expect(page.getByTestId('metric-outstanding')).toContainText('1,260.00 EUR');
+  await context.setOffline(true);
+  await page.getByRole('button', { name: 'Refresh', exact: true }).click();
+  await expect(page.getByRole('alert')).toBeVisible();
+  await expect(page.getByTestId('metric-outstanding')).toContainText('1,260.00 EUR');
+  await expect(page.getByText('Last known snapshot', { exact: true })).toBeVisible();
+  await go(page, 'Workspace'); await expect(page.getByRole('button', { name: /Run Strands/ })).toBeDisabled();
+  await context.setOffline(false);
+  await expect(page.getByRole('button', { name: /Run Strands/ })).toBeDisabled();
+  await page.getByRole('button', { name: 'Refresh durable state', exact: true }).click();
+  await expect(page.getByRole('button', { name: /Run Strands/ })).toBeEnabled();
+});
+
+test('checked consent expires on an open page and no simulated receipt is created', async ({ page }) => {
+  await draft(page);
+  await page.clock.install({ time: new Date() });
+  await page.getByLabel(/I reviewed this recipient/).check();
+  await expect(page.getByRole('button', { name: /Approve exact draft/ })).toBeEnabled();
+  await page.clock.fastForward(1800001);
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+  await expect(page.getByRole('button', { name: /Approve exact draft/ })).toBeDisabled();
+  await expect(page.getByLabel(/I reviewed this recipient/)).not.toBeChecked();
+  await expect(page.getByText(/This draft expired/)).toBeVisible();
+  await go(page, 'Dashboard');
+  await expect(page.getByTestId('metric-drafts').locator('strong')).toHaveText('0');
+  await go(page, 'History'); await expect(page.getByText('No delivery attempts', { exact: true })).toBeVisible();
 });

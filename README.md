@@ -128,19 +128,47 @@ the shapes, and the adversarial line is one I wrote: a real attacker would write
 
 The new `frontend/` application is a React, TypeScript and Tailwind ledger workstation.
 Live AWS application: [ARCHON workstation](https://d2ssmv59q16d0b.cloudfront.net/).
-[Live AWS acceptance](https://github.com/upgradedev/archon-aws-strands/actions/runs/34327809017)
+[Historical live AWS acceptance](https://github.com/upgradedev/archon-aws-strands/actions/runs/34327809017)
 passed all 16 desktop/mobile journeys on 2026-09-09 against CloudFront, Lambda and private S3.
 This is automated synthetic acceptance, not a person's UAT signoff or evidence of real email delivery.
 The tested frontend was `d83b611c9e3e360cefa1428d27beab0e4b4420bf`; current release identity is
 published at `/release.json`, and API identity at `/api/health`.
 GitHub Pages is not the live product hosting path; the HTML export is a legacy local/CI artifact.
-Its routes are `#/queue`, `#/documents`, `#/approvals` and `#/activity`; source links use
-`#/documents?source=JN-4410`. Every public workspace starts empty and is labelled synthetic.
-In Documents, post the sample invoice and then the sample payment. The domain calculates
+This result applies only to that named historical release, not the new Dashboard and Workspace.
+Current acceptance comes from the exact commit's CI artifacts and deployed release metadata.
+The navigation is Dashboard → Workspace → Records → History. Old `#/queue`, `#/documents`,
+`#/approvals` and `#/activity` bookmarks still resolve; source links retain their actual source ID.
+Invoice/source context travels in navigation query parameters and survives back and reload.
+Every public workspace starts empty and is labelled synthetic.
+In Records, choose Add synthetic email, then post the sample invoice and sample payment. The domain calculates
 1,260.00 EUR outstanding from 1,860.00 EUR invoiced and 600.00 EUR received. Run Strands from
-the action queue, review the exact draft, and approve a **simulated** receipt. The six reader
+the selected Workspace case, review the exact draft, and approve a **simulated** receipt. The six reader
 tools execute through the real Strands graph; its model is scripted and supplies no AI judgment.
 No mailbox, bank, live model, or real email provider is connected to this public path.
+
+The Dashboard derives outstanding and overdue debt from client settlement rows, recorded receipts
+from posted receipt documents, pending drafts from the stored draft's time and receipt state, and
+source holds from refused evidence. Overdue includes debt on an agreed arrangement; that does not
+make it chaseable. Balances cover all session records as of the API ledger date; the separately
+labelled quarter report covers 2026-07-01 through that date. Missing amounts display Unknown,
+and unreadable or duplicated balance evidence blocks target selection. Monetary sums use integer
+cents, never floating-point estimates. Metric links open the corresponding filtered records.
+
+The collections desk pairs its queue and source selection with the original document, arithmetic,
+stored draft and explicit signoff. Payment arrangements use a separate case tab. `/api/reason`
+still takes no invoice ID: the backend chooses its oldest overdue invoice, largest on a tie.
+Other selected invoices can be inspected but cannot be silently substituted as the drafting target.
+If a missing recipient masks an arrangement in the existing API projection, preparation is held
+with an explanation. This is a conservative UI limit, not a new domain rule or API contract.
+Only the exact stored body/fingerprint can be approved. Consent resets on revision, source or
+case changes, durable refresh and uncertain outcomes; an open page disables expired consent.
+Known 400/422 refusals keep intake editable. Unknown outcomes, timeout, unavailable sessions and
+409 conflicts require durable refresh before retry; retry preserves the original request ID.
+
+Visual inspiration: Kerdon's deep navy surfaces, panel hierarchy and violet/indigo financial
+workspace direction were rebuilt for this application. No Kerdon components, dependencies,
+customer data, tenant configuration, source identifiers or example metric values were reused.
+The source and scenario IDs shown in this interface come from this application's actual API data.
 
 The API is `archon.web.api:app`; the AWS HTTP API v2 entrypoint is
 `archon.web.lambda_handler.handler`. Use same-origin `/api/*`. Local runtime state uses
@@ -171,6 +199,11 @@ HTML/JUnit reports, traces, screenshots, failure video and the testbook for 14 d
 result summary in GitHub Actions. Failure makes the pipeline red; it does not undo a merge
 or automatically roll back the deployed frontend. Backend deployment remains a separate process.
 Manual reruns remain available. Automated results never set human UAT signoff to PASS.
+Successful Dashboard and selected Workspace journeys attach desktop and mobile PNGs. The small
+`ui-screenshots-<run_id>` artifact contains screenshots only; full traces and videos remain in
+the existing evidence bundle. Human device, screen-reader and high-contrast acceptance remain
+NOT_RUN until a person performs them. New/changed testbook cases are PENDING_CI until their
+exact branch run provides evidence; historical PASS entries do not attest the current UX.
 
 For the same browser suite against the deployed AWS target, set
 `ARCHON_UI_URL=https://d2ssmv59q16d0b.cloudfront.net` when running `npm run test:e2e`

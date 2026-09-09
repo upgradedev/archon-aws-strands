@@ -81,6 +81,14 @@ jobs:
         run: |
           npx playwright install --with-deps chromium
           npm run test:e2e
+      - name: Review screenshots without downloading traces and videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-screenshots-${{ github.run_id }}
+          path: frontend/test-results/**/*.png
+          retention-days: 14
+          if-no-files-found: warn
       - name: Evidence and deployable static build
         if: always()
         uses: actions/upload-artifact@v4
