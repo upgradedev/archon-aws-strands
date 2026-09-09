@@ -1,0 +1,58 @@
+name: Package AWS API
+on:
+  workflow_dispatch:
+  push:
+    branches: ["codex/aws-*"]
+    paths: ["src/**", "pyproject.toml", "infra/archon_api_stack.py", ".github/workflows/aws-api-package.yml"]
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build Linux package without cloud credentials
+        run: |
+          python -m pip install --target build/pkg .
+          cp -R src/archon/. build/pkg/archon/
+          test -s build/pkg/archon/web/lambda_handler.py
+          python -m pip freeze --path build/pkg > build/requirements-resolved.txt
+          printf '%s\n' "${{ github.sha }}" > build/commit.txt
+      - name: Exercise packaged API Gateway event adapter
+        env:
+          PYTHONPATH: build/pkg
+          ARCHON_SESSION_DB: /tmp/archon-package-check.sqlite
+          ARCHON_COMMIT_SHA: ${{ github.sha }}
+          AWS_EC2_METADATA_DISABLED: "true"
+        run: |
+          cd /tmp
+          python - <<'PY'
+          import importlib, json, os, sys
+          sys.path.insert(0, os.environ["GITHUB_WORKSPACE"] + "/build/pkg")
+          handler = importlib.import_module("archon.web.lambda_handler").handler
+          event = {"version": "2.0", "rawPath": "/api/health", "rawQueryString": "", "headers": {},
+                   "requestContext": {"http": {"method": "GET", "path": "/api/health", "sourceIp": "127.0.0.1"}}}
+          response = handler(event, None)
+          assert response["statusCode"] == 200, response
+          body = json.loads(response["body"])
+          assert os.environ["ARCHON_COMMIT_SHA"] in json.dumps(body), body
+          print(json.dumps({"health": body, "package_import": "passed"}, indent=2))
+          PY
+      - name: Archive exact package and checksum
+        run: |
+          cd build/pkg
+          zip -qr ../archon-api.zip .
+          cd ..
+          sha256sum archon-api.zip > archon-api.zip.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: archon-aws-api
+          path: |
+            build/archon-api.zip
+            build/archon-api.zip.sha256
+            build/requirements-resolved.txt
+            build/commit.txt
+          retention-days: 14

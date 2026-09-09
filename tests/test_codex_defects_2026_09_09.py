@@ -386,20 +386,24 @@ def test_a_reply_with_no_message_id_is_not_retried(store):
     assert client.calls == 1
 
 
-def test_the_transport_does_not_retry_underneath_the_record():
+def test_the_transport_does_not_retry_underneath_the_record(tmp_path, monkeypatch):
     """One approved draft is one email, and botocore's default breaks that.
 
     Everything above works to make the send happen once. A transport that
     retries three times on its own puts three messages in an inbox while this
     code records one unknown.
     """
-    import inspect
-
     from archon.adapters.ses import live_outbox
+    from archon.store.sqlite import SendLog
 
-    source = inspect.getsource(live_outbox)
-    assert 'retries={"max_attempts": 1' in source
-    assert "Config(" in source
+    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "testing")
+    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "testing")
+    monkeypatch.setenv("AWS_EC2_METADATA_DISABLED", "true")
+    log = SendLog(tmp_path / "operator.db")
+    outbox = live_outbox("operator@example.com", authorized=True,
+                         controlled_recipient="controlled@example.com", log=log)
+    assert outbox.client.meta.config.retries == {"total_max_attempts": 1, "mode": "standard"}
+    assert outbox.log is log
 
 
 def test_a_five_hundred_from_ses_is_not_treated_as_a_refusal():

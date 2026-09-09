@@ -299,9 +299,19 @@ def _claims_for(books: Books, worst) -> tuple[Claim, ...]:
 
 def _outbox(live_send: bool, sender: str) -> Outbox:
     if live_send:  # pragma: no cover - needs verified SES identities
-        from archon.adapters.ses import live_outbox
+        import os
 
-        return live_outbox(sender=sender)
+        from archon.adapters.ses import live_outbox
+        from archon.store.sqlite import SendLog
+
+        path = os.environ.get("ARCHON_SEND_LEDGER")
+        return live_outbox(
+            sender=sender,
+            log=SendLog(path) if path else None,
+            controlled_recipient=os.environ.get("ARCHON_VERIFIED_RECIPIENT"),
+            authorized=os.environ.get("ARCHON_OPERATOR_SEND_AUTHORIZATION")
+            == "I_AUTHORIZE_CONTROLLED_SEND",
+        )
 
     class InMemorySes:
         def __init__(self) -> None:

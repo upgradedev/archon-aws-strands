@@ -1,13 +1,6 @@
-# The walkthrough a judge can open with nothing installed.
-#
-# Built from the real code on every push, so it cannot drift from what the
-# repository actually does: if the ledger changes, these pages change with it,
-# and if the gate stops releasing the chase the build fails rather than
-# publishing a screenshot of a thing that no longer happens.
-#
-# Needs the repository to be public and Pages enabled with "GitHub Actions" as
-# the source. Both are owner actions and neither is code.
-name: pages
+# Retain the original walkthrough as a downloadable regression artifact.
+# The application frontend is deployed only to private S3 / CloudFront.
+name: legacy walkthrough artifact
 
 on:
   push:
@@ -16,11 +9,9 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: legacy-walkthrough
   cancel-in-progress: false
 
 jobs:
@@ -51,41 +42,8 @@ jobs:
               print(f"{name}.html ok, {len(html):,} bytes")
           PY
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
+          name: legacy-walkthrough
           path: site
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      # Publishing needs Pages switched on in the repository settings with
-      # "GitHub Actions" as the source, and that is an owner action, not code.
-      # Until it is done this step 404s. It is allowed to fail rather than
-      # painting a red cross on every commit of a repository a judge is about to
-      # read: the build job above is the real gate, and it fails properly if the
-      # walkthrough stops rendering. What this must not do is fail silently, so
-      # the outcome is written into the run summary either way.
-      - id: deployment
-        continue-on-error: true
-        uses: actions/deploy-pages@v4
-
-      - name: say plainly whether it published
-        run: |
-          if [ -n "${{ steps.deployment.outputs.page_url }}" ]; then
-            echo "### Published" >> "$GITHUB_STEP_SUMMARY"
-            echo "${{ steps.deployment.outputs.page_url }}" >> "$GITHUB_STEP_SUMMARY"
-          else
-            {
-              echo "### Not published, and this is an owner action"
-              echo ""
-              echo "The pages were built from the real code and are correct; only the"
-              echo "deployment was refused. Enable Pages with source \"GitHub Actions\" at"
-              echo "https://github.com/${{ github.repository }}/settings/pages and re-run."
-              echo ""
-              echo "Until then there is no public URL for a judge to open."
-            } >> "$GITHUB_STEP_SUMMARY"
-          fi
+          retention-days: 14
