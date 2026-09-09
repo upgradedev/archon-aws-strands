@@ -35,7 +35,7 @@ requiring the source of a derived work to be released under their terms.
 
 | service | terms it is used under |
 |---|---|
-| **Amazon Bedrock** | the AWS Customer Agreement and the Bedrock service terms, on the entrant's own account. Model access for `global.anthropic.claude-opus-5` is granted per account and per region and is enabled on the account this was built against |
+| **Amazon Bedrock** | the AWS Customer Agreement and the Bedrock service terms, on the entrant's own account. Model access for `eu.anthropic.claude-opus-5` is granted per account and per region and is enabled on the account this was built against |
 | **Amazon SES** | the same agreement. The account is in the SES sandbox, which permits sending only to verified addresses, and this project does not attempt to send anywhere else |
 | **GitHub Actions and Pages** | the GitHub Terms of Service, on the entrant's own account |
 

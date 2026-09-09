@@ -24,11 +24,24 @@ def test_the_strands_defaults_are_the_ones_ci_printed():
 
 def test_archon_asks_for_a_more_capable_model_than_the_sdk_default():
     assert bedrock.MODEL_ID != bedrock.STRANDS_DEFAULT_MODEL_ID
-    assert bedrock.MODEL_ID.startswith("global.anthropic.")
+    assert "opus" in bedrock.MODEL_ID
 
 
-def test_the_region_defaults_to_the_sdk_region():
-    assert bedrock.REGION == bedrock.STRANDS_DEFAULT_REGION
+def test_the_region_is_europe_and_not_the_sdk_default():
+    """Changed 2026-09-09. The SDK default was inherited rather than chosen.
+
+    The buyer is a European sole trader. Redaction means no address, IBAN, tax
+    number or phone number leaves this machine, but the commercial content that
+    does is a European business's data.
+    """
+    assert bedrock.REGION == "eu-west-1"
+    assert bedrock.REGION != bedrock.STRANDS_DEFAULT_REGION
+
+
+def test_the_inference_profile_keeps_the_request_in_europe():
+    """`global.` may route wherever there is capacity. `eu.` may not."""
+    assert bedrock.MODEL_ID.startswith("eu.")
+    assert not bedrock.MODEL_ID.startswith("global.")
 
 
 def test_max_tokens_is_small_on_purpose():
@@ -41,7 +54,7 @@ def test_max_tokens_is_small_on_purpose():
     ("variable", "attribute", "value"),
     [
         ("ARCHON_BEDROCK_MODEL_ID", "MODEL_ID", "global.anthropic.claude-sonnet-5"),
-        ("ARCHON_BEDROCK_REGION", "REGION", "eu-west-1"),
+        ("ARCHON_BEDROCK_REGION", "REGION", "us-east-1"),
         ("ARCHON_BEDROCK_MAX_TOKENS", "MAX_TOKENS", "512"),
     ],
 )

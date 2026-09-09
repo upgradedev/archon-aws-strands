@@ -44,7 +44,7 @@ Twenty scored cases. Thirteen of them are cases where a chase was genuinely owed
 
 Held out: baselines 3 of 4 wrong money; Archon 0 of 4, sending nothing.
 
-Live rows: `global.anthropic.claude-opus-5`, us-west-2, 2026-09-09, one call per
+Live rows: `eu.anthropic.claude-opus-5`, us-west-2, 2026-09-09, one call per
 email. Transcript: [`FAIR-LIVE-2026-09-09.txt`](FAIR-LIVE-2026-09-09.txt).
 
 ## What this actually says

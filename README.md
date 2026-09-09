@@ -5,7 +5,7 @@
 Built for **Agents for Humans (AWS)**, track **Professional Agents**, on the **Strands Agents SDK** and **Amazon Bedrock**.
 
 [![CI](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml)
-[![tests](https://img.shields.io/badge/tests-485%20offline%2C%20no%20key%2C%20no%20network-22c55e)](#run-it)
+[![tests](https://img.shields.io/badge/tests-489%20offline%2C%20no%20key%2C%20no%20network-22c55e)](#run-it)
 [![coverage](https://img.shields.io/badge/branch%20coverage-92%25-22c55e)](#run-it)
 [![model](https://img.shields.io/badge/Bedrock-claude--opus--5-8b5cf6)](#how-it-is-put-together)
 [![licence](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
@@ -248,6 +248,7 @@ tool; the judgement did not.
 - **An ambiguous outcome is not a failure.** A timeout means the request may already have been accepted, so it is recorded as  and never retried on its own. Only a rejection the provider actually answered with is called , and only that may be tried again. Anything unrecognised is treated as ambiguous, because guessing in that direction sends a second demand for money.
 - **One approved draft is one email, even if the process dies.** The send record is written to disk before anything leaves and consulted before anything leaves again, so a restart cannot turn one approval into two demands for money. It was two, measured, before this existed. An attempt that never settled is never retried on its own: it may already have gone.
 - **When it breaks it says so.** An unexpected failure gets a page in this product's own voice naming the fault and stating that nothing was sent and nothing was written, rather than a bare Internal Server Error that on a demonstration says neither.
+- **It runs in Europe, and the prefix matters more than the region does.** `eu.anthropic.claude-opus-5` in `eu-west-1`, not the SDK's `global.` default: `global.` is cross-region inference and may route a request wherever there is capacity, including out of the EU. The buyer is a European sole trader, and although every address, IBAN, tax number and phone number is redacted before anything leaves the machine, what remains is still a European business's commercial data. This ran in `us-west-2` for a week because that is what a default does: nobody chooses it.
 - **Every input is treated as something a stranger wrote.** A supplier's own name is escaped before it reaches the page, an attachment is capped and refused before it is read rather than after, a document id that looks like SQL is stored as the string it is, and an email giving the reader orders becomes a document or nothing. The page runs no script of its own, which leaves the escaping as the only thing that has to be right.
 - **Every agent tool is a read.** No sequence of tool calls an agent invents can change the books or reach a client.
 
@@ -257,9 +258,9 @@ tool; the judgement did not.
 
 | | |
 |---|---|
-| the ledger, six domains, P&L, cash, metrics | real, 485 tests, 92% branch coverage |
+| the ledger, six domains, P&L, cash, metrics | real, 489 tests, 92% branch coverage |
 | the six-agent Strands graph | real, runs on `strands-agents` 1.53 and 1.54 |
-| Bedrock | real, `global.anthropic.claude-opus-5`, verified by a live call |
+| Bedrock | real, `eu.anthropic.claude-opus-5`, verified by a live call |
 | SES send, idempotent, with receipt | real code; **the account is in the SES sandbox**, so it can send only to verified addresses |
 | reading an attached PDF | real. The text is extracted **on this machine**, redacted here, and only the redacted text is sent, because redaction cannot reach inside a file. A scan is refused rather than guessed at: there is no OCR |
 | reading a forwarded email | real; redaction, typed extraction and the ledger's arithmetic check. Offline it is read by rules and the page says so, with Bedrock it reads anything |

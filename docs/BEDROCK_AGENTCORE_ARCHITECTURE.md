@@ -11,7 +11,7 @@
 >
 > - it called Archon a **dispute resolution** engine. Archon chases an unpaid invoice; it does not
 >   arbitrate disputes, and no dispute logic exists anywhere in the code.
-> - it named **Claude 3.5 Sonnet**. The model is `global.anthropic.claude-opus-5`, verified by a live
+> - it named **Claude 3.5 Sonnet**. The model is `eu.anthropic.claude-opus-5`, verified by a live
 >   call, and `python -m archon.evidence.licences` prints what is actually installed.
 >
 > **What of it does exist today**, and where:

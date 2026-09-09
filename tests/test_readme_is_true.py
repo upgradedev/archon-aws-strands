@@ -326,3 +326,25 @@ def test_ci_runs_the_quickstart_the_readme_prints():
         module = re.search(r"python -m ([\w.]+)", command)
         assert module, command
         assert module.group(1) in workflow, f"{module.group(1)} is not exercised by CI"
+
+
+def test_it_runs_in_europe_and_says_why():
+    """Asked on 2026-09-09: why us-west-2? There was no good reason."""
+    from archon.adapters.bedrock import MODEL_ID, REGION
+
+    assert REGION.startswith("eu-"), REGION
+    assert MODEL_ID.startswith("eu."), "global. may route a request out of the EU"
+
+    said = " ".join(README.split())
+    assert "prefix matters more than the region" in said
+    assert "may route a request wherever there is capacity" in said
+
+
+def test_the_sender_region_matches_the_model_region():
+    """A chase composed in Europe and posted from Oregon is a strange shape."""
+    import inspect
+
+    from archon.adapters.bedrock import REGION
+    from archon.adapters.ses import live_outbox
+
+    assert f'region: str = "{REGION}"' in inspect.getsource(live_outbox)

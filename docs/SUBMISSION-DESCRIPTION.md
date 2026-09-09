@@ -85,7 +85,7 @@ One holds an internal decision back. The other reaches a third party — which i
 
 ### Built with
 
-Strands Agents SDK · Amazon Bedrock (`global.anthropic.claude-opus-5`) · Amazon SES · Python 3.11+ · FastAPI · SQLite
+Strands Agents SDK · Amazon Bedrock (`eu.anthropic.claude-opus-5`) · Amazon SES · Python 3.11+ · FastAPI · SQLite
 
 Runs offline with no AWS account: `pip install -e ".[dev]"` then `python -m archon.demo`.
 

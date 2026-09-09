@@ -274,7 +274,7 @@ class Outbox:
         return self.sent.get(draft.fingerprint())
 
 
-def live_outbox(sender: str, region: str = "us-west-2") -> Outbox:
+def live_outbox(sender: str, region: str = "eu-west-1") -> Outbox:
     """A real SES sender, with the client's own retries turned off.
 
     This matters more than it looks. Everything above here works to make one
@@ -286,6 +286,9 @@ def live_outbox(sender: str, region: str = "us-west-2") -> Outbox:
 
     Retries are a decision about a demand for money and they belong here, where
     the record is, not in a transport default nobody set.
+
+    The region is Europe for the same reason the model's is: the recipient is a
+    European client and the message carries their name and what they owe.
     """
     import boto3
     from botocore.config import Config
