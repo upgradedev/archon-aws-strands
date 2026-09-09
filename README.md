@@ -161,6 +161,17 @@ for this migration run in GitHub Actions. No passing run or human acceptance is 
 these instructions. `frontend/UAT.testbook.html` and `.json` are shipped with the build and
 retain **NOT_RUN** human signoff until a person actually performs the checks.
 
+Every push to `main`, including a merged pull request, now starts
+[`frontend-deploy.yml`](https://github.com/upgradedev/archon-aws-strands/actions/workflows/frontend-deploy.yml):
+offline checks -> AWS frontend deployment -> live desktop/mobile Playwright testbook journeys.
+The release lock stays held through acceptance; queued releases do not interrupt a running test.
+The reusable `aws-uat.yml` checks the exact frontend SHA before and after the journeys and fails
+on browser errors or a changed release. Focused `test.only` tests are refused. Each run retains
+HTML/JUnit reports, traces, screenshots, failure video and the testbook for 14 days, with a
+result summary in GitHub Actions. Failure makes the pipeline red; it does not undo a merge
+or automatically roll back the deployed frontend. Backend deployment remains a separate process.
+Manual reruns remain available. Automated results never set human UAT signoff to PASS.
+
 For the same browser suite against the deployed AWS target, set
 `ARCHON_UI_URL=https://d2ssmv59q16d0b.cloudfront.net` when running `npm run test:e2e`
 in GitHub Actions. This disables both local web servers and runs every desktop/mobile
