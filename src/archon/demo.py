@@ -24,6 +24,7 @@ import argparse
 import sys
 from datetime import UTC, date, datetime
 
+from archon.adapters.bedrock import bedrock_model
 from archon.adapters.scripted import ScriptedModel
 from archon.adapters.ses import Outbox, SendRefused
 from archon.agents import tools, wiring
@@ -181,7 +182,7 @@ def run(live_model: bool = False, live_send: bool = False, sender: str = DEMO_SE
         print(tools.headline_metrics(books, TODAY))
 
     with _Rule("4. Six Strands agents, one per domain, feeding one composer"):
-        model = None if live_model else ScriptedModel(default=SCRIPTED_REPLY)
+        model = bedrock_model() if live_model else ScriptedModel(default=SCRIPTED_REPLY)
         graph = build(books, TODAY, QUARTER_FROM, TODAY, model=model)
         result = graph("Close the quarter and decide whether a chase is warranted.")
         order = [

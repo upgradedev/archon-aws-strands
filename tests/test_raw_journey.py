@@ -43,6 +43,7 @@ REMITTANCE = (
     "From: accounts@buildco.example\n"
     "Subject: Remittance\n\n"
     "We have paid 600.00 EUR on 2026-08-20 against invoice JN-4410."
+    "\nTransfer ID: TEST-BANK-RAW-600-A"
 )
 
 

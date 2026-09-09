@@ -151,11 +151,12 @@ class Session:
         keeps the scripted tone it already had, clearly labelled. Quietly serving
         a script while claiming a live run is the one thing this must not do.
         """
+        from archon.adapters.bedrock import bedrock_model
         from archon.agents.graph import build
         from archon.agents.views import from_graph_result
 
         try:
-            graph = build(self.books, TODAY, QUARTER_FROM, TODAY, model=None)
+            graph = build(self.books, TODAY, QUARTER_FROM, TODAY, model=bedrock_model())
             result = graph("Close the quarter and decide whether a chase is warranted.")
         except Exception as failure:  # noqa: BLE001 - reported, never swallowed
             self.reasoning = Reasoning.unreachable(f"{type(failure).__name__}: {failure}")
@@ -453,6 +454,8 @@ def client_pays() -> RedirectResponse:
                 received_on=TODAY,
                 amount=str(part),
                 source_ref="email:paid-at-lunchtime",
+                # This button creates a new invented demo event, not an imported payment.
+                transfer_id=f"SIMULATED-CLICK-{len(session.books.receipts)}",
             )
         )
         session._remember()

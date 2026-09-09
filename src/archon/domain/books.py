@@ -18,7 +18,14 @@ from dataclasses import dataclass, field
 from datetime import date
 from decimal import Decimal
 
-from .documents import Payment, PayrollRun, PurchaseInvoice, Receipt, SalesInvoice
+from .documents import (
+    Payment,
+    PayrollRun,
+    PurchaseInvoice,
+    Receipt,
+    SalesInvoice,
+    transfer_identity,
+)
 from .ledger import Ledger
 from .money import ZERO, money
 
@@ -67,10 +74,11 @@ class Books:
     #: has ever produced a journal entry, and nothing in here ever will. An
     #: arrangement changes when a chase fires, never what is owed.
     arrangements: dict = field(default_factory=dict)
+    legacy_payment_holds: list[str] = field(default_factory=list)
 
     # ---- taking documents in -------------------------------------------------
 
-    def record(self, document: object) -> None:
+    def record(self, document: object, *, replay_legacy: bool = False) -> None:
         """Post a document and file it under the right domain.
 
         Unknown types are refused rather than ignored. A document that silently
@@ -92,7 +100,7 @@ class Books:
         if bucket is None:
             raise TypeError(f"Archon has no posting rule for {type(document).__name__}")
 
-        self._check_settles(document)
+        self._check_settles(document, replay_legacy=replay_legacy)
 
         entries = list(document.entries())  # type: ignore[attr-defined]
         posted = []
@@ -105,7 +113,7 @@ class Books:
             raise
         bucket.append(document)  # type: ignore[arg-type]
 
-    def _check_settles(self, document: object) -> None:
+    def _check_settles(self, document: object, *, replay_legacy: bool = False) -> None:
         """A payment must point at a real invoice and must not overpay it.
 
         Both failures are the quiet kind. A payment against a typo'd reference
@@ -123,6 +131,31 @@ class Books:
             noun = "sales invoice"
         else:
             return
+
+        # A reference names a bank event across messages, invoices and directions.
+        # Old/manual documents can lack one; repeated equal amounts then require
+        # human evidence rather than an inference that two instalments are one.
+        identity = transfer_identity(document.transfer_id)
+        for previous in (*self.payments, *self.receipts):
+            previous_identity = transfer_identity(previous.transfer_id)
+            if identity and identity == previous_identity:
+                raise SettlementError(
+                    "This transfer identity is already recorded. Review the original payment; "
+                    "a forwarded or corrected email cannot credit it again."
+                )
+            if (
+                type(previous) is type(document)
+                and previous.settles == document.settles
+                and previous.amount == document.amount
+                and (not identity or not previous_identity)
+            ):
+                if replay_legacy and not identity and not previous_identity:
+                    self.legacy_payment_holds.append(document.doc_id)
+                    continue
+                raise SettlementError(
+                    "Ambiguous payment identity: equal amounts may be distinct instalments. "
+                    "A person must reconcile the bank references before another posting."
+                )
 
         if document.settles not in known:
             raise SettlementError(
@@ -219,6 +252,8 @@ class Books:
 
     def overdue(self, as_of: date) -> list[Settlement]:
         """Overdue and not held by a promise somebody is still keeping."""
+        if self.legacy_payment_holds:
+            return []
         return [
             s
             for s in self.uncollected()

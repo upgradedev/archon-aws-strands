@@ -21,6 +21,7 @@ one command.
 
 from __future__ import annotations
 
+import json
 import pathlib
 import re
 import sys
@@ -29,6 +30,7 @@ from dataclasses import dataclass
 from archon.adapters.ses import SendRefused
 from archon.demo import TODAY
 from archon.domain.queue import build as build_queue
+from archon.security.sanitizer import sanitize_payload
 from archon.web.app import Session, _stats
 from archon.web.render import page
 
@@ -142,6 +144,53 @@ def write(target: pathlib.Path) -> list[pathlib.Path]:
         out.write_text(html, encoding="utf-8")
         written.append(out)
     return written
+
+
+def evidence_bundle(state: dict, commit: str) -> dict:
+    """A human-readable, redacted session export; hashes identify bytes, not truth."""
+    def safe(value):
+        return sanitize_payload(str(value)).sanitized_text
+
+    lines = [
+        "ARCHON / SYNTHETIC SESSION EVIDENCE",
+        f"Backend revision: {commit}; ledger revision: {state['revision']}",
+        "Extraction: bounded local rules. Reasoning: LedgerScriptModel (scripted).",
+        "Orchestration: real Strands graph. Provider: simulated outbox; no email delivered.",
+        "A hash identifies bytes, not truth, authenticity, bank settlement or compliance.",
+        "SOURCE DECISIONS",
+    ]
+    for source in state["sources"]:
+        lines += [
+            f"{source['id']} / {source['status']} / {source['kind'] or 'unreadable'}",
+            f"Evidence SHA256 (JSON-encoded source): {source['hash']}",
+            f"Source excerpt (redacted, at most 500 characters): {safe(source['body'])[:500]}",
+            f"Decision: {safe(source['error']) or 'Posted to the ledger'}",
+        ]
+        if source.get("corrected_by"):
+            lines.append(f"Correction: {source['corrected_by']}; original retained.")
+        if source.get("resolution"):
+            resolution = source["resolution"]
+            lines.append(f"Human resolution: {resolution['decision']} / {safe(resolution['note'])}")
+    for resolution in state.get("resolutions", []):
+        lines.append(f"Human attestation: {safe(json.dumps(resolution))}")
+    lines += ["GRAPH AND APPROVAL", safe(json.dumps(state.get("graph"))),
+              "Current draft: " + safe(json.dumps(state.get("draft"))),
+              "Recorded provider outcomes: " + safe(json.dumps(state["sends"]))]
+    from archon.web.workspace import holds
+    for held in holds(state):
+        lines.append(f"ACTIVE HOLD: {held['id']} / {safe(held['error'])}")
+    lines.append("OBSERVED WORKFLOW")
+    for item in state["activity"]:
+        lines.append(f"{item['at']} / {safe(item['title'])} / {safe(item['detail'])}")
+    lines += ["FAILURE AND RECOVERY",
+              "Refused evidence holds collections. Correct the source or record a resolution.",
+              "After timeout or conflict, refresh durable state before an explicit retry.",
+              "Unknown delivery outcomes must not be retried automatically.",
+              "LIMITS",
+              "Synthetic evidence; no connected mailbox, bank, live model or delivery proof.",
+              "Redaction is a best-effort filter; review the bundle before sharing.",
+              "Human active time, money recovered and time saved: unknown; not measured."]
+    return {"revision": state["revision"], "commit": commit, "text": "\n".join(lines)}
 
 
 def main(argv: list[str] | None = None) -> int:

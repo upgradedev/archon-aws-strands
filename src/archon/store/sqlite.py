@@ -239,7 +239,7 @@ def load(path: str | pathlib.Path) -> Books:
     for kind in REPLAY_ORDER:
         for doc_id, body in by_kind[kind]:
             try:
-                books.record(_decode(kind, body))
+                books.record(_decode(kind, body), replay_legacy=True)
             except Exception as broken:
                 raise StoreError(
                     f"{doc_id} ({kind}) will not post: {broken}. The store is not opened "

@@ -1,5 +1,15 @@
 # The first fair comparison, and it does not flatter this project
 
+> Historical evaluation record, not current acceptance or performance evidence. Earlier
+> comparisons remain withdrawn. The retained independent run made zero Archon chases;
+> the evaluator has since gained exact invoice and nonempty-recipient checks. No new benchmark.
+
+For the joiner reconciling inbox invoices: [live AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/).
+Try Records → invoice → payment → Workspace → Run Strands → exact review → History.
+Public extraction is bounded, the model scripted and acceptance simulated; the real Strands graph
+must finish all six reports before drafting. [Evidence and limits](../README.md#evidence-and-limits) ·
+[Required disclosures](../README.md#pre-existing-work-disclosed).
+
 Both earlier sets are withdrawn and stay withdrawn. The worse failure was the
 second: **Archon's column was scored from books the fixture had already posted
 correctly**, while the method it was measured against started from raw text.

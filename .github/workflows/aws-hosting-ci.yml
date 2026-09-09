@@ -32,4 +32,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: aws-frontend-template
+          retention-days: 90
           path: frontend-stack.json

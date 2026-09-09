@@ -11,6 +11,26 @@ permissions:
   contents: read
 
 jobs:
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan all retained Git history, redacted
+        run: |
+          test "$(git rev-parse --is-shallow-repository)" = false
+          docker run --rm -v "$PWD:/repo" -v "$RUNNER_TEMP:/evidence" \
+            ghcr.io/gitleaks/gitleaks:v8.30.1 git /repo --log-opts=--all \
+            --redact --report-format json --report-path /evidence/gitleaks-history.json
+      - name: Retain redacted full-history scan
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: secret-history-${{ github.run_id }}
+          path: ${{ runner.temp }}/gitleaks-history.json
+          retention-days: 90
+          if-no-files-found: error
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -44,6 +64,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frontend-lock-${{ github.run_id }}
+          retention-days: 90
           path: frontend/package-lock.json
       - name: Runtime dependency audit and full audit evidence
         working-directory: frontend
@@ -71,6 +92,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frontend-checkpoint-${{ github.run_id }}
+          retention-days: 90
           path: |
             frontend/dist/
             frontend/artifacts/
@@ -87,7 +109,7 @@ jobs:
         with:
           name: ui-screenshots-${{ github.run_id }}
           path: frontend/test-results/**/*.png
-          retention-days: 14
+          retention-days: 90
           if-no-files-found: warn
       - name: Evidence and deployable static build
         if: always()
@@ -102,4 +124,4 @@ jobs:
             frontend/test-results/
             frontend/UAT.testbook.json
             frontend/UAT.testbook.html
-          retention-days: 14
+          retention-days: 90

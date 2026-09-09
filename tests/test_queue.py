@@ -83,8 +83,10 @@ def test_an_email_with_no_reply_address_becomes_a_visible_pending_item():
     assert kept.read_count == 0
     assert len(kept.refusals) == 1
     said = kept.refusals[0]
-    assert "does not say who sent it" in said, said
-    assert "and it will post" in said, "the refusal has to say what would fix it"
+    assert "Invoice direction is ambiguous" in said, said
+    assert "Include the original issuer and customer" in said, (
+        "the refusal has to say which missing evidence would fix it"
+    )
 
 
 def test_a_full_payment_takes_it_out_of_the_queue_entirely(books):

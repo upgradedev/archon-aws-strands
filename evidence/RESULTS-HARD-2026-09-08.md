@@ -1,5 +1,15 @@
 # The awkward month, run 2026-09-08
 
+> Historical evaluation record, not current acceptance or performance evidence. Earlier
+> comparisons remain withdrawn. The retained independent run made zero Archon chases;
+> the evaluator has since gained exact invoice and nonempty-recipient checks. No new benchmark.
+
+For the joiner reconciling inbox invoices: [live AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/).
+Try Records → invoice → payment → Workspace → Run Strands → exact review → History.
+Public extraction is bounded, the model scripted and acceptance simulated; the real Strands graph
+must finish all six reports before drafting. [Evidence and limits](../README.md#evidence-and-limits) ·
+[Required disclosures](../README.md#pre-existing-work-disclosed).
+
 The first comparison called itself a friendly test in its own write-up: twenty
 clean months, one client each, no contradictory messages, no adversarial text.
 This is the set that answers what it admitted.

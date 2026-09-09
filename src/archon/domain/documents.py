@@ -16,6 +16,11 @@ from .ledger import JournalEntry, Posting
 from .money import ZERO, money
 
 
+def transfer_identity(value: str) -> str:
+    """Normalize an explicit bank reference, never an email or amount fingerprint."""
+    return " ".join(value.upper().split())
+
+
 class DocumentError(ValueError):
     """A document that cannot be posted as it stands."""
 
@@ -124,6 +129,7 @@ class Payment:
     paid_on: date
     amount: Decimal
     source_ref: str
+    transfer_id: str = ""
 
     def __post_init__(self) -> None:
         amount = money(self.amount)
@@ -155,6 +161,7 @@ class Receipt:
     received_on: date
     amount: Decimal
     source_ref: str
+    transfer_id: str = ""
 
     def __post_init__(self) -> None:
         amount = money(self.amount)

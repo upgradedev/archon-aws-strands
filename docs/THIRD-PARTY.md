@@ -1,9 +1,15 @@
 # Third-party components, and what each is used under
 
+For the joiner reconciling inbox invoices: [live AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/).
+Try Records → invoice → payment → Workspace → Run Strands → exact review → History.
+Public extraction is bounded, the model scripted and acceptance simulated; the real Strands graph
+must finish all six reports before drafting. [Evidence and limits](../README.md#evidence-and-limits) ·
+[Required disclosures](../README.md#pre-existing-work-disclosed).
+
 The submission rules require an entrant to be authorised to use every third-party
 integration in accordance with its terms, and they require an entry that uses
-open source to build on it rather than wrap it. This is that list, read from the
-installed packages rather than from memory:
+open source to build on it rather than wrap it. The Python versions below are historical observations, not a current lock or guarantee.
+CI records installed versions; frontend exact versions remain in frontend/package-lock.json:
 
 ```bash
 python -m archon.evidence.licences
@@ -35,13 +41,20 @@ requiring the source of a derived work to be released under their terms.
 
 | service | terms it is used under |
 |---|---|
-| **Amazon Bedrock** | the AWS Customer Agreement and the Bedrock service terms, on the entrant's own account. Model access for `eu.anthropic.claude-opus-5` is granted per account and per region and is enabled on the account this was built against |
-| **Amazon SES** | the same agreement. The account is in the SES sandbox, which permits sending only to verified addresses, and this project does not attempt to send anywhere else |
+| **Amazon Bedrock (operator-only live mode)** | the AWS Customer Agreement and the Bedrock service terms, on the entrant's own account. Model access for `eu.anthropic.claude-opus-5` depends on account and region; operators must check current eligibility before any call |
+| **Amazon SES** | the same agreement. Past observations recorded SES sandbox restrictions. Current operator authorization and recipient eligibility must be checked separately; the public provider is simulated |
 | **GitHub Actions and Pages** | the GitHub Terms of Service, on the entrant's own account |
 
-No paid third-party API is called, no dataset is redistributed, and nothing here
-is used under a licence that forbids commercial use or requires attribution
-beyond what this file gives.
+The public runtime calls no paid model or mail API. AWS hosting incurs infrastructure costs;
+operator Bedrock/SES calls may incur usage costs. No third-party dataset is redistributed.
+Existing licence notices remain authoritative; preserve transitive dependency notices when distributing.
+
+## Frontend dependencies
+
+React and React DOM are MIT-licensed runtime dependencies. TypeScript is Apache-2.0;
+Playwright is Apache-2.0; Vite, Vitest and Tailwind CSS are MIT-licensed development tools.
+Exact versions and transitive packages are retained in frontend/package-lock.json. These additions
+do not replace any Python licence disclosure above.
 
 ## What this adds to the open source it builds on
 

@@ -1,5 +1,83 @@
 import { test, expect, type Page } from '@playwright/test';
 
+test('editable payment refusal correction and semantic duplicate resolution use real HTTP', async ({ page }, info) => {
+  await page.goto('/#/documents');
+  await page.getByRole('button', { name: 'Try success', exact: true }).click();
+  await page.getByRole('button', { name: 'Read & post email', exact: true }).click();
+  await expect(page.getByLabel(/Email headers/)).toHaveValue('');
+  await page.getByRole('button', { name: 'Try identity refusal', exact: true }).click();
+  const original = await page.getByLabel(/Email headers/).inputValue();
+  expect(original).not.toContain('Transfer ID:');
+  await page.getByRole('button', { name: 'Read & post email', exact: true }).click();
+  await expect(page.getByTestId('latest-source-decision')).toContainText('refused');
+  await expect(page.getByText(/Payment identity is missing/, { exact: false }).first()).toBeVisible();
+  await page.getByRole('button', { name: 'Correct held payment', exact: true }).click();
+  await expect(page.getByLabel(/Email headers/)).toHaveValue(original);
+  const corrected = original + '\nTransfer ID: TEST-BANK-FLOW-A';
+  await page.getByLabel(/Email headers/).fill(corrected);
+  await page.getByRole('button', { name: 'Read corrected source', exact: true }).click();
+  await expect(page.getByTestId('latest-source-decision')).toContainText('posted');
+  await expect(page.getByText('Corrected by email:003; original evidence retained.', { exact: true })).toBeAttached();
+  await page.getByLabel(/Email headers/).fill(corrected.replace('Subject: Remittance', 'Subject: Forward of same bank event'));
+  await page.getByRole('button', { name: 'Read & post email', exact: true }).click();
+  await expect(page.getByTestId('latest-source-decision')).toContainText('refused');
+  await page.getByLabel('Original posted receipt').selectOption('email:003');
+  await page.getByLabel('Resolution evidence and reason').fill('Reviewed the same supplied bank event against original remittance.');
+  await page.getByLabel(/I reviewed this source/).check();
+  await page.getByRole('button', { name: 'Record human resolution', exact: true }).click();
+  await expect(page.getByTestId('latest-source-decision')).toContainText('resolved');
+  await page.getByLabel(/Email headers/).fill(corrected.replace('FLOW-A', 'FLOW-B'));
+  await page.getByRole('button', { name: 'Read & post email', exact: true }).click();
+  await expect(page.getByTestId('latest-source-decision')).toContainText('posted');
+  await go(page, 'Dashboard');
+  await expect(page.getByTestId('metric-outstanding')).toContainText('660.00 EUR');
+  await expect(page.getByText(/Human active time, time saved and money recovered: Unknown/)).toBeVisible();
+  await go(page, 'History');
+  await page.route('**/api/evidence', async route => {
+    const response = await route.fetch(); expect(response.ok()).toBe(true);
+    await route.abort('failed');
+  }, { times: 1 });
+  await page.getByRole('button', { name: 'Prepare evidence bundle', exact: true }).click();
+  await expect(page.getByRole('alert')).toBeVisible();
+  await page.getByRole('button', { name: 'Prepare evidence bundle', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'Download readable evidence' })).toBeVisible();
+  await page.getByText('Inspect evidence and limits', { exact: true }).click();
+  await expect(page.locator('.evidence-text')).toContainText('Correction: email:003');
+  await expect(page.locator('.evidence-text')).not.toContainText('accounts@buildco.example');
+  await expect(page.locator('.evidence-text')).toContainText('not truth');
+  await page.screenshot({ path: info.outputPath('reliable-evidence-recovery.png'), fullPage: true });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test('supplier direction and externally resolved dispute retain evidence and require fresh review', async ({ page }, info) => {
+  await books(page);
+  await page.getByRole('button', { name: 'Sample supplier', exact: true }).click();
+  const supplier = (await page.getByLabel(/Email headers/).inputValue()).replace('\nSubject:', '\nTo: me@myjoinery.example\nSubject:') + '\nBilled to: My Joinery';
+  await page.getByLabel(/Email headers/).fill('From: me@myjoinery.example\n\n----- Forwarded message -----\n' + supplier);
+  await page.getByRole('button', { name: 'Read & post email', exact: true }).click();
+  await expect(page.getByTestId('latest-source-decision')).toContainText('posted');
+  const session = await page.evaluate(() => localStorage.getItem('archon.demo.session.v1'));
+  const headers = { 'X-Archon-Session': session! };
+  const state = await (await page.request.get('/api/workspace', { headers })).json();
+  expect(state.purchases).toHaveLength(1); expect(state.sales).toHaveLength(1);
+  await go(page, 'Workspace'); await page.getByRole('link', { name: 'Payment arrangement', exact: true }).click();
+  await page.getByLabel("Client's proposed terms").fill('I dispute this invoice.');
+  await page.getByRole('button', { name: 'Read proposed terms', exact: true }).click();
+  await expect(page.getByText(/Correct refused sources before proposing terms/)).toBeVisible();
+  await go(page, 'Records');
+  await page.getByLabel('Resolution evidence and reason').fill('Client and operator reviewed the work and confirmed collection may resume.');
+  await page.getByLabel(/I reviewed this source/).check();
+  await page.getByRole('button', { name: 'Record human resolution', exact: true }).click();
+  await expect(page.locator('.source-list')).toContainText('Human resolution: resume-collection');
+  await go(page, 'Workspace'); await page.getByRole('link', { name: 'Draft & signoff', exact: true }).click();
+  await expect(page.getByRole('button', { name: /Run Strands/ })).toBeEnabled();
+  await page.getByRole('button', { name: /Run Strands/ }).click();
+  await expect(page.locator('.email > pre')).toContainText('1,260.00 EUR');
+  await expect(page.getByRole('button', { name: /Approve exact draft/ })).toBeDisabled();
+  await page.screenshot({ path: info.outputPath('resolved-dispute-fresh-review.png'), fullPage: true });
+});
+
+
 async function go(page: Page, name: string) {
   const legacy = name;
   name = ({ 'Action queue': 'Workspace', 'Approvals & arrangements': 'Workspace', 'Documents & payments': 'Records', 'Activity & delivery': 'History' } as Record<string, string>)[name] ?? name;
@@ -93,7 +171,7 @@ test('stale approval after another tab posts payment is refused by actual API', 
   const headers = { 'X-Archon-Session': session! };
   const state = await (await page.request.get('/api/workspace', { headers })).json();
   const paid = await page.request.post('/api/intake', { headers, data: { revision: state.revision,
-    request_id: 'parallel-tab-payment-20260909', body: state.samples.payment.replace('600.00', '200.00').replace('08-20', '09-09') } });
+    request_id: 'parallel-tab-payment-20260909', body: state.samples.payment.replace('600.00', '200.00').replace('08-20', '09-09').replace('DEMO-BANK-600-A', 'TEST-BANK-LATE-200') } });
   expect(paid.ok()).toBe(true);
   await page.getByLabel(/I reviewed this recipient/).check();
   await page.getByRole('button', { name: /Approve exact draft/ }).click();

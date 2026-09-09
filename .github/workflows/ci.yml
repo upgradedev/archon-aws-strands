@@ -2,13 +2,15 @@ name: ci
 
 on:
   push:
-    branches: [main, "build/**"]
+    branches: [main, "build/**", "codex/**"]
   pull_request:
   workflow_dispatch:
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      AWS_EC2_METADATA_DISABLED: "true"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -20,10 +22,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e ".[dev]"
 
-      # The J4 claim in this project's notes says a graph of Strands agents is
-      # load-bearing. LastTake AWS learned that a remembered API is not an API:
-      # its notes named ctx.interrupt() and the real surface was different. So
-      # the surface is printed by a run and asserted, not recalled.
+      # Assert the SDK surface used by the actual graph.
       - name: the Strands surface this build depends on actually exists
         run: |
           python -m pip show strands-agents | head -3

@@ -5,11 +5,11 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from datetime import UTC, date, datetime
 from decimal import Decimal
 
-from archon.adapters.inbound import LocalReader, read_email
+from archon.adapters.inbound import BUSINESS_EMAIL, BUSINESS_NAME, LocalReader, read_email
 from archon.adapters.ses import Outbox
 from archon.agents.claims import Outstanding, Overdue, PartPaid
 from archon.agents.draft import ChaseDraft
@@ -17,6 +17,7 @@ from archon.agents.gate import APPROVAL_LIFETIME, Approval, assess
 from archon.agents.proposal import read_reply
 from archon.domain.arrangement import Arrangement, Instalment, consider
 from archon.domain.books import Books
+from archon.domain.documents import Payment, Receipt, transfer_identity
 from archon.domain.queue import build as build_queue
 from archon.domain.reports import cashflow, metrics, profit_and_loss
 from archon.store.sessions import Conflict
@@ -31,7 +32,8 @@ SAMPLES = {
     "Invoice JN-4410 dated 2026-07-02, due 2026-08-01. "
     "Net 1500.00 EUR, VAT 360.00 EUR, total 1860.00 EUR.",
     "payment": "From: accounts@buildco.example\nSubject: Remittance\n\n"
-    "We have paid 600.00 EUR on 2026-08-20 against invoice JN-4410.",
+    "We have paid 600.00 EUR on 2026-08-20 against invoice JN-4410.\n"
+    "Transfer ID: DEMO-BANK-600-A",
     "supplier": "From: billing@wholesaler.example\nSubject: Invoice WS-77\n\n"
     "Invoice WS-77 dated 2026-08-02, due 2026-10-01. "
     "Net 100.00 EUR, VAT 24.00 EUR, total 124.00 EUR.",
@@ -72,7 +74,12 @@ def books_for(state: dict) -> Books:
     books = Books()
     for source in state["sources"]:
         if source["status"] == "posted":
-            books.record(_decode(source["kind"], json.dumps(source["document"])))
+            document = _decode(source["kind"], json.dumps(source["document"]))
+            attested = state.get("transfer_attestations", {}).get(document.doc_id)
+            if attested and isinstance(document, (Receipt, Payment)) and not document.transfer_id:
+                # An additive human attestation changes the projection, never stored evidence.
+                document = replace(document, transfer_id=attested)
+            books.record(document, replay_legacy=True)
     for saved in state["arrangements"]:
         fields = dict(saved)
         fields["agreed_on"] = date.fromisoformat(fields["agreed_on"])
@@ -92,7 +99,30 @@ def event(state: dict, title: str, detail: str) -> None:
 
 
 def holds(state: dict) -> list[dict]:
-    return [source for source in state["sources"] if source["status"] == "refused"]
+    held = [source for source in state["sources"] if source["status"] == "refused"]
+    legacy = legacy_documents(state)
+    review_ids = set(books_for(state).legacy_payment_holds)
+    for source in held:
+        candidate = source.get("document")
+        if candidate and source["error"].startswith("Ambiguous payment identity:"):
+            review_ids.update(d["doc_id"] for d in legacy
+                              if d["settles"] == candidate.get("settles")
+                              and d["amount"] == candidate.get("amount"))
+    for doc_id in sorted(review_ids):
+        source = next(s for s in state["sources"] if s["document"]
+                      and s["document"]["doc_id"] == doc_id)
+        held.append({**source, "kind": "LegacyPaymentReview", "status": "refused",
+                     "error": "Historical payments involved in ambiguity lack bank identities. "
+                              "Records are "
+                              "retained; reconcile them with a person before collections.",
+                     "legacy_documents": legacy_documents(state)})
+    return held
+
+
+def legacy_documents(state: dict) -> list[dict]:
+    return [s["document"] for s in state["sources"] if s["status"] == "posted"
+            and s["kind"] in ("Receipt", "Payment") and not s["document"].get("transfer_id")
+            and s["document"]["doc_id"] not in state.get("transfer_attestations", {})]
 
 
 def intake(state: dict, body: str, replace_id: str | None = None) -> None:
@@ -125,7 +155,19 @@ def intake(state: dict, body: str, replace_id: str | None = None) -> None:
         # Mixed/unsupported currencies cannot silently become euro debt.
         if re.search(r"\b(?:USD|GBP|CHF|JPY|CAD|AUD)\b|[$£¥]", body, re.I):
             raise ValueError("Only EUR is supported. No exchange rate has been authorized.")
-        reading = read_email(body, source_id, client=LocalReader())
+        reading = read_email(
+            body, source_id, client=LocalReader(), ours=BUSINESS_EMAIL,
+            business_name=BUSINESS_NAME,
+        )
+        source.update(kind=type(reading.document).__name__,
+                      document=json.loads(_encode(reading.document)),
+                      redactions=reading.redactions)
+        if previous and previous["kind"] == "Receipt":
+            if source["kind"] != "Receipt" or (
+                previous["document"] and
+                previous["document"]["settles"] != source["document"]["settles"]
+            ):
+                raise ValueError("Correct the same payment evidence; an invoice cannot resolve it.")
         books_for(state).record(reading.document)
         source.update(
             status="posted",
@@ -138,6 +180,8 @@ def intake(state: dict, body: str, replace_id: str | None = None) -> None:
             previous["corrected_by"] = source_id
     except ValueError as exc:
         source["error"] = str(exc)
+        if "Payment identity" in source["error"]:
+            source["kind"] = "Receipt"
     state["sources"].append(source)
     state["draft"], state["graph"], state["proposal"] = None, None, None
     event(
@@ -323,12 +367,72 @@ def propose(state: dict, invoice_id: str, body: str) -> None:
                 "status": "refused",
                 "error": reading.why,
                 "kind": "ClientReply",
+                "invoice_id": invoice_id,
                 "document": None,
                 "redactions": reading.redactions,
                 "at": now(),
             }
         )
     event(state, "Payment terms read", f"{invoice_id}: {reading.why}")
+
+
+def resolve(state: dict, source_id: str, decision: str, note: str,
+            duplicate_of: str | None = None, identities: dict[str, str] | None = None) -> None:
+    """Record a human resolution, never a replacement journal entry or automatic resend."""
+    source = next((s for s in holds(state) if s["id"] == source_id), None)
+    if source is None:
+        raise Conflict("That source is no longer held. Refresh and inspect the current record.")
+    if len(note.strip()) < 20:
+        raise ValueError("Record the human evidence and reason in at least 20 characters.")
+    if decision == "attest-legacy-payments":
+        expected = {d["doc_id"] for d in legacy_documents(state)}
+        if source["kind"] != "LegacyPaymentReview" or not expected or not identities:
+            raise ValueError("Select a historical payment hold and supply its bank references.")
+        if set(identities) != expected or len(identities) > 50:
+            raise ValueError(
+                "Supply references for every listed historical payment, and only those."
+            )
+        if any(not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9 _/-]{2,79}", v)
+               for v in identities.values()):
+            raise ValueError(
+                "Each supplied bank reference must be 3–80 letters, digits, spaces, /, _ or -."
+            )
+        attested = {**state.get("transfer_attestations", {}),
+                    **{k: transfer_identity(v) for k, v in identities.items()}}
+        # Validate the entire replay before storing any attestation. Duplicate events stay held;
+        # they require an operator's accounting correction, not a fabricated second reference.
+        candidate = {**state, "transfer_attestations": attested}
+        if books_for(candidate).legacy_payment_holds:
+            raise ValueError("Historical payment ambiguity remains. No resolution recorded.")
+        state["transfer_attestations"] = attested
+        state.setdefault("resolutions", []).append({
+            "source_id": source_id, "decision": decision, "note": note.strip(),
+            "identities": dict(identities), "at": now(), "revision": state["revision"],
+            "approved_by": "demo visitor", "verification": "Human supplied; not bank verified",
+        })
+    elif decision == "duplicate-payment":
+        target = next((s for s in state["sources"] if s["id"] == duplicate_of
+                       and s["status"] == "posted" and s["kind"] == "Receipt"), None)
+        if source["kind"] != "Receipt" or target is None:
+            raise ValueError("Select the posted receipt for this duplicate payment.")
+        candidate = source["document"]
+        if candidate and any(candidate[k] != target["document"][k]
+                             for k in ("settles", "amount", "received_on")):
+            raise ValueError("The payment facts conflict. Correct the source before resolving it.")
+    elif decision == "resume-collection":
+        if source["kind"] != "ClientReply" or not source.get("invoice_id"):
+            raise ValueError("Only an invoice-linked client reply can have this resolution.")
+        if not any(s.doc_id == source["invoice_id"] for s in books_for(state).uncollected()):
+            raise ValueError("This invoice is no longer outstanding. Review the current books.")
+    else:
+        raise ValueError("Choose a supported human resolution.")
+    if decision != "attest-legacy-payments":
+        source["status"] = "resolved"
+        source["resolution"] = {"decision": decision, "note": note.strip(), "at": now(),
+                            "duplicate_of": duplicate_of, "approved_by": "demo visitor",
+                            "revision": state["revision"]}
+    state["draft"], state["graph"], state["proposal"] = None, None, None
+    event(state, "Human resolution recorded", f"{source_id}: {decision}; fresh review required.")
 
 
 def agree(state: dict, fingerprint: str) -> None:
@@ -375,10 +479,13 @@ def snapshot(state: dict) -> dict:
     }
     result.update(
         as_of=str(AS_OF),
+        business={"name": BUSINESS_NAME, "email": BUSINESS_EMAIL,
+                  "source": "Received post; explicit original headers for outbound/forwarded mail"},
         synthetic=True,
         reader="Bounded local rules; no model call",
         provider="Simulated outbox; no real email",
         holds=holds(state),
+        resolutions=state.get("resolutions", []),
         samples=SAMPLES,
         queue=asdict(queue),
         sales=[{**asdict(s), "outstanding": s.outstanding} for s in books.sales_settlements()],

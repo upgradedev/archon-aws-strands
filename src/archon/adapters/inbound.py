@@ -32,15 +32,25 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import os
 import re
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal, InvalidOperation
 
 from archon.adapters.bedrock import MODEL_ID, REGION
-from archon.domain.documents import DocumentError, PurchaseInvoice, Receipt, SalesInvoice
+from archon.domain.documents import (
+    DocumentError,
+    PurchaseInvoice,
+    Receipt,
+    SalesInvoice,
+    transfer_identity,
+)
 from archon.domain.money import MoneyError, money
 from archon.security.sanitizer import sanitize_payload
+
+BUSINESS_EMAIL = os.environ.get("ARCHON_BUSINESS_EMAIL", "me@myjoinery.example")
+BUSINESS_NAME = os.environ.get("ARCHON_BUSINESS_NAME", "My Joinery")
 
 ASK = (
     "You are keeping the books of one small firm. In this email that firm is "
@@ -121,6 +131,7 @@ def _document(fields: dict, source_ref: str):
             received_on=_day(fields.get("issued"), "date"),
             amount=_decimal(fields.get("amount") or fields.get("gross"), "amount"),
             source_ref=source_ref,
+            transfer_id=str(fields.get("transfer_id") or ""),
         )
 
     common = dict(
@@ -194,30 +205,93 @@ def _usable_address(value: object) -> bool:
     return "@" in text and "REDACTED" not in text.upper()
 
 
-def _whose_books(here: dict[str, str], ours: str) -> str:
-    """Say which SIDE of this email the firm is on, naming no address.
+def original_message(raw: str) -> str:
+    """Read the innermost explicitly forwarded message; retain the full source elsewhere."""
+    # Quote prefixes are presentation, not new parties. Unseparated threads then expose
+    # conflicting headers to the direction guard instead of hiding an inner supplier.
+    unquoted = re.sub(r"(?m)^[ \t]*(?:>[ \t]*)+", "", raw.replace("\r\n", "\n"))
+    return re.split(
+        r"(?im)^[ \t]*(?:-+[ \t]*(?:Forwarded message|Original Message)[ \t]*-+"
+        r"|Begin forwarded message:)[ \t]*$", unquoted
+    )[-1]
 
-    The first version of this put the real sender and recipient into the prompt
-    so the model could tell which was which, and two existing tests failed
-    immediately: an address that redaction had just masked was being handed
-    straight back. The tests were right. The model does not need to know who
-    anybody is; it needs to know which end of the email we are.
 
-    So this says "the sender" or "the recipient" and never an address. The
-    ledger fills the address in afterwards, from the raw text, on this machine.
+def invoice_direction(raw: str, ours: str, business_name: str) -> str:
+    """Check economic direction, not authenticity, from identity and original parties.
+
+    The input source is received post. An omitted recipient only supports a
+    purchase from an identifiable external issuer, without conflicting customer
+    evidence. A forward uses its original headers rather than its envelope.
     """
-    sender = here.get("From", "")
-    recipient = here.get("To", "")
-    if ours and ours == sender:
-        return "OURS is the sender of this email. The counterparty is the recipient."
-    if ours and ours == recipient:
-        return "OURS is the recipient of this email. The counterparty is the sender."
-    if not sender:
-        return "The email does not say who sent it, so which side we are on is not stated."
-    return (
-        "Assume OURS is the sender unless the email plainly says otherwise. "
-        "The counterparty is then the recipient."
+    here = addresses_on(raw)
+    own = ours.strip().casefold()
+    sender = here.get("From", "").casefold()
+    recipient = here.get("To", "").casefold()
+    name = " ".join(business_name.casefold().split()).strip(" .")
+    customers = re.findall(
+        r"(?im)\b(?:billed to|invoice to|our invoice to|customer:)\s*:?\s*([^\n]+)", raw
     )
+    issuers = re.findall(r"(?im)^(?:issued by|supplier|seller):\s*([^\n]+)", raw)
+    for header in ("From", "To"):
+        values = {address.casefold().rstrip(">,;") for key, address
+                  in _HEADER_ADDRESS.findall(raw) if key.casefold() == header.casefold()}
+        if len(values) > 1:
+            raise UnreadablePost("Invoice direction has conflicting original headers.")
+
+    def is_ours(value):
+        value = " ".join(value.casefold().split()).strip(" .")
+        return bool(name) and (value == name or value.startswith((name + ".", name + ",")))
+
+    if not own or not sender or sender == recipient:
+        raise UnreadablePost(
+            "Invoice direction is ambiguous. Include the original issuer and customer "
+            "with the configured business identity."
+        )
+    if sender == own and recipient and recipient != own:
+        if any(is_ours(c) for c in customers) or any(not is_ours(i) for i in issuers):
+            raise UnreadablePost("Invoice direction conflicts with the issuer/customer evidence.")
+        return "sales_invoice"
+    if sender != own and (recipient == own or not recipient):
+        if any(is_ours(i) for i in issuers) or any(not is_ours(c) for c in customers):
+            raise UnreadablePost(
+                "Invoice direction conflicts with the configured business. "
+                "Include the original From and To headers."
+            )
+        return "purchase_invoice"
+    raise UnreadablePost(
+        "Invoice direction is ambiguous. Include the original From and To "
+        "headers for the configured business."
+    )
+
+
+def _whose_books(here: dict[str, str], ours: str) -> str:
+    sender = here.get("From", "").casefold()
+    recipient = here.get("To", "").casefold()
+    if ours and ours.casefold() == sender:
+        return "OURS is the sender of this email. The counterparty is the recipient."
+    if ours and (ours.casefold() == recipient or (sender and not recipient)):
+        return "OURS is the recipient of this email. The counterparty is the sender."
+    return "Which side OURS is on is unresolved. Do not infer the economic direction."
+
+
+_TRANSFER = re.compile(
+    r"(?im)^\s*(?:bank\s+)?(?:transfer|transaction|payment)\s+"
+    r"(?:id|ref(?:erence)?)\s*:[ \t]*([^\r\n]*)$"
+)
+
+
+def payment_reference(raw: str) -> str:
+    values = _TRANSFER.findall(raw)
+    references = {transfer_identity(value) for value in values}
+    if len(references) != 1 or any(
+        not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9 _/-]{2,79}", v.strip()) for v in values
+    ):
+        raise UnreadablePost(
+            "Payment identity is missing or conflicting. A person must check "
+            "the bank event and add one Transfer ID: reference. "
+            "Equal amounts alone do not identify a payment."
+        )
+    return references.pop()
 
 
 def read_email(
@@ -225,7 +299,8 @@ def read_email(
     source_ref: str,
     client=None,
     model_id: str = MODEL_ID,
-    ours: str = "",
+    ours: str = BUSINESS_EMAIL,
+    business_name: str = BUSINESS_NAME,
 ) -> Reading:
     """Sanitize, ask, then check. Raises `UnreadablePost` rather than guessing."""
     if client is None:  # pragma: no cover - needs credentials
@@ -233,6 +308,7 @@ def read_email(
 
         client = boto3.client("bedrock-runtime", region_name=REGION)
 
+    raw = original_message(raw)
     safe = sanitize_payload(raw)
     here = addresses_on(raw)
     whose = _whose_books(here, ours)
@@ -262,6 +338,20 @@ def read_email(
         raise UnreadablePost("the reply carried unparseable JSON") from exc
     if not isinstance(fields, dict):
         raise UnreadablePost("the reply was not an object")
+
+    # Direction and transfer identity are locally derived, never delegated to a model.
+    if fields.get("kind") in ("sales_invoice", "purchase_invoice"):
+        direction = invoice_direction(raw, ours, business_name)
+        fields["kind"] = direction
+        if direction == "sales_invoice":
+            fields["counterparty_email"] = here.get("To", "")
+        else:
+            sender = LocalReader._FROM.search(safe.sanitized_text)
+            fields["counterparty"] = LocalReader._counterparty(sender.group(1) if sender else None)
+    if fields.get("kind") == "receipt":
+        reference = payment_reference(raw)
+        fields["transfer_id"] = reference
+        fields["doc_id"] = "RC-" + hashlib.sha256(reference.encode()).hexdigest()[:24]
 
     # The address the model was never shown. Taken from the raw text on this
     # machine and put back only now, so a chase has somewhere to go.
@@ -343,7 +433,7 @@ class LocalReader:
 
     #: A client's name as a person writes it in the sentence that names them.
     _BILLED_TO_NAME = re.compile(
-        r"\b(?:invoice (?:to|for)|billed to|charged to|our invoice to)\s+"
+        r"(?i:\b(?:invoice (?:to|for)|billed to|charged to|our invoice to))(?:\s*:\s*|\s+)"
         r"([A-Z][\w&.'-]*(?:\s+[A-Z][\w&.'-]*){0,3})",
     )
 
@@ -407,12 +497,10 @@ class LocalReader:
 
         paid, settles = one(self._PAID), one(self._SETTLES)
         if paid and settles:
-            receipt_key = hashlib.sha256(body.encode()).hexdigest()[:12]
             return {
                 "kind": "receipt",
-                # Separate remittances against one invoice must not collide.
-                # Re-reading identical evidence still yields the same identity.
-                "doc_id": f"RC-{settles.replace(' ', '')}-{receipt_key}",
+                # The shared reader supplies the bank reference identity.
+                "doc_id": "pending-transfer-identity",
                 "settles": settles.replace(" ", ""),
                 "issued": one(self._DATED),
                 "amount": paid,
@@ -427,14 +515,8 @@ class LocalReader:
             "gross": one(self._GROSS),
         }
 
-        # Which way the money runs is read off the text, never assumed. An
-        # invoice that says who it was billed TO is one the trader issued, and
-        # that is the only kind worth chasing. A "To:" header carrying an
-        # address is what makes it chaseable, because a chase needs somewhere to
-        # go.
-        if self._ISSUED_BY_US.search(body):
-            # The address itself is masked by now and is put back by the caller
-            # from the raw text. All this decides is which way the money runs.
+        # The surrounding prompt states the locally resolved side without addresses.
+        if "OURS is the sender of this email." in body:
             return {
                 "kind": "sales_invoice",
                 # Not from the To: header: that is redacted by now, and

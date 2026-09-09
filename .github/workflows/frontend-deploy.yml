@@ -56,6 +56,7 @@ jobs:
         if: always()
         with:
           name: aws-frontend-release
+          retention-days: 90
           path: frontend-release.json
   acceptance:
     name: Live Playwright testbook

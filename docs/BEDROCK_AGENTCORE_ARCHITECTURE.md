@@ -1,5 +1,11 @@
 # Bedrock AgentCore: a design note, not a description of what runs
 
+For the joiner reconciling inbox invoices: [live AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/).
+Try Records → invoice → payment → Workspace → Run Strands → exact review → History.
+Public extraction is bounded, the model scripted and acceptance simulated; the real Strands graph
+must finish all six reports before drafting. [Evidence and limits](../README.md#evidence-and-limits) ·
+[Required disclosures](../README.md#pre-existing-work-disclosed).
+
 > **Read this first.** **None of the AgentCore runtime described below is implemented.** This document
 > is a sketch of what Archon would look like deployed on Bedrock AgentCore, kept because the rules note
 > that AgentCore strengthens a Technical Implementation score and because the mapping is worth having
@@ -10,8 +16,8 @@
 > today. Both are corrected below rather than left to be found by a judge:
 >
 > - it called Archon a **dispute resolution** engine. Archon chases an unpaid invoice; it does not
->   arbitrate disputes, and no dispute logic exists anywhere in the code.
-> - it named **Claude 3.5 Sonnet**. The model is `eu.anthropic.claude-opus-5`, verified by a live
+>   arbitrate disputes. The current public API records bounded human resolutions; it is not a dispute engine.
+> - it named **Claude 3.5 Sonnet**. The operator model configuration is `eu.anthropic.claude-opus-5`; the public model is scripted, not a live
 >   call, and `python -m archon.evidence.licences` prints what is actually installed.
 >
 > **What of it does exist today**, and where:
@@ -23,7 +29,8 @@
 > | human-in-the-loop before the one write | **yes**, and bound to exact bytes rather than to a threshold | `archon.agents.gate` |
 > | session memory as an audit trail | **yes**, as documents replayed through the same validation | `archon.store.sqlite` |
 > | AgentCore runtime, Action Groups, Guardrails as a service | **no** | nothing; the graph runs on the Strands SDK against `bedrock-runtime` |
-> | API Gateway, Lambda, S3 audit seals, DynamoDB | **no** | nothing is deployed at all |
+> | API Gateway, Lambda, private S3 sessions | **yes** | public synthetic API; no cryptographic truth attestation |
+> | S3 audit seals, DynamoDB | **no** | not implemented |
 >
 > The threshold in the mapping below, holding a draft when an amount exceeds €5,000, is **not** how the
 > gate works and never was. The gate holds on facts that stopped being true, on an approval that does
@@ -31,6 +38,8 @@
 > it stops caring.
 
 ---
+
+HISTORICAL UNIMPLEMENTED SKETCH: no compliance, zero-hallucination or deployment claim below is current.
 
 The rest of this document is the original sketch, kept as written apart from the corrections above, so that what was planned can be compared with what was built.
 
