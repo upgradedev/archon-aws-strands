@@ -37,6 +37,7 @@ test('raw emails → real HTTP / Strands → exact draft → simulated durable r
   await draft(page);
   await expect(page.locator('.email')).toContainText('1,260.00 EUR');
   await expect(page.locator('.email')).toContainText('accounts@buildco.example');
+  await page.getByText('Six domain reports · inspect', { exact: true }).click();
   await expect(page.locator('.domain-reports details')).toHaveCount(6);
   await expect(page.getByRole('button', { name: /Approve exact draft/ })).toBeDisabled();
   await page.screenshot({ path: info.outputPath('approval.png'), fullPage: true });
@@ -173,6 +174,7 @@ test('independent visitors, deep links, keyboard skip, and new workspace', async
 
 test('draft ledger badges open actual invoice and receipt sources without approving', async ({ page }, info) => {
   await draft(page);
+  await page.getByText('Linked ledger evidence', { exact: true }).click();
   const session = await page.evaluate(() => localStorage.getItem('archon.demo.session.v1'));
   const state = await (await page.request.get('/api/workspace', { headers: { 'X-Archon-Session': session! } })).json();
   const evidence = page.getByRole('region', { name: 'Draft ledger evidence' });
@@ -195,6 +197,7 @@ test('draft ledger badges open actual invoice and receipt sources without approv
     await page.reload();
     await expect(opened).toHaveAttribute('open', '');
     await go(page, 'Approvals & arrangements');
+    await page.getByText('Linked ledger evidence', { exact: true }).click();
   }
   await expect(page.getByRole('button', { name: /Approve exact draft/ })).toBeDisabled();
   await go(page, 'Action queue');

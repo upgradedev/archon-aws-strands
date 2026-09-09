@@ -34,7 +34,7 @@ export function Queue({ data, busy, mutate, route = '/workspace', stale = false,
           <strong>{item.kind === 'Receipt' ? 'Recorded receipt' : 'Invoice'} · {item.document?.doc_id}</strong><span>{item.id} · {item.status}</span>{item.document?.amount ? <span>{money(item.document.amount)}</span> : null}
         </a>) : <p className="section-note">No linked posted source is available for this selection.</p>}</div>
         {data.holds.length ? <div className="case-sources"><h3>Source holds</h3>{data.holds.map(item => <a key={item.id} className="source-choice" href={`#/records?filter=refused&source=${encodeURIComponent(item.id)}`}><strong>{item.id}</strong><span>{item.error}</span></a>)}</div> : null}
-        <div className="case-guidance"><p>The backend prepares only its oldest overdue invoice, then the largest on a tie. Selecting evidence does not retarget that operation.</p><p>Six ledger readers must report before the composer runs.</p></div>
+        <details className="case-guidance"><summary>How priority and holds work</summary><p>The backend prepares only its oldest overdue invoice, then the largest on a tie. Selecting evidence does not retarget that operation.</p><p>Six ledger readers must report before the composer runs.</p></details>
       </aside>
       <section className="case-review" aria-label="Document and signoff">
         {!balance ? <div className="panel"><Empty title={invoice ? 'Selected invoice unavailable' : 'No invoice selected'}>{invoice ? <>The invoice {invoice} is not in this session. <a href="#/workspace">Return to current cases</a>.</> : <>Post a synthetic invoice in <a href="#/records?intake=open">Records</a> to start.</>}</Empty></div> : <>

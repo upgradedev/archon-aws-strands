@@ -75,7 +75,9 @@ export function App() {
       const refused = failure instanceof ApiError && (failure.status === 400 || failure.status === 422);
       if (refused) intent.current = null;
       else intent.current!.needsRefresh = true;
-      setError(errorText(failure)); setStale(!refused); setReviewEpoch(e => e + 1); return false;
+      setError(errorText(failure)); setStale(!refused);
+      if (!refused) setReviewEpoch(e => e + 1);
+      return false;
     }
     finally { inFlight.current = false; setBusy(false); }
   }
