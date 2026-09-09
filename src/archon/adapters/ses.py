@@ -160,8 +160,11 @@ class Outbox:
     #: everything when the process ends, which was measured to send a second
     #: email to a client for one approved draft.
     log: Any = None
+    controlled_recipient: str | None = None
 
     def send(self, draft: ChaseDraft, release: Release) -> Receipt:
+        if self.controlled_recipient and draft.to_address != self.controlled_recipient:
+            raise SendRefused("Live sending is restricted to the operator's verified recipient.")
         if not release.allowed:
             raise SendRefused(
                 "the gate held this draft and the sender does not overrule it: "
@@ -274,7 +277,10 @@ class Outbox:
         return self.sent.get(draft.fingerprint())
 
 
-def live_outbox(sender: str, region: str = "eu-west-1") -> Outbox:
+def live_outbox(
+    sender: str, region: str = "eu-west-1", *, log=None,
+    controlled_recipient: str | None = None, authorized: bool = False,
+) -> Outbox:
     """A real SES sender, with the client's own retries turned off.
 
     This matters more than it looks. Everything above here works to make one
@@ -293,11 +299,19 @@ def live_outbox(sender: str, region: str = "eu-west-1") -> Outbox:
     import boto3
     from botocore.config import Config
 
+    if not authorized or log is None or not controlled_recipient:
+        raise SendRefused(
+            "Live send needs explicit operator authorization, a durable send ledger, "
+            "and a controlled verified recipient. The public API cannot enable this."
+        )
+
     return Outbox(
         client=boto3.client(
             "sesv2",
             region_name=region,
-            config=Config(retries={"max_attempts": 1, "mode": "standard"}),
+            config=Config(retries={"total_max_attempts": 1, "mode": "standard"}),
         ),
         sender=sender,
+        log=log,
+        controlled_recipient=controlled_recipient,
     )

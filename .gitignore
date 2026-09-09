@@ -10,3 +10,8 @@ build/
 *.egg-info/
 .claude/
 site/
+frontend/coverage/
+frontend/test-results/
+frontend/playwright-report/
+frontend/artifacts/
+frontend/*.tsbuildinfo
