@@ -132,18 +132,20 @@ test('approval lost before reaching the API retries the same intent after durabl
 test('unavailable session recovers by explicitly creating a new workspace', async ({ page }) => {
   await books(page);
   await page.evaluate(() => localStorage.setItem('archon.demo.session.v1', 'f'.repeat(64)));
+  const unavailable = page.waitForResponse(response => response.url().endsWith('/api/workspace'));
   await page.reload();
-  await expect(page.getByRole('alert')).toContainText('Session not found');
+  expect((await unavailable).status()).toBe(401);
+  await expect(page.getByRole('alert')).toContainText(/Session (?:not found|unavailable or expired)/);
   await page.getByRole('button', { name: 'New workspace', exact: true }).click();
   await page.getByRole('button', { name: 'Start new workspace', exact: true }).click();
   await expect(page.getByText('No matching sources', { exact: true })).toBeVisible();
   expect(await page.evaluate(() => localStorage.getItem('archon.demo.session.v1'))).not.toBe('f'.repeat(64));
 });
 
-test('independent visitors, deep links, keyboard skip, and new workspace', async ({ page, browser }) => {
+test('independent visitors, deep links, keyboard skip, and new workspace', async ({ page, browser }, testInfo) => {
   await books(page);
   const other = await browser.newContext(); const visitor = await other.newPage();
-  await visitor.goto('http://127.0.0.1:4173/#/queue');
+  await visitor.goto(new URL('/#/queue', testInfo.project.use.baseURL).href);
   await expect(visitor.getByText('Nothing to chase yet', { exact: true })).toBeVisible();
   await other.close();
   await page.goto('/#/documents?source=JN-4410');
