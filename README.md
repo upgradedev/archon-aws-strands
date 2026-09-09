@@ -124,6 +124,47 @@ the shapes, and the adversarial line is one I wrote: a real attacker would write
 
 ---
 
+## React workstation usage
+
+The new `frontend/` application is a React, TypeScript and Tailwind ledger workstation.
+Its routes are `#/queue`, `#/documents`, `#/approvals` and `#/activity`; source links use
+`#/documents?source=JN-4410`. Every public workspace starts empty and is labelled synthetic.
+In Documents, post the sample invoice and then the sample payment. The domain calculates
+1,260.00 EUR outstanding from 1,860.00 EUR invoiced and 600.00 EUR received. Run Strands from
+the action queue, review the exact draft, and approve a **simulated** receipt. The six reader
+tools execute through the real Strands graph; its model is scripted and supplies no AI judgment.
+No mailbox, bank, live model, or real email provider is connected to this public path.
+
+The API is `archon.web.api:app`; the AWS HTTP API v2 entrypoint is
+`archon.web.lambda_handler.handler`. Use same-origin `/api/*`. Local runtime state uses
+`ARCHON_SESSION_DB` (a SQLite path, defaulting to the temporary directory). Lambda requires
+`ARCHON_STATE_BUCKET`, with `ARCHON_STATE_PREFIX=sessions/`; `ARCHON_COMMIT_SHA` is reported by
+the health route. The role needs private prefix GetObject/PutObject, with conditional writes,
+and no SES, Bedrock or ListBucket access. S3 failures never fall back to ephemeral books.
+Session handles expire after seven days; physical record retention is separately configured
+by the operator. Only the opaque handle is stored in the browser. Blocked browser storage
+is disclosed and limits the handle to the current page.
+
+`frontend-ci.yml` runs on pushes, pull requests, dispatch and reusable workflow calls. It
+generates a lock only when absent and uploads that lock, builds `frontend/dist`, runs Vitest
+with an 85% floor on all four coverage measures, runs the Python regression and actual HTTP
+API tests, then Playwright desktop/mobile journeys against the real API. The generated lock
+must be integrated and CI rerun immutably before release. Tests and dependency installation
+for this migration run in GitHub Actions. No passing run or human acceptance is implied by
+these instructions. `frontend/UAT.testbook.html` and `.json` are shipped with the build and
+retain **NOT_RUN** human signoff until a person actually performs the checks.
+
+The command-line live sender is a separate operator gate. In addition to `--live-send`, it
+requires `ARCHON_OPERATOR_SEND_AUTHORIZATION=I_AUTHORIZE_CONTROLLED_SEND`, an
+`ARCHON_SEND_LEDGER` durable SQLite path, and `ARCHON_VERIFIED_RECIPIENT` matching the exact
+draft recipient, whose identity the operator must have verified. SES transport is limited
+to one total attempt. The public API cannot enable these options. Provider acceptance
+never proves delivery; an ambiguous send is not retried automatically.
+
+The server-rendered walkthrough below is retained for legacy local/regression use. The new
+frontend is a separate static build; AWS deployment and its final public URL are handled
+by the hosting workflow, not by the legacy HTML export.
+
 ## Run it
 
 No AWS account, no key, no network.

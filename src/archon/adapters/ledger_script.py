@@ -19,21 +19,24 @@ class LedgerScriptModel(ScriptedModel):
             if not results:
                 name = tool_specs[0]["name"]
                 yield {"messageStart": {"role": "assistant"}}
-                yield {"contentBlockStart": {
-                    "contentBlockIndex": 0,
-                    "start": {"toolUse": {"toolUseId": f"read-{name}", "name": name}},
-                }}
-                yield {"contentBlockDelta": {
-                    "contentBlockIndex": 0, "delta": {"toolUse": {"input": "{}"}},
-                }}
+                yield {
+                    "contentBlockStart": {
+                        "contentBlockIndex": 0,
+                        "start": {"toolUse": {"toolUseId": f"read-{name}", "name": name}},
+                    }
+                }
+                yield {
+                    "contentBlockDelta": {
+                        "contentBlockIndex": 0,
+                        "delta": {"toolUse": {"input": "{}"}},
+                    }
+                }
                 yield {"contentBlockStop": {"contentBlockIndex": 0}}
                 yield {"messageStop": {"stopReason": "tool_use"}}
                 return
             if any(result.get("status") == "error" for result in results):
                 raise ValueError("A ledger reader failed; the composer cannot proceed.")
-            text = "\n".join(
-                block.get("text", "") for block in results[-1].get("content", [])
-            )
+            text = "\n".join(block.get("text", "") for block in results[-1].get("content", []))
             if not text.strip():
                 raise ValueError("A ledger reader returned no report.")
         else:

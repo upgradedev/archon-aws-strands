@@ -41,6 +41,12 @@ jobs:
         with:
           name: frontend-lock-${{ github.run_id }}
           path: frontend/package-lock.json
+      - name: Runtime dependency audit and full audit evidence
+        working-directory: frontend
+        run: |
+          mkdir -p artifacts
+          npm audit --json > artifacts/npm-audit-full.json || true
+          npm audit --omit=dev --audit-level=low
       - name: Build React TypeScript Tailwind application
         id: build
         working-directory: frontend

@@ -38,9 +38,15 @@ def read(client, session):
 
 def change(client, session, path, *, revision=None, request_id=None, **payload):
     revision = read(client, session)["revision"] if revision is None else revision
-    return client.post(f"/api/{path}", headers={"X-Archon-Session": session}, json={
-        "revision": revision, "request_id": request_id or uuid.uuid4().hex, **payload,
-    })
+    return client.post(
+        f"/api/{path}",
+        headers={"X-Archon-Session": session},
+        json={
+            "revision": revision,
+            "request_id": request_id or uuid.uuid4().hex,
+            **payload,
+        },
+    )
 
 
 def posted(client, session):
@@ -84,16 +90,22 @@ def test_raw_post_real_strands_exact_approval_and_durable_receipt(client):
     assert receipt["message_id"].startswith("simulated-")
     assert receipt["fingerprint"] == draft["fingerprint"]
     assert set(read(client, session)["receipt_states"]) == {
-        "queued", "unknown", "provider-accepted", "delivered", "failed",
+        "queued",
+        "unknown",
+        "provider-accepted",
+        "delivered",
+        "failed",
     }
 
 
 def test_retry_after_lost_response_is_one_post_and_rejects_key_reuse(client):
     session, key = create(client), uuid.uuid4().hex
-    first = change(client, session, "intake", revision=0, request_id=key,
-                   body=workspace.SAMPLES["invoice"])
-    replay = change(client, session, "intake", revision=0, request_id=key,
-                    body=workspace.SAMPLES["invoice"])
+    first = change(
+        client, session, "intake", revision=0, request_id=key, body=workspace.SAMPLES["invoice"]
+    )
+    replay = change(
+        client, session, "intake", revision=0, request_id=key, body=workspace.SAMPLES["invoice"]
+    )
     assert first.json() == replay.json()
     assert len(read(client, session)["sources"]) == 1
     refused = change(client, session, "intake", request_id=key, body=workspace.SAMPLES["payment"])
@@ -106,8 +118,14 @@ def test_retry_approval_across_new_api_client_retains_one_receipt(client):
     key = uuid.uuid4().hex
     approved = change(client, session, "approve", fingerprint=draft["fingerprint"], request_id=key)
     with TestClient(api.app) as restarted:
-        replayed = change(restarted, session, "approve", fingerprint=draft["fingerprint"],
-                          request_id=key, revision=0)
+        replayed = change(
+            restarted,
+            session,
+            "approve",
+            fingerprint=draft["fingerprint"],
+            request_id=key,
+            revision=0,
+        )
     assert approved.json() == replayed.json()
     assert len(read(client, session)["receipts"]) == 1
 
@@ -117,8 +135,16 @@ def test_late_payment_invalidates_exact_approval(client):
     old = drafted(client, session)
     extra = workspace.SAMPLES["payment"].replace("600.00", "200.00").replace("08-20", "09-09")
     assert change(client, session, "intake", body=extra).status_code == 200
-    assert change(client, session, "approve", revision=old["revision"],
-                  fingerprint=old["draft"]["fingerprint"]).status_code == 409
+    assert (
+        change(
+            client,
+            session,
+            "approve",
+            revision=old["revision"],
+            fingerprint=old["draft"]["fingerprint"],
+        ).status_code
+        == 409
+    )
     assert read(client, session)["receipts"] == []
     current = change(client, session, "reason").json()
     assert "1,060.00 EUR" in current["draft"]["body"]
@@ -130,8 +156,13 @@ def test_refused_input_holds_every_chase_until_corrected(client):
     state = change(client, session, "intake", body=workspace.SAMPLES["refusal"]).json()
     assert state["draft"] is None and len(state["holds"]) == 1
     assert change(client, session, "reason").status_code == 422
-    corrected = change(client, session, "intake", body=workspace.SAMPLES["supplier"],
-                       replace_id=state["holds"][0]["id"]).json()
+    corrected = change(
+        client,
+        session,
+        "intake",
+        body=workspace.SAMPLES["supplier"],
+        replace_id=state["holds"][0]["id"],
+    ).json()
     assert corrected["holds"] == []
     assert corrected["sources"][2]["status"] == "corrected"
     assert change(client, session, "reason").json()["draft"]
@@ -140,17 +171,25 @@ def test_refused_input_holds_every_chase_until_corrected(client):
 def test_arrangement_exact_approval_survives_store_reopen_without_changing_debt(client):
     session = create(client)
     posted(client, session)
-    proposed = change(client, session, "arrangements/propose", invoice_id="JN-4410",
-                      body="2026-09-20: 600.00 EUR\n2026-10-05: 660.00 EUR").json()
+    proposed = change(
+        client,
+        session,
+        "arrangements/propose",
+        invoice_id="JN-4410",
+        body="2026-09-20: 600.00 EUR\n2026-10-05: 660.00 EUR",
+    ).json()
     assert proposed["proposal"]["plan"]["baseline"] == "600.00"
-    approved = change(client, session, "arrangements/approve",
-                      fingerprint=proposed["proposal"]["fingerprint"])
+    approved = change(
+        client, session, "arrangements/approve", fingerprint=proposed["proposal"]["fingerprint"]
+    )
     assert approved.status_code == 200, approved.text
     state, _ = SQLiteSessions(api.store().path).get(session)
     books = workspace.books_for(state)
     assert books.worst_overdue(workspace.AS_OF) is None
     assert books.uncollected()[0].outstanding == 1260
-    assert workspace.snapshot(state)["queue"]["blocked"][0]["reason"] == "a payment plan is being kept"
+    assert (
+        workspace.snapshot(state)["queue"]["blocked"][0]["reason"] == "a payment plan is being kept"
+    )
 
 
 @pytest.mark.parametrize("body", ["soon", "I dispute this debt"])
@@ -164,24 +203,33 @@ def test_ambiguous_or_disputed_reply_holds_collection(client, body):
     assert change(client, session, "reason").status_code == 422
 
 
-@pytest.mark.parametrize("body", [
-    "2026-09-20: 1.00 EUR", "2026-01-01: 1260.00 EUR",
-    "2026-09-20: 600.00 EUR\n2026-09-20: 660.00 EUR",
-])
+@pytest.mark.parametrize(
+    "body",
+    [
+        "2026-09-20: 1.00 EUR",
+        "2026-01-01: 1260.00 EUR",
+        "2026-09-20: 600.00 EUR\n2026-09-20: 660.00 EUR",
+    ],
+)
 def test_invalid_arrangement_never_changes_books(client, body):
     session = create(client)
     posted(client, session)
-    assert change(client, session, "arrangements/propose", invoice_id="JN-4410",
-                  body=body).status_code == 422
+    assert (
+        change(client, session, "arrangements/propose", invoice_id="JN-4410", body=body).status_code
+        == 422
+    )
     assert read(client, session)["arrangements"] == []
 
 
-@pytest.mark.parametrize("body", [
-    workspace.SAMPLES["invoice"].replace("1860.00", "1859.99"),
-    workspace.SAMPLES["invoice"].replace("EUR", "USD"),
-    workspace.SAMPLES["invoice"].replace("To: accounts@buildco.example\n", ""),
-    workspace.SAMPLES["payment"],
-])
+@pytest.mark.parametrize(
+    "body",
+    [
+        workspace.SAMPLES["invoice"].replace("1860.00", "1859.99"),
+        workspace.SAMPLES["invoice"].replace("EUR", "USD"),
+        workspace.SAMPLES["invoice"].replace("To: accounts@buildco.example\n", ""),
+        workspace.SAMPLES["payment"],
+    ],
+)
 def test_unsupported_or_contradictory_input_is_visible_refusal(client, body):
     session = create(client)
     response = change(client, session, "intake", body=body)
@@ -192,7 +240,10 @@ def test_unsupported_or_contradictory_input_is_visible_refusal(client, body):
 def test_no_public_live_provider_or_foreign_session_selection(client):
     session = create(client)
     assert client.get("/api/workspace").status_code == 422
-    assert client.get("/api/workspace", headers={"X-Archon-Session": "../elsewhere"}).status_code == 401
+    assert (
+        client.get("/api/workspace", headers={"X-Archon-Session": "../elsewhere"}).status_code
+        == 401
+    )
     assert client.get("/api/workspace", headers={"X-Archon-Session": "f" * 64}).status_code == 401
     assert client.post("/api/sessions", json={"mode": "live"}).status_code == 422
     assert change(client, session, "reason", provider="ses").status_code == 422
@@ -206,7 +257,10 @@ def test_expired_session_and_expired_draft_are_refused(client):
     state, version = api.store().get(session)
     state["draft"]["at"] = (datetime.now(UTC) - timedelta(minutes=31)).isoformat()
     api.store().put(session, state, version)
-    assert change(client, session, "approve", fingerprint=current["draft"]["fingerprint"]).status_code == 409
+    assert (
+        change(client, session, "approve", fingerprint=current["draft"]["fingerprint"]).status_code
+        == 409
+    )
     state, version = api.store().get(session)
     state["created_at"] = (datetime.now(UTC) - timedelta(days=8)).isoformat()
     api.store().put(session, state, version)
@@ -287,12 +341,22 @@ def test_s3_no_list_bucket_denial_is_unavailable_not_claimed_missing(caplog):
 
 
 def gateway_event(path, body=None, session=None):
-    return {"version": "2.0", "requestContext": {"http": {
-        "method": "POST" if body is not None else "GET", "path": path,
-    }}, "headers": {"content-type": "application/json", **(
-        {"x-archon-session": session} if session else {})},
-        "rawQueryString": "", "body": json.dumps(body) if body is not None else "",
-        "isBase64Encoded": False}
+    return {
+        "version": "2.0",
+        "requestContext": {
+            "http": {
+                "method": "POST" if body is not None else "GET",
+                "path": path,
+            }
+        },
+        "headers": {
+            "content-type": "application/json",
+            **({"x-archon-session": session} if session else {}),
+        },
+        "rawQueryString": "",
+        "body": json.dumps(body) if body is not None else "",
+        "isBase64Encoded": False,
+    }
 
 
 def test_real_lambda_handler_http_api_v2_health_commit_and_session_journey(client, monkeypatch):
@@ -305,9 +369,18 @@ def test_real_lambda_handler_http_api_v2_health_commit_and_session_journey(clien
     event.update(body=base64.b64encode(event["body"].encode()).decode(), isBase64Encoded=True)
     event["cookies"] = ["unrelated=value"]
     session = json.loads(handler(event, None)["body"])["session"]
-    response = handler(gateway_event("/api/intake", {
-        "revision": 0, "request_id": uuid.uuid4().hex, "body": workspace.SAMPLES["invoice"],
-    }, session), None)
+    response = handler(
+        gateway_event(
+            "/api/intake",
+            {
+                "revision": 0,
+                "request_id": uuid.uuid4().hex,
+                "body": workspace.SAMPLES["invoice"],
+            },
+            session,
+        ),
+        None,
+    )
     assert response["statusCode"] == 200
     assert json.loads(response["body"])["sales"][0]["outstanding"] == "1860.00"
     assert handler(gateway_event("/api/workspace", session=session), None)["statusCode"] == 200
@@ -320,8 +393,11 @@ def test_live_adapter_requires_operator_authorization_and_durable_log():
     workspace.intake(state, workspace.SAMPLES["invoice"])
     workspace.reason(state)
     draft = workspace.draft_for(state)
-    outbox = Outbox(workspace.SimulatedProvider(draft.fingerprint()), "sender@example.com",
-                    controlled_recipient="somebody-else@example.com")
+    outbox = Outbox(
+        workspace.SimulatedProvider(draft.fingerprint()),
+        "sender@example.com",
+        controlled_recipient="somebody-else@example.com",
+    )
     with pytest.raises(SendRefused, match="verified recipient"):
         outbox.send(draft, None)
 

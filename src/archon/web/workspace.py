@@ -54,9 +54,18 @@ def plain(value):
 
 
 def fresh() -> dict:
-    return {"revision": 0, "created_at": now(), "sources": [], "arrangements": [],
-            "proposal": None, "graph": None, "draft": None, "sends": {},
-            "activity": [], "requests": {}}
+    return {
+        "revision": 0,
+        "created_at": now(),
+        "sources": [],
+        "arrangements": [],
+        "proposal": None,
+        "graph": None,
+        "draft": None,
+        "sends": {},
+        "activity": [],
+        "requests": {},
+    }
 
 
 def books_for(state: dict) -> Books:
@@ -77,8 +86,9 @@ def books_for(state: dict) -> Books:
 
 
 def event(state: dict, title: str, detail: str) -> None:
-    state["activity"].append({"id": len(state["activity"]) + 1, "at": now(),
-                              "title": title, "detail": detail})
+    state["activity"].append(
+        {"id": len(state["activity"]) + 1, "at": now(), "title": title, "detail": detail}
+    )
 
 
 def holds(state: dict) -> list[dict]:
@@ -91,21 +101,38 @@ def intake(state: dict, body: str, replace_id: str | None = None) -> None:
     previous = next((s for s in state["sources"] if s["id"] == replace_id), None)
     if replace_id and (previous is None or previous["status"] != "refused"):
         raise ValueError("Only a refused source can be corrected. Posted evidence is immutable.")
+    if previous and previous["kind"] == "ClientReply":
+        raise ValueError(
+            "A disputed or ambiguous client reply needs a separate human resolution. "
+            "Replacing it with an invoice cannot release collections in this demo."
+        )
     content_hash = digest(body)
     if any(s["hash"] == content_hash and s["status"] == "posted" for s in state["sources"]):
         raise ValueError("This exact email is already posted. Nothing was posted twice.")
     source_id = f"email:{len(state['sources']) + 1:03d}"
-    source = {"id": source_id, "hash": content_hash, "body": body, "at": now(),
-              "status": "refused", "error": "", "kind": "", "document": None,
-              "redactions": 0}
+    source = {
+        "id": source_id,
+        "hash": content_hash,
+        "body": body,
+        "at": now(),
+        "status": "refused",
+        "error": "",
+        "kind": "",
+        "document": None,
+        "redactions": 0,
+    }
     try:
         # Mixed/unsupported currencies cannot silently become euro debt.
         if re.search(r"\b(?:USD|GBP|CHF|JPY|CAD|AUD)\b|[$£¥]", body, re.I):
             raise ValueError("Only EUR is supported. No exchange rate has been authorized.")
         reading = read_email(body, source_id, client=LocalReader())
         books_for(state).record(reading.document)
-        source.update(status="posted", kind=type(reading.document).__name__,
-                      document=json.loads(_encode(reading.document)), redactions=reading.redactions)
+        source.update(
+            status="posted",
+            kind=type(reading.document).__name__,
+            document=json.loads(_encode(reading.document)),
+            redactions=reading.redactions,
+        )
         if previous:
             previous["status"] = "corrected"
             previous["corrected_by"] = source_id
@@ -113,8 +140,11 @@ def intake(state: dict, body: str, replace_id: str | None = None) -> None:
         source["error"] = str(exc)
     state["sources"].append(source)
     state["draft"], state["graph"], state["proposal"] = None, None, None
-    event(state, "Email posted" if source["status"] == "posted" else "Email refused",
-          f"{source_id}: {source['error'] or source['document']['doc_id']}")
+    event(
+        state,
+        "Email posted" if source["status"] == "posted" else "Email refused",
+        f"{source_id}: {source['error'] or source['document']['doc_id']}",
+    )
 
 
 def draft_for(state: dict) -> ChaseDraft | None:
@@ -125,14 +155,22 @@ def draft_for(state: dict) -> ChaseDraft | None:
     worst = books.worst_overdue(AS_OF)
     if worst is None:
         return None
-    claims = [Outstanding(worst.doc_id, worst.outstanding),
-              Overdue(worst.doc_id, worst.days_overdue(AS_OF))]
+    claims = [
+        Outstanding(worst.doc_id, worst.outstanding),
+        Overdue(worst.doc_id, worst.days_overdue(AS_OF)),
+    ]
     if worst.settled > 0:
         claims.append(PartPaid(worst.doc_id, worst.settled))
-    return ChaseDraft(invoice_id=worst.doc_id, client=worst.counterparty,
-                      to_address=worst.contact, subject="Our outstanding invoice",
-                      opening=saved["opening"], closing=saved["closing"],
-                      claims=tuple(claims), as_of=AS_OF)
+    return ChaseDraft(
+        invoice_id=worst.doc_id,
+        client=worst.counterparty,
+        to_address=worst.contact,
+        subject="Our outstanding invoice",
+        opening=saved["opening"],
+        closing=saved["closing"],
+        claims=tuple(claims),
+        as_of=AS_OF,
+    )
 
 
 def reason(state: dict) -> None:
@@ -153,10 +191,15 @@ def reason(state: dict) -> None:
         message = getattr(getattr(outcome, "result", None), "message", {})
         reports[str(name)] = "\n".join(b.get("text", "") for b in message.get("content", []))
     if not wiring.REQUIRED_REPORTS.issubset(reports) or not reports.get(wiring.COMPOSER):
-        raise ValueError("The Strands graph did not complete every required report. Nothing drafted.")
+        raise ValueError(
+            "The Strands graph did not complete every required report. Nothing drafted."
+        )
     opening, closing = two_lines(reports.pop(wiring.COMPOSER))
-    state["graph"] = {"at": now(), "reports": reports,
-                      "mode": "Real Strands graph · scripted model · no AI judgment"}
+    state["graph"] = {
+        "at": now(),
+        "reports": reports,
+        "mode": "Real Strands graph · scripted model · no AI judgment",
+    }
     state["draft"] = {"opening": opening, "closing": closing, "at": now()}
     draft = draft_for(state)
     if draft is None:
@@ -205,12 +248,19 @@ def approve(state: dict, fingerprint: str) -> None:
         raise Conflict("This draft is older than 30 minutes. Run the graph and review again.")
     approval = Approval(fingerprint, "demo visitor", moment)
     release = assess(books_for(state), draft, approval, AS_OF, now=moment)
-    outbox = Outbox(SimulatedProvider(fingerprint), "books@archon.example",
-                    clock=lambda: moment, log=DocumentSendLog(state))
+    outbox = Outbox(
+        SimulatedProvider(fingerprint),
+        "books@archon.example",
+        clock=lambda: moment,
+        log=DocumentSendLog(state),
+    )
     receipt = outbox.send(draft, release)
     if not receipt.replayed:
-        event(state, "Exact draft approved · simulated acceptance",
-              f"{draft.invoice_id} · {receipt.message_id}. No email left this application.")
+        event(
+            state,
+            "Exact draft approved · simulated acceptance",
+            f"{draft.invoice_id} · {receipt.message_id}. No email left this application.",
+        )
 
 
 class BoundedReplyReader:
@@ -226,8 +276,11 @@ class BoundedReplyReader:
             outcome, why = "proposed", "Explicit dates and amounts extracted by bounded rules."
         else:
             outcome, why = "needs-a-person", "Use one YYYY-MM-DD: 0.00 EUR line per instalment."
-        value = {"outcome": outcome, "why": why,
-                 "instalments": [{"due": day, "amount": amount} for day, amount in rows]}
+        value = {
+            "outcome": outcome,
+            "why": why,
+            "instalments": [{"due": day, "amount": amount} for day, amount in rows],
+        }
         return {"output": {"message": {"content": [{"text": json.dumps(value)}]}}}
 
 
@@ -241,20 +294,40 @@ def propose(state: dict, invoice_id: str, body: str) -> None:
     reading = read_reply(body, AS_OF, client=BoundedReplyReader())
     plan = None
     if not reading.needs_a_person:
-        plan = consider(invoice_id=invoice_id, outstanding=settlement.outstanding,
-                        instalments=reading.instalments, as_of=AS_OF,
-                        baseline=settlement.settled, approved_by="demo visitor")
-    proposed = {"invoice_id": invoice_id, "outcome": reading.outcome, "why": reading.why,
-                "plan": plain(asdict(plan)) if plan else None, "at": now(), "body": body}
+        plan = consider(
+            invoice_id=invoice_id,
+            outstanding=settlement.outstanding,
+            instalments=reading.instalments,
+            as_of=AS_OF,
+            baseline=settlement.settled,
+            approved_by="demo visitor",
+        )
+    proposed = {
+        "invoice_id": invoice_id,
+        "outcome": reading.outcome,
+        "why": reading.why,
+        "plan": plain(asdict(plan)) if plan else None,
+        "at": now(),
+        "body": body,
+    }
     proposed["fingerprint"] = digest(proposed)
     state["proposal"] = proposed
     state["draft"] = None
     # A dispute/ambiguous reply is material missing evidence, not a cosmetic warning.
     if reading.needs_a_person:
-        state["sources"].append({"id": f"email:{len(state['sources']) + 1:03d}",
-            "body": body, "hash": digest(body), "status": "refused", "error": reading.why,
-            "kind": "ClientReply", "document": None, "redactions": reading.redactions,
-            "at": now()})
+        state["sources"].append(
+            {
+                "id": f"email:{len(state['sources']) + 1:03d}",
+                "body": body,
+                "hash": digest(body),
+                "status": "refused",
+                "error": reading.why,
+                "kind": "ClientReply",
+                "document": None,
+                "redactions": reading.redactions,
+                "at": now(),
+            }
+        )
     event(state, "Payment terms read", f"{invoice_id}: {reading.why}")
 
 
@@ -270,14 +343,22 @@ def agree(state: dict, fingerprint: str) -> None:
     books = books_for(state)
     saved = proposal["plan"]
     settlement = next(s for s in books.uncollected() if s.doc_id == saved["invoice_id"])
-    plan = consider(invoice_id=saved["invoice_id"], outstanding=settlement.outstanding,
-        instalments=tuple(Instalment(date.fromisoformat(i["due"]), Decimal(i["amount"]))
-                         for i in saved["instalments"]),
-        as_of=AS_OF, baseline=settlement.settled, approved_by="demo visitor")
+    plan = consider(
+        invoice_id=saved["invoice_id"],
+        outstanding=settlement.outstanding,
+        instalments=tuple(
+            Instalment(date.fromisoformat(i["due"]), Decimal(i["amount"]))
+            for i in saved["instalments"]
+        ),
+        as_of=AS_OF,
+        baseline=settlement.settled,
+        approved_by="demo visitor",
+    )
     if plain(asdict(plan)) != saved:
         raise Conflict("The balance changed after the proposal. Review the terms again.")
-    state["arrangements"] = [a for a in state["arrangements"]
-                             if a["invoice_id"] != plan.invoice_id] + [saved]
+    state["arrangements"] = [
+        a for a in state["arrangements"] if a["invoice_id"] != plan.invoice_id
+    ] + [saved]
     state["proposal"], state["draft"] = None, None
     event(state, "Payment arrangement approved", f"{plan.invoice_id}: debt unchanged; chase held.")
 
@@ -288,26 +369,44 @@ def snapshot(state: dict) -> dict:
     draft = draft_for(state)
     pnl = profit_and_loss(books, date(2026, 7, 1), AS_OF)
     cash = cashflow(books, date(2026, 7, 1), AS_OF)
-    result = {key: state[key] for key in ("revision", "sources", "arrangements", "proposal",
-                                         "graph", "activity")}
-    result.update(as_of=str(AS_OF), synthetic=True, reader="Bounded local rules; no model call",
-        provider="Simulated outbox; no real email", holds=holds(state), samples=SAMPLES,
+    result = {
+        key: state[key]
+        for key in ("revision", "sources", "arrangements", "proposal", "graph", "activity")
+    }
+    result.update(
+        as_of=str(AS_OF),
+        synthetic=True,
+        reader="Bounded local rules; no model call",
+        provider="Simulated outbox; no real email",
+        holds=holds(state),
+        samples=SAMPLES,
         queue=asdict(queue),
         sales=[{**asdict(s), "outstanding": s.outstanding} for s in books.sales_settlements()],
-        purchases=[{**asdict(s), "outstanding": s.outstanding}
-                   for s in books.purchase_settlements()],
+        purchases=[
+            {**asdict(s), "outstanding": s.outstanding} for s in books.purchase_settlements()
+        ],
         metrics=asdict(metrics(books, AS_OF)),
         pnl={**asdict(pnl), "profit": pnl.profit},
         cashflow={**asdict(cash), "net": cash.net},
         trial_balance=books.ledger.trial_balance(),
-        receipts=list(state["sends"].values()), draft=None,
-        receipt_states={"queued": "Intent recorded; provider not yet confirmed",
+        receipts=list(state["sends"].values()),
+        draft=None,
+        receipt_states={
+            "queued": "Intent recorded; provider not yet confirmed",
             "unknown": "Outcome ambiguous; never retry automatically",
             "provider-accepted": "Provider returned an identifier; arrival is unproven",
             "delivered": "Requires independent arrival evidence; unavailable in this demo",
-            "failed": "Confirmed rejection; may be retried after correction"})
+            "failed": "Confirmed rejection; may be retried after correction",
+        },
+    )
     if draft:
-        result["draft"] = {"invoice_id": draft.invoice_id, "recipient": draft.to_address,
-            "subject": draft.subject, "body": draft.body(), "fingerprint": draft.fingerprint(),
-            "at": state["draft"]["at"], "claims": [c.sentence() for c in draft.claims]}
+        result["draft"] = {
+            "invoice_id": draft.invoice_id,
+            "recipient": draft.to_address,
+            "subject": draft.subject,
+            "body": draft.body(),
+            "fingerprint": draft.fingerprint(),
+            "at": state["draft"]["at"],
+            "claims": [c.sentence() for c in draft.claims],
+        }
     return plain(result)

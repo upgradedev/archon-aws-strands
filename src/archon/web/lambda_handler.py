@@ -15,11 +15,20 @@ async def invoke(event):
     headers = [(k.lower().encode(), v.encode()) for k, v in event.get("headers", {}).items()]
     if event.get("cookies"):
         headers.append((b"cookie", "; ".join(event["cookies"]).encode()))
-    scope = {"type": "http", "asgi": {"version": "3.0", "spec_version": "2.3"},
-        "http_version": "1.1", "method": http["method"], "scheme": "https",
-        "path": http["path"], "raw_path": http["path"].encode(), "root_path": "",
-        "query_string": event.get("rawQueryString", "").encode(), "headers": headers,
-        "server": ("lambda", 443), "client": (http.get("sourceIp", "127.0.0.1"), 0)}
+    scope = {
+        "type": "http",
+        "asgi": {"version": "3.0", "spec_version": "2.3"},
+        "http_version": "1.1",
+        "method": http["method"],
+        "scheme": "https",
+        "path": http["path"],
+        "raw_path": http["path"].encode(),
+        "root_path": "",
+        "query_string": event.get("rawQueryString", "").encode(),
+        "headers": headers,
+        "server": ("lambda", 443),
+        "client": (http.get("sourceIp", "127.0.0.1"), 0),
+    }
     sent = False
     response = {"statusCode": 500, "headers": {}}
     output = bytearray()
