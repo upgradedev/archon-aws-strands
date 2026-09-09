@@ -127,8 +127,12 @@ the shapes, and the adversarial line is one I wrote: a real attacker would write
 ## React workstation usage
 
 The new `frontend/` application is a React, TypeScript and Tailwind ledger workstation.
-AWS hosting target: [ARCHON workstation](https://d2ssmv59q16d0b.cloudfront.net/).
-**Pending deployment:** the frontend has not yet been uploaded or verified at this target.
+Live AWS application: [ARCHON workstation](https://d2ssmv59q16d0b.cloudfront.net/).
+[Live AWS acceptance](https://github.com/upgradedev/archon-aws-strands/actions/runs/34327809017)
+passed all 16 desktop/mobile journeys on 2026-09-09 against CloudFront, Lambda and private S3.
+This is automated synthetic acceptance, not a person's UAT signoff or evidence of real email delivery.
+The tested frontend was `d83b611c9e3e360cefa1428d27beab0e4b4420bf`; current release identity is
+published at `/release.json`, and API identity at `/api/health`.
 GitHub Pages is not the live product hosting path; the HTML export is a legacy local/CI artifact.
 Its routes are `#/queue`, `#/documents`, `#/approvals` and `#/activity`; source links use
 `#/documents?source=JN-4410`. Every public workspace starts empty and is labelled synthetic.
@@ -317,7 +321,7 @@ tool; the judgement did not.
 | the firm, its clients, its staff | **entirely invented.** No customer data is present anywhere in this repository |
 | the static walkthrough | legacy local/CI export from the ledger, not the interactive AWS product; GitHub Pages is not the live hosting path |
 | the books between sessions | real. Set `ARCHON_STORE` to a path and the post is written down; loading replays it through the same validation, so a store cannot hold books that do not balance |
-| a running deployment | not yet. The screen runs locally |
+| a running deployment | [React workstation on AWS](https://d2ssmv59q16d0b.cloudfront.net/), private S3 + CloudFront + API Gateway + Lambda; synthetic public path, real Strands, scripted model, simulated outbox |
 | Bedrock AgentCore | **no.** [`docs/BEDROCK_AGENTCORE_ARCHITECTURE.md`](docs/BEDROCK_AGENTCORE_ARCHITECTURE.md) sketches what it would look like and says on its first line that none of it is built |
 
 ---
