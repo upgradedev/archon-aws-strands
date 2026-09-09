@@ -10,6 +10,7 @@ from __future__ import annotations
 import pathlib
 import re
 import sqlite3
+from dataclasses import replace
 
 import pytest
 
@@ -46,6 +47,13 @@ def test_a_script_tag_in_a_document_never_renders_as_one(client):
             "Net 100.00 EUR, VAT 24.00 EUR, total 124.00 EUR."
         },
     )
+    body = outside_the_textarea(client.get("/").text)
+    assert "<script>alert(1)</script>" not in body
+    posted = next(invoice for invoice in session.books.purchases if invoice.doc_id == "XSS-1")
+    assert posted.supplier == "supplier, name redacted"
+    # Intake now redacts the whole sender label. Direct/persisted document names still
+    # reach rendering, so exercise that escaping boundary independently of redaction.
+    session.books.record(replace(posted, doc_id="XSS-2", supplier="<script>alert(1)</script>"))
     body = outside_the_textarea(client.get("/").text)
     assert "<script>alert(1)</script>" not in body
     assert "&lt;script&gt;" in body

@@ -265,6 +265,7 @@ def test_legacy_attestation_refuses_missing_conflicting_and_unknown_references(i
 
 def test_final_gate_also_holds_legacy_books_even_for_direct_callers():
     from datetime import UTC, datetime
+
     from archon.agents.claims import Outstanding
     from archon.agents.draft import ChaseDraft
     from archon.agents.gate import Approval, assess
@@ -347,3 +348,38 @@ def test_business_configuration_changes_classification_not_just_recipient_addres
     assert isinstance(received.document, PurchaseInvoice)
     with pytest.raises(UnreadablePost, match="direction conflicts"):
         read_email(supplier, "wrong-owner", client=LocalReader())
+
+
+def test_one_historical_instalment_can_be_attested_before_distinct_equal_correction():
+    state = historical_state()
+    state["sources"].pop()
+    original = copy.deepcopy(state["sources"])
+    assert not workspace.holds(state)
+    workspace.intake(state, workspace.SAMPLES["payment"])
+    refused = state["sources"][-1]
+    assert refused["status"] == "refused" and "Ambiguous payment identity" in refused["error"]
+    legacy_hold = next(s for s in workspace.holds(state) if s["kind"] == "LegacyPaymentReview")
+    workspace.resolve(state, legacy_hold["id"], "attest-legacy-payments",
+                      "Checked the original historical event in supplied bank records.",
+                      identities={"OLD-1": "BANK-ORIGINAL-LEGACY"})
+    assert state["sources"][:2] == original
+    assert [s["id"] for s in workspace.holds(state)] == [refused["id"]]
+    workspace.intake(state, workspace.SAMPLES["payment"], replace_id=refused["id"])
+    assert refused["status"] == "corrected" and not workspace.holds(state)
+    assert workspace.books_for(state).sales_settlements()[0].outstanding == Decimal("660")
+    workspace.reason(state)
+    assert state["draft"] is not None
+
+
+def test_attested_same_event_cannot_be_reposted_as_distinct_equal_correction():
+    state = historical_state()
+    state["sources"].pop()
+    workspace.intake(state, workspace.SAMPLES["payment"])
+    refused = state["sources"][-1]
+    workspace.resolve(state, "email:old-1", "attest-legacy-payments",
+                      "Matched the supplied reference to the historical bank event.",
+                      identities={"OLD-1": "DEMO-BANK-600-A"})
+    workspace.intake(state, workspace.SAMPLES["payment"], replace_id=refused["id"])
+    assert state["sources"][-1]["status"] == "refused"
+    assert workspace.books_for(state).sales_settlements()[0].outstanding == Decimal("1260")
+    assert workspace.holds(state)

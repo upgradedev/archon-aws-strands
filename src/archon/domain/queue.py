@@ -99,6 +99,9 @@ def build(books, as_of: date, currency: str = "EUR") -> Queue:
 
         if settlement.outstanding <= ZERO:
             continue
+        if books.legacy_payment_holds:
+            blocked.append(_with(item, "historical payment identities need human reconciliation"))
+            continue
         if not settlement.contact:
             # The case that quietly disappears in most tools. It stays visible.
             blocked.append(_with(item, NO_RECIPIENT))

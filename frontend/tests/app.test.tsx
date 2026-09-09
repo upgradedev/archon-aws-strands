@@ -13,6 +13,27 @@ beforeEach(() => {
 async function route(path: string) {
   await act(async () => { location.hash = path; window.dispatchEvent(new HashChangeEvent('hashchange')); });
 }
+
+test('new workspace on History clears an existing evidence bundle at the same revision', async () => {
+  location.hash = '/history';
+  const state = empty();
+  vi.mocked(api.openWorkspace).mockReset()
+    .mockResolvedValueOnce({ session: 'old-handle', workspace: state })
+    .mockResolvedValueOnce({ session: 'new-handle', workspace: empty() });
+  vi.mocked(api.request).mockResolvedValueOnce({
+    revision: 0, commit: 'old-backend', text: 'Evidence belonging only to old session',
+  });
+  render(<App />);
+  await screen.findByRole('heading', { name: 'History' });
+  await userEvent.click(screen.getByRole('button', { name: 'Prepare evidence bundle' }));
+  await screen.findByRole('link', { name: 'Download readable evidence' });
+  expect(api.request).toHaveBeenCalledWith('/evidence', 'old-handle');
+  await userEvent.click(screen.getByRole('button', { name: 'New workspace' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Start new workspace' }));
+  await waitFor(() => expect(api.openWorkspace).toHaveBeenCalledTimes(2));
+  expect(screen.queryByRole('link', { name: 'Download readable evidence' })).not.toBeInTheDocument();
+  expect(screen.queryByText('Evidence belonging only to old session')).not.toBeInTheDocument();
+});
 test('workspace starts, navigates deep links and skip link focuses main', async () => {
   render(<App />);
   await screen.findByRole('heading', { name: 'Workspace' });

@@ -118,6 +118,26 @@ def test_legacy_resolution_is_revision_bound_durable_and_does_not_rewrite(client
     assert change(client, session, "reason").json()["draft"] is not None
 
 
+def test_single_legacy_instalment_attestation_recovers_new_equal_payment_over_http(client):
+    from test_reliable_workflows import historical_state
+    session = create(client)
+    state, version = api.store().get(session)
+    state["sources"] = historical_state()["sources"][:-1]
+    original = json.loads(json.dumps(state["sources"]))
+    api.store().put(session, state, version)
+    refused = change(client, session, "intake", body=workspace.SAMPLES["payment"]).json()
+    old = next(s for s in refused["holds"] if s["kind"] == "LegacyPaymentReview")
+    result = change(client, session, "resolve", source_id=old["id"],
+                    decision="attest-legacy-payments", identities={"OLD-1": "BANK-OLD-EVENT"},
+                    note="Reviewed distinct historical bank event with the owner.")
+    assert result.status_code == 200, result.text
+    assert result.json()["sources"][:2] == original
+    result = change(client, session, "intake", body=workspace.SAMPLES["payment"],
+                    replace_id=refused["sources"][-1]["id"])
+    assert result.status_code == 200 and not result.json()["holds"]
+    assert result.json()["sales"][0]["outstanding"] == "660.00"
+
+
 def test_raw_post_real_strands_exact_approval_and_durable_receipt(client):
     session = create(client)
     state = drafted(client, session)

@@ -100,11 +100,20 @@ def event(state: dict, title: str, detail: str) -> None:
 
 def holds(state: dict) -> list[dict]:
     held = [source for source in state["sources"] if source["status"] == "refused"]
-    for doc_id in books_for(state).legacy_payment_holds:
+    legacy = legacy_documents(state)
+    review_ids = set(books_for(state).legacy_payment_holds)
+    for source in held:
+        candidate = source.get("document")
+        if candidate and source["error"].startswith("Ambiguous payment identity:"):
+            review_ids.update(d["doc_id"] for d in legacy
+                              if d["settles"] == candidate.get("settles")
+                              and d["amount"] == candidate.get("amount"))
+    for doc_id in sorted(review_ids):
         source = next(s for s in state["sources"] if s["document"]
                       and s["document"]["doc_id"] == doc_id)
         held.append({**source, "kind": "LegacyPaymentReview", "status": "refused",
-                     "error": "Historical equal payments lack bank identities. Records are "
+                     "error": "Historical payments involved in ambiguity lack bank identities. "
+                              "Records are "
                               "retained; reconcile them with a person before collections.",
                      "legacy_documents": legacy_documents(state)})
     return held
@@ -380,10 +389,14 @@ def resolve(state: dict, source_id: str, decision: str, note: str,
         if source["kind"] != "LegacyPaymentReview" or not expected or not identities:
             raise ValueError("Select a historical payment hold and supply its bank references.")
         if set(identities) != expected or len(identities) > 50:
-            raise ValueError("Supply references for every listed historical payment, and only those.")
+            raise ValueError(
+                "Supply references for every listed historical payment, and only those."
+            )
         if any(not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9 _/-]{2,79}", v)
                for v in identities.values()):
-            raise ValueError("Each supplied bank reference must be 3–80 letters, digits, spaces, /, _ or -.")
+            raise ValueError(
+                "Each supplied bank reference must be 3–80 letters, digits, spaces, /, _ or -."
+            )
         attested = {**state.get("transfer_attestations", {}),
                     **{k: transfer_identity(v) for k, v in identities.items()}}
         # Validate the entire replay before storing any attestation. Duplicate events stay held;
