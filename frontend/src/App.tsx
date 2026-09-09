@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { openWorkspace, request, errorText, storageWarning } from './api';
+import { ApiError, openWorkspace, request, errorText, storageWarning } from './api';
 import type { Workspace } from './types';
 import { Queue } from './Queue';
 import { Documents } from './Documents';
@@ -71,7 +71,12 @@ export function App() {
         ...payload, revision: data.revision, request_id: intent.current.id,
       });
       intent.current = null; setData(updated); setStale(false); setNotice('Saved to this workspace.'); return true;
-    } catch (failure) { intent.current!.needsRefresh = true; setError(errorText(failure)); setStale(true); setReviewEpoch(e => e + 1); return false; }
+    } catch (failure) {
+      const refused = failure instanceof ApiError && (failure.status === 400 || failure.status === 422);
+      if (refused) intent.current = null;
+      else intent.current!.needsRefresh = true;
+      setError(errorText(failure)); setStale(!refused); setReviewEpoch(e => e + 1); return false;
+    }
     finally { inFlight.current = false; setBusy(false); }
   }
 

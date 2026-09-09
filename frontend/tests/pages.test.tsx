@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Queue } from '../src/Queue';
 import { Documents } from '../src/Documents';
@@ -23,16 +23,16 @@ test('queue shows source-backed figures and navigates only after graph succeeds'
   const mutate = vi.fn().mockResolvedValueOnce(false).mockResolvedValueOnce(true);
   location.hash = '/queue';
   render(<Queue data={filled()} busy={false} mutate={mutate} />);
-  expect(screen.getByText('39 days overdue')).toBeInTheDocument();
+  expect(screen.getByText('39 days overdue · Backend priority')).toBeInTheDocument();
   await userEvent.click(screen.getByRole('button', { name: /Run Strands/ }));
   expect(location.hash).toBe('#/queue');
   await userEvent.click(screen.getByRole('button', { name: /Run Strands/ }));
-  expect(mutate).toHaveBeenCalledWith('/reason'); expect(location.hash).toBe('#/approvals');
+  expect(mutate).toHaveBeenCalledWith('/reason'); expect(location.hash).toBe('#/workspace?view=draft&invoice=JN-4410&source=email%3A001');
 });
 test('incomplete evidence and arrangements stay visibly held', () => {
   const data = refusal(); data.queue.blocked = [{ ...data.queue.ready[0], reason: 'a payment plan is being kept' }];
   render(<Queue data={data} busy={true} mutate={vi.fn()} />);
-  expect(screen.getByText('Evidence held')).toBeInTheDocument();
+  expect(screen.getByText('Collections held · incomplete evidence')).toBeInTheDocument();
   expect(screen.getByText('a payment plan is being kept')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Working…' })).toBeDisabled();
 });
@@ -62,7 +62,7 @@ test('source deep links, filtering, literal text and correction are usable', asy
   await userEvent.selectOptions(screen.getByRole('combobox'), 'refused');
   expect(screen.queryByText('Corrected by email:004; original evidence retained.')).not.toBeInTheDocument();
   await userEvent.click(screen.getByRole('button', { name: 'Correct source' }));
-  expect(screen.getByLabelText(/Email headers/)).toHaveFocus();
+  await waitFor(() => expect(screen.getByLabelText(/Email headers/)).toHaveFocus());
   await userEvent.click(screen.getByRole('button', { name: 'Cancel correction' }));
   expect(screen.getByLabelText(/Email headers/)).toHaveValue('');
   await userEvent.click(screen.getByRole('button', { name: 'Correct source' }));
@@ -85,7 +85,7 @@ test('draft requires review and exact fingerprint, with a failed retry and succe
   await userEvent.click(button); expect(button).toBeEnabled();
   await userEvent.click(button);
   expect(mutate).toHaveBeenLastCalledWith('/approve', { fingerprint: 'a'.repeat(64) });
-  expect(location.hash).toBe('#/activity');
+  expect(location.hash).toBe('#/history');
 });
 test('a stored receipt prevents a second draft approval', () => {
   render(<Approvals data={received()} busy={false} mutate={vi.fn()} />);

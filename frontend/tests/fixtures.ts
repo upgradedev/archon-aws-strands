@@ -20,7 +20,7 @@ export function filled(): Workspace {
   value.purchases = [{ doc_id: 'WS-77', counterparty: 'Wholesaler', contact: '', gross: '124.00', settled: '0.00', outstanding: '124.00', due: '2026-10-01' }];
   value.queue.ready = [{ invoice_id: 'JN-4410', client: 'BuildCo Ltd', recipient: 'accounts@buildco.example', outstanding: '1260.00', currency: 'EUR', days_overdue: 39, reason: '' }];
   value.metrics = { ...value.metrics, bank: '600.00', owed_by_clients: '1260.00', overdue_amount: '1260.00', overdue_count: 1 };
-  value.draft = { invoice_id: 'JN-4410', recipient: 'accounts@buildco.example', subject: 'Our outstanding invoice', body: 'Invoice JN-4410 is still outstanding at 1,260.00 EUR.', fingerprint: 'a'.repeat(64), at: '2026-09-09T12:00:00Z', claims: ['1,260.00 EUR'] };
+  value.draft = { invoice_id: 'JN-4410', recipient: 'accounts@buildco.example', subject: 'Our outstanding invoice', body: 'Invoice JN-4410 is still outstanding at 1,260.00 EUR.', fingerprint: 'a'.repeat(64), at: new Date().toISOString(), claims: ['1,260.00 EUR'] };
   value.graph = { at: '2026-09-09', mode: 'Real Strands graph · scripted model · no AI judgment', reports: { sales: '1,260.00 EUR', cash: '600.00 EUR' } };
   value.sources = [{ id: 'email:001', body: '<script>alert("text only")</script>', status: 'posted', error: '', kind: 'SalesInvoice', document: { doc_id: 'JN-4410', source_ref: 'email:001' }, redactions: 2, at: '2026-09-09' }];
   value.activity = [{ id: 1, at: '2026-09-09T12:00:00Z', title: 'Email posted', detail: 'email:001: JN-4410' }];
