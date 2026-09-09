@@ -110,7 +110,7 @@ test('search typing never remounts the field or steals focus; aliases and page c
 test('late reasoning completes durable state without navigating a different selected case', async () => {
   const data = filled(); data.sales.push({ ...data.sales[0], doc_id: 'OTHER', due: '2026-08-03' });
   vi.mocked(api.openWorkspace).mockResolvedValue({ session: 'handle', workspace: data });
-  let finish!: (data: typeof data) => void;
+  let finish!: (value: typeof data) => void;
   vi.mocked(api.request).mockImplementationOnce(() => new Promise(resolve => { finish = resolve as typeof finish; }));
   render(<App />); await screen.findByRole('heading', { name: 'Workspace' });
   await userEvent.click(screen.getByRole('button', { name: /Run Strands/ }));
