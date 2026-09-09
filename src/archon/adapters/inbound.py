@@ -433,7 +433,7 @@ class LocalReader:
 
     #: A client's name as a person writes it in the sentence that names them.
     _BILLED_TO_NAME = re.compile(
-        r"\b(?:invoice (?:to|for)|billed to|charged to|our invoice to)(?:\s*:\s*|\s+)"
+        r"(?i:\b(?:invoice (?:to|for)|billed to|charged to|our invoice to))(?:\s*:\s*|\s+)"
         r"([A-Z][\w&.'-]*(?:\s+[A-Z][\w&.'-]*){0,3})",
     )
 
