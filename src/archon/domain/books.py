@@ -203,6 +203,8 @@ class Books:
         arrangement = self.arrangements.get(settlement.doc_id)
         if arrangement is None:
             return False
+        # Everything received against this invoice, ever. The arrangement
+        # subtracts what had already arrived when it was agreed.
         received = settlement.gross - settlement.outstanding
         if arrangement.is_broken(as_of, received):
             return False

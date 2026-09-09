@@ -57,6 +57,16 @@ class Arrangement:
     invoice_id: str
     agreed_on: date
     instalments: tuple[Instalment, ...]
+    #: What had already been received against this invoice when the owner agreed.
+    #: Without it, money paid *before* the arrangement counts towards the first
+    #: instalment and a client who has paid nothing since looks like they are
+    #: keeping to the plan. The baseline is why "received" and "received under
+    #: this arrangement" are different numbers.
+    baseline: Decimal = ZERO
+    #: Who approved it and against which version of the terms. An arrangement
+    #: nobody approved does not exist, and the record has to say who did.
+    approved_by: str = ""
+    version: int = 1
     note: str = ""
 
     @property
@@ -72,13 +82,25 @@ class Arrangement:
         """How much the client has promised to have paid by now."""
         return money(sum((i.amount for i in self.instalments if i.due < as_of), ZERO))
 
-    def is_broken(self, as_of: date, received: Decimal) -> bool:
+    def paid_under_this(self, received_in_total: Decimal) -> Decimal:
+        """Of everything received, how much arrived after this was agreed.
+
+        Never negative. A credit note or a correction that reduces total receipts
+        below the baseline would otherwise produce a negative payment, which is
+        not a thing, and the arrangement should be reviewed by a person rather
+        than quietly re-scored.
+        """
+        return max(ZERO, money(received_in_total - self.baseline))
+
+    def is_broken(self, as_of: date, received_in_total: Decimal) -> bool:
         """A promise that has come due and has not been kept.
 
-        `received` comes from the books. This class never asks what was paid; it
-        is told, because the only thing that knows what was paid is the ledger.
+        `received_in_total` comes from the books. This class never asks what was
+        paid; it is told, because the only thing that knows is the ledger. What
+        it does do is subtract the baseline, so money that arrived before the
+        promise cannot be spent twice on keeping it.
         """
-        return received < self.due_by(as_of)
+        return self.paid_under_this(received_in_total) < self.due_by(as_of)
 
     def is_finished(self, as_of: date) -> bool:
         return self.next_due(as_of) is None
@@ -91,6 +113,8 @@ def consider(
     instalments: tuple[Instalment, ...],
     as_of: date,
     agreed_on: date | None = None,
+    baseline: Decimal = ZERO,
+    approved_by: str = "",
 ) -> Arrangement:
     """Accept a proposal, or refuse it saying exactly why.
 
@@ -131,4 +155,6 @@ def consider(
         invoice_id=invoice_id,
         agreed_on=agreed_on or as_of,
         instalments=tuple(sorted(instalments, key=lambda i: i.due)),
+        baseline=baseline,
+        approved_by=approved_by,
     )

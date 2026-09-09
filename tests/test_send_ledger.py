@@ -26,9 +26,19 @@ class Counting:
         return {"MessageId": f"ses-{self.calls:04d}"}
 
 
+class ClientError(Exception):
+    """botocore's name for a request that arrived and was refused.
+
+    The class name matters: after 2026-09-09 the outbox only calls something a
+    failure when it recognises it as a confirmed rejection. A bare RuntimeError
+    is ambiguous, and ambiguous means unknown, because a timeout that is treated
+    as a failure is retried and sends a second email.
+    """
+
+
 class Refusing:
     def send_email(self, **kwargs):
-        raise RuntimeError("SES said no")
+        raise ClientError("SES said no")
 
 
 @pytest.fixture
@@ -121,7 +131,7 @@ def test_an_attempt_that_never_settled_is_not_retried_automatically(store):
 
     client = Counting()
     session.outbox = outbox_for(store, client)
-    with pytest.raises(SendRefused, match="never settled"):
+    with pytest.raises(SendRefused, match="nobody knows whether it went"):
         session.outbox.send(draft, session.verdict(draft))
     assert client.calls == 0
 
@@ -131,7 +141,7 @@ def test_a_refusal_by_the_provider_is_recorded_as_failed(store):
     session.outbox = outbox_for(store, Refusing())
     draft = session.draft()
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ClientError):
         session.outbox.send(draft, session.verdict(draft))
 
     record = SendLog(store).find(draft.fingerprint())
@@ -145,7 +155,7 @@ def test_a_failed_send_can_be_tried_again(store):
     session = Session(store_path=store)
     draft = session.draft()
     session.outbox = outbox_for(store, Refusing())
-    with pytest.raises(RuntimeError):
+    with pytest.raises(ClientError):
         session.outbox.send(draft, session.verdict(draft))
 
     client = Counting()

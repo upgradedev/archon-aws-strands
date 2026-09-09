@@ -30,6 +30,7 @@ from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 
+from archon.domain.arrangement import Arrangement, Instalment
 from archon.domain.books import Books
 from archon.domain.documents import (
     Payment,
@@ -56,15 +57,45 @@ CREATE TABLE IF NOT EXISTS documents (
 -- measured, not theorised: the fake SES client received two.
 --
 -- The states are deliberately not a single "sent" flag:
---   requested          the row exists and SES has not been called yet, or the
---                      process died between calling it and hearing back
+--   queued             the row exists and SES has not been called yet
+--   unknown            SES was called and the outcome is not known: the
+--                      connection timed out, or the process died between the
+--                      call and the reply. The request may well have been
+--                      accepted. NOTHING RESENDS FROM HERE automatically
 --   provider-accepted  SES returned a MessageId. That is acceptance by the
 --                      provider and nothing more; it is not evidence that
 --                      anybody received anything
---   failed             SES refused, with the reason kept
+--   delivered          independent evidence of arrival exists. Nothing in this
+--                      project can produce it today, so the column is never
+--                      written; it is declared because the difference between
+--                      it and provider-accepted is the point
+--   failed             SES answered and refused. The request reached it and was
+--                      rejected, so nothing was sent and a retry is safe
 --
--- There is no "delivered" state, because nothing here has delivery evidence. A
--- column that could only ever be filled in by guessing does not exist.
+-- The distinction that matters is failed versus unknown. A confirmed rejection
+-- can be retried. An ambiguous one cannot, because the email may already be in
+-- somebody's inbox and a retry puts a second demand for money there. Treating a
+-- timeout as failure was measured to send twice.
+-- Arrangements a person approved. Not documents: nothing here has ever produced
+-- a journal entry and nothing here ever will.
+--
+-- They are stored because they were being lost. `save`/`load` walked the
+-- documents only, so restarting the process forgot every agreed payment plan
+-- and the client who had agreed terms was chased again the next morning. The
+-- ledger balance was right and the behaviour was wrong, which is the worst
+-- shape of bug this project can have.
+--
+-- `baseline` is what had already been received when the owner agreed. Without
+-- it, money paid before the promise counts towards keeping it.
+CREATE TABLE IF NOT EXISTS arrangements (
+    invoice_id  TEXT PRIMARY KEY,
+    agreed_on   TEXT NOT NULL,
+    baseline    TEXT NOT NULL,
+    approved_by TEXT NOT NULL,
+    version     INTEGER NOT NULL,
+    instalments TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS sends (
     fingerprint TEXT PRIMARY KEY,
     state       TEXT NOT NULL,
@@ -155,6 +186,28 @@ def save(books: Books, path: str | pathlib.Path) -> int:
             "INSERT OR REPLACE INTO documents (doc_id, kind, received, body) VALUES (?, ?, ?, ?)",
             rows,
         )
+        db.execute("DELETE FROM arrangements")
+        db.executemany(
+            "INSERT INTO arrangements "
+            "(invoice_id, agreed_on, baseline, approved_by, version, instalments) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            [
+                (
+                    plan.invoice_id,
+                    plan.agreed_on.isoformat(),
+                    str(plan.baseline),
+                    plan.approved_by,
+                    plan.version,
+                    json.dumps(
+                        [
+                            {"due": i.due.isoformat(), "amount": str(i.amount)}
+                            for i in plan.instalments
+                        ]
+                    ),
+                )
+                for plan in books.arrangements.values()
+            ],
+        )
     return len(rows)
 
 
@@ -172,6 +225,10 @@ def load(path: str | pathlib.Path) -> Books:
     with _connect(path) as db:
         db.executescript(SCHEMA)
         rows = db.execute("SELECT kind, doc_id, body FROM documents ORDER BY received").fetchall()
+        agreed = db.execute(
+            "SELECT invoice_id, agreed_on, baseline, approved_by, version, instalments "
+            "FROM arrangements"
+        ).fetchall()
 
     by_kind: dict[str, list[tuple[str, str]]] = {kind: [] for kind in REPLAY_ORDER}
     for kind, doc_id, body in rows:
@@ -188,6 +245,28 @@ def load(path: str | pathlib.Path) -> Books:
                     f"{doc_id} ({kind}) will not post: {broken}. The store is not opened "
                     "rather than opened wrong."
                 ) from broken
+
+    # Arrangements last, because they are about documents that must already be
+    # there. They post nothing, so replaying them cannot move the ledger.
+    for invoice_id, agreed_on, baseline, approved_by, version, instalments in agreed:
+        try:
+            plan = Arrangement(
+                invoice_id=invoice_id,
+                agreed_on=date.fromisoformat(agreed_on),
+                instalments=tuple(
+                    Instalment(due=date.fromisoformat(i["due"]), amount=Decimal(i["amount"]))
+                    for i in json.loads(instalments)
+                ),
+                baseline=Decimal(baseline),
+                approved_by=approved_by,
+                version=int(version),
+            )
+        except (ValueError, KeyError, TypeError) as broken:
+            raise StoreError(
+                f"the arrangement on {invoice_id} will not read back: {broken}. The store is "
+                "not opened rather than opened with a payment plan nobody can check."
+            ) from broken
+        books.agree(plan)
     return books
 
 
@@ -198,9 +277,18 @@ def forget(path: str | pathlib.Path) -> None:
 
 # --- the send ledger, which has to survive a crash ----------------------------
 
-REQUESTED = "requested"
+QUEUED = "queued"
+UNKNOWN = "unknown"
 PROVIDER_ACCEPTED = "provider-accepted"
+DELIVERED = "delivered"
 FAILED = "failed"
+
+#: Kept so older callers and stored rows still read. `requested` was the name
+#: before the ambiguous case was separated from the confirmed one.
+REQUESTED = QUEUED
+
+#: Nothing may leave again while a row is in one of these.
+NO_RESEND = frozenset({QUEUED, UNKNOWN, PROVIDER_ACCEPTED, DELIVERED})
 
 
 @dataclass(frozen=True, slots=True)
@@ -222,13 +310,24 @@ class SendRecord:
 
     @property
     def in_flight(self) -> bool:
-        """Written down, and nobody knows whether SES saw it.
+        """Nobody knows whether the provider saw it, so nothing may go again.
 
-        A crash between the call and the reply lands here. It must never be
-        retried automatically: the provider may well have accepted it, and a
-        second attempt is a second email to a client who is already annoyed.
+        Two things land here. A crash between the call and the reply, and a
+        connection that timed out. Both mean the request may well have been
+        accepted, and a second attempt is a second demand for money to a client
+        who has already had one.
         """
-        return self.state == REQUESTED
+        return self.state in {QUEUED, UNKNOWN}
+
+    @property
+    def settled(self) -> bool:
+        """The outcome is known, either way."""
+        return self.state in {PROVIDER_ACCEPTED, DELIVERED, FAILED}
+
+    @property
+    def may_send(self) -> bool:
+        """A confirmed rejection is the only state a fresh attempt is safe from."""
+        return self.state == FAILED
 
 
 class SendLog:
@@ -271,6 +370,39 @@ class SendLog:
             error=error,
         )
 
+    def reserve(self, record: SendRecord) -> bool:
+        """Claim the right to send this exact text. True only for the winner.
+
+        Two callers can reach a send at the same moment: two browser tabs, two
+        workers, a person double-clicking. `INSERT OR REPLACE` let both through,
+        because it succeeds for everybody. This inserts and reports whether the
+        row was new, so exactly one caller proceeds and the rest are told the
+        send is already in hand.
+
+        The one row that may be claimed again is a confirmed rejection, where
+        the provider answered and refused, so nothing was sent.
+        """
+        with contextlib.closing(self._open()) as db, db:
+            cursor = db.execute(
+                "INSERT INTO sends "
+                "(fingerprint, state, message_id, to_address, invoice_id, amount, at, error) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?) "
+                "ON CONFLICT(fingerprint) DO UPDATE SET state = excluded.state, at = excluded.at, "
+                "error = NULL WHERE sends.state = ?",
+                (
+                    record.fingerprint,
+                    QUEUED,
+                    None,
+                    record.to_address,
+                    record.invoice_id,
+                    record.amount,
+                    record.at,
+                    None,
+                    FAILED,
+                ),
+            )
+            return cursor.rowcount > 0
+
     def requested(self, record: SendRecord) -> None:
         """Write the intention down before anything leaves."""
         with contextlib.closing(self._open()) as db, db:
@@ -290,9 +422,22 @@ class SendLog:
                 ),
             )
 
-    def settle(self, fingerprint: str, *, message_id: str | None, error: str | None) -> None:
-        """Say how it ended: accepted by the provider, or refused."""
-        state = PROVIDER_ACCEPTED if message_id else FAILED
+    def settle(
+        self,
+        fingerprint: str,
+        *,
+        message_id: str | None,
+        error: str | None,
+        state: str | None = None,
+    ) -> None:
+        """Say how it ended, and be honest when that is not known.
+
+        `state` is passed explicitly for the ambiguous case. Without it the old
+        behaviour holds: a MessageId means accepted, anything else means the
+        provider refused. That default was wrong for timeouts and is why the
+        caller now decides.
+        """
+        state = state or (PROVIDER_ACCEPTED if message_id else FAILED)
         with contextlib.closing(self._open()) as db, db:
             db.execute(
                 "UPDATE sends SET state = ?, message_id = ?, error = ? WHERE fingerprint = ?",

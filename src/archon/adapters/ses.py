@@ -88,6 +88,30 @@ def _record_for(draft: ChaseDraft, at):
     )
 
 
+#: Exception types that mean the request reached SES and SES refused it. Only
+#: these are safe to call a failure, because only these prove nothing was sent.
+#: Everything else — a timeout, a dropped connection, a process killed mid-call —
+#: is ambiguous, and ambiguous means unknown.
+CONFIRMED_REJECTIONS = (
+    "ClientError",
+    "ParamValidationError",
+    "MessageRejected",
+    "AccountSendingPausedException",
+    "MailFromDomainNotVerifiedException",
+)
+
+
+def _is_confirmed_rejection(failure: BaseException) -> bool:
+    """Did the provider answer and say no?
+
+    Conservative on purpose: anything not positively recognised is treated as
+    unknown. Getting this backwards sends a second email, and the whole point of
+    the distinction is that one direction is recoverable and the other is not.
+    """
+    names = {type(failure).__name__} | {c.__name__ for c in type(failure).__mro__}
+    return bool(names & set(CONFIRMED_REJECTIONS))
+
+
 @dataclass
 class Outbox:
     """Sends, and remembers exactly what it sent.
@@ -134,14 +158,22 @@ class Outbox:
                 return receipt.replay()
             if written is not None and written.in_flight:
                 raise SendRefused(
-                    "an attempt to send this exact text was written down and never "
-                    "settled, which means the process stopped between calling SES "
-                    "and hearing back. It may already have gone. Nothing is sent "
-                    "again automatically: check the mailbox, then clear the record."
+                    "an attempt to send this exact text is recorded as "
+                    f"{written.state!r}, which means nobody knows whether it went. "
+                    "The connection may have timed out after SES accepted it, or "
+                    "the process may have stopped between the call and the reply. "
+                    "It is not sent again automatically, because a second demand "
+                    "for money cannot be recalled. Check the mailbox, then clear "
+                    "the record deliberately."
                 )
-            self.log.requested(
-                _record_for(draft, at=self.clock()),
-            )
+            # Exactly one caller may proceed. Two tabs, two workers or a
+            # double-click all reach this line; only the one that wins the
+            # insert sends.
+            if not self.log.reserve(_record_for(draft, at=self.clock())):
+                raise SendRefused(
+                    "another caller is already sending this exact text. Only one "
+                    "of them may, and it is not this one."
+                )
 
         try:
             response = self.client.send_email(
@@ -156,7 +188,23 @@ class Outbox:
             )
         except Exception as failure:
             if self.log is not None:
-                self.log.settle(fingerprint, message_id=None, error=str(failure))
+                from archon.store.sqlite import FAILED, UNKNOWN
+
+                confirmed = _is_confirmed_rejection(failure)
+                self.log.settle(
+                    fingerprint,
+                    message_id=None,
+                    error=f"{type(failure).__name__}: {failure}",
+                    state=FAILED if confirmed else UNKNOWN,
+                )
+                if not confirmed:
+                    raise SendRefused(
+                        "the send did not come back with an answer, so nobody "
+                        f"knows whether it went: {type(failure).__name__}: {failure}. "
+                        "It is recorded as unknown and will not be tried again on "
+                        "its own. If it did go, retrying sends a second demand for "
+                        "money; if it did not, a person can clear the record."
+                    ) from failure
             raise
 
         message_id = (response or {}).get("MessageId")
