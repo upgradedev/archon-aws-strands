@@ -123,7 +123,13 @@ def read_reply(
                 "content": [{"text": ASK.format(today=today, body=safe.sanitized_text)}],
             }
         ],
-        inferenceConfig={"maxTokens": 400},
+        # Enough room to answer. At 400 a reasoning model spends the budget
+        # before it reaches the JSON, comes back empty with stopReason
+        # max_tokens, and the caller reports that the reply carried no JSON.
+        # Every live read of a realistic invoice email failed that way on
+        # 2026-09-09, and it read as a model that could not do the job rather
+        # than one that was cut off mid-sentence.
+        inferenceConfig={"maxTokens": 4000},
     )
     text = "".join(
         block.get("text", "")

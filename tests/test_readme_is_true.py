@@ -26,20 +26,18 @@ def test_the_headline_sentence_is_the_one_in_the_gate():
 
 
 def test_the_comparison_table_matches_what_the_code_computes():
-    from archon.evidence.compare import score_all
+    """Superseded 2026-09-09 by the fair table; kept pointing at the live one."""
+    from archon.evidence.fair import METHODS, score
+    from archon.evidence.independent import scored
 
-    by_method = {t.method: t for t in score_all()}
-    assert by_method["reference matching"].missed == 13
-    assert by_method["naive text extraction"].wrong_money == 19
-    assert by_method["Archon"].correct == 6
-
-    assert "| 0 / 20 | **13** | 7 |" in README
-    assert "| 19 / 20 | 0 | 1 |" in README
-    assert "| 0 / 20 | 0 | 20 |" in README
+    rows = {name: score(name, run, scored()).counts for name, run in METHODS.items()}
+    assert rows["naive text extraction"]["wrong-money"] == 11
+    assert "| **11 / 20** | 5 | 4 |" in README
 
 
 def test_the_live_row_is_reported_with_its_caveat():
-    assert "a real Claude model, one pass, no ledger" in README
+    assert "live Bedrock reader" in README
+    assert "Archon, live Bedrock reader" in README
     assert "nothing in its answer tells you which" in README
     assert "partly circular" in README, "the weakest row must be named as weak"
     assert "friendly test" in README
@@ -120,7 +118,7 @@ def test_the_offline_mode_is_not_dressed_up_as_agentic():
 
 
 def test_the_commands_it_tells_a_judge_to_run_exist():
-    for module in ("archon.evidence.compare", "archon.demo", "archon.web.app"):
+    for module in ("archon.evidence.fair", "archon.demo", "archon.web.app"):
         assert module in README
         __import__(module)
 
@@ -186,16 +184,35 @@ def test_the_disagreement_is_shown_from_a_real_run_not_asserted():
     assert "URGENT" in text and "WATCH" in text
 
 
-def test_the_hard_table_matches_what_the_code_computes():
-    from archon.evidence.compare import score_all
-    from archon.evidence.hard import all_hard_scenarios
+def test_the_readme_quotes_the_fair_table_the_code_computes():
+    """The only comparison this project is allowed to quote, as of 2026-09-09."""
+    from archon.evidence.fair import METHODS, score
+    from archon.evidence.independent import scored
 
-    by_method = {t.method: t for t in score_all(all_hard_scenarios())}
-    assert by_method["reference matching"].missed == 6
-    assert by_method["Archon"].correct == 0
+    cases = scored()
+    rows = {name: score(name, run, cases) for name, run in METHODS.items()}
 
-    assert "| 0 / 15 | **6** | 9 |" in README
-    assert "withdrawn" in README
+    baseline = rows["reference matching (baseline)"].counts
+    archon = rows["Archon"].counts
+    assert baseline["wrong-money"] == 10
+    assert archon["wrong-money"] == 0
+    assert archon["missed"] == 15
+
+    assert "| **10 / 20** | 6 | 4 |" in README
+    assert "| **0 / 20** | **15** | 5 |" in README
+    assert "collects less money than the baseline" in README, "the cost has to travel with the win"
+
+
+def test_the_withdrawn_tables_stay_withdrawn():
+    assert "Both earlier comparisons are withdrawn and stay withdrawn" in README
+    assert "a ledger agreeing with itself" in README
+
+
+def test_the_injection_finding_says_which_set_it_came_from():
+    """It was measured on a withdrawn set, so the README says so where it stands."""
+    said = " ".join(README.split())
+    assert "Measured on the withdrawn set of 2026-09-08" in said
+    assert "has not been re-run on the independent post" in said
 
 
 def test_the_injection_finding_is_stated_with_its_own_caveat():

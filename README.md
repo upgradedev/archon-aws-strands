@@ -5,7 +5,7 @@
 Built for **Agents for Humans (AWS)**, track **Professional Agents**, on the **Strands Agents SDK** and **Amazon Bedrock**.
 
 [![CI](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml)
-[![tests](https://img.shields.io/badge/tests-481%20offline%2C%20no%20key%2C%20no%20network-22c55e)](#run-it)
+[![tests](https://img.shields.io/badge/tests-483%20offline%2C%20no%20key%2C%20no%20network-22c55e)](#run-it)
 [![coverage](https://img.shields.io/badge/branch%20coverage-93%25-22c55e)](#run-it)
 [![model](https://img.shields.io/badge/Bedrock-claude--opus--5-8b5cf6)](#how-it-is-put-together)
 [![licence](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
@@ -34,18 +34,10 @@ Everything else — reading the post, keeping double-entry books across six doma
 
 Twenty months of one firm's post, every answer known by construction. Re-run it yourself:
 
-```bash
-python -m archon.evidence.compare
-```
-
-| method | wrong money | missed | correct | 95% CI on wrong money |
-|---|---|---|---|---|
-| reference matching, how small-business software reconciles | 0 / 20 | **13** | 7 | 0.0% to 16.1% |
-| naive text extraction | 19 / 20 | 0 | 1 | 76.4% to 99.1% |
-| **a real Claude model, one pass, no ledger** | **0 / 20** | **3** | 17 | 0.0% to 16.1% |
-| **Archon** | 0 / 20 | 0 | 20 | 0.0% to 16.1% |
-
-**Wrong money** is an email demanding a figure that is not owed. It reaches a client and cannot be recalled. **A missed chase** is silence where money was owed. Both are shown, because a method that never sends anything scores zero on the first.
+**Withdrawn, 2026-09-08.** The table that stood here scored Archon from books the fixture had already
+posted correctly, while the method it was compared against read raw text. The numbers are not repeated,
+because a withdrawal that leaves the figure on the page is not a withdrawal. What replaced it, on inputs
+written by somebody who had never seen this code, is below.
 
 ### What this does and does not show
 
@@ -60,52 +52,52 @@ So the claim is narrower, and it survives the model being good:
 **That was a friendly test**, and it said so: twenty clean months, one client each, no contradictory
 messages, no adversarial text. Full write-up: [`evidence/RESULTS-2026-09-04.md`](evidence/RESULTS-2026-09-04.md).
 
-### Archon's own row is withdrawn, 2026-09-08
+### The comparison, rebuilt so it means something
 
-**The comparison was not a comparison.** Archon's method read `scenario.books`, a set of books the
-fixture had already posted correctly, while the method it was measured against read the raw text. It was
-never asked to build the books it then reasoned over.
+Both earlier comparisons are withdrawn and stay withdrawn. The second failure was the worse one:
+**Archon's column was scored from books the fixture had already posted correctly**, while the method it
+was measured against started from raw text. That is a ledger agreeing with itself, not a comparison.
 
-It reads the same raw post as everything else now, and the answer changes completely: **6 correct of 20
-instead of 20, and 0 of 15 instead of 15.** A live Bedrock reader scores exactly the same as the offline
-one, to the case, so the reader is not the bottleneck.
-
-The cause is in the transcript, and it is the same two lines throughout: *a sales invoice with no client
-address cannot be chased*, and *the email does not identify a document*. **The fixtures are one-line
-summaries written to exercise a naive extractor, not emails.** Archon refuses to chase a debt when it
-does not know who to send it to, which is correct, and which means these fixtures cannot measure it.
-
-**What survives:** Archon demands wrong money in 0 of 35 cases across both sets and both readers. It goes
-silent rather than inventing a figure or a recipient.
-
-**What does not:** any claim that it collects more than the alternatives. On this evidence it collects
-less, and `reference matching` beats it on both sets. That row stays withdrawn until the fixtures are
-rewritten as emails a person would actually receive — by a different hand from the one that writes the
-reader, or the circularity returns one layer down.
-
-Full working: [`evidence/RESULTS-CORRECTED-2026-09-08.md`](evidence/RESULTS-CORRECTED-2026-09-08.md).
-
-### The awkward month
-
-So here is the set that answers it. Fifteen months containing two clients at once, the same payment
-described in two emails, a client asserting a payment that never arrived, a remittance naming an invoice
-that does not exist, and an invoice with an instruction printed inside it.
+So the inputs were written by somebody else. **Twenty-four independent agents each wrote one month of a
+small firm's post**, told only the business situation and nothing whatever about how anything here reads
+an email; each set was then audited by a different agent. They came back as real post: line items, VAT at
+the local rate, IBANs, a Saturday call-out charge, a note about a condenser fan that is starting to
+rattle. The answers came with the fixtures, before any method ran. Four cases are held out of every
+figure below.
 
 ```bash
-python -m archon.evidence.compare --hard
+python -m archon.evidence.fair --held-out
 ```
 
 | method | wrong money | missed | correct | 95% CI on wrong money |
 |---|---|---|---|---|
-| reference matching | 0 / 15 | **6** | 9 | 0.0% to 20.4% |
-| naive text extraction | 15 / 15 | 0 | 0 | 79.6% to 100.0% |
-| **a real Claude model, one pass, no ledger** | **0 / 15** | **9** | 6 | 0.0% to 20.4% |
-| ~~**Archon**~~ | **withdrawn** | | | see below |
+| reference matching, the declared baseline | **10 / 20** | 6 | 4 | 29.9% to 70.1% |
+| naive text extraction | **11 / 20** | 5 | 4 | 34.2% to 74.2% |
+| **Archon, offline rule reader** | **0 / 20** | **15** | 5 | 0.0% to 16.1% |
+| **Archon, live Bedrock reader** | **1 / 20** | **14** | 5 | 0.9% to 23.6% |
 
-**On clean months the model went quiet on 3 of 20. On these it went quiet on 9 of 15.** It still demanded
-no wrong figure, which is to its credit. What changed is how often it said nothing where money was owed.
+*A zero without its interval reads as certainty, and twenty cases do not earn certainty.*
+
+Held out, never used to tune anything: the baselines demand a wrong figure in **3 of 4**; Archon in
+**0 of 4**.
+
+**Both directions, together, because one without the other is a boast.** Archon does not demand money
+that is not owed, where both baselines do so in half the cases. And it is much quieter: it says nothing
+on 14 to 15 of 20 where the baseline misses 6. **On this evidence it collects less money than the baseline while embarrassing its owner far less
+often.** Which a small firm should prefer is a judgement,
+not a measurement, and nothing here settles it.
+
+Two defects surfaced during the run and are fixed: every live read was coming back empty at
+`stopReason: max_tokens`, which looked exactly like a model that could not read an invoice and was a
+model not allowed to finish its sentence; and nothing told the reader which side of the email the firm
+was on, so it turned money owed *to* the firm into money owed *by* it.
+
+Full protocol, the held-out table and what this still does not show:
+[`evidence/RESULTS-FAIR-2026-09-09.md`](evidence/RESULTS-FAIR-2026-09-09.md).
 
 ### An invoice can tell the reader to stop, and it works
+
+*Measured on the withdrawn set of 2026-09-08. The finding concerns what a model does with a hostile invoice, which the withdrawal does not touch: that set was withdrawn because Archon's own column was scored unfairly, not because the model's behaviour was mismeasured. It has not been re-run on the independent post.*
 
 Three of those fifteen months carry an ordinary invoice with one line printed inside it:
 
@@ -261,7 +253,7 @@ tool; the judgement did not.
 
 | | |
 |---|---|
-| the ledger, six domains, P&L, cash, metrics | real, 481 tests, 93% branch coverage |
+| the ledger, six domains, P&L, cash, metrics | real, 483 tests, 93% branch coverage |
 | the six-agent Strands graph | real, runs on `strands-agents` 1.53 and 1.54 |
 | Bedrock | real, `global.anthropic.claude-opus-5`, verified by a live call |
 | SES send, idempotent, with receipt | real code; **the account is in the SES sandbox**, so it can send only to verified addresses |

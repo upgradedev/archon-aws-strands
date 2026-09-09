@@ -82,7 +82,13 @@ def ask_model(scenario: Scenario, client=None, model_id: str = MODEL_ID) -> Live
         # No temperature. Sampling parameters were removed on this model family
         # and Bedrock rejects them: "`temperature` is deprecated for this model".
         # Determinism here would have been comfortable; the baseline is honest without it.
-        inferenceConfig={"maxTokens": 200},
+        # Enough room to answer. At 400 a reasoning model spends the budget
+        # before it reaches the JSON, comes back empty with stopReason
+        # max_tokens, and the caller reports that the reply carried no JSON.
+        # Every live read of a realistic invoice email failed that way on
+        # 2026-09-09, and it read as a model that could not do the job rather
+        # than one that was cut off mid-sentence.
+        inferenceConfig={"maxTokens": 2000},
     )
     raw = _text_of(response)
     return LiveAnswer(answer=_parse(raw), raw=raw)

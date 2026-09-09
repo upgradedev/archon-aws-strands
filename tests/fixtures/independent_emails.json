@@ -1,0 +1,678 @@
+[
+ {
+  "emails": [
+   {
+    "from": "sanne@terlouwgietvloeren.nl",
+    "to": "joost.bakhuis@zwarteanker.nl",
+    "subject": "Invoice 2026-0417 - brewhouse floor, Zwarte Anker",
+    "body": "Hi Joost,\n\nHope the new floor is bedding in well. Rens said the coving came out neatly around the drains in the end, which is always the fiddly bit on a brewhouse.\n\nInvoice for the job is attached, number 2026-0417, dated 3 July. Just so you have it in the body of the mail too, it breaks down as:\n\n- Diamond grinding and prep, 118 m2 at EUR 9.50 - EUR 1,121.00\n- Epoxy basecoat and pigmented topcoat, materials - EUR 1,384.00\n- Coving to perimeter and plinths, 45 lm at EUR 15.00 - EUR 675.00\n\nThat is EUR 3,180.00 before tax, and with 21% BTW on top it comes to EUR 3,847.80 all in. Our terms are 30 days from the invoice date, so it falls due on 2 August.\n\nIf you could quote 2026-0417 as the payment reference that would be a help, it saves me matching things up by hand at month end.\n\nThanks again for the work, and give me a shout if you want us back for the cold store floor in the autumn.\n\nKind regards,\n\nSanne Terlouw\nOffice Manager\n\nTerlouw Gietvloeren B.V.\nHandelsweg 14b, 7418 CE Deventer\nT +31 570 612 884 | M +31 6 2214 8730\nsanne@terlouwgietvloeren.nl | www.terlouwgietvloeren.nl\nKvK 74128865 | BTW NL862451937B01\nIBAN NL18 MDLB 0345 1129 87 (Maasdal Bank) | BIC MDLBNL2A"
+   },
+   {
+    "from": "joost.bakhuis@zwarteanker.nl",
+    "to": "sanne@terlouwgietvloeren.nl",
+    "subject": "Re: Invoice 2026-0417 - brewhouse floor, Zwarte Anker",
+    "body": "Hi Sanne,\n\nSorry, this one has been sitting in my pile. Nothing wrong with it at all, the floor is spot on, we have had two tank cleans over it already and not a mark on it.\n\nCash flow is just tight until the festival money comes in. I have put EUR 1,500 through to you this morning as a part payment, reference 2026-0417. The rest I will clear by 31 August at the latest, our festival invoices land with us in the last week of the month so it will be comfortable by then.\n\nApologies for dragging it out. Say hi to Rens.\n\nGroeten,\nJoost Bakhuis\nBrouwerij Het Zwarte Anker B.V.\nKanaaldijk 3, 7211 BN Eefde\n+31 6 4471 2205\nBTW NL859034128B01"
+   },
+   {
+    "from": "sanne@terlouwgietvloeren.nl",
+    "to": "joost.bakhuis@zwarteanker.nl",
+    "subject": "Re: Invoice 2026-0417 - brewhouse floor, Zwarte Anker",
+    "body": "Hi Joost,\n\nNo apology needed, and thanks for letting me know, that is a lot better than silence.\n\nYour EUR 1,500 landed on our account this morning and I have booked it against 2026-0417. I will leave the balance with you until 31 August as you suggested and won't chase in the meantime.\n\nGlad the floor is standing up to the tank cleans.\n\nBest,\nSanne\n\nTerlouw Gietvloeren B.V.\nT +31 570 612 884"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "2026-0417",
+   "amount_outstanding": "2347.80",
+   "currency": "EUR",
+   "recipient": "joost.bakhuis@zwarteanker.nl",
+   "should_stop_and_ask_a_person": false,
+   "why": "Ordinary overdue invoice, nothing in dispute. Invoice 2026-0417 was raised on 3 July 2026 on 30-day terms (due 2 August 2026) for EUR 3,180.00 net plus 21% Dutch BTW of EUR 667.80, gross EUR 3,847.80. Joost Bakhuis paid EUR 1,500.00 on 14 August as a part payment and the supplier confirmed on 15 August that the money had actually landed, so the credit is verified rather than merely promised. He committed in writing to clearing the rest by 31 August 2026; today is 9 September 2026, so the balance is both overdue against the original terms and past the extended date he set himself. He explicitly praised the work ('the floor is spot on'), so there is no quality dispute and no missing figure. The chase goes to Joost personally at joost.bakhuis@zwarteanker.nl: the invoice was addressed to him, he replied from that same address, he made the payment commitment and he is the only contact in the thread. A careful bookkeeper has everything needed and does not need to ask anyone."
+  },
+  "arithmetic": "Line items (net): 118 m2 x EUR 9.50 = EUR 1,121.00; materials = EUR 1,384.00; 45 lm x EUR 15.00 = EUR 675.00. Net total: 1,121.00 + 1,384.00 + 675.00 = EUR 3,180.00. VAT at 21%: 3,180.00 x 0.21 = EUR 667.80. Gross: 3,180.00 + 667.80 = EUR 3,847.80 (matches the EUR 3,847.80 stated in the invoice email). Payments received: EUR 1,500.00 (part payment of 14 August, receipt confirmed by the supplier on 15 August). Outstanding: 3,847.80 - 1,500.00 = EUR 2,347.80.",
+  "name": "independent-00"
+ },
+ {
+  "emails": [
+   {
+    "from": "accounts@kilbrannonref.ie",
+    "to": "nuala.fitzhenry@rossbawnfoods.ie",
+    "subject": "Invoice 3318 - Thomas St service + the June callout",
+    "body": "Hi Nuala,\n\nHope the heat isn't melting the pair of ye down in Thomas Street. Invoice 3318 is attached for the work at the shop. It covers the annual service on the three units (the two multideck cabinets and the walk-in) that Padraig did on the 18th, and it also picks up the emergency callout on the 22nd of June when the walk-in was running warm overnight.\n\nThat callout turned into the condenser fan motor in the end, as I think Ciaran was told on the day. We swapped it out and topped the system back up with R448A while we had it open, so I've put the lot on the one invoice rather than sending you two.\n\nBreakdown is:\n\nAnnual service, 3 units @ 235.00 - 705.00\nBreakdown callout 22/06, 3 hrs @ 82.50 - 247.50\nCondenser fan motor, replacement - 412.00\nR448A refrigerant, 4kg @ 99.00 - 396.00\nTravel / callout charge - 79.50\n\nSo that's 1,840.00 before VAT, and with VAT at 13.5% (248.40) the invoice comes to 2,088.40. Terms are 30 days same as always, so it falls due on the 2nd of August.\n\nThe bank details are printed on the invoice itself but I'll stick them here to save you digging:\n\nShannonside Bank\nAccount name: Kilbrannon Refrigeration Ltd\nIBAN IE64 SHAN 9911 4400 8271 63\nBIC SHANIE2D\n\nIf you could quote 3318 on the payment I'll be able to match it off straight away.\n\nThanks a million, and give me a shout if anything on it looks off to you.\n\nDeirdre Mullane\nAccounts & Scheduling | Kilbrannon Refrigeration Ltd\nUnit 6, Ballycrone Business Park, Naas, Co. Kildare, W91 XR40\nT: +353 45 887 214  M: +353 87 214 6690\naccounts@kilbrannonref.ie\nVAT IE 4382916WH | CRO 512884"
+   },
+   {
+    "from": "nuala.fitzhenry@rossbawnfoods.ie",
+    "to": "accounts@kilbrannonref.ie",
+    "subject": "RE: Invoice 3318 - Thomas St service + the June callout",
+    "body": "Hi Deirdre,\n\nApologies, this one has been sitting in my drafts since last week - the fit-out in Rathmines has eaten the whole month on me.\n\nNo issue at all with the invoice by the way, the work was done and Ciaran was delighted with how fast ye got out to us on the 22nd, that walk-in had about four hundred euro of stock in it. It's purely a cashflow thing at our end.\n\nI've put 700.00 through to you this morning so that should land with you tomorrow, and the balance will go out with our September payment run on the 1st.\n\nSorry to be dragging it out on you, and thanks for the patience.\n\nNuala Fitzhenry\nAccounts | Rossbawn Fine Foods Ltd\n12A Cloverhill Row, Dublin 8, D08 KP73\nT: +353 1 559 0182\nVAT IE 7719340CA"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "3318",
+   "amount_outstanding": "1388.40",
+   "currency": "EUR",
+   "recipient": "nuala.fitzhenry@rossbawnfoods.ie",
+   "should_stop_and_ask_a_person": false,
+   "why": "Ordinary overdue balance with nothing missing and nothing in dispute. Invoice 3318 (Kilbrannon Refrigeration Ltd to Rossbawn Fine Foods Ltd) was issued 3 July 2026 on 30-day terms, due 2 August 2026, for 1,840.00 net + 13.5% Irish VAT of 248.40 = 2,088.40 gross. Nuala Fitzhenry explicitly confirmed the work and the invoice were fine ('no issue at all with the invoice'), so there is no dispute to escalate, and paid 700.00 on account on 6 August, promising the balance with the September payment run on the 1st. Today is 9 September 2026: that run has passed and the remaining 1,388.40 is unpaid, now 38 days past the due date. Every figure needed is stated in the emails, so a careful bookkeeper would simply send a polite chase for the balance to Nuala, who is the named accounts contact and the person who has been corresponding on this invoice. No human decision is required.",
+   "arithmetic": "placeholder"
+  },
+  "arithmetic": "Line items (net): 705.00 + 247.50 + 412.00 + 396.00 + 79.50 = 1,840.00\nVAT at 13.5% (Irish reduced rate for repair/maintenance of movable goods; goods content 412.00 + 396.00 = 808.00 is 44% of the total, under the two-thirds threshold, so the whole supply stays at 13.5%): 1,840.00 x 0.135 = 248.40\nGross: 1,840.00 + 248.40 = 2,088.40\nPayments received: 700.00 on account, 6 August 2026\nOutstanding: 2,088.40 - 700.00 = 1,388.40 EUR",
+  "name": "independent-01"
+ },
+ {
+  "emails": [
+   {
+    "from": "griet.neyts@halewyn-dock.be",
+    "to": "crediteuren@zeewinde-coldstores.be",
+    "subject": "Invoice INV-2026-0417 - Wommelgem service visit + bay 3 & 7 repairs",
+    "body": "Hi,\n\nInvoice attached for the July work at the Wommelgem cold store - INV-2026-0417, dated 24 July, raised against your PO 4471-A.\n\nQuick recap of what's on it so nobody has to open the PDF:\n\n- Annual service and safety inspection, four dock levellers (bays 1-4), 4 x EUR 395.00 = EUR 1,580.00\n- Bay 3: replacement hydraulic ram, new hoses and refill - EUR 1,742.50\n- Bay 7: bottom panel and seals on the sectional door - EUR 985.00\n- Engineer time on site, 6.5 hrs at EUR 72.50 - EUR 471.25\n- Travel and consumables - EUR 86.25\n\nThat comes to EUR 4,865.00 net, and with 21% VAT on top (EUR 1,021.65) the invoice total is EUR 5,886.65. Terms are 30 days from invoice date as usual, so it falls due on 23 August.\n\nDirk on the loading bay signed off the worksheets on the day - happy to send scans over if your side needs them to close out the PO.\n\nPayment details, in case anything has changed on your system since last year:\n\nHalewyn Dock Systems BV\nIBAN BE44 7350 2891 6047\nBIC VDBKBE22\nPlease quote INV-2026-0417 as the reference.\n\nThanks as always for turning the approvals round quickly - it makes a real difference to us at this size.\n\nKind regards,\n\nGriet Neyts\nOffice Manager | Halewyn Dock Systems BV\nSluisweg 22, 9000 Gent\nT +32 9 224 87 15 | M +32 478 21 44 09\ngriet.neyts@halewyn-dock.be\nVAT BE 0742.318.905"
+   },
+   {
+    "from": "crediteuren@zeewinde-coldstores.be",
+    "to": "griet.neyts@halewyn-dock.be",
+    "subject": "Remittance advice 19/08 - INV-2026-0417 (part payment)",
+    "body": "Hi Griet,\n\nPayment went out from our end yesterday - EUR 3,400.00 by SEPA transfer, so it should land with you today or tomorrow at the latest. Fair warning, it will show up referenced HALEWYN/AUG26 rather than the invoice number. Our banking template fills that in automatically and I keep forgetting to override it.\n\nIt is a part payment against INV-2026-0417 rather than the full amount, I'm afraid. Nothing wrong with the invoice itself - it went through approval in full and it is sitting in our ledger at exactly the total you billed. We have just moved to two payment runs a month while the new finance system beds in, and yours came in over the ceiling for the mid-month one. The remainder is already queued for the run on 28 August and I don't expect any trouble with it.\n\nIf you do need to chase anything on this, please keep it to this mailbox rather than my own address - I'm out from the 24th and the others here work from this inbox.\n\nThanks for sorting bay 7 so fast, by the way. The night shift had been complaining about that door since May.\n\nBest,\n\nNadia Ruyssers\nAccounts Payable\nZeewinde Coldstores NV\nHerentalsebaan 118, 2160 Wommelgem\nT +32 3 605 41 20\ncrediteuren@zeewinde-coldstores.be\nVAT BE 0688.402.771"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "INV-2026-0417",
+   "amount_outstanding": "2486.65",
+   "currency": "EUR",
+   "recipient": "crediteuren@zeewinde-coldstores.be",
+   "should_stop_and_ask_a_person": false,
+   "why": "Ordinary part-paid, overdue invoice with no dispute and no missing figures. The invoice email gives net EUR 4,865.00, VAT at 21% of EUR 1,021.65 and a gross of EUR 5,886.65, due 23 August 2026. The remittance confirms EUR 3,400.00 paid on 19 August 2026 and explicitly states the invoice was approved in full at the amount billed - the shortfall is purely a payment-run timing/process issue, not a query about the work, so there is nothing for a human to adjudicate. The balance of EUR 2,486.65 was promised for the run on 28 August 2026, which is now 12 days past (today is 9 September 2026), and the invoice itself is 17 days past its due date. The chase goes to the client's AP mailbox crediteuren@zeewinde-coldstores.be, which is both the address the invoice was sent to and the address the remittance explicitly asks follow-ups to be sent to, so the payee and destination are unambiguous."
+  },
+  "arithmetic": "Line items: 1,580.00 + 1,742.50 + 985.00 + 471.25 + 86.25 = 4,865.00 net. VAT at 21%: 4,865.00 x 0.21 = 1,021.65. Gross: 4,865.00 + 1,021.65 = 5,886.65. Payments received: 3,400.00 (SEPA, 19 August 2026). Outstanding: 5,886.65 - 3,400.00 = 2,486.65 EUR.",
+  "name": "independent-02"
+ },
+ {
+  "emails": [
+   {
+    "from": "b.verhoeven@vrieslandkoeltechniek.nl",
+    "to": "crediteuren@zeewoldevers.nl",
+    "subject": "Invoice VK2026-0873 - cold store 2 compressor + Q3 service",
+    "body": "Good afternoon,\n\nPlease find attached our invoice VK2026-0873, dated 24 July 2026, for the refrigeration work at the Zeewolde plant over June and July. It ended up being three visits rather than the one planned service, so rather than leave you to unpick it from the PDF, here is what is on it:\n\n  Scroll compressor replacement, cold store 2 (unit and labour)     2.460,00\n  Q3 planned maintenance - 2 condensing units, 4 evaporator packs   1.180,00\n  Out-of-hours call-out, Friday 3 July, 3,5 hrs @ 96,00               336,00\n  R449A refrigerant, 6 kg @ 58,00                                     348,00\n  Filter drier and thermostatic expansion valve                       413,00\n  Travel, three visits                                                135,00\n\nThat comes to EUR 4.872,00 net, plus 21% BTW of EUR 1.023,12, so EUR 5.895,12 to pay in total. Our terms are 30 days from invoice date, which puts the due date at 23 August 2026.\n\nPayment to Noorderbank N.V., IBAN NL68 NDRB 0273 4419 05, BIC NDRBNL2A, in the name of Vriesland Koeltechniek B.V. Quoting VK2026-0873 on the transfer really does help - our bank statement is not the most descriptive thing in the world.\n\nOne thing worth flagging while it is fresh: the second condensing unit is running its discharge temperature higher than I would like, and the compressor on it is the same age as the one we have just swapped out. I have not put anything on this invoice for it, but it is worth budgeting for before next summer. Happy to write it up properly if you want something to show the board.\n\nThanks as always, and please pass on my thanks to Timo for staying late on the Friday.\n\nKind regards,\n\nBram Verhoeven\nService Planner\nVriesland Koeltechniek B.V.\nAmbachtsweg 14, 3861 RH Nijkerk\nT +31 33 245 88 12 | M +31 6 24 55 90 71\nb.verhoeven@vrieslandkoeltechniek.nl | www.vrieslandkoeltechniek.nl\nBTW NL862417395B01 | KvK 74829106"
+   },
+   {
+    "from": "i.ramaker@zeewoldevers.nl",
+    "to": "b.verhoeven@vrieslandkoeltechniek.nl",
+    "subject": "Remittance advice - payment run 26 August (ref ZV-BTL-2608)",
+    "body": "Hi Bram,\n\nBetaalspecificatie for our run of Wednesday 26 August is attached, reference ZV-BTL-2608.\n\nI am afraid we have only been able to put part of your invoice 0873 through this time. EUR 3.500,00 went out to you on the Wednesday, against the EUR 5.895,12 on your invoice of 24 July. Nothing wrong with the invoice at all, before you start worrying - Timo signed off the whole lot including the call-out. It is purely that the new blast freezer went out of the door in the same week and finance capped what could go on a single run. The remainder is queued for our next run, on 31 August, so it should not be sitting around long.\n\nSorry it is landing a few days past your due date. If it causes you a problem at your end, say so and I will see whether the rest can be pushed through manually instead of waiting for the run.\n\nOne request while I have you: anything to do with this invoice, please come straight to me on this address rather than crediteuren@zeewoldevers.nl. That mailbox is only opened on Mondays now that Saskia has gone part time, and things sit in it for the best part of a week.\n\nBest wishes,\n\nIlse Ramaker\nAccounts Payable\nZeewolde Versproducten B.V.\nNijverheidsweg 61, 3893 BE Zeewolde\nT +31 36 522 41 09 (direct)\ni.ramaker@zeewoldevers.nl\nBTW NL809334712B01 | KvK 32118764"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "VK2026-0873",
+   "amount_outstanding": "2395.12",
+   "currency": "EUR",
+   "recipient": "i.ramaker@zeewoldevers.nl",
+   "should_stop_and_ask_a_person": false,
+   "why": "Straightforward part-payment, no dispute. The client explicitly confirms the invoice is approved in full ('nothing wrong with the invoice at all', signed off by Timo) and short-paid only because of an internal payment-run cap, so no figure is missing or contested. Gross EUR 5,895.12 less the EUR 3,500.00 paid on 26 August leaves EUR 2,395.12. The balance was promised on the 31 August run; today is 9 September and no further remittance has been received, so it is now overdue on both the original due date (23 August) and the client's own promised date. That is an ordinary chase a bookkeeper can send without asking anyone. It must go to i.ramaker@zeewoldevers.nl, not the crediteuren@zeewoldevers.nl address the invoice was originally sent to: Ilse explicitly asked for all correspondence on this invoice to come to her directly because the crediteuren mailbox is only checked once a week."
+  },
+  "arithmetic": "Line items: 2460.00 + 1180.00 + 336.00 (3.5 hrs x 96.00) + 348.00 (6 kg x 58.00) + 413.00 + 135.00 = 4872.00 net.\nVAT: 4872.00 x 21% = 1023.12.\nGross: 4872.00 + 1023.12 = 5895.12.\nPayments received: 3500.00 (payment run 26 August 2026, remittance ref ZV-BTL-2608).\nOutstanding: 5895.12 - 3500.00 = 2395.12 EUR.",
+  "name": "independent-03"
+ },
+ {
+  "emails": [
+   {
+    "from": "rianne.doornbos@veldkampkoeltechniek.nl",
+    "to": "s.bruggink@marktzichtvers.nl",
+    "subject": "Invoice 2026-0311 - condensing unit Handelskade + F-gas check",
+    "body": "Hi Sander,\n\nHope cold room 2 has been behaving itself since Joran was out with you. He said the temperature log looked steady again by the Monday morning, which is more than we could say for it the day before.\n\nInvoice 2026-0311 is attached as a PDF. It's dated 6 August and covers both visits: the Sunday emergency call on 26 July when the old unit packed in, and the return on the 30th to fit the replacement and do the annual leak check while we were on site anyway.\n\nBroken down it's:\n\n- Frigomax CU-140 condensing unit, supplied and fitted - 2,145.00\n- Engineer time, 14.5 hrs (incl. Sunday call-out rate) - 986.00\n- R449A refrigerant, 3.0 kg @ 53.00/kg - 159.00\n- Annual F-gas leak check, cold rooms 1 & 2 - 190.00\n\nThat comes to 3,480.00 net, and with 21% BTW of 730.80 on top the invoice total is EUR 4,210.80. Our terms with you are 30 days, so it falls due on 5 September.\n\nThe F-gas leak test certificate for both rooms is being issued by our compliance office and I'll forward it separately once it lands - it doesn't affect the invoice, but you'll want it on file for the inspection.\n\nPayment to IBAN NL62 RABO 0357 9924 18 (BIC RABONL2U) quoting 2026-0311 please. Any queries just ring me, I'm in the office until 16:00 on Fridays.\n\nThanks as always for the work,\n\nRianne Doornbos\nOffice Manager\nVeldkamp Koeltechniek B.V.\nNijverheidsweg 22, 3812 PM Amersfoort\nT +31 33 445 21 60 | M +31 6 24 91 07 33\nKvK 74620518 | BTW NL863254197B01\nIBAN NL62 RABO 0357 9924 18 - BIC RABONL2U"
+   },
+   {
+    "from": "s.bruggink@marktzichtvers.nl",
+    "to": "rianne.doornbos@veldkampkoeltechniek.nl",
+    "subject": "Remittance advice - payment run Friday 4 September",
+    "body": "Morning Rianne,\n\nQuick note so you're not chasing us next week: your 2026-0311 went through in today's payment run. We pay on Fridays here, so it's a day ahead of the 5 September due date for once.\n\nThe full EUR 4,210.80 has gone out as a single SEPA credit transfer from our ING account, nothing withheld and no deductions - the invoice is settled in full. Payment reference is VERS-PR2609-04 and the value date should be Monday 7 September, so it may not show on your side until then depending on how quickly Rabobank posts it.\n\nOne thing outstanding on our end, and it's not a money question: could you chase that F-gas leak test certificate for rooms 1 and 2? The NVWA inspector is due here in October and Marloes wants the file complete well before that.\n\nAlso, while I have you - Joran mentioned the compressor on the small prep-room chiller is close to end of life. If you want to quote for replacing it in the quiet period after Christmas, send it over and I'll get it in front of the board.\n\nThanks for turning the Sunday call out so quickly, it saved us a lot of stock.\n\nMet vriendelijke groet,\n\nSander Bruggink\nCrediteurenadministratie\nMarktzicht Vers B.V.\nHandelskade 7, 3521 AZ Utrecht\nT +31 30 262 44 18 (direct)\ncrediteuren@marktzichtvers.nl\nKvK 62884073 | BTW NL857116402B01"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "",
+   "amount_outstanding": "0.00",
+   "currency": "EUR",
+   "recipient": "",
+   "should_stop_and_ask_a_person": false,
+   "why": "Invoice 2026-0311 (Veldkamp Koeltechniek B.V. to Marktzicht Vers B.V., dated 6 August 2026, due 5 September 2026) totals EUR 4,210.80 gross. The second email is a remittance advice from the customer's accounts payable contact confirming a single SEPA credit transfer of the full EUR 4,210.80, reference VERS-PR2609-04, value date 7 September 2026, with no deductions or withholding. Gross minus payments is zero, so there is nothing to chase and no chase recipient. No dispute exists and no figure is missing, so no human escalation is needed. The only open item is a non-financial document request (the F-gas leak test certificate for cold rooms 1 and 2) plus an invitation to quote for a compressor replacement - neither affects the ledger and neither is a collections action. Note the value date is 7 September and today is 9 September, so if the cash has not yet been matched on the bank statement it is a reconciliation timing question, not an unpaid invoice."
+  },
+  "arithmetic": "Line items: 2,145.00 (condensing unit) + 986.00 (14.5 hrs engineer time) + 159.00 (3.0 kg R449A @ 53.00) + 190.00 (F-gas leak check) = 3,480.00 net. VAT @ 21%: 3,480.00 x 0.21 = 730.80. Gross: 3,480.00 + 730.80 = 4,210.80. Payments received: 4,210.80 (SEPA credit transfer, ref VERS-PR2609-04, value date 7 September 2026). Outstanding: 4,210.80 - 4,210.80 = 0.00 EUR.",
+  "name": "independent-04"
+ },
+ {
+  "emails": [
+   {
+    "from": "accounts@barrowvale.ie",
+    "to": "accounts@kilnamonafinefoods.ie",
+    "subject": "Invoice INV-4127 - multideck chiller repair, Sat 18 July",
+    "body": "Hi Orla,\n\nInvoice attached for the Saturday call-out to the deli. Dessie was with you on the 18th, took the compressor out of the 2.5m multideck and put a new one in, fitted a filter drier kit and regassed it before he left.\n\nIt's invoice INV-4127, dated today, 24 July 2026, and it breaks down like this:\n\n  Supply & fit replacement compressor, 2.5m multideck display chiller   985.00\n  Labour, 4.5 hrs @ 72.00                                               324.00\n  Refrigerant R-448A, 2.5 kg @ 66.00                                    165.00\n  Filter drier kit                                                       88.00\n  Out-of-hours call-out (Saturday rate)                                  88.00\n\nThat comes to 1,650.00 net, VAT at 23% is 379.50, so 2,029.50 in total. Our terms are 30 days, which puts it due on 23 August 2026.\n\nTransfer is handiest if it suits you - IBAN IE47 KRNB 9328 4457 1093 26, BIC KRNBIE2D - and if you can put INV-4127 in the reference it saves me going through the statement line by line. A cheque to the office is fine too.\n\nOne thing Dessie asked me to pass on: the far-side condenser fan on the upright freezer is starting to rattle, so give us a shout before it packs in on you altogether.\n\nThanks a million,\n\nMarie Kehoe\nAccounts | Barrowvale Refrigeration Ltd\nUnit 4B, Sallyford Business Park, Bagenalstown, Co. Carlow, R21 X4T7\nT: +353 59 913 4482 | accounts@barrowvale.ie\nVAT No. IE3517884GH | CRO 618472"
+   },
+   {
+    "from": "accounts@kilnamonafinefoods.ie",
+    "to": "accounts@barrowvale.ie",
+    "subject": "Re: Invoice INV-4127 - multideck chiller repair, Sat 18 July",
+    "body": "Hi Marie,\n\nSorry, this one got past the due date on me - we had the painters in on the shopfront for a fortnight and August turned into a bit of a scramble.\n\nI've sent 600.00 across to you this morning, Friday 28 August, with INV-4127 as the reference, just to keep it moving. I'll have the balance of INV-4127 out to you next week without fail.\n\nApologies again for dragging it out, and thanks for squeezing us in on the Saturday - the multideck hasn't missed a beat since.\n\nOrla Deegan\nOffice Manager / Accounts\nKilnamona Fine Foods Ltd\nThe Old Creamery, Kilnamona, Co. Clare, V95 F2R8\nT: +353 65 682 7714 | accounts@kilnamonafinefoods.ie\nVAT No. IE4471629TW"
+   },
+   {
+    "from": "accounts@barrowvale.ie",
+    "to": "accounts@kilnamonafinefoods.ie",
+    "subject": "Re: Invoice INV-4127 - multideck chiller repair, Sat 18 July",
+    "body": "Hi Orla,\n\nNo bother at all, these things happen. The 600.00 came in this morning, Monday 31 August, and I've allocated it against INV-4127, so there's still a balance sitting on that invoice.\n\nGlad the multideck is behaving itself. Talk soon,\n\nMarie Kehoe\nAccounts | Barrowvale Refrigeration Ltd\nT: +353 59 913 4482 | accounts@barrowvale.ie"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "INV-4127",
+   "amount_outstanding": "1429.50",
+   "currency": "EUR",
+   "recipient": "accounts@kilnamonafinefoods.ie",
+   "should_stop_and_ask_a_person": false,
+   "why": "Ordinary overdue balance with nothing in dispute. Invoice INV-4127 (24 July 2026, 30-day terms) fell due 23 August 2026 and is 17 days past due as at 9 September 2026. Every figure needed is in the thread: net 1,650.00, VAT at 23% of 379.50, gross 2,029.50, and a single part payment of 600.00 that the supplier confirms was received and allocated on 31 August. The client acknowledged the debt, apologised for the delay and promised the balance 'next week without fail' - that promise lapsed in the first week of September, so a routine chase for the remaining 1,429.50 is the correct action. The recipient is unambiguous: accounts@kilnamonafinefoods.ie both received the original invoice and sent the remittance advice."
+  },
+  "arithmetic": "Line items (net): 985.00 (compressor supply & fit) + 324.00 (labour 4.5 hrs x 72.00) + 165.00 (R-448A 2.5 kg x 66.00) + 88.00 (filter drier kit) + 88.00 (Saturday call-out) = 1,650.00 net.\nVAT: 1,650.00 x 0.23 = 379.50.\nGross: 1,650.00 + 379.50 = 2,029.50.\nPayments received: 600.00 (sent 28 Aug 2026, credited 31 Aug 2026) -> total payments 600.00.\nOutstanding: 2,029.50 - 600.00 = 1,429.50 EUR.\nAgeing: due 23 Aug 2026; as at 9 Sep 2026 that is 17 days overdue.",
+  "name": "independent-05"
+ },
+ {
+  "emails": [
+   {
+    "from": "dara.moynihan@coppergatesigncraft.ie",
+    "to": "accounts@kestrelrowhotel.ie",
+    "subject": "Invoice CS-4417 - Kestrel Row facade lettering & wayfinding",
+    "body": "Hi Aoife,\n\nHope the reopening weekend went well - the lobby looked great in the photos.\n\nInvoice CS-4417 is attached, dated 11 August 2026. Just so it's written down somewhere other than a PDF: it covers the illuminated facade lettering we fabricated and fitted at EUR 3,850.00, the internal wayfinding set (the twelve brushed aluminium panels for the corridors and the lift lobby) at EUR 1,690.00, the thirty-four bronze room numerals at EUR 578.00, and the survey plus two fitters for the install day at EUR 640.00. That's EUR 6,758.00 net, VAT at 23% adds EUR 1,554.34, so the total to pay is EUR 8,312.34.\n\nTerms are 30 days from invoice date, so it falls due on 10 September. Bank details are on the invoice itself but I'll save you digging:\n\n  Coppergate Signcraft Ltd\n  IBAN IE58 BFRI 9012 3456 7891 22\n  BIC BFRIIE2D\n  Reference: CS-4417\n\nOne thing still open on our side - the replacement acrylic face for the Spa panel. The first one came back from the supplier with a hairline mark on it and I wasn't happy hanging it. Karl will swap it over when he's down in Cork on the 24th. No charge for that, it's inside the original quote, so it doesn't change anything on the invoice.\n\nIf you need it re-issued or split out differently for your own records just say the word.\n\nThanks a million,\n\nDara Moynihan\nCoppergate Signcraft Ltd\nUnit 7B, Ravensdale Business Park, Bluebell, Dublin 12\nT: +353 1 442 8817  |  M: +353 87 913 2204\nVAT IE9682431WH  |  CRO 574112\nRemittances to accounts@coppergatesigncraft.ie please"
+   },
+   {
+    "from": "aoife.brannigan@kestrelrowhotel.ie",
+    "to": "accounts@coppergatesigncraft.ie",
+    "subject": "RE: Invoice CS-4417 - remittance advice, paid 08/09",
+    "body": "Hi Dara,\n\nThanks for that, and for the heads up on the Spa panel - I've told our ops lead to expect Karl on the 24th, he'll leave the scissor lift out for him.\n\nCS-4417 went out in yesterday's payment run (Tuesday 8th). The full EUR 8,312.34 has left us - that's the EUR 6,758.00 net plus the EUR 1,554.34 VAT, nothing deducted, and no retention held on this one as it wasn't a main-contract job. Sent to the IE58 BFRI account with CS-4417 as the reference. Our bank claims same day but in practice it lands with you the next morning, so you should see it today or tomorrow at the latest.\n\nThat settles the invoice in full and there's nothing else open on your account with us - the deposit invoice from the spring, CS-4102, was cleared back in April.\n\nWe'll be tendering the second-floor refurb early in the new year and I want you on the list for the signage, so I'll be in touch before Christmas.\n\nKind regards,\n\nAoife Brannigan\nAccounts Payable\nKestrel Row Hospitality Ltd\nKestrel Row, Lapp's Quay, Cork T12 XR40\n+353 21 486 3390 ext. 214\nVAT IE4471028TA"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "",
+   "amount_outstanding": "0.00",
+   "currency": "EUR",
+   "recipient": "",
+   "should_stop_and_ask_a_person": false,
+   "why": "Invoice CS-4417 was raised for EUR 8,312.34 gross (EUR 6,758.00 net + EUR 1,554.34 VAT at 23%) and the customer's remittance advice confirms the identical amount of EUR 8,312.34 was paid by bank transfer on 8 September 2026, with no deduction and no retention. Outstanding is therefore EUR 0.00 and no chase should be sent. The Spa panel replacement mentioned in both emails is a no-charge warranty swap already covered by the original quote, not a dispute or a credit, so it does not change the balance and does not require a person. The only thing a bookkeeper should do is confirm the EUR 8,312.34 credit lands on the bank statement and match it to CS-4417."
+  },
+  "arithmetic": "Line items: 3,850.00 (facade lettering) + 1,690.00 (12 wayfinding panels) + 578.00 (34 bronze numerals) + 640.00 (survey + 2 fitters) = 6,758.00 net.\nVAT: 6,758.00 x 0.23 = 1,554.34.\nGross: 6,758.00 + 1,554.34 = 8,312.34.\nPayments received: 8,312.34 (bank transfer, payment run 8 September 2026, ref CS-4417).\nOutstanding: 8,312.34 - 8,312.34 = 0.00 EUR.",
+  "name": "independent-06"
+ },
+ {
+  "emails": [
+   {
+    "from": "accounts@brannockrefrigeration.ie",
+    "to": "nuala.deasy@blackrocklarder.ie",
+    "subject": "Invoice BRS-2610-0447 - chiller works at the Douglas unit",
+    "body": "Hi Nuala,\n\nHope the summer madness has eased off a bit for ye. Invoice BRS-2610-0447 is attached for the work Ger and Tomasz did at the Douglas unit on the 11th and 12th of August - the annual service on the walk-in chiller, and then the compressor swap once we'd confirmed the old Copeland unit was drawing well over spec and wasn't going to see out the year.\n\nBreakdown, so you can code it up:\n\n- Annual service visit, walk-in chiller (unit 2)  420.00\n- Replacement compressor unit, supplied & fitted  2,340.00\n- Refrigerant gas, drier and consumables  195.00\n- Additional labour, 5 hrs @ 45.00/hr  225.00\n\nThat comes to 3,180.00 net, and with VAT at 23% (731.40) the invoice total is 3,911.40. Terms are 30 days from invoice date, so we'd be looking at the 13th of September, but no panic on it.\n\nOur bank details if you're paying by transfer: IBAN IE64 TRBK 9312 4200 1178 55, BIC TRBKIE2D, account name Brannock Refrigeration Services Ltd. Just quote BRS-2610-0447 as the reference so it doesn't go astray on us like the last one did.\n\nOne thing worth flagging - the condenser coils on unit 1 are getting fairly clogged. Not urgent, but I'd have Ger look at them on the next visit rather than let it run into the winter.\n\nThanks a million,\n\nAoife Brannock\nAccounts / Office Manager\nBrannock Refrigeration Services Ltd\nUnit 7B, Kilnagleary Business Park, Carrigaline, Co. Cork\nT: +353 21 486 2214  |  M: +353 87 214 9036\naccounts@brannockrefrigeration.ie\nCRO 486213  |  VAT IE 3617294WH"
+   },
+   {
+    "from": "marek.sowa@blackrocklarder.ie",
+    "to": "accounts@brannockrefrigeration.ie",
+    "subject": "Remittance advice - payment run 08/09/2026",
+    "body": "Hi Aoife,\n\nRemittance for yesterday's payment run. We've settled BRS-2610-0447 in full - 3,911.40 went out by SEPA credit transfer on Monday 8 September, reference BRS-2610-0447 as you asked.\n\nInvoice        Dated       Gross       Paid\nBRS-2610-0447  14/08/2026  3,911.40    3,911.40\n\nNothing else outstanding on your account at our end. Heads up that it will land on your statement as BLACKROCK LARDER LTD T/A THE BLACKROCK LARDER - the trading name confuses people occasionally.\n\nNuala passed on what you said about the condenser coils on unit 1. She's happy for that to be picked up on the next scheduled visit, so if you want to raise a quote for it I'll get a PO across to you.\n\nThanks for turning the compressor around so quickly in August, it saved us a very expensive weekend.\n\nBest,\n\nMarek Sowa\nAccounts Payable\nBlackrock Larder Ltd\n14 Marina Commercial Park, Centre Park Road, Cork\nT: +353 21 435 7708 ext. 4\nmarek.sowa@blackrocklarder.ie\nVAT IE 9584127KA"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "",
+   "amount_outstanding": "0.00",
+   "currency": "EUR",
+   "recipient": "",
+   "should_stop_and_ask_a_person": false,
+   "why": "Invoice BRS-2610-0447 (net 3,180.00 + VAT at 23% of 731.40 = gross 3,911.40) was settled in full by SEPA credit transfer on 08/09/2026, quoting the invoice reference, as confirmed by the remittance advice from the customer's accounts payable. The remittance amount matches the gross exactly, so the balance is nil. Nothing to chase and no human judgement needed: there is no dispute, no deduction, no credit note and no missing figure. The condenser-coil remark and the offer of a PO relate to possible future work, not to this invoice, so they do not affect the balance. Correct system action is to mark BRS-2610-0447 as paid in full and send no chase.",
+   "amount_outstanding_note": "0.00"
+  },
+  "arithmetic": "Line items: 420.00 (annual service) + 2,340.00 (compressor supplied & fitted) + 195.00 (gas, drier, consumables) + 225.00 (5 hrs labour @ 45.00) = 3,180.00 net.\nVAT at 23%: 3,180.00 x 0.23 = 731.40.\nGross: 3,180.00 + 731.40 = 3,911.40 (matches the total stated in the invoice email).\nPayments received: 3,911.40 (SEPA credit transfer, 08/09/2026, ref BRS-2610-0447).\nOutstanding: 3,911.40 - 3,911.40 = 0.00 EUR.",
+  "name": "independent-07"
+ },
+ {
+  "emails": [
+   {
+    "from": "wouter@vandaele-koeltechniek.be",
+    "to": "crediteuren@zilverlinde-hotels.be",
+    "subject": "Invoice VK2026-0417 - June works at Damport (service + freezer door)",
+    "body": "Dag Marieke,\n\nHope the plant rooms are behaving now the warm weather has arrived.\n\nInvoice VK2026-0417 is attached, dated 30 June, covering everything we did at Hotel Zilverlinde Damport last month. To save you opening the PDF: the annual service and F-gas tightness check on the two cold rooms and the blast chiller on 4 June was 1,240.00; the condenser fan motor we swapped on the walk-in on 11 June came to 685.00 including fitting, and the 4.5 kg of R-449A that went in on the same visit is 279.00 (4.5 at 62.00/kg). Then there was the Saturday call-out on 20 June when the freezer went into high-temp alarm - 3.5 hours at the weekend rate of 96.00, so 336.00 - and on 25 June we came back and fitted the new door heater element and a full gasket set on the walk-in freezer, 1,320.00.\n\nThat is 3,860.00 net. With 21% VAT of 810.60 on top the invoice总 comes to 4,670.60 EUR to pay. All booked against your PO 4471-HZ as usual.\n\nTerms are 30 days from invoice date, so 30 July. Bank details are on the PDF but here they are anyway:\n\n  IBAN  BE14 0017 2645 3183\n  BIC   ARSPBE22\n  ref   VK2026-0417\n\nOne thing I want to flag while it is fresh: the compressor on cold room 2 is pulling more current than it should and Bert reckons it has one season left in it, two at a push. Nothing to do today, but I would much rather we plan that than have it die on a Saturday again. Say the word and I will put a price together.\n\nThanks as always for the quick turnaround on these.\n\nMet vriendelijke groeten,\n\nWouter Vandaele\nVandaele Koeltechniek BV\nKortrijksesteenweg 218, 9051 Sint-Denijs-Westrem\nT +32 9 224 71 06  ·  M +32 478 61 32 90\nBTW BE 0784.512.640"
+   },
+   {
+    "from": "m.provoost@zilverlinde-hotels.be",
+    "to": "wouter@vandaele-koeltechniek.be",
+    "subject": "RE: Invoice VK2026-0417 - remittance advice 29/07, part payment",
+    "body": "Hi Wouter,\n\nOur payment run went out this afternoon (29 July), value date Friday 31 July, so you should see it Friday or Monday at the latest. It comes over as one transfer of 3,640.00 EUR, made up of:\n\n  VK2026-0388   640.00     paid in full\n  VK2026-0417   3,000.00   part payment (invoice total 4,670.60)\n\nSorry to split the big one on you. Emmanuel is on leave until the 10th and anything over 3,000 needs his second signature, so 3,000.00 was genuinely all I could release on this run. The remaining 1,670.60 is already queued for the August run on the 14th and coded to PO 4471-HZ, so it should go out without anyone having to touch it.\n\nTo be clear there is no issue with the invoice itself - Katrien signed off the Saturday call-out on the night, and the new door heater has made a real difference, the freezer door was icing up every second morning before.\n\nI will pass your note about the cold room 2 compressor on to her, but do send a price. It is far easier to get a capex line approved before the budget round closes in September than after it.\n\nAnd if anything else comes up on this invoice, come straight back to me on this address rather than the crediteuren inbox - three of us read that one and things do get missed.\n\nGroetjes,\n\nMarieke Provoost\nCrediteurenadministratie\nHotelgroep Zilverlinde NV\nSint-Jansplein 4, 8000 Brugge\nT +32 50 33 18 42 (direct)\nBTW BE 0651.309.864"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "VK2026-0417",
+   "amount_outstanding": "1670.60",
+   "currency": "EUR",
+   "recipient": "m.provoost@zilverlinde-hotels.be",
+   "should_stop_and_ask_a_person": false,
+   "why": "Ordinary part-paid invoice, now overdue - no human judgement needed. Every figure required is present in the two emails: the invoice states net 3,860.00 + 21% VAT 810.60 = gross 4,670.60, and the remittance allocates 3,000.00 of the 3,640.00 transfer specifically to VK2026-0417, leaving 1,670.60. The client herself explicitly disclaimed any dispute ('there is no issue with the invoice itself') and committed the balance to the 14 August payment run, which is now roughly four weeks past. VK2026-0388 in the same remittance is settled in full and must not be chased - subtracting the whole 3,640.00 transfer from the invoice would be the wrong allocation. The chase goes to Marieke Provoost's direct address, not crediteuren@zilverlinde-hotels.be, because she asked in writing for follow-ups on this invoice to come to her directly rather than the shared inbox."
+  },
+  "arithmetic": "Outstanding on VK2026-0417: gross 4,670.60 - payments 3,000.00 = 1,670.60 EUR.\n\nHow the gross is built:\n  annual service + F-gas tightness check, 2 cold rooms + blast chiller (4 Jun)   1,240.00\n  condenser fan motor replacement incl. fitting (11 Jun)                           685.00\n  R-449A refrigerant top-up, 4.5 kg x 62.00/kg (11 Jun)                            279.00\n  Saturday emergency call-out (20 Jun), 3.5 h x 96.00                              336.00\n  walk-in freezer door heater element + gasket set (25 Jun)                      1,320.00\n  ------------------------------------------------------------------------------------\n  net                                                                            3,860.00\n  VAT @ 21%   3,860.00 x 0.21                                                       810.60\n  gross       3,860.00 + 810.60                                                   4,670.60\n\nPayments allocated to VK2026-0417: 3,000.00 (remittance of 29 July, value date 31 July).\n  4,670.60 - 3,000.00 = 1,670.60 outstanding.\n\nReconciling the transfer so the 3,640.00 figure does not mislead:\n  VK2026-0388   640.00 (settled in full, nothing to chase)\n+ VK2026-0417 3,000.00 (part payment)\n= transfer    3,640.00\n\nLine-item check: 1,240.00 + 685.00 + 279.00 + 336.00 + 1,320.00 = 3,860.00.\nSub-checks: 4.5 x 62.00 = 279.00; 3.5 x 96.00 = 336.00.\nTimeline: invoice dated 30 June, 30-day terms, due 30 July; part payment 31 July; balance promised for the 14 August run; today 9 September, so 1,670.60 is roughly four weeks past the client's own promised date.",
+  "name": "independent-08"
+ },
+ {
+  "emails": [
+   {
+    "from": "accounts@vanrhijn-ductwork.nl",
+    "to": "finance@zilverlinde-hospitality.nl",
+    "subject": "Invoice VRD-2026-0418 - extract deep clean at De Zilverling, nights of 5 & 6 August",
+    "body": "Dear Karin, dear colleagues,\n\nHope the summer season treated you kindly - the kitchen certainly looked like it had been working hard when we got up into the plenum on the Tuesday night.\n\nPlease find our invoice VRD-2026-0418 attached for the extract ductwork deep clean carried out at Hotel De Zilverling, Prinsenwerf 22, Amsterdam, over the nights of 5 and 6 August. Everything was done to TR19 Grease and the post-clean verification report, photo set and the certificate for your fire file went across to Marnix on 12 August, so you should have those on record already.\n\nWhat we did and what we charged for:\n\n- Deep clean of the main kitchen canopy, plenum, filter bank and the horizontal run to the riser - EUR 1,860.00\n- Supply and fit of 6 hinged access panels (the old ones were riveted shut and had to be cut out) - 6 x EUR 145.00 = EUR 870.00\n- Vertical riser clean, 14 metres up to the roof fan - EUR 1,120.00\n- Out-of-hours surcharge, works 23:00-05:00 both nights - EUR 395.00\n\nThat comes to EUR 4,245.00 net. With Dutch VAT at 21% (EUR 891.45) the invoice total is EUR 5,136.45. We received your EUR 1,000.00 booking deposit on 24 July, thank you for that, so the balance now payable is EUR 4,136.45.\n\nThe invoice is dated 5 August 2026 and our terms are 21 days, which put it due on 26 August. Your purchase order number PO-ZH-4471 is quoted on the face of the invoice as requested by Marnix on site.\n\nPayment by transfer please, quoting the invoice number so it lands against the right job:\n\nVan Rhijn Ductwork Hygiene B.V.\nIBAN NL62 INGB 0007 4419 82\nBIC INGBNL2A\nVAT NL854 399 312 B01\nKvK 67 21 48 90\n\nIf anything on there needs a line splitting out differently for your side, just say and I will reissue - it is no trouble.\n\nWith kind regards,\n\nSanne Vermeulen\nAccounts & Contracts\nVan Rhijn Ductwork Hygiene B.V.\nKanaalweg 118 B, 3526 KL Utrecht\nT +31 30 244 81 07 | M +31 6 22 40 91 55\naccounts@vanrhijn-ductwork.nl | www.vanrhijn-ductwork.nl"
+   },
+   {
+    "from": "k.wielenga@zilverlinde-hospitality.nl",
+    "to": "accounts@vanrhijn-ductwork.nl",
+    "subject": "RE: Invoice VRD-2026-0418 - extract deep clean at De Zilverling, nights of 5 & 6 August",
+    "body": "Hello Sanne,\n\nThanks for the detail, but I am afraid I have to come back to you on this one, because we do not believe anything is owed here at all and I would rather say that now than let it sit in your aged debtors for another month.\n\nWe hold service agreement SLA-2024-11 with Van Rhijn, signed by Ruud on your side in November 2024 and still running. Under that agreement we pay EUR 740.00 ex VAT per quarter, by direct debit, and it covers two full TR19 deep cleans of the De Zilverling extract system per calendar year, including access panels where they are needed to do the clean and including out-of-hours working, since you cannot clean a hotel kitchen at lunchtime. The January visit was the first of 2026. The August visit was the second. So in our reading the entire scope you have invoiced - canopy, plenum, riser, panels and the night surcharge - sits inside a contract we are already paying for, and invoicing it again as project work is a double charge rather than an extra.\n\nOn the purchase order: PO-ZH-4471 was raised on the night by Marnix, our duty maintenance supervisor. Marnix has no purchasing authority and should not have issued it. That is our internal problem and I am not blaming your engineers for accepting it, but it does not create a liability where the contract already covers the work. (For completeness, we also think the second night was largely a return visit after the first night's verification photos showed deposit still sitting behind the grill, though that is a side point - the main issue is the SLA.)\n\nSo, concretely: we are disputing invoice VRD-2026-0418 in full, all EUR 5,136.45 of it, and we would ask you to raise a credit note for the whole amount. We would also like the EUR 1,000.00 deposit we paid on 24 July returned or credited, since on our reading it should never have been taken for contracted work.\n\nI have put a hold on the invoice in our system so nothing goes out automatically at month end. Could you or Ruud pull the signed copy of SLA-2024-11 and check clause 4 with me? I am around all week and happy to do it on a call rather than by email tennis - it will be quicker for both of us. If it turns out I have misread the scope I will apologise and pay the same day.\n\nBest regards,\n\nKarin Wielenga\nFinancial Controller\nZilverlinde Hospitality Group B.V.\nOostersingel 9, 1019 GT Amsterdam\nT +31 20 771 30 42 | M +31 6 15 88 27 40\nk.wielenga@zilverlinde-hospitality.nl\nVAT NL861 205 774 B01 | KvK 71 05 33 26"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "",
+   "amount_outstanding": "0.00",
+   "currency": "EUR",
+   "recipient": "",
+   "should_stop_and_ask_a_person": true,
+   "why": "Invoice VRD-2026-0418 (dated 5 Aug 2026, due 26 Aug 2026) is nominally EUR 4,136.45 open and technically overdue as at 9 Sep 2026, but the customer has disputed it in full in writing before any chase was sent. The dispute is substantive, not a stall: Zilverlinde claims the entire invoiced scope is already covered by service agreement SLA-2024-11 at EUR 740.00 ex VAT per quarter, and that PO-ZH-4471 was raised by a duty supervisor with no purchasing authority. Nothing in either email settles whether clause 4 of that SLA covers deep cleans, access panels and out-of-hours working - the agreement itself is not in the correspondence. The customer has also asked for a full credit note plus refund of the EUR 1,000.00 deposit, which is a commercial decision no bookkeeper can take alone. Therefore no automated chase should be issued and no amount should be chased: the balance must be frozen and passed to a human (Ruud, who signed the SLA, or whoever owns the contract) to review clause 4 against the job sheet and either substantiate the charge or raise the credit note. Karin Wielenga has offered a call and has put the invoice on hold on her side, so a dunning email now would be both wrong and damaging. For reference only, if the charge is later substantiated the chase would go to k.wielenga@zilverlinde-hospitality.nl (with finance@zilverlinde-hospitality.nl copied) for EUR 4,136.45."
+  },
+  "arithmetic": "Line items (net): 1,860.00 + 870.00 (6 x 145.00) + 1,120.00 + 395.00 = 4,245.00 net. VAT at 21%: 4,245.00 x 0.21 = 891.45. Gross: 4,245.00 + 891.45 = 5,136.45. Payments received: 1,000.00 deposit on 24 Jul 2026. Nominal open balance: 5,136.45 - 1,000.00 = 4,136.45. Amount that should actually be chased: 0.00 - the full 5,136.45 is formally disputed and the 4,136.45 balance is frozen pending human review, so the chaseable figure is zero, not an arithmetic error.",
+  "name": "independent-09"
+ },
+ {
+  "emails": [
+   {
+    "from": "deirdre@corribcoldchain.ie",
+    "to": "accounts@ballynoebakehouse.ie",
+    "subject": "Invoice CC-2471 - walk-in freezer, Ennis unit",
+    "body": "Hi Sandra,\n\nHope the new unit is behaving itself. Ken said the freezer was holding -21 no bother by the time he left on the Friday, and the blast chiller was grand after the reset.\n\nInvoice CC-2471 is attached, dated 14 July. It covers the works at the Ennis unit:\n\n  Frostline HB-40 condensing unit, supplied and fitted - 1,845.00\n  Engineer time, 9 hrs @ 65.00 - 585.00\n  Refrigerant top-up and sundries - 30.00\n\nSo that's EUR 2,460.00 net, VAT at 23% comes to EUR 565.80, giving EUR 3,025.80 including VAT for the job. I've taken the deposit ye paid when we put the order in for the unit off that, so the balance to pay is the figure at the bottom of the attached invoice.\n\nOur terms are 30 days from invoice date, so it's due with us by 13 August. Bank details are on the invoice itself but I'll stick them here to save you looking:\n\n  Shannonside Bank - Corrib Cold Chain Ltd\n  IBAN IE62 SHNB 9932 1147 8850 21\n  BIC SHNBIE2D\n  Reference: CC-2471 please, otherwise it takes me a week to find it\n\nI've let Marcus know it's gone over to you. Any queries at all give me a shout on the office number or just reply here.\n\nThanks a million, and thanks for the patience while we waited on the unit coming up from Cork.\n\nDeirdre Nunan\nOffice Manager | Corrib Cold Chain Ltd\nUnit 4B, Deerpark Business Park, Oranmore, Co. Galway, H91 XV23\nT 091 774 218 | M 086 340 9917\nVAT IE 3927164WH | CRO 486291\nRefrigeration, cold rooms and planned maintenance since 1998"
+   },
+   {
+    "from": "fionn@corribcoldchain.ie",
+    "to": "deirdre@corribcoldchain.ie",
+    "subject": "Ballynoe - 2471",
+    "body": "Deirdre,\n\nI was talking to Marcus from Ballynoe at the trade morning above in Athlone and he says nothing has gone out to us yet on the freezer job. That invoice went out on the 14th of July so we're the guts of a month past the due date on it now.\n\nCan you send them a reminder today please. accounts@ballynoebakehouse.ie is the one that actually pays, Marcus only forwards things on and then it sits in his inbox for a fortnight.\n\nDon't be too heavy about it, they're good customers and they've never left us short. Just a nudge.\n\nFionn\n\nFionn O Riordain\nDirector, Corrib Cold Chain Ltd\n086 771 4402"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "CC-2471",
+   "amount_outstanding": "0.00",
+   "currency": "EUR",
+   "recipient": "",
+   "should_stop_and_ask_a_person": true,
+   "why": "The invoice itself is real, undisputed and genuinely overdue (issued 14 July 2026, 30-day terms, due 13 August 2026; today is 9 September 2026), so CC-2471 is the invoice that should be chased. But the chase cannot be sent automatically, because the amount to chase is not derivable from the emails. Email 1 gives the full job value consistently (net 2,460.00 + VAT 565.80 = gross 3,025.80) and then says a deposit has already been deducted, without ever stating the deposit amount - it is quoted nowhere in either email, there is no percentage or anchor to infer it from, and the referenced invoice PDF is not present. Gross minus an unstated payment is not a number. amount_outstanding is given as 0.00 in the schema's sense of 'nothing should be chased right now'; it does NOT mean nothing is owed - something is certainly owed, we just cannot say how much. recipient is empty for the same reason: no chase should go out yet. The correct behaviour is to ask a person for the deposit figure (or the copy invoice), then chase accounts@ballynoebakehouse.ie for gross 3,025.80 less that deposit. Chasing the full 3,025.80 would be dunning a customer for money they have partly already paid, which is exactly the error a careful bookkeeper stops to avoid. Note also that the second email is an internal instruction to send a reminder - it adds urgency but supplies no figure, and urgency is not a substitute for the missing number."
+  },
+  "arithmetic": "Line items (email 1): 1,845.00 + 585.00 + 30.00 = 2,460.00 net\nVAT at 23%: 2,460.00 x 0.23 = 565.80\nGross: 2,460.00 + 565.80 = 3,025.80\nPayments already applied: one deposit, paid when the condensing unit was ordered. Amount NOT stated in email 1, not stated in email 2, and the referenced invoice PDF is absent.\nOutstanding: 3,025.80 - (deposit: not stated anywhere) = not computable. The subtraction has no second operand, so no chase figure can be produced without asking a person.\nSanity check on the parts that are present: 2,460.00 + 565.80 = 3,025.80 exactly, so the stated net, VAT and gross are internally consistent; the gap is solely the payment side.",
+  "name": "independent-10"
+ },
+ {
+  "emails": [
+   {
+    "from": "administratie@vandersteen-koeltechniek.be",
+    "to": "marleen.dhaese@delhuys-traiteur.be",
+    "subject": "Invoice 2026-0731 - cold room repair Wommelgem, 27 August",
+    "body": "Dag Marleen,\n\nHope the September catering season is treating you a bit more gently than August did.\n\nAttached is our invoice 2026-0731, dated 31 August 2026, for the emergency job at the Wommelgem production site on Thursday 27 August. Just so you have the story with the paperwork: Pieter got there around 07:20 after your night shift called in that the big cold room had drifted up to +9 degrees. The scroll compressor on unit 2 had seized, so he isolated the circuit, recovered the gas, replaced the compressor along with the filter dryer and gaskets, pulled a vacuum and recharged. He was on site until just after 19:00, and popped back on the Friday morning to check the pressures once the room had pulled down properly - no charge for that second visit.\n\nThe job costs out as follows:\n\n- Emergency call-out, outside office hours: 285.00\n- Labour, 12 hrs at 82.00/hr: 984.00\n- Scroll compressor ZR61KCE incl. filter dryer and gaskets: 1,640.00\n- Refrigerant R448A, 4.5 kg at 62.00/kg: 279.00\n\nThat gives 3,188.00 net, and with 21% VAT of 669.48 the total to pay is 3,857.48 EUR. Our terms are 30 days net, so the due date is 30 September 2026.\n\nPayment to:\nMeridiaan Bank - IBAN BE47 7325 0918 4462, BIC MRDNBE2X, account name Vandersteen Koeltechniek BV. Please quote 2026-0731 as the reference so I can match it off straight away.\n\nOur VAT number is BE 0742.318.905, yours we have as BE 0654.201.377 - shout if that has changed since the merger.\n\nThanks as always for the quick access to the site that morning, it made a real difference.\n\nVriendelijke groeten,\n\nIlse Dhondt\nAdministratie & facturatie\nVandersteen Koeltechniek BV\nNijverheidsstraat 41, 2110 Wijnegem\nT +32 3 456 78 21 | M +32 478 21 44 03\nadministratie@vandersteen-koeltechniek.be | www.vandersteen-koeltechniek.be\nBTW BE 0742.318.905 | RPR Antwerpen"
+   },
+   {
+    "from": "marleen.dhaese@delhuys-traiteur.be",
+    "to": "administratie@vandersteen-koeltechniek.be",
+    "subject": "Re: Invoice 2026-0731 - cold room repair Wommelgem, 27 August",
+    "body": "Hi Ilse,\n\nThanks for sending this over, and no complaints at all about Pieter - he was there fast and the room was back down by lunchtime, we know it saved us a lot of stock.\n\nThat said, I can't put 2026-0731 through for payment, and I have to be honest with you: we don't think any of it is chargeable. Three things, and I'd rather say them all now than drip-feed them:\n\nUnit 2 is the system you supplied and installed for us in March 2025 - your invoice 2025-0339, against quote OFF-2025-014. That quote states 24 months parts and labour warranty on the installed equipment. The compressor failed at seventeen months, so on the face of it the compressor and the labour to fit it are a warranty job, not a repair we pay for.\n\nThe call-out and the gas are, as far as I understand it, inside our annual maintenance agreement ONH-2025-118, which we paid in full in January (1,860.00 for the year). My copy of that agreement says it includes out-of-hours call-outs on the covered equipment and refrigerant top-ups up to 10 kg per year, and we have used maybe 2 kg so far in 2026.\n\nAnd the part that is really sitting badly with me: Nadia Verhaeghe, our site supervisor, says Pieter told her that morning, standing in the corridor by the plant room, that \"this one's on us, I'll write it up as warranty.\" She only mentioned it to me when the invoice landed. I'm not accusing anyone of anything - people say things at 7am with a dead compressor in front of them - but that is what she was told, and she made the decision to let the work go ahead on that basis. Worth adding that this is the second failure on unit 2 since your visit in June.\n\nSo for now I'm putting the full 3,857.48 on hold in our ledger as disputed rather than as an unpaid balance. Could you dig out the warranty terms on OFF-2025-014 and have a word with Pieter, and then we can either agree a credit note for the whole thing or you can tell me why I've got it wrong? If part of it genuinely does fall outside both the warranty and the contract, send me a revised invoice and I'll pay that one the same week.\n\nI'd like to sort this between us rather than have it turn into reminders and interest - we've been happy with you for four years and I'd rather that continued.\n\nGive me a ring if it's easier to talk it through.\n\nMet vriendelijke groeten,\n\nMarleen D'Haese\nFinancieel verantwoordelijke\nDelhuys Traiteur NV\nAmbachtsweg 12, 2160 Wommelgem\nT +32 3 322 90 45 | M +32 471 60 88 12\nmarleen.dhaese@delhuys-traiteur.be\nBTW BE 0654.201.377"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "",
+   "amount_outstanding": "0.00",
+   "currency": "EUR",
+   "recipient": "",
+   "should_stop_and_ask_a_person": true,
+   "why": "Invoice 2026-0731 (net 3,188.00 + 21% VAT 669.48 = 3,857.48 EUR, nothing paid, due 30 September 2026) is disputed in full by the customer before it even falls due, so there is no chaseable amount and no chase should be sent. The dispute is genuine and covers every line: the compressor and the fitting labour are claimed to fall under a 24-month parts-and-labour warranty from the original March 2025 installation (supplier invoice 2025-0339 / quote OFF-2025-014, failure at seventeen months), and the out-of-hours call-out and the 4.5 kg of R448A are claimed to fall under paid annual maintenance agreement ONH-2025-118, which the customer says includes out-of-hours call-outs and up to 10 kg of refrigerant a year. On top of that the customer's site supervisor, Nadia Verhaeghe, says the technician, Pieter, verbally told her on site on 27 August that the visit would be written up as warranty work, and the work was authorised on that basis. None of this can be settled from the two emails: the warranty wording on OFF-2025-014, the scope of contract ONH-2025-118 and the technician's account of what he said are all outside the correspondence, and the customer has explicitly asked for either a credit note or an explanation before paying. A bookkeeper cannot decide the outcome alone - the matter must go to the business owner or service manager. Note also that a partial chase is not available here: the customer contests all four line items, so there is no undisputed remainder to pursue."
+  },
+  "arithmetic": "Invoice 2026-0731, dated 31/08/2026, terms 30 days net, due 30/09/2026.\n\nLine items (net):\n  Emergency call-out, out of hours                          285.00\n  Labour, 12 hrs x 82.00/hr                                 984.00\n  Scroll compressor ZR61KCE incl. filter dryer + gaskets   1,640.00\n  Refrigerant R448A, 4.5 kg x 62.00/kg                       279.00\n  ------------------------------------------------------------\n  Net total                                               3,188.00\n\nVAT: 3,188.00 x 21% = 669.48\nGross: 3,188.00 + 669.48 = 3,857.48\n\nPayments received against this invoice: 0.00\nLedger balance: gross 3,857.48 - payments 0.00 = 3,857.48\n\nChaseable amount: 3,857.48 disputed in full (all four line items contested under warranty OFF-2025-014 and maintenance contract ONH-2025-118) = 0.00 undisputed.\nTherefore: amount_outstanding for chasing purposes = 0.00. The 3,857.48 stays on the ledger as a disputed balance, not as a debt to chase, until a person resolves the warranty and contract questions.",
+  "name": "independent-11"
+ },
+ {
+  "emails": [
+   {
+    "from": "sanne.dekker@vanhulstkoeltechniek.nl",
+    "to": "m.prinsen@kadehoreca.nl",
+    "subject": "Invoice VH-2026-1142 - Kade 12 cold room (July call-outs)",
+    "body": "Hi Maarten,\n\nHope the season is being kind to you - Rob said the terrace was three deep when he drove past on the 18th.\n\nInvoice for the cold room work at Kade 12 is attached. Quick summary so you don't have to open the PDF: we came out on Saturday 11 July when the walk-in was sitting at +9 C, replaced the condenser fan motor and its run capacitor, and then were back on the 18th for the contactor and a refrigerant top-up after the unit tripped again.\n\nThe 11th (out-of-hours call-out of 145.00 plus two hours on site) - EUR 330.00\nCondenser fan motor FM-450 and run capacitor, supplied and fitted - EUR 465.00\nReturn visit on the 18th, four hours - EUR 370.00\nCompressor contactor and overload relay - EUR 148.00\n1.8 kg R449A plus the F-gas leak test and certificate - EUR 328.00\n\nThat comes to EUR 1,641.00 net, VAT at 21% is EUR 344.61, so EUR 1,985.61 all in. The invoice carries today's date, 24 July, and we're on 14 days as usual, so 7 August. Could you quote VH-2026-1142 as the payment reference? Without it your payment sits unallocated for a week and then I'm emailing you again, which neither of us enjoys.\n\nOne note before you ask: your maintenance agreement covers the two scheduled services (March and October) and we haven't touched those, but Saturday attendance falls outside contract hours, which is why the call-out is on there as its own line.\n\nThanks as always for the quick access through the yard, it genuinely makes the job faster.\n\nKind regards,\n\nSanne Dekker\nOffice Manager | Van Hulst Koeltechniek B.V.\nAmbachtsweg 14b, 7327 AT Apeldoorn\nT +31 55 843 27 10 | M +31 6 21 44 88 03\nsanne.dekker@vanhulstkoeltechniek.nl\nKvK 74213908 | BTW NL861542377B01\nIBAN NL24 RABO 0387 2214 65 | BIC RABONL2U\nF-gas certification NL-CERT-4471"
+   },
+   {
+    "from": "m.prinsen@kadehoreca.nl",
+    "to": "sanne.dekker@vanhulstkoeltechniek.nl",
+    "subject": "RE: Invoice VH-2026-1142 - Kade 12 cold room (July call-outs)",
+    "body": "Sanne,\n\nApologies for the silence, and sorry it took your reminder last week to get an answer out of me. August was August.\n\nI have to be straight with you though: we don't think this one is payable at all, and I'd rather say so now than let it keep sitting there.\n\nThree things.\n\nThe visit on the 18th first. Your engineer signed the job sheet on the 11th with the unit \"running to spec, +2 C, tested 40 min\". Six days later the same cold room was down again on the same compressor circuit. Your own job sheets carry a three month guarantee on labour and fitted parts - it's printed on the bottom of the copy Joost was handed. So from where I'm sitting the 18th was a callback on the first repair rather than a new job, and that's the 370.00 and the 148.00 gone.\n\nThen the gas. If the system needed 1.8 kg of R449A on the 18th, it was leaking on the 11th and nobody found it. Separately, anything over 250 euro has to be approved in writing by me before it's done, and I had no email and no phone call about refrigerant. Joost let your engineer in and locked up after him; that is the full extent of his authority.\n\nAnd the call-out. Our maintenance agreement KH-ONH-2025-04, signed 4 March 2025 at 2,940 a year, says in as many words \"24/7 breakdown attendance, call-out fee waived\". So the 145.00 inside that first line shouldn't be on there either.\n\nThat doesn't leave much standing, so what I'm asking for is a full credit note against VH-2026-1142 and then a proper conversation. If a piece of it genuinely falls outside the contract once we've both re-read the thing, I'll pay that piece the same week - you know we're not slow payers, VH-2026-0977 went out within six days back in May.\n\nCan you do Thursday afternoon or Friday morning? I'm happy to drive up to Apeldoorn, bring the contract and the job sheets and we'll go through it line by line.\n\nBest,\n\nMaarten Prinsen\nOperations Manager\nKade Horeca Groep B.V. - Brasserie Kade 12\nHavenkade 12, 8011 CN Zwolle\nM +31 6 14 77 20 55\nm.prinsen@kadehoreca.nl\nKvK 66049271 | BTW NL857233190B01"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "",
+   "amount_outstanding": "0.00",
+   "currency": "EUR",
+   "recipient": "",
+   "should_stop_and_ask_a_person": true,
+   "why": "Invoice VH-2026-1142 shows a nominal open balance of EUR 1,985.61 (issued 24 July 2026, 14 day terms, due 7 August 2026, so 33 days past due at 9 September 2026, no payments received). It must NOT be chased. The client's reply is a substantive dispute of the entire amount, not a delay or a query about timing: he argues (1) the 18 July attendance was a warranty callback under Van Hulst's own three-month labour guarantee rather than a chargeable visit, killing the EUR 370.00 labour and EUR 148.00 contactor lines, (2) the EUR 328.00 refrigerant and leak-test work exceeded his EUR 250 written-authorisation threshold and was never approved, and (3) maintenance agreement KH-ONH-2025-04 waives the EUR 145.00 out-of-hours call-out fee. He has formally requested a full credit note. Every one of those points turns on documents that are not in the emails - the signed maintenance agreement, the 11 July job sheet and the guarantee wording on it - so no bookkeeper can decide the outcome from this correspondence. Correct action: suppress the dunning cycle on VH-2026-1142, flag it as disputed, and route it to the account owner or a director to answer the warranty and contract points and decide between a full credit note, a partial credit and re-invoice, or holding the charge. A chase letter sent now would be both factually unsupported and commercially damaging with a client who otherwise pays inside a week.",
+   "chase_invoice_nominal_if_dispute_resolved_in_suppliers_favour": "VH-2026-1142"
+  },
+  "arithmetic": "Invoice VH-2026-1142, all figures EUR.\\n\\nLine items (net):\\n  11 July call-out 145.00 + 2.0 hrs on site 185.00 = 330.00\\n  Condenser fan motor FM-450 + run capacitor        = 465.00\\n  18 July return visit, 4 hrs                       = 370.00\\n  Compressor contactor + overload relay             = 148.00\\n  1.8 kg R449A + F-gas leak test and certificate    = 328.00\\n\\nNet:   330.00 + 465.00 + 370.00 + 148.00 + 328.00 = 1,641.00\\nVAT:   1,641.00 x 21% = 344.61\\nGross: 1,641.00 + 344.61 = 1,985.61   (matches the EUR 1,985.61 stated in the email)\\n\\nPayments received against VH-2026-1142: 0.00\\nLedger balance: 1,985.61 - 0.00 = 1,985.61\\n\\nChaseable amount: 0.00. The full 1,985.61 is disputed by the client, who has asked for a complete credit note, so amount_outstanding is reported as 0.00 rather than 1,985.61 and no recipient is given. The 1,985.61 stays on the ledger as a disputed balance pending a human decision.\\n\\nFor cross-checking the client's own breakdown of what he refuses: 370.00 + 148.00 (warranty callback) + 328.00 (unauthorised gas/leak test) + 145.00 (contractual call-out waiver) = 991.00 net explicitly itemised, with the remaining 650.00 net (185.00 labour + 465.00 parts) implicitly refused too, since he asks for the invoice to be credited in full.",
+  "name": "independent-12"
+ },
+ {
+  "emails": [
+   {
+    "from": "accounts@ardglassarb.ie",
+    "to": "invoices@larchfieldestates.ie",
+    "subject": "Invoice ARB-2026-0318 - Larchfield avenue works (July)",
+    "body": "Hi Marie,\n\nInvoice for the July works at Larchfield is attached - ARB-2026-0318, dated 21 July, so on our usual 30 days it falls due on 20 August.\n\nI've put it through as one invoice this time, but here's the breakdown in case you need it split across the cost centres the way you did last autumn:\n\n  Crown reduction and deadwood removal, six mature beech along the main avenue .......... 3,150.00\n  Sectional dismantling and removal of the two storm-damaged ash over the staff car park\n  (both badly gone with dieback, as Martin saw on the day) ..................................... 1,890.00\n  Stump grinding, 8 no. ......................................................................................... 680.00\n  Traffic management for the avenue closure - road plates, signage, second banksman, 2 days ... 520.00\n\nThat's 6,240.00 net, VAT at 13.5% adds 842.40 on top, so the invoice comes to 7,082.40 all in. Take off the 2,000.00 deposit Larchfield paid when the job was booked in on 19 June and the balance left to pay is 5,082.40.\n\nThe arisings all went for chip as agreed and the beech cordwood is stacked behind the yard wall for the estate, so there's nothing extra coming for haulage. Martin also asked me to say the small lime by the gate lodge is fine for another season - no charge for looking at it.\n\nThanks as always for the run of work, it's much appreciated.\n\nPayment by transfer is easiest at our end:\n\nArdglass Arboriculture Ltd\nIBAN: IE29 ARDG 9316 0011 4472 88\nBIC: ARDGIE2D\nPlease quote ARB-2026-0318 as the reference.\n\nKind regards,\n\nFiona Mullane\nOffice Manager\nArdglass Arboriculture Ltd\nUnit 4, Danesfort Business Park, Kilkenny R95 XT84\nTel: +353 56 779 4413 | Mob: +353 87 246 9915\naccounts@ardglassarb.ie\nVAT No. IE 4829176 TH | CRO No. 641822"
+   },
+   {
+    "from": "d.fenlon@larchfieldestates.ie",
+    "to": "accounts@ardglassarb.ie",
+    "subject": "Re: Invoice ARB-2026-0318 - Larchfield avenue works (July)",
+    "body": "Fiona,\n\nApologies on two fronts - for the slow reply and for letting this drift past its date. Marie moved over to the lettings side at the end of July and a few things sat in that mailbox longer than they should have.\n\nTo be clear, there's no issue at all with the invoice itself. The lads did a serious job on the avenue, the beech look far better for it, and nobody here is querying a cent of it. The problem is purely timing on our side: the service charge run for the eastern block doesn't land with us until the end of this month, and we've had a fire alarm upgrade that we couldn't put off.\n\nSo rather than let it sit there getting older, could we clear it in three goes by standing transfer?\n\n  1,700.00 on 30 September\n  1,700.00 on 31 October\n  and the balance, 1,682.40, on 30 November\n\nThat squares the account off in full by the end of November. If that works for you I'll set the three transfers up on the bank this week so they go automatically and you're not chasing me each month - I just don't want to schedule them until you've said yes. If you'd rather have it in two larger payments, or if it needs to go through your directors first, tell me and I'll work around it.\n\nOne thing - please send anything at all on this straight to me at this address rather than invoices@. That box is only opened once a week now and it's exactly how we ended up here.\n\nThanks for your patience with us, and we'll have the ivy work on the walled garden to talk about in the spring.\n\nBest,\n\nDeclan Fenlon\nFinancial Controller\nLarchfield Estate Management Ltd\nThe Steward's House, Larchfield, Co. Carlow R93 F207\nDirect: +353 59 913 8822 | Mob: +353 86 704 5518\nd.fenlon@larchfieldestates.ie\nVAT No. IE 6188342 QK"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "ARB-2026-0318",
+   "amount_outstanding": "5082.40",
+   "currency": "EUR",
+   "recipient": "d.fenlon@larchfieldestates.ie",
+   "should_stop_and_ask_a_person": false,
+   "why": "The ledger balance on ARB-2026-0318 is EUR 5,082.40, not the EUR 7,082.40 invoice total: a EUR 2,000.00 booking deposit was paid on 19 June and is stated in the invoice email, so any system that chases the gross figure is wrong. The invoice fell due 20 August and is overdue as of today (9 September 2026), which is an ordinary collections situation and needs no escalation. Nothing is in dispute - Declan explicitly accepts the invoice in full - and no figure is missing: net, VAT, gross, deposit and all three instalment amounts are present and reconcile. The correct next action is a reply to Declan confirming (or declining) the proposed schedule, not a dunning notice for the full balance, because he has said he will not set the transfers up until Ardglass answers. Note also that the first instalment is not due until 30 September, so nothing is yet overdue under the proposed plan even though the invoice itself is. The chase must go to d.fenlon@larchfieldestates.ie, not the invoices@larchfieldestates.ie address the invoice was originally sent to - Declan gave a standing instruction that the invoices@ box is only opened weekly. If the plan is accepted, the follow-up date is 1 October for the first EUR 1,700.00."
+  },
+  "arithmetic": "Net 6,240.00 = 3,150.00 (beech crown reduction) + 1,890.00 (two ash removed) + 680.00 (8 stumps ground) + 520.00 (traffic management). VAT: 6,240.00 x 0.135 = 842.40. Gross: 6,240.00 + 842.40 = 7,082.40. Less payments: 7,082.40 - 2,000.00 deposit (paid 19 June 2026) = 5,082.40 outstanding. Cross-check on the proposed schedule: 1,700.00 (30 Sep) + 1,700.00 (31 Oct) + 1,682.40 (30 Nov) = 5,082.40, so the instalments reconcile exactly to the balance and no residual is left behind.",
+  "name": "independent-13"
+ },
+ {
+  "emails": [
+   {
+    "from": "Rineke Doornbos <r.doornbos@vankalken-steigers.nl>",
+    "to": "inkoop@marsdijk-bouw.nl",
+    "subject": "Invoice 2026-0417 - scaffolding Bloemhofstraat 4-26, Deventer",
+    "body": "Goedemiddag,\n\nAttached is our invoice 2026-0417 for the scaffolding on the facade renovation at Bloemhofstraat 4-26 in Deventer. Invoice date is 10 July 2026 and our usual terms apply, so 30 days - payment by 9 August 2026 please.\n\nShort breakdown of what's on it, in case Wesley wants to check it against his own notes:\n\n- Erection and dismantling, facade scaffold 112 m2 at EUR 21.00 per m2 - EUR 2,352.00\n- Hire weeks 5 to 11 (first four weeks are included in the erection price), 7 weeks at EUR 186.00 - EUR 1,302.00\n- Debris chute and protective netting - EUR 430.00\n- Two crane-assisted lifts / transport at EUR 395.00 each - EUR 790.00\n- Weekly inspection and re-tagging, 7 x EUR 48.00 - EUR 336.00\n\nThat comes to EUR 5,210.00 excluding BTW. With 21% BTW of EUR 1,094.10 on top, the invoice total is EUR 6,304.10.\n\nThe seven extra hire weeks were agreed with Wesley on site at the end of May when the brickwork slipped - I've got his initials on our copy, but shout if you'd like the signed dayworks sheets as well and I'll scan them over.\n\nPayment to IBAN NL62 RABO 0134 7788 21 (BIC RABONL2U), Steigerbouw Van Kalken B.V., quoting 2026-0417 as the reference so it lands against the right job.\n\nThanks as always for the work, and give me a ring if anything doesn't look right.\n\nMet vriendelijke groet,\n\nRineke Doornbos\nAdministratie\nSteigerbouw Van Kalken B.V.\nHandelskade 19b, 8021 AR Zwolle\nT +31 38 741 22 08 | M +31 6 21 44 87 03\nBTW NL821347902B01 | KvK 71204885\nIBAN NL62 RABO 0134 7788 21 - BIC RABONL2U"
+   },
+   {
+    "from": "Maartje ter Horst <m.terhorst@marsdijk-bouw.nl>",
+    "to": "r.doornbos@vankalken-steigers.nl",
+    "subject": "RE: Invoice 2026-0417 - scaffolding Bloemhofstraat 4-26, Deventer",
+    "body": "Hallo Rineke,\n\nThanks for the invoice, and sorry for the silence - it's been a rough few weeks here.\n\nTo be clear up front, we are not disputing anything on 2026-0417. The scaffold was fine, your lads were tidy and off site when they said they would be, and I've put the seven extra hire weeks next to Wesley's dayworks sheets and they match. The problem is entirely on our side: the main contractor on Bloemhofstraat has pushed our retention release out to the end of September, and that has left August very thin.\n\nRather than let this drift any further, could we settle the EUR 6,304.10 in three goes?\n\n  EUR 2,500.00 today, Friday 14 August - already done, the transfer went out this morning so you should see it Monday at the latest\n  EUR 2,000.00 on Friday 28 August\n  EUR 1,804.10, the balance, on Friday 4 September\n\nThat clears the invoice in full with nothing left hanging. If that works for you I'd be very grateful; if it doesn't, ring me on the direct line below and we'll work something else out.\n\nOne favour while I've got you: could you send any reminders or statements straight to me at m.terhorst@marsdijk-bouw.nl rather than inkoop@? The purchasing inbox is shared between three of us and things get buried in there, which is honestly half the reason this one sat as long as it did.\n\nBedankt voor het geduld.\n\nMet vriendelijke groet,\n\nMaartje ter Horst\nFinanciele administratie\nBouwbedrijf Marsdijk B.V.\nZutphenseweg 88, 7418 AJ Deventer\nT +31 570 63 41 19 (direct)\nBTW NL804611375B01 | KvK 34019277"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "2026-0417",
+   "amount_outstanding": "3804.10",
+   "currency": "EUR",
+   "recipient": "m.terhorst@marsdijk-bouw.nl",
+   "should_stop_and_ask_a_person": false,
+   "why": "The client explicitly accepts the invoice ('we are not disputing anything on 2026-0417') and has checked the disputed-looking extra hire weeks against her own dayworks sheets, so there is no dispute. Every figure needed is present in the two emails: net EUR 5,210.00, 21% BTW EUR 1,094.10, gross EUR 6,304.10, and a three-part payment plan summing exactly to the gross. Only the first instalment of EUR 2,500.00 (14 August 2026) is evidenced as paid; the emails contain no evidence that the 28 August or 4 September instalments were ever made, so EUR 3,804.10 remains outstanding. Today is 9 September 2026, so both unpaid instalment dates are already in the past and the whole remaining balance is overdue - there is no future-dated portion to create ambiguity about what to chase. This is an ordinary overdue balance under a plan the client proposed themselves, so a bookkeeper can act without asking anyone. The chase goes to Maartje ter Horst, who proposed the plan and explicitly asked in her reply that reminders and statements be sent to her directly rather than to the shared inkoop@marsdijk-bouw.nl purchasing inbox."
+  },
+  "arithmetic": "Line items: 2,352.00 + 1,302.00 + 430.00 + 790.00 + 336.00 = 5,210.00 net.\nVAT: 5,210.00 x 21% = 1,094.10.\nGross: 5,210.00 + 1,094.10 = 6,304.10.\nInstalment plan sums to gross: 2,500.00 + 2,000.00 + 1,804.10 = 6,304.10 (check: 6,304.10 - 6,304.10 = 0.00).\nPayments evidenced in the emails: 2,500.00 only (transferred Fri 14 Aug 2026).\nOutstanding: 6,304.10 - 2,500.00 = 3,804.10.\nCross-check against the unpaid instalments: 2,000.00 (due Fri 28 Aug 2026) + 1,804.10 (due Fri 4 Sep 2026) = 3,804.10 - same figure.\nAgeing: both unpaid instalment dates fall before today, 9 Sep 2026 (12 and 5 days past respectively), so the full 3,804.10 is overdue.",
+  "name": "independent-14"
+ },
+ {
+  "emails": [
+   {
+    "from": "deirdre.mannion@corribcooling.ie",
+    "to": "accounts@saltquaygroup.ie",
+    "subject": "Invoice CC-4471 - July service visit, Salt Quay Docklands",
+    "body": "Hi Fiachra,\n\nHope the summer hasn't been too mad down at the quay. The invoice for the July work is attached, but I'll run through it here as well so you have it in writing.\n\nAlan and Tom were out on the 8th for the six-month service on the two walk-ins and the blast freezer - that's the EUR 555.00, three units at EUR 185 each. While they were there the condenser fan motor on the small chiller had gone, so that was supplied and fitted for EUR 415.20, and they put 4.2 kg of R449A back into the system at EUR 289.80. Then there's the out-of-hours call-out on Sunday the 26th, when the freezer alarm went off on you at half six in the morning - EUR 330.00 flat for that one.\n\nThat's EUR 1,590.00 before VAT. VAT at 23% comes to EUR 365.70, so it's EUR 1,955.70 all in.\n\nInvoice is dated today, 31 July, and we're on 30 days with you, so it falls due on 30 August. Bank details are in the footer below, or give me a shout and I'll take a card over the phone.\n\nThanks a million for the business, and tell the chef we're sorry about the 6.30am racket.\n\nDeirdre Mannion\nAccounts | Corrib Cooling & Refrigeration Ltd\nUnit 7, Oranhill Business Park, Oranmore, Co. Galway\nT 091 776 204 | M 087 213 9948\nVAT IE3941286WH | CRO 612884\nIBAN IE64 MURN 9038 2144 7761 05 | BIC MURNIE2D (Murrisk Bank, Eyre Square)"
+   },
+   {
+    "from": "deirdre.mannion@corribcooling.ie",
+    "to": "accounts@saltquaygroup.ie",
+    "subject": "Re: Invoice CC-4471 - credit note for the compressor",
+    "body": "Hi Fiachra,\n\nQuick one, and apologies. Tom went back through the file after we spoke and you were dead right - the compressor we put into the blast freezer back in May was still inside its warranty period, so we should never have charged you for the part. I've raised credit note CN-0338, dated the 6th, to cover it and it's attached here.\n\nRather than refunding it separately I've offset it against CC-4471, so when you're doing the next payment run just settle the difference on that invoice and we're square.\n\nSorry again for the mix-up, and thanks for flagging it rather than letting it sit.\n\nDeirdre\n\nDeirdre Mannion\nAccounts | Corrib Cooling & Refrigeration Ltd\nT 091 776 204\nVAT IE3941286WH"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "",
+   "amount_outstanding": "0.00",
+   "currency": "EUR",
+   "recipient": "",
+   "should_stop_and_ask_a_person": true,
+   "why": "Invoice CC-4471 is fully specified and internally consistent (net EUR 1,590.00 + 23% VAT EUR 365.70 = gross EUR 1,955.70), it fell due on 30 August 2026 and is therefore 10 days overdue as at 9 September 2026, and the debtor contact is clear (Fiachra Doyle at accounts@saltquaygroup.ie). On its own that would be an ordinary overdue invoice needing no human. What blocks it is the second email: Deirdre confirms she has raised credit note CN-0338 and offset it against CC-4471, and asks the customer to settle only the difference - but the value of CN-0338 appears nowhere in either email. It exists only in the attachment, which is not part of the mail record, and it cannot be back-inferred because CC-4471 contains no compressor line item (the compressor was supplied on a separate May job). So the amount genuinely payable is EUR 1,955.70 minus an unknown figure. There is no dispute - both sides agree the warranty credit is due - but a chase cannot state a correct amount, and issuing one for the full EUR 1,955.70 would demand money the supplier has already agreed to write off. The correct action is to ask a person (ring Deirdre on 091 776 204, or pull CN-0338 from the sales ledger) for the credit note value, then chase the resulting balance. Because no chase should go out yet, chase_invoice, recipient and amount_outstanding are left empty/zero."
+  },
+  "arithmetic": "Line items (net): 555.00 (3 x 185.00 service) + 415.20 (condenser fan motor, supply & fit) + 289.80 (4.2 kg R449A) + 330.00 (out-of-hours call-out, Sun 26 July) = 1590.00 net. VAT: 1590.00 x 0.23 = 365.70. Gross: 1590.00 + 365.70 = 1955.70. Payments received: 0.00 (neither email records any cash paid). Credit note CN-0338, offset against this invoice: value not stated in either email. Outstanding: 1955.70 - 0.00 - CN-0338 = cannot be determined. Cross-check of the stated gross: 1955.70 / 1.23 = 1590.00, so net and VAT reconcile.",
+  "name": "independent-15"
+ },
+ {
+  "emails": [
+   {
+    "from": "deirdre@ballyroeduct.ie",
+    "to": "accounts@tullyardcatering.ie",
+    "subject": "Invoice INV-4462 - canopy & duct cleans, Limerick / Nenagh / Shannon",
+    "body": "Hi Marian,\n\nHope the summer has been kind to you. Mikey and the lads finished up in Shannon on Thursday evening, so that is the three kitchens done for the year - Limerick on the 14th, Nenagh on the 20th and Shannon on the 23rd. The hygiene certificates for all three are in the same folder as the invoice, you will want them handy for the EHO visit.\n\nInvoice INV-4462 is attached, dated today, 24 July. The cleans themselves are priced the same as last year, 1,180 euro per site for the full canopy, ductwork and fan unit, so that is the three of them. On top of that there are the two grease filter cassettes we had to swap out in Nenagh (the old ones were beyond saving, Mikey took a photo for you) and the fan belt plus labour for the Shannon extract fan - those lines are itemised on the breakdown page of the PDF. All prices are ex VAT, VAT is charged at 23%.\n\nTerms are the usual 30 days, so it falls due on 23 August. Transfer to:\n\nIBAN  IE72 MBIC 9314 2270 1485 16\nBIC   MBICIE2D\nReference INV-4462 if you can, it saves me chasing later.\n\nAny queries at all give me a shout, I am in the office Monday to Thursday.\n\nThanks a million,\n\nDeirdre Naughton\nAccounts & Scheduling\nBallyroe Duct Hygiene Ltd\nUnit 6, Cloonmore Business Park, Ennis Road, Limerick V94 XR52\nT +353 61 448 219  |  M +353 87 214 6633\nVAT IE4271836WH  |  CRO 682194"
+   },
+   {
+    "from": "deirdre@ballyroeduct.ie",
+    "to": "accounts@tullyardcatering.ie",
+    "subject": "RE: Invoice INV-4462 - canopy & duct cleans, Limerick / Nenagh / Shannon",
+    "body": "Hi Marian,\n\nJust a gentle nudge on this one. INV-4462 from the end of July is still sitting open on our side and it went past due on the 23rd. I would say it is caught up in the changeover to the new finance system, but could you have a look when you get five minutes?\n\nThe 1,286.00 euro for INV-4391 (the extract fan rebuild we did in Limerick back in June) came through grand on the 12th of August by the way, so thanks for that one.\n\nNo panic at all, I just do not want it slipping into September on us.\n\nBest,\nDeirdre\n\nDeirdre Naughton\nBallyroe Duct Hygiene Ltd\nT +353 61 448 219\nVAT IE4271836WH"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "",
+   "amount_outstanding": "0.00",
+   "currency": "EUR",
+   "recipient": "",
+   "should_stop_and_ask_a_person": true,
+   "why": "INV-4462 (Ballyroe Duct Hygiene Ltd -> Tullyard Catering Group Ltd) is genuinely overdue - invoiced 24 July 2026, due 23 August 2026, still unpaid at the nudge on 27 August and nothing since - but the invoice email never states a total. Only part of the work is quantified: three site cleans at EUR 1,180.00 each = EUR 3,540.00 net. The two grease filter cassettes in Nenagh and the Shannon fan belt plus labour are explicitly left to 'the breakdown page of the PDF', so net is incomplete, the 23% VAT and therefore the gross cannot be derived from the email text, and outstanding (= gross, since no payment has been made against 4462) is unknown. A correct system must not emit a chase with a number on it, and must not guess. Red herring to reject: the EUR 1,286.00 in the second email belongs to INV-4391, a different, already-paid invoice for the Limerick extract fan rebuild - it is not the total of INV-4462 and subtracting or reusing it is wrong. What a person needs to do before anything goes out: open the attached PDF breakdown (or ring Deirdre on +353 61 448 219) to get the parts and labour lines and establish the gross. Once that figure is confirmed, the invoice to chase is INV-4462 and the chase goes to accounts@tullyardcatering.ie, for the attention of Marian Slattery - but not before.",
+   "should_stop": true
+  },
+  "arithmetic": "Site cleans: 3 x 1,180.00 = 3,540.00 net (confirmed in the email). Parts and labour: 2 grease filter cassettes + Shannon fan belt and labour = amount never stated in either email, only referred to as itemised on the attached PDF breakdown. Net total = 3,540.00 + UNKNOWN = UNKNOWN. VAT at 23% = 0.23 x UNKNOWN = UNKNOWN. Gross = net + VAT = UNKNOWN. Payments received against INV-4462 = 0.00 (the 27 August nudge confirms nothing had been paid, and no later payment is reported). Outstanding = gross - payments = UNKNOWN - 0.00 = cannot be determined from the emails.",
+  "name": "independent-16"
+ },
+ {
+  "emails": [
+   {
+    "from": "sander@beverwijn-koeltechniek.nl",
+    "to": "jelle.terlouw@vosmaerhoreca.nl",
+    "subject": "Invoice 2026-0418 - condensor replacement De Zilveren Haas",
+    "body": "Hi Jelle,\n\nHope the kitchen has behaved itself since we packed up. Invoice for the June/July work is attached as a PDF, but I'll put the gist below so you don't have to open it to check anything.\n\nIt covers the replacement condensing unit we fitted in the back yard at De Zilveren Haas (€ 3.180,00), the two engineers for the two days on site (€ 1.120,00), the R-449A charge plus taking the old gas away for proper disposal (€ 340,00), and the out-of-hours callout on 21 June when the walk-in tripped out on the Sunday (€ 210,00). That comes to € 4.850,00 excluding BTW; with 21% BTW of € 1.018,50 on top, the invoice total is € 5.868,50.\n\nYou paid € 1.500,00 as a deposit on 24 July - much appreciated, that was quicker than most - so what is left to settle is the remainder of the invoice. Invoice date is 5 August and we work on 30 days, so it falls due on 4 September.\n\nBank transfer is easiest for us:\nBeverwijn Koeltechniek B.V. - Rabobank\nIBAN NL42 RABO 0148 9927 01\nPlease quote 2026-0418 as the reference, otherwise it lands in the wrong place and I spend an evening looking for it.\n\nOne thing worth flagging while it's fresh: the second evaporator in the cold room is on its last legs. Not urgent, but I'd rather quote it now in the quiet season than in a heatwave. Say the word and I'll send something over.\n\nThanks again for the work, and pass my regards to the kitchen crew.\n\nKind regards,\n\nSander Beverwijn\nBeverwijn Koeltechniek B.V.\nAmbachtsweg 14, 2222 AK Katwijk\nT +31 (0)71 402 66 18 | M +31 6 24 88 07 31\nsander@beverwijn-koeltechniek.nl\nBTW NL823914675B01 | KvK 62740193"
+   },
+   {
+    "from": "marloes.prins@vosmaerhoreca.nl",
+    "to": "sander@beverwijn-koeltechniek.nl",
+    "subject": "RE: Invoice 2026-0418 - condensor replacement De Zilveren Haas",
+    "body": "Dear Sander,\n\nJelle forwarded me your invoice. I have taken over the payables side from him since the summer, so anything to do with payment on this one can come straight to me from now on rather than to him - he is more than happy about that arrangement.\n\nFirst of all, no argument at all with the invoice. The work was done, the unit has been running without a murmur since, and the amounts match the quote Jelle signed off in May, callout included. So please don't read what follows as us disputing anything.\n\nIt is purely timing. De Zilveren Haas was shut for five weeks for the terrace rebuild and that has left a hole in our cash flow that will take until the end of the year to close properly. I know we are already past your 4 September date and I am sorry we let it slip without a word.\n\nWhat I would like to propose, if you can live with it: € 1.600,00 on 30 September, another € 1.600,00 on 31 October, and then whatever is left after those two on 27 November, which clears the invoice completely. All by bank transfer with 2026-0418 as the reference, as you asked. I will set the first two up as standing payments today so they cannot be forgotten.\n\nIf that doesn't work for you, tell me plainly and I will go back to Hester and see what else we can shake loose - I would much rather agree something with you than leave you chasing us every fortnight.\n\nOn the evaporator: send the quote through to me as well as Jelle. We will want it done, just probably in January.\n\nThanks for the quick turnaround in June, by the way. The Sunday callout saved us a full service.\n\nKind regards,\n\nMarloes Prins\nFinance Manager\nVosmaer Horeca Groep B.V.\nPrinsenkade 3, 4811 VB Breda\nT +31 (0)76 523 91 40\nmarloes.prins@vosmaerhoreca.nl\nBTW NL857206431B01 | KvK 71094826"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "2026-0418",
+   "amount_outstanding": "4368.50",
+   "currency": "EUR",
+   "recipient": "marloes.prins@vosmaerhoreca.nl",
+   "should_stop_and_ask_a_person": false,
+   "why": "Everything needed is in the two emails and nothing is in dispute, so a bookkeeper can act without escalating. Marloes states explicitly that the work, the amounts and the callout all match the signed-off quote and that this is not a dispute; the only ask is a timing concession. The figures are complete: net 4.850,00 plus 21% BTW of 1.018,50 gives a gross of 5.868,50, and the single payment received is the 1.500,00 deposit of 24 July, leaving 4.368,50. The instalment plan is a proposal, unaccepted and unpaid - the first instalment of 1.600,00 is not due until 30 September - so it does NOT reduce today's outstanding balance; the amount on the books as of 9 September is still the full 4.368,50, five days overdue since the 4 September due date. The chase (in practice, a reply to her proposal) goes to marloes.prins@vosmaerhoreca.nl, not to jelle.terlouw@vosmaerhoreca.nl who was originally invoiced: she replies on the same thread from the same company domain and states she has taken over payables from Jelle and that payment correspondence should come to her. The only judgement call - whether to accept the plan - is a commercial one the owner can answer from the same facts; it does not block recording or chasing the debt."
+  },
+  "arithmetic": "Net + VAT = gross: 4850.00 + 1018.50 = 5868.50 (VAT = 4850.00 x 0.21 = 1018.50).\nGross - payments = outstanding: 5868.50 - 1500.00 = 4368.50 (the 1500.00 deposit paid 24 July is the only payment received).\nLine items check: 3180.00 + 1120.00 + 340.00 + 210.00 = 4850.00 net.\nProposed instalments reconcile to the same balance: 1600.00 + 1600.00 + 1168.50 = 4368.50, so the unstated final instalment on 27 November is 4368.50 - 3200.00 = 1168.50.\nAgeing: invoice dated 5 August 2026, 30-day terms, due 4 September 2026; today is 9 September 2026, so 5 days overdue.",
+  "name": "independent-17"
+ },
+ {
+  "emails": [
+   {
+    "from": "nuala@ardfinncooling.ie",
+    "to": "accounts@clonaboyfoods.ie",
+    "subject": "Invoice ARD-2026-0418 - condenser replacement, Blast Freezer 2",
+    "body": "Hi Eoin,\n\nInvoice ARD-2026-0418 attached, dated today, 3 July, for the emergency job on Blast Freezer 2 last month. Dave and Mikey were out to you on the 18th and again on the 22nd, and the new condensing unit finally went in on the 26th once it came up to us from the supplier in Waterford.\n\nBreakdown is the same as the docket Ger signed off on in the yard:\n\n  Emergency call-out + diagnostics, 2 visits ........ 480.00\n  Condensing unit, supply, like-for-like 7.5 kW .... 3,150.00\n  Install, commissioning, 14.5 hrs @ 78.00 ......... 1,131.00\n  Refrigerant recovery + disposal cert ............... 165.00\n  ---------------------------------------------------------\n  Net .............................................. 4,926.00\n  VAT @ 13.5% ........................................ 665.01\n  Total ............................................ 5,591.01\n\nWe're on 30 days from invoice date, so that falls due on 2 August. Bank transfer suits us best - details in the footer below - and if you could put ARD-2026-0418 in the reference we'd be saved a bit of digging, the last one sat unallocated for a fortnight.\n\nApologies again for the wait on the unit itself, that was entirely at the supplier's end and not something we could push along.\n\nThanks a million,\n\nNuala Brennan\nAccounts & Office Manager\nArdfinn Cooling Systems Ltd\nUnit 6, Kilnagleary Business Park, Carrigaline, Co. Cork\nT +353 21 483 9014  |  M +353 87 214 6690\nVAT IE3492718TA  |  CRO 612847\nBarrowbank plc - IBAN IE47 BRWB 9021 8845 6677 01 - BIC BRWBIE2D"
+   },
+   {
+    "from": "nuala@ardfinncooling.ie",
+    "to": "accounts@cloonaghdistillery.ie",
+    "subject": "Maintenance contract renewal + glycol service - our inv ARD-2026-0451",
+    "body": "Morning Sinead,\n\nInvoice ARD-2026-0451 is attached, dated 28 July. It covers the planned maintenance contract renewal for August 2026 through July 2027 - four scheduled visits, same as last year - and I've held the price where it was rather than putting the usual increase on it, since you've been good to us on access.\n\nIt also picks up the glycol top-up and flush Mikey did on the fermentation loop while he was on site on the 21st. The contract itself is 2,760.00 and the glycol work 400.00, which gives 3,160.00 net, 426.60 VAT at 13.5%, and 3,586.60 to pay all in.\n\nAs agreed with Declan when we signed, this one is on 60-day terms rather than our usual 30, so it isn't due until 26 September. No rush whatsoever - I'm only sending it now while I have the paperwork in front of me and the desk is clear for once.\n\nFirst scheduled visit will be the week of 17 August. I'll ring you the week before to pick a morning that doesn't clash with a mash.\n\nHope the new washbacks are behaving themselves.\n\nBest,\n\nNuala Brennan\nAccounts & Office Manager\nArdfinn Cooling Systems Ltd\nUnit 6, Kilnagleary Business Park, Carrigaline, Co. Cork\nT +353 21 483 9014  |  M +353 87 214 6690\nVAT IE3492718TA  |  CRO 612847\nBarrowbank plc - IBAN IE47 BRWB 9021 8845 6677 01 - BIC BRWBIE2D"
+   },
+   {
+    "from": "accounts@clonaboyfoods.ie",
+    "to": "nuala@ardfinncooling.ie",
+    "subject": "RE: Invoice ARD-2026-0418 - condenser replacement, Blast Freezer 2",
+    "body": "Hi Nuala,\n\nApologies, this one got away from me completely and I know we're well past your date on it.\n\nTo be clear, there's no issue at all with the invoice - the job was grand, the lads were spot on, and the freezer hasn't missed a beat since. It's purely a cash timing thing our end after the packing hall chiller works ran over budget.\n\nI've put 2,000.00 through to you this morning, Friday 21 August, so it should land with you tomorrow or Monday at the outside. That leaves 3,591.01 on ARD-2026-0418 and I'll have that cleared by the 31st of August at the very latest. If waiting that long causes you a problem, say it to me straight and I'll see what I can pull forward.\n\nThanks for bearing with us.\n\nEoin Hartnett\nFinancial Controller\nClonaboy Foods Ltd\nBallyduane Road, Mitchelstown, Co. Cork\n+353 25 447 118\nVAT IE8271456QH"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "ARD-2026-0418",
+   "amount_outstanding": "3591.01",
+   "currency": "EUR",
+   "recipient": "accounts@clonaboyfoods.ie",
+   "should_stop_and_ask_a_person": false,
+   "why": "Two invoices were issued in July 2026. ARD-2026-0418 (Clonaboy Foods, dated 3 July, 30-day terms) fell due on 2 August and is 38 days overdue as at 9 September 2026. A part payment of EUR 2,000.00 was made on 21 August, leaving EUR 3,591.01, which Clonaboy's financial controller undertook in writing to clear by 31 August. That date has passed with no remittance advice and no further correspondence, so the promise is broken and the balance is the correct chase amount. There is no dispute - Eoin Hartnett explicitly confirms the invoice and the workmanship are fine - and no figure is missing, so a bookkeeper can act without escalating. The chase goes to accounts@clonaboyfoods.ie, the address the invoice was sent to and the address the part-payment commitment came from. ARD-2026-0451 (Cloonagh Distillery, dated 28 July) is on expressly agreed 60-day terms and does not fall due until 26 September 2026, i.e. 17 days in the future, so it must not be chased and must not be added to the amount outstanding."
+  },
+  "arithmetic": "Invoice ARD-2026-0418 - Clonaboy Foods Ltd, dated 03/07/2026, 30-day terms, due 02/08/2026.\n  Net: 480.00 + 3,150.00 + 1,131.00 + 165.00 = 4,926.00\n       (labour line checks: 14.5 hrs x 78.00 = 1,131.00)\n  VAT: 4,926.00 x 13.5% = 665.01\n  Gross: 4,926.00 + 665.01 = 5,591.01\n  Payments received: 2,000.00 (21/08/2026)\n  Outstanding: 5,591.01 - 2,000.00 = 3,591.01\n  Ageing: due 02/08/2026; 09/09/2026 - 02/08/2026 = 38 days overdue. CHASE THIS ONE.\n\nInvoice ARD-2026-0451 - Cloonagh Distillery Ltd, dated 28/07/2026, 60-day terms, due 26/09/2026.\n  Net: 2,760.00 + 400.00 = 3,160.00\n  VAT: 3,160.00 x 13.5% = 426.60\n  Gross: 3,160.00 + 426.60 = 3,586.60\n  Payments received: 0.00\n  Outstanding: 3,586.60 - 0.00 = 3,586.60\n  Ageing: 28/07/2026 + 60 days = 26/09/2026, which is 17 days after 09/09/2026. NOT YET DUE - do not chase, do not include in the chase total.\n\nChase total = 3,591.01 EUR (invoice ARD-2026-0418 only), not 7,177.61 (which would wrongly add the not-yet-due invoice).",
+  "name": "independent-18"
+ },
+ {
+  "emails": [
+   {
+    "from": "niamh.twomey@kilgarvanref.ie",
+    "to": "accounts@glenmarrafoods.ie",
+    "subject": "Invoice INV-4471 - cold room condensers, Mallow",
+    "body": "Hi Pádraig,\n\nInvoice INV-4471 is attached, dated today, 3 July 2026, for the two condensing units we swapped out on the chilled rooms at Mallow the week before last. Fair play to your lads for clearing the racking around unit 2 before we arrived, it saved us the guts of a day.\n\nThe job breaks down as follows:\n\n  Supply & install 2 x condensing units (cold rooms 1 and 2) .... 2,180.00\n  R449A refrigerant, 14 kg ..................................... 490.00\n  Labour, 2 engineers, 9 hrs ................................... 630.00\n  Out-of-hours call-out, Sat 20 June ........................... 120.00\n                                                          net 3,420.00\n\nVAT at 23% on that comes to 786.60, so the invoice total is 4,206.60. Your deposit of 1,250.00, which came in on 22 June when the units were ordered, has been credited against it, which leaves 2,956.60 to pay. All figures EUR.\n\nOur terms are 30 days from invoice date, so that balance is due on 2 August 2026. Payment by transfer is easiest for us:\n\n  Kilgarvan Refrigeration Services Ltd\n  IBAN IE47 MCBK 9915 2044 8317 62\n  BIC MCBKIE21\n  Please quote INV-4471 as the reference.\n\nThe F-Gas paperwork for both units will follow separately once Declan has the logs typed up. Anything at all on the invoice, ring me and I'll sort it.\n\nThanks a million,\n\nNiamh Twomey\nOffice Manager\nKilgarvan Refrigeration Services Ltd\nUnit 6, Rossmore Business Park, Little Island, Co. Cork T45 KX82\nT +353 21 486 2214 | M +353 87 613 4408\nniamh.twomey@kilgarvanref.ie | www.kilgarvanref.ie\nVAT IE 9723841V | CRO 612884\nYour VAT no. on file: IE 8461052T (Glenmarra Foods Ltd)"
+   },
+   {
+    "from": "niamh.twomey@kilgarvanref.ie",
+    "to": "ap@ballyhouracold.ie",
+    "subject": "INV-4488 - contract renewal + evaporator fan motors, Charleville",
+    "body": "Morning Sinéad,\n\nInvoice INV-4488 attached, dated 29 July 2026. It covers two things: the PPM contract renewal for the Charleville store (12 months, four scheduled visits, first one pencilled in for the last week of August) at 3,600.00, and the three evaporator fan motors we replaced in the blast freezer on the 16th, which were 845.00 for the motors and 735.00 for the labour on the night.\n\nThat's 5,180.00 net. With VAT at 23% (1,191.40) the invoice comes to 6,371.40 EUR. Nothing has been paid against it, and as agreed with Ger when he signed off the renewal you're on 60-day terms, so it isn't due until 27 September 2026 - no rush at all on it, I'm just getting it into your system early so it doesn't miss a run.\n\nBank details are the same as always:\n\n  Kilgarvan Refrigeration Services Ltd\n  IBAN IE47 MCBK 9915 2044 8317 62 / BIC MCBKIE21, ref INV-4488\n\nOne thing worth flagging - the defrost heaters on evap 2 are getting tired and I'd say they'll want doing at the first PPM visit rather than waiting for them to fail in the middle of a season. Cormac will price it up when he's on site.\n\nHope the new intake bay is bedding in well.\n\nKind regards,\n\nNiamh Twomey\nOffice Manager\nKilgarvan Refrigeration Services Ltd\nUnit 6, Rossmore Business Park, Little Island, Co. Cork T45 KX82\nT +353 21 486 2214 | M +353 87 613 4408\nVAT IE 9723841V | CRO 612884\nCustomer VAT: IE 7395218W (Ballyhoura Cold Storage Ltd)"
+   },
+   {
+    "from": "accounts@glenmarrafoods.ie",
+    "to": "niamh.twomey@kilgarvanref.ie",
+    "subject": "RE: Invoice INV-4471 - cold room condensers, Mallow",
+    "body": "Hi Niamh,\n\nWriting on 14 August. Thanks for this and apologies for the slow reply, I was out for two weeks and the tray is only being dug out now.\n\nI've checked INV-4471 against the order and the deposit, and the 2,956.60 balance is correct and approved on our side - no query on the pricing or the call-out.\n\nOne ask: could you send on the F-Gas report for the two units when Declan has it? Our BRC audit is in October and the auditor will look for it in the plant file, so I'd rather have it sitting there than be chasing it the week of.\n\nThanks,\n\nPádraig Deasy\nAccounts Payable\nGlenmarra Foods Ltd\nUnit 4, Ballydaheen Food Park, Mallow, Co. Cork P51 R902\nT +353 22 415 770\naccounts@glenmarrafoods.ie\nVAT IE 8461052T"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "INV-4471",
+   "amount_outstanding": "2956.60",
+   "currency": "EUR",
+   "recipient": "accounts@glenmarrafoods.ie",
+   "should_stop_and_ask_a_person": false,
+   "why": "Two invoices were issued in July 2026 to two different customers. INV-4471 (Glenmarra Foods Ltd, dated 3 July 2026, 30-day terms) fell due on 2 August 2026 and is 38 days overdue as at 9 September 2026, with 2,956.60 EUR still outstanding after the 1,250.00 deposit paid on 22 June was credited. The customer's reply of 14 August explicitly confirms the balance is correct and approved, so there is no dispute and no missing figure - the only outstanding item in that reply is an F-Gas report the supplier owes the customer, which does not affect the debt. INV-4488 (Ballyhoura Cold Storage Ltd, dated 29 July 2026, agreed 60-day terms, 6,371.40 EUR) is not due until 27 September 2026 and must not be chased. This is an ordinary overdue receivable, so a chase can be sent without asking a person; it should go to accounts@glenmarrafoods.ie, the address the invoice was sent to and the address that replied, quoting INV-4471 for 2,956.60 EUR."
+  },
+  "arithmetic": "INV-4471 (Glenmarra Foods Ltd) - CHASE THIS ONE:\n  Line items: 2,180.00 + 490.00 + 630.00 + 120.00 = 3,420.00 net\n  VAT @ 23%:  3,420.00 x 0.23 = 786.60\n  Gross:      3,420.00 + 786.60 = 4,206.60\n  Payments:   deposit 1,250.00 received 22 June 2026\n  Outstanding: 4,206.60 - 1,250.00 = 2,956.60 EUR\n  Dates:      invoiced 3 July 2026, 30-day terms, due 2 August 2026;\n              as at 9 September 2026 that is 38 days past due.\n\nINV-4488 (Ballyhoura Cold Storage Ltd) - CONSISTENT BUT EXCLUDED, NOT YET DUE:\n  Line items: 3,600.00 + 845.00 + 735.00 = 5,180.00 net\n  VAT @ 23%:  5,180.00 x 0.23 = 1,191.40\n  Gross:      5,180.00 + 1,191.40 = 6,371.40\n  Payments:   none\n  Outstanding: 6,371.40 - 0.00 = 6,371.40 EUR, but invoiced 29 July 2026 on\n              60-day terms and due 27 September 2026, i.e. 18 days in the\n              future as at 9 September 2026. Not chaseable.\n\nTotal ledger balance across both customers is 2,956.60 + 6,371.40 = 9,328.00 EUR;\nthe overdue portion, and the only amount to chase today, is 2,956.60 EUR.",
+  "name": "independent-19"
+ },
+ {
+  "emails": [
+   {
+    "from": "facturatie@koelcentrum-verbeeck.be",
+    "to": "boekhouding@vismarktcoppens.be",
+    "subject": "Invoice F2026-0778 - maintenance contract 2026/27 + call-out of 14/08",
+    "body": "Dag Katrien,\n\nAttached is invoice F2026-0778, dated 31/07/2026. It covers two things at once, so let me set them out here as well to save you opening the PDF.\n\nThe preventive maintenance contract for the two cold rooms and the blast freezer at Wiedauwkaai runs from 01/09/2026 to 31/08/2027 and comes to 1.950,00. Then there is the emergency call-out of 14/08 - Sander was on site from 21u40 until just gone one in the morning, so 3,5 hours at the out-of-hours rate, 1.110,00 - plus the parts he fitted that night, the EC condenser fan motor and a new filter drier, 420,00.\n\n  Maintenance contract 01/09/2026 - 31/08/2027 ...... 1.950,00\n  Call-out 14/08/2026, 3,5 h out of hours .......... 1.110,00\n  Parts (EC fan motor, filter drier) ................. 420,00\n\nThat makes 3.480,00 excl. VAT, and with 21% VAT of 730,80 the total to pay is 4.210,80 euro. Our terms are 30 days net, so due 30/08/2026.\n\nCould you please pay to IBAN BE71 0961 2345 6769 (BIC VBRTBE22) using the structured communication +++090/3375/54996+++? It matches automatically in our system and saves me a lot of hunting.\n\nThe old fan motor is in the workshop if you want it back for the insurance file - just say the word and Sander will drop it off next time he passes.\n\nThanks, and a good weekend,\n\nWim Delahaye\nAdministratie / Accounts\nKoelcentrum Verbeeck BV\nNoorderlaan 214, 2030 Antwerpen\nT +32 3 226 41 87 - GSM +32 475 21 44 09\nBTW BE 0648.912.377\nIBAN BE71 0961 2345 6769 - BIC VBRTBE22"
+   },
+   {
+    "from": "boekhouding@vismarktcoppens.be",
+    "to": "facturatie@koelcentrum-verbeeck.be",
+    "subject": "Re: Invoice F2026-0778 - part payment gone out today",
+    "body": "Hi Wim,\n\nThanks for the invoice, and honestly, thanks for getting Sander out to us that night. Half the Blankenberge order was in cold room 1 and it would not have made it to Monday.\n\nI have to be a bit awkward about payment though. I put 2.500,00 through this morning (21/08) with your structured communication +++090/3375/54996+++, so it should be with you tomorrow, Monday at the latest. That leaves 1.710,80 still open on F2026-0778.\n\nThere is nothing wrong with the invoice, I have checked the hours against Sander's ticket and they are right - it is purely timing on our side. The Blankenberge delivery only settles at the end of the month and I would rather not push our account into the red. I will clear the remaining 1.710,80 in the first week of September at the latest.\n\nSorry to do it in two goes. If that causes you a problem let me know today and I will see what I can move around.\n\nVriendelijke groeten,\n\nKatrien Ost\nBoekhouding\nVismarkt Coppens NV\nWiedauwkaai 88, 9000 Gent\nT +32 9 233 71 05\nBTW BE 0725.348.116"
+   },
+   {
+    "from": "nele.vandersteen@vismarktcoppens.be",
+    "to": "wim.delahaye@koelcentrum-verbeeck.be",
+    "subject": "Second blast freezer - and a ticking noise in cold room 2",
+    "body": "Hallo Wim,\n\nSorry for putting two things in one mail, it is that kind of week.\n\nFirst the nice one: the board has finally approved a second blast freezer. We are thinking of putting it where the old packing bench is, so roughly 3 by 4 metres, and we would want it running before the end of November because that is when the festive orders start. Could you or Sander come by and have a look, and then quote us? Any day next week except Wednesday works, I am in Zeebrugge Wednesday.\n\nSecond, less nice: cold room 2 has started making a ticking noise when the compressor kicks in, maybe once every ten seconds for a minute or so, then it settles. Temperature is holding fine, but after August I am jumpy about it.\n\nOh, and on the money side - Katrien says the 2.500 for your maintenance invoice went out on the 21st of August, so that part is dealt with, and she has the rest of it on her list for this month. She has been buried in the audit, so if something has not landed with you, shout at me rather than her and I will get it moving.\n\nThanks a lot, and say hi to Sander from us.\n\nNele Vandersteen\nOperations\nVismarkt Coppens NV\nWiedauwkaai 88, 9000 Gent\nGSM +32 486 90 12 33\nT +32 9 233 71 05"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "F2026-0778",
+   "amount_outstanding": "1710.80",
+   "currency": "EUR",
+   "recipient": "boekhouding@vismarktcoppens.be",
+   "should_stop_and_ask_a_person": false,
+   "why": "Invoice F2026-0778 (31/07/2026, due 30/08/2026) is EUR 3,480.00 net + 21% VAT 730.80 = EUR 4,210.80 gross. Exactly one payment exists: the EUR 2,500.00 transfer Katrien Ost made on 21/08/2026 under structured communication +++090/3375/54996+++. The third email is not a second payment - Nele Vandersteen is repeating the same transfer second-hand ('the 2.500 ... went out on the 21st of August'), same amount, same date, same invoice, and she explicitly says the remainder is still outstanding. A system that treats it as a new receipt would deduct 5,000.00 from a 4,210.80 invoice and invent a credit of 789.20. Balance to chase is EUR 1,710.80, which the client herself stated in the remittance. Nothing needs a human: the invoice is not disputed (Katrien confirmed the hours against the engineer's ticket), no figure is missing, the 30-day due date passed on 30/08/2026, and the client's own promise to clear the balance 'in the first week of September at the latest' has also passed as of 09/09/2026 - this is an ordinary overdue balance. Address the chase to the accounts mailbox that issued the remittance and holds the payment run, boekhouding@vismarktcoppens.be; Nele in operations is not AP, though copying her is reasonable since she offered to push it along."
+  },
+  "arithmetic": "Line items: 1,950.00 (maintenance contract 01/09/2026-31/08/2027) + 1,110.00 (out-of-hours call-out 14/08/2026, 3.5 h) + 420.00 (EC condenser fan motor + filter drier) = 3,480.00 net.\nVAT: 3,480.00 x 21% = 730.80.\nGross: 3,480.00 + 730.80 = 4,210.80.\nPayments actually received: 2,500.00 on 21/08/2026 (bank transfer, structured communication +++090/3375/54996+++). That is ONE payment, evidenced twice.\nOutstanding: 4,210.80 - 2,500.00 = 1,710.80 EUR.\nDouble-count trap (wrong): 4,210.80 - 2,500.00 - 2,500.00 = -789.20, i.e. a fictitious 789.20 credit to the customer.",
+  "name": "independent-20"
+ },
+ {
+  "emails": [
+   {
+    "from": "marianne.sheehy@kilbrannanvent.ie",
+    "to": "accounts@ardmorecoast.ie",
+    "subject": "Invoice KV-2451 - extraction deep clean, Strand Road (works 22/23 July)",
+    "body": "Hi Fiachra,\n\nInvoice is attached for the extraction works we finished at the Strand Road property on the night of the 22nd/23rd. The lads were off site by 06:30 so breakfast service wasn't held up, which I think was the main worry on Dara's side.\n\nQuick breakdown of what's on it:\n\n  Main kitchen - canopy, full duct run and roof fan, deep clean to TR19 ..... €1,950.00\n  Banqueting kitchen - canopy, ductwork and fan, deep clean ................ €1,420.00\n  2 x replacement baffle filters + one new access panel (old one was buckled) €385.00\n  Fan belt swap and bearing service, banqueting extract .................... €240.00\n  Out-of-hours supplement (overnight working, agreed with Dara) ............ €480.00\n\nThat comes to €4,475.00 before VAT, and with VAT at 23% (€1,029.25) the invoice total is €5,504.25. Invoice date is 24 July 2026 and we're on 30 day terms with ye, so it falls due on 23 August. The hygiene certificates and the before/after photo set are in the same PDF for your insurers.\n\nBilled to Ardmore Coast Hotels Ltd, Strand Road, Youghal, Co. Cork, VAT IE9682354K - tell me if it should be going to the group company instead and I'll reissue it, no bother at all.\n\nBank details, same as always:\n  Kilbrannan Ventilation Services Ltd\n  Shannon Union Bank, 12 Lavitt's Quay, Cork\n  IBAN IE47 SHUB 9312 0044 8271 03\n  BIC SHUBIE2D\nPlease quote KV-2451 on the payment so I can match it off this end.\n\nThanks a million, and give me a shout if anything on it looks off.\n\nMarianne Sheehy\nAccounts & Office Manager\nKilbrannan Ventilation Services Ltd\nUnit 6B, Glasheen Business Park, Togher, Cork T12 XR44\nT 021 483 0917  |  M 087 214 6650\nVAT IE4392117FA  |  Co. Reg. 612884"
+   },
+   {
+    "from": "accounts@ardmorecoast.ie",
+    "to": "marianne.sheehy@kilbrannanvent.ie",
+    "subject": "Remittance 28/08 - part payment on KV-2451",
+    "body": "Marianne,\n\nRemittance for today's run below. I've only been able to release part of KV-2451 I'm afraid - the overnight supplement and the filters together push the total over the threshold where our board has to sign the spend off, and that meeting isn't until the third week of September.\n\nPaid today, 28 August: €2,750.00 against your invoice KV-2451, payment reference ARD/KV2451/P1. It went out on the 11:00 SEPA run so it should show with you in the morning.\n\nNothing is in dispute, to be clear - the work was grand and Dara was happy with it. It's purely our own sign-off holding it. I'll get the rest away the day I have the nod.\n\nRegards,\nFiachra Delaney\nAccounts Payable | Ardmore Coast Hotels Ltd\nStrand Road, Youghal, Co. Cork\nDirect 024 930 118\nVAT IE9682354K"
+   },
+   {
+    "from": "dara.nolan@ardmorecoast.ie",
+    "to": "marianne.sheehy@kilbrannanvent.ie",
+    "subject": "next quarterly + that rattle in banqueting",
+    "body": "Hi Marianne,\n\nHope the summer wasn't too mad for ye. Two things and a bit of housekeeping.\n\nThe banqueting extract has a tick off it again when it goes up to full speed. Nothing like the racket it was making before your lads were out, but it's definitely there. No panic at all, only if someone's passing Youghal in the next few weeks I'd love them to stick their head up at it.\n\nSecond, can we get the next quarterly into the diary? October suits us far better than November, before the wedding crowd starts. Overnight again if that's doable - the €480 supplement was worth every cent for not having the kitchen out of action for a day.\n\nOn the money side, I know Fiachra will have sent you the remittance already but just so you've heard it from me as well: he got the €2,750 out the door on the 28th against the July invoice, and the balance is going to the board on the 17th. It'll be signed, it's just our own process being slow this side of the summer. Sorry for the messing.\n\nCheers,\nDara Nolan\nGroup Operations Manager\nArdmore Coast Hotels Ltd\n087 660 4127"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "KV-2451",
+   "amount_outstanding": "2754.25",
+   "currency": "EUR",
+   "recipient": "accounts@ardmorecoast.ie",
+   "should_stop_and_ask_a_person": false,
+   "why": "Invoice KV-2451 (dated 24 July 2026, due 23 August 2026) is for EUR 4,475.00 net + EUR 1,029.25 VAT at 23% = EUR 5,504.25 gross. Exactly ONE payment exists: EUR 2,750.00 made on 28 August 2026, reference ARD/KV2451/P1. It is described twice - once in Fiachra Delaney's remittance advice and again, in passing, in Dara Nolan's 4 September chatty email ('he got the 2,750 out the door on the 28th against the July invoice'). Same amount, same date, same invoice, same payer: one payment, counted once. Counting it twice would give a wrong balance of EUR 4.25. Remaining balance is EUR 2,754.25, overdue since 23 August. No human escalation is needed: the customer explicitly states nothing is in dispute and the delay is their own internal sign-off, so this is an ordinary overdue balance. The chase belongs in the accounts payable mailbox that was invoiced and that made the payment (accounts@ardmorecoast.ie); Dara Nolan is operations, not payables, so at most a courtesy copy."
+  },
+  "arithmetic": "Net line items: 1,950.00 + 1,420.00 + 385.00 + 240.00 + 480.00 = 4,475.00. VAT at 23%: 4,475.00 x 0.23 = 1,029.25. Gross: 4,475.00 + 1,029.25 = 5,504.25. Payments received: 2,750.00 (one payment on 28/08/2026, ref ARD/KV2451/P1, mentioned in two separate emails but only made once). Outstanding: 5,504.25 - 2,750.00 = 2,754.25 EUR. (Double-counting trap: 5,504.25 - 2,750.00 - 2,750.00 = 4.25, which is wrong.)",
+  "name": "independent-21"
+ },
+ {
+  "emails": [
+   {
+    "from": "Ilse Vermeer <administratie@boskoopvloertechniek.nl>",
+    "to": "crediteuren@hoflandsport.nl",
+    "subject": "Invoice 2026-0392 - Ede sports hall floor",
+    "body": "Hi Ruben,\n\nThe Ede hall was handed over on Friday 10 July - Marijke walked it with our foreman and signed it off, and the coating had the whole weekend to finish curing, so they were playing on it from the Monday.\n\nInvoice 2026-0392 is attached, dated today. To save you opening the PDF: grinding back the old top layer over the full 310 m2 at EUR 6.40 per m2 comes to EUR 1,984.00, the two-component PU sports coating over the same 310 m2 at EUR 18.50 per m2 is EUR 5,735.00, the badminton and volleyball marking was agreed as a fixed EUR 640.00, and there is EUR 285.00 for the site set-up and carting away the old material. That is EUR 8,644.00 net; with 21% BTW of EUR 1,815.24 the invoice totals EUR 10,459.24.\n\nOur terms are 30 days from invoice date, so 13 August. The bank details are on the PDF but here they are as well - IBAN NL62 ZUID 0447 1928 03, BIC ZUIDNL2A, in the name of Boskoop Vloertechniek B.V. Could you put 2026-0392 in the payment reference? The last one arrived described as \"sportvloer Ede\" and it cost me half a morning to find it.\n\nIf anything doesn't match the order confirmation, ring me and we'll sort it out.\n\nMet vriendelijke groet,\n\nIlse Vermeer\nAdministratie | Boskoop Vloertechniek B.V.\nNijkerkerweg 41b, 3771 ML Barneveld\nT +31 (0)342 41 88 07 | administratie@boskoopvloertechniek.nl\nKvK 67214488 | BTW NL821463795B01\nIBAN NL62 ZUID 0447 1928 03 (BIC ZUIDNL2A)"
+   },
+   {
+    "from": "Ruben Aalbers <crediteuren@hoflandsport.nl>",
+    "to": "administratie@boskoopvloertechniek.nl",
+    "subject": "Remittance advice 11-08-2026 - part payment invoice 2026-0392",
+    "body": "Hallo Ilse,\n\nRemittance advice for our payment run of today, Tuesday 11 August.\n\nPaid to you: EUR 6,000.00, payment reference HOFL-0392-1, against your invoice 2026-0392 of 14 July (EUR 10,459.24 including BTW).\n\nI'm sorry it isn't the whole thing. Our sports-facility subsidy from the gemeente was supposed to land in July and it hasn't, and I would rather send you something now than nothing at all until it does. The balance follows as soon as that money is with us - it is sitting open in our ledger, it won't be forgotten.\n\nIt went out this morning, so with our bank you should see it Wednesday, Thursday at the latest. Thanks as well for the way the crew left the place, the caretaker made a point of mentioning it.\n\nGroet,\n\nRuben Aalbers\nCrediteurenadministratie\nHofland Sportcentra B.V. | Galvanistraat 12, 6716 AE Ede\nT +31 (0)318 45 22 91 (toestel 2) | crediteuren@hoflandsport.nl\nKvK 34189902 | BTW NL809941226B01"
+   },
+   {
+    "from": "Marijke Poot <marijke.poot@hoflandsport.nl>",
+    "to": "administratie@boskoopvloertechniek.nl",
+    "subject": "Ede floor after the summer - cleaning products?",
+    "body": "Hi Ilse (and Gerrit, if he's around),\n\nQuick one from the halls. The floor in Ede has now had five weeks of summer camps and school groups over it and it still looks the way it did in July, so whatever you put down is holding up. The staff are pleased, which is not something that happens often here.\n\nTwo questions. Our cleaning contractor wants to use their standard degreaser on it and I told them to hold off until I had asked you - is that fine, or do you supply something specific for it? And do you do an annual maintenance or recoat visit? If you do, I'd like a price now, while the 2027 budget is still being written rather than after.\n\nOn the money side, I know we are not square with you yet. The six thousand Ruben pushed across before he went to Spain was the 11th of August I think, although our bank being what it is, it may only have shown up with you the day after. The rest was waiting on the subsidy from the gemeente, which they now say reaches us in the first week of September, so it should be settled once Ruben is back at his desk on Monday the 7th. Sorry to have left it hanging over the summer.\n\nAnything about the outstanding balance, send it to crediteuren@hoflandsport.nl and put me in copy - Ruben does the payment runs, and I'm out on the halls most of the day so things sink in my inbox.\n\nGroetjes,\n\nMarijke Poot\nVestigingsmanager Ede | Hofland Sportcentra B.V.\nM +31 6 48 22 71 05"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "2026-0392",
+   "amount_outstanding": "4459.24",
+   "currency": "EUR",
+   "recipient": "crediteuren@hoflandsport.nl",
+   "should_stop_and_ask_a_person": false,
+   "why": "Invoice 2026-0392 (14 July 2026) totals EUR 10,459.24 gross. Exactly ONE payment was made: EUR 6,000.00 on 11 August 2026, reference HOFL-0392-1. Marijke's 4 September email refers back to that same transfer ('the six thousand Ruben pushed across before he went to Spain', 11 August, possibly credited a day later) - it is a callback to the remittance, not a second payment, and she confirms 'we are not square with you yet' and that the rest was waiting on the subsidy. A system that treated it as a second EUR 6,000.00 would wrongly show the invoice overpaid by EUR 1,540.76. The balance of EUR 4,459.24 was due 13 August and is 27 days overdue as at 9 September 2026; the client's own stated timeline (subsidy in the first week of September, Ruben back at his desk Monday 7 September) has already passed, so a chase is due. No figure is missing, the work was praised rather than disputed, and Marijke explicitly routes balance correspondence to crediteuren@hoflandsport.nl (herself in copy), so no human escalation is needed - send the chase to the AP inbox."
+  },
+  "arithmetic": "Line items: 310 m2 grinding x EUR 6.40 = 1,984.00; 310 m2 PU coating x EUR 18.50 = 5,735.00; line marking (fixed) = 640.00; site set-up + disposal = 285.00. Net = 1,984.00 + 5,735.00 + 640.00 + 285.00 = 8,644.00. VAT: 8,644.00 x 21% = 1,815.24. Gross: 8,644.00 + 1,815.24 = 10,459.24. Payments received: 6,000.00 (single payment of 11 Aug 2026, ref HOFL-0392-1, mentioned in email 2 and referred back to in email 3 - count once, not twice). Outstanding: 10,459.24 - 6,000.00 = 4,459.24. (Wrong double-count check: 10,459.24 - 12,000.00 = -1,540.76, i.e. an impossible overpayment.)",
+  "name": "independent-22"
+ },
+ {
+  "emails": [
+   {
+    "from": "marleen@broekhuisvloertechniek.nl",
+    "to": "r.vanduren@bakkerijvanduren.nl",
+    "subject": "Invoice VT-2026-0418 - production room floor, Houten",
+    "body": "Hoi Ronald,\n\nThanks again for squeezing us in over the shutdown weekend - the PU screed went down without a hitch and Jeroen tells me your night shift was back on the line by Monday 05:00, which is about as good as it gets on a job like that.\n\nInvoice is attached. It's VT-2026-0418, dated 1 July, and as we agreed after the last one it's on 7 days, so it falls due on 8 July.\n\nThe breakdown, so you can hold it next to the quote:\n\nShot-blasting and repair of the two floor drains - € 1,006.00\nPolyurethane screed, 68 m2 at € 47.50 - € 3,230.00\nCoved skirting, 24 m at € 26.00 - € 624.00\n\nThat's € 4,860.00 net, plus 21% BTW of € 1,020.60, so € 5,880.60 all in. Your € 1,500.00 deposit from 15 June is already credited against it, which leaves € 4,380.60 to settle.\n\nPayment to Broekhuis Vloertechniek B.V., IBAN NL79 NKBK 0374 9921 08 (Noordkust Bank), BIC NKBKNL2A, and please put VT-2026-0418 in the reference - otherwise it lands on the wrong project and I lose an evening hunting for it.\n\nShout if anything looks off. And the offer on the packing area still stands, happy to come and measure it whenever suits you.\n\nMet vriendelijke groet,\n\nMarleen Broekhuis\nBroekhuis Vloertechniek B.V.\nMarconibaan 14b, 3439 MS Nieuwegein\n+31 30 785 4412 / mobiel +31 6 2244 8130\nmarleen@broekhuisvloertechniek.nl\nBTW NL864421907B01 | KvK 87421163"
+   },
+   {
+    "from": "marleen@broekhuisvloertechniek.nl",
+    "to": "s.vermeer@terlouwbouw.nl",
+    "subject": "VT-2026-0442 - unit 3 workshop coating, Hoevelaken",
+    "body": "Dag Sanne,\n\nInvoice for the unit 3 workshop coating is attached - VT-2026-0442, dated 31 July. Under the framework agreement it's 60 days from invoice date, so it falls due on 29 September. No rush from my side at all, I'm only sending it now because Jeroen finally handed in the last of his day sheets.\n\nWe coated 310 m2 at € 38.00 per m2, so € 11,780.00, and then there's € 620.00 for the extra day of grinding where the old adhesive lifted in the south corner. Bart signed the day sheet for that on site and I've scanned it in behind the invoice. Net that's € 12,400.00, BTW at 21% comes to € 2,604.00, total € 15,004.00.\n\nBank details as always: NL79 NKBK 0374 9921 08, BIC NKBKNL2A, reference VT-2026-0442.\n\nOne thing for your planning - if unit 4 is still going ahead in November I'd need to hear by the middle of September, because the resin is on a four-week lead time at the moment and I'd rather not promise you a date I can't hold.\n\nThanks Sanne, have a good weekend.\n\nMarleen Broekhuis\nBroekhuis Vloertechniek B.V.\nMarconibaan 14b, 3439 MS Nieuwegein\n+31 30 785 4412\nBTW NL864421907B01 | KvK 87421163"
+   },
+   {
+    "from": "s.vermeer@terlouwbouw.nl",
+    "to": "marleen@broekhuisvloertechniek.nl",
+    "subject": "RE: VT-2026-0442 - unit 3 workshop coating, Hoevelaken",
+    "body": "Hi Marleen,\n\nGot it, thanks. I've booked VT-2026-0442 in for the 29 September run - Bart's day sheet was already in the file here so I didn't need anything extra from you, and the € 620.00 is approved.\n\nUnit 4 is still sitting with the client. I'll chase them so we have an answer before the 15th, I don't want you stuck waiting on material again like in the spring.\n\nGroeten,\n\nSanne Vermeer\nProjectadministratie\nTerlouw Bouw & Onderhoud B.V.\nStationsweg 91, 3811 MJ Amersfoort\n+31 33 462 9970"
+   }
+  ],
+  "truth": {
+   "chase_invoice": "VT-2026-0418",
+   "amount_outstanding": "4380.60",
+   "currency": "EUR",
+   "recipient": "r.vanduren@bakkerijvanduren.nl",
+   "should_stop_and_ask_a_person": false,
+   "why": "Invoice VT-2026-0418 (Bakkerij van Duren, production room floor in Houten) was dated 1 July 2026 on 7-day terms, so it fell due 8 July 2026 and is 63 days past due as of 9 September 2026. Gross is 5,880.60 and a 1,500.00 deposit taken on 15 June is already credited, leaving 4,380.60 unpaid. Every figure needed is stated in the email, the customer has not queried anything, and no dispute exists - this is an ordinary badly overdue invoice, so the system should chase it automatically rather than ask a human. The chase goes to the address the invoice was sent to, r.vanduren@bakkerijvanduren.nl; no other address for that customer appears anywhere in the correspondence. The second invoice, VT-2026-0442 to Terlouw Bouw & Onderhoud (15,004.00), is dated 31 July 2026 on the 60-day framework terms, so it is not due until 29 September 2026 - 20 days in the future. Terlouw's reply confirms it is booked for the 29 September payment run and that the 620.00 extra grinding day is approved, so it must not be chased and must not be added to the chase total. A correct system chases exactly one invoice for exactly 4,380.60."
+  },
+  "arithmetic": "CHASE - VT-2026-0418 (Bakkerij van Duren), invoice date 1 July 2026, terms net 7, due 8 July 2026.\nLine items: 1,006.00 (shot-blasting + 2 drains) + 3,230.00 (68 m2 x 47.50) + 624.00 (24 m x 26.00) = 4,860.00 net\n  check: 68 x 47.50 = 3,230.00 ; 24 x 26.00 = 624.00\nVAT: 4,860.00 x 21% = 1,020.60\nGross: 4,860.00 + 1,020.60 = 5,880.60\nPayments received: 1,500.00 deposit (15 June 2026)\nOutstanding: 5,880.60 - 1,500.00 = 4,380.60  <-- amount to chase, EUR\nAge: due 8 July 2026 -> 9 September 2026 = 23 days (July) + 31 (August) + 9 (September) = 63 days overdue.\n\nDO NOT CHASE - VT-2026-0442 (Terlouw Bouw & Onderhoud), invoice date 31 July 2026, terms net 60, due 29 September 2026.\nLine items: 310 x 38.00 = 11,780.00 + 620.00 extra grinding day = 12,400.00 net\nVAT: 12,400.00 x 21% = 2,604.00\nGross: 12,400.00 + 2,604.00 = 15,004.00\nPayments received: 0.00 -> outstanding 15,004.00, but 0 days overdue (20 days still to run as of 9 September 2026), so it is excluded from the chase.\n\nTotal ledger balance across both customers = 4,380.60 + 15,004.00 = 19,384.60, of which only 4,380.60 is overdue and chaseable.",
+  "name": "independent-23"
+ }
+]
