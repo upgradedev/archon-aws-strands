@@ -5,8 +5,8 @@
 Built for **Agents for Humans (AWS)**, track **Professional Agents**, on the **Strands Agents SDK** and **Amazon Bedrock**.
 
 [![CI](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml)
-[![tests](https://img.shields.io/badge/tests-483%20offline%2C%20no%20key%2C%20no%20network-22c55e)](#run-it)
-[![coverage](https://img.shields.io/badge/branch%20coverage-93%25-22c55e)](#run-it)
+[![tests](https://img.shields.io/badge/tests-485%20offline%2C%20no%20key%2C%20no%20network-22c55e)](#run-it)
+[![coverage](https://img.shields.io/badge/branch%20coverage-92%25-22c55e)](#run-it)
 [![model](https://img.shields.io/badge/Bedrock-claude--opus--5-8b5cf6)](#how-it-is-put-together)
 [![licence](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
 
@@ -52,47 +52,51 @@ So the claim is narrower, and it survives the model being good:
 **That was a friendly test**, and it said so: twenty clean months, one client each, no contradictory
 messages, no adversarial text. Full write-up: [`evidence/RESULTS-2026-09-04.md`](evidence/RESULTS-2026-09-04.md).
 
-### The comparison, rebuilt so it means something
+### The comparison, rebuilt so it means something, and it does not flatter this
 
-Both earlier comparisons are withdrawn and stay withdrawn. The second failure was the worse one:
-**Archon's column was scored from books the fixture had already posted correctly**, while the method it
-was measured against started from raw text. That is a ledger agreeing with itself, not a comparison.
+Both earlier comparisons are withdrawn and stay withdrawn: **Archon's column was scored from books the
+fixture had already posted correctly**, while the method it was measured against read raw text. That is a
+ledger agreeing with itself.
 
 So the inputs were written by somebody else. **Twenty-four independent agents each wrote one month of a
 small firm's post**, told only the business situation and nothing whatever about how anything here reads
-an email; each set was then audited by a different agent. They came back as real post: line items, VAT at
-the local rate, IBANs, a Saturday call-out charge, a note about a condenser fan that is starting to
-rattle. The answers came with the fixtures, before any method ran. Four cases are held out of every
-figure below.
+an email; each set was audited by a different agent. They came back as real post: line items, VAT at the
+local rate, IBANs, a Saturday call-out charge, a note about a condenser fan that is starting to rattle.
+Four cases are held out of every figure.
 
 ```bash
 python -m archon.evidence.fair --held-out
 ```
 
-| method | wrong money | missed | correct | 95% CI on wrong money |
-|---|---|---|---|---|
-| reference matching, the declared baseline | **10 / 20** | 6 | 4 | 29.9% to 70.1% |
-| naive text extraction | **11 / 20** | 5 | 4 | 34.2% to 74.2% |
-| **Archon, offline rule reader** | **0 / 20** | **15** | 5 | 0.0% to 16.1% |
-| **Archon, live Bedrock reader** | **1 / 20** | **14** | 5 | 0.9% to 23.6% |
+Twenty scored cases, thirteen of which genuinely owed a chase:
 
-*A zero without its interval reads as certainty, and twenty cases do not earn certainty.*
+| method | wrong money | missed | correct | sends | **sends and is right** |
+|---|---|---|---|---|---|
+| reference matching, the declared baseline | 10 / 20 | 6 | 4 | 10 | **0** |
+| naive text extraction | 11 / 20 | 5 | 4 | 11 | **0** |
+| **Archon, offline rule reader** | **0 / 20** | 15 | 5 | **0** | **0** |
+| **Archon, live Bedrock reader** | **0 / 20** | 15 | 5 | **0** | **0** |
 
-Held out, never used to tune anything: the baselines demand a wrong figure in **3 of 4**; Archon in
-**0 of 4**.
+**Nobody collects any money correctly here.** The baselines send ten and eleven times and get the figure
+wrong every single time. **Archon sends nothing at all** — its zero wrong-money is achieved by not
+acting, and quoting that zero without this sentence would be the most misleading true statement in the
+repository.
 
-**Both directions, together, because one without the other is a boast.** Archon does not demand money
-that is not owed, where both baselines do so in half the cases. And it is much quieter: it says nothing
-on 14 to 15 of 20 where the baseline misses 6. **On this evidence it collects less money than the baseline while embarrassing its owner far less
-often.** Which a small firm should prefer is a judgement,
-not a measurement, and nothing here settles it.
+**On independently written post this product is safe and not yet useful.** Reading real post is the
+unsolved part: every case has at least one email it could not read, and forty-one of the forty-six
+refusals are the same thing — the reader wants `dated 2026-07-24` and a person writes "dated today, 24
+July 2026". Until this benchmark existed nothing said so, because the demo books were seeded and the
+screen looked complete.
 
-Two defects surfaced during the run and are fixed: every live read was coming back empty at
-`stopReason: max_tokens`, which looked exactly like a model that could not read an invoice and was a
-model not allowed to finish its sentence; and nothing told the reader which side of the email the firm
-was on, so it turned money owed *to* the firm into money owed *by* it.
+Three defects surfaced. **Chasing from partial books**: a month with one unread email still produced a
+chase, from the invoice without the payment, demanding 2,029.50 where 1,429.50 was owed, thirteen times
+in twenty-four. A refusal stops the chase now. **Every live read was returning empty** at
+`stopReason: max_tokens`, so every earlier live figure here was measured through a model that was not
+allowed to finish its sentence, and none is carried over. And **nothing told the reader which side of the
+email the firm was on**, so it turned money owed *to* the firm into money owed *by* it.
 
-Full protocol, the held-out table and what this still does not show:
+This page also published a wrong live row for about an hour on 2026-09-09, read off an aborted run's
+totals. Full protocol, the correction, and what this still does not show:
 [`evidence/RESULTS-FAIR-2026-09-09.md`](evidence/RESULTS-FAIR-2026-09-09.md).
 
 ### An invoice can tell the reader to stop, and it works
@@ -253,7 +257,7 @@ tool; the judgement did not.
 
 | | |
 |---|---|
-| the ledger, six domains, P&L, cash, metrics | real, 483 tests, 93% branch coverage |
+| the ledger, six domains, P&L, cash, metrics | real, 485 tests, 92% branch coverage |
 | the six-agent Strands graph | real, runs on `strands-agents` 1.53 and 1.54 |
 | Bedrock | real, `global.anthropic.claude-opus-5`, verified by a live call |
 | SES send, idempotent, with receipt | real code; **the account is in the SES sandbox**, so it can send only to verified addresses |

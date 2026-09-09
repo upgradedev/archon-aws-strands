@@ -30,13 +30,19 @@ class Counting:
 
 
 class ClientError(Exception):
-    """botocore's name for a request that arrived and was refused.
+    """Shaped like botocore's, because the classifier reads the code inside.
 
-    The class name matters: after 2026-09-09 the outbox only calls something a
-    failure when it recognises it as a confirmed rejection. A bare RuntimeError
-    is ambiguous, and ambiguous means unknown, because a timeout that is treated
-    as a failure is retried and sends a second email.
+    The class alone is not enough and should not be: botocore raises ClientError
+    for a 500 and a throttle as well as a refusal, and a 5xx reached SES and says
+    nothing about whether it sent.
     """
+
+    def __init__(self, message: str, code: str = "MessageRejected", status: int = 400) -> None:
+        super().__init__(message)
+        self.response = {
+            "Error": {"Code": code, "Message": message},
+            "ResponseMetadata": {"HTTPStatusCode": status},
+        }
 
 
 class Refusing:

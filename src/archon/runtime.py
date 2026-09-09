@@ -90,6 +90,16 @@ class Close:
     def read_count(self) -> int:
         return len(self.readings)
 
+    @property
+    def balance_is_known(self) -> bool:
+        """False when an email in this month could not be read.
+
+        Every figure in a set of partial books is arithmetically right and the
+        total is wrong, which is the most dangerous shape a number can have here.
+        Measured: with one remittance unread, the chase demanded the gross.
+        """
+        return not self.refusals
+
 
 def _reader(mode: Mode):
     """The client `read_email` should use. None means real Bedrock."""

@@ -78,12 +78,16 @@ def archon(case: Case) -> Answer:
     from archon.runtime import OFFLINE, read_the_post
 
     kept = read_the_post(list(case.emails), OFFLINE, prefix=case.name)
+    if kept.refusals:
+        # An email in this month could not be read, so the balance is not known.
+        # Chasing from what did post is how this demanded 2,029.50 where
+        # 1,429.50 was owed: it had the invoice and not the payment. Partial
+        # books look exactly like complete ones.
+        return Answer(asked=True)
     queue = build_queue(kept.books, AS_OF)
     top = queue.next_up
     if top is None:
-        # Nothing chaseable. If something was refused, that is a person's problem
-        # rather than a conclusion that nothing is owed.
-        return Answer(asked=bool(kept.refusals))
+        return Answer()
     return Answer(invoice=top.invoice_id, amount=top.outstanding, recipient=top.recipient)
 
 

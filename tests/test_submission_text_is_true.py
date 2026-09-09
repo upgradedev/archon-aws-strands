@@ -35,27 +35,24 @@ def said(text: str) -> str:
 # --- the figures ---------------------------------------------------------------
 
 
-def test_the_description_does_not_quote_the_withdrawn_archon_row():
-    """Corrected 2026-09-08. The description must not carry a number the README withdrew."""
-    from archon.evidence.compare import score_all
+def test_the_description_quotes_the_fair_table_and_the_cost_with_it():
+    """It carried both withdrawn tables until 2026-09-09."""
+    from archon.evidence.fair import METHODS, score
+    from archon.evidence.independent import scored
 
-    by_method = {t.method: t for t in score_all()}
-    assert by_method["reference matching"].missed == 13
-    assert by_method["Archon"].correct == 6, "reading the post itself, not handed books"
+    rows = {name: score(name, run, scored()).counts for name, run in METHODS.items()}
+    assert rows["reference matching (baseline)"]["wrong-money"] == 10
+    assert rows["Archon"]["wrong-money"] == 0
 
-    assert "| 0 / 20 | **13** |" in DESCRIPTION
-    assert "withdrawn" in DESCRIPTION, "the description has to carry the correction too"
+    assert "| 10 / 20 | 10 | **0** |" in DESCRIPTION
+    assert "| **0 / 20** | **0** | **0** |" in DESCRIPTION
+    said = said_plain(DESCRIPTION)
+    assert "archon sends nothing at all" in said
+    assert "safe and not yet useful" in said
 
 
-def test_the_description_quotes_the_hard_table_the_code_computes():
-    from archon.evidence.compare import score_all
-    from archon.evidence.hard import all_hard_scenarios
-
-    by_method = {t.method: t for t in score_all(all_hard_scenarios())}
-    assert by_method["reference matching"].missed == 6
-    assert by_method["Archon"].correct == 0
-
-    assert "| 0 / 15 | **6** |" in DESCRIPTION
+def said_plain(text: str) -> str:
+    return " ".join(text.split()).lower()
 
 
 def test_the_statutory_interest_figure_is_the_one_the_ledger_produces():
@@ -71,17 +68,15 @@ def test_the_statutory_interest_figure_is_the_one_the_ledger_produces():
     assert "37.67 EUR" in DESCRIPTION
 
 
-def test_the_injection_debt_is_the_one_in_the_scenarios():
-    from archon.evidence.hard import all_hard_scenarios
+def test_the_injection_claim_is_not_in_the_description_at_all():
+    """It was measured on a withdrawn set. The README says so where it stands.
 
-    injected = [c for c in all_hard_scenarios() if c.name.startswith("instruction")]
-    assert len(injected) == 3
-    assert all(str(c.truth) == "3720.00" for c in injected)
-
-    for text in (DESCRIPTION, SCRIPT):
-        assert "three times out of three" in said(text)
-        spoken = said(text)
-        assert "3,720" in spoken or "three thousand seven hundred and twenty" in spoken
+    The description is what gets pasted into a form, and a finding that needs a
+    paragraph of provenance to be honest does not survive that trip.
+    """
+    said = " ".join(DESCRIPTION.split()).lower()
+    assert "three times out of three" not in said
+    assert "measured on one of the withdrawn sets" in said
 
 
 def test_the_hero_line_on_the_page_is_the_one_the_script_reads_out():
@@ -99,16 +94,17 @@ def test_the_hero_line_on_the_page_is_the_one_the_script_reads_out():
 @pytest.mark.parametrize(
     "admission",
     [
-        "circular in both sets",
+        "earned by not acting",
         "SES sandbox",
         "No mailbox is connected",
         "no OCR",
         "invented",
-        "a real attacker would write a better one",
+        "a better line than the one I wrote",
     ],
 )
 def test_the_description_keeps_its_admissions(admission):
-    assert admission in DESCRIPTION, admission
+    # Read the way a person does: the file is wrapped to a column.
+    assert admission in " ".join(DESCRIPTION.split()), admission
 
 
 def test_the_script_forbids_the_things_that_would_overclaim():

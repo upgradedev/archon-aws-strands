@@ -57,7 +57,19 @@ class LostAcknowledgement:
 
 
 class ClientError(Exception):
-    """botocore's name for: the request arrived and the API said no."""
+    """Shaped like botocore's, because the classifier now reads the code inside.
+
+    The class alone is not enough and should not be: botocore raises ClientError
+    for a 500 and a throttle as well as a refusal, and a 5xx reached SES and says
+    nothing about whether it sent.
+    """
+
+    def __init__(self, message: str, code: str = "MessageRejected", status: int = 400) -> None:
+        super().__init__(message)
+        self.response = {
+            "Error": {"Code": code, "Message": message},
+            "ResponseMetadata": {"HTTPStatusCode": status},
+        }
 
 
 class Refusing:
@@ -149,6 +161,14 @@ def test_only_a_recognised_rejection_counts_as_one():
     assert not _is_confirmed_rejection(TimeoutError("read timeout"))
     assert not _is_confirmed_rejection(OSError("connection reset"))
     assert not _is_confirmed_rejection(Exception("something odd"))
+
+    # A 5xx reached SES and proves nothing about whether it sent. Treating it as
+    # a refusal would make it retryable, which is the same mistake as calling a
+    # timeout a failure, one layer along.
+    assert not _is_confirmed_rejection(
+        ClientError("internal error", code="InternalFailure", status=500)
+    )
+    assert not _is_confirmed_rejection(ClientError("slow down", code="Throttling", status=429))
 
 
 def test_eight_callers_at_once_send_exactly_one_email(store):
@@ -325,3 +345,64 @@ def test_a_credit_that_takes_receipts_below_the_baseline_is_not_negative():
         baseline=Decimal("500.00"),
     )
     assert plan.paid_under_this(Decimal("100.00")) == Decimal("0.00")
+
+
+# --- from the adversarial review of 2026-09-09 --------------------------------
+
+
+def test_a_reply_with_no_message_id_is_unknown_not_failed(store):
+    """SES answering oddly does not prove it did not accept the message."""
+
+    class Silent:
+        def send_email(self, **kwargs):
+            return {}
+
+    session = session_with(store, Silent())
+    draft = session.draft()
+    with pytest.raises(SendRefused):
+        session.outbox.send(draft, session.verdict(draft))
+
+    assert SendLog(store).find(draft.fingerprint()).state == UNKNOWN
+
+
+def test_a_reply_with_no_message_id_is_not_retried(store):
+    class Silent:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def send_email(self, **kwargs):
+            self.calls += 1
+            return {}
+
+    client = Silent()
+    session = session_with(store, client)
+    draft = session.draft()
+    with pytest.raises(SendRefused):
+        session.outbox.send(draft, session.verdict(draft))
+
+    again = session_with(store, client)
+    with pytest.raises(SendRefused, match="'unknown'"):
+        again.outbox.send(again.draft(), again.verdict(again.draft()))
+    assert client.calls == 1
+
+
+def test_the_transport_does_not_retry_underneath_the_record():
+    """One approved draft is one email, and botocore's default breaks that.
+
+    Everything above works to make the send happen once. A transport that
+    retries three times on its own puts three messages in an inbox while this
+    code records one unknown.
+    """
+    import inspect
+
+    from archon.adapters.ses import live_outbox
+
+    source = inspect.getsource(live_outbox)
+    assert 'retries={"max_attempts": 1' in source
+    assert "Config(" in source
+
+
+def test_a_five_hundred_from_ses_is_not_treated_as_a_refusal():
+    assert not _is_confirmed_rejection(
+        ClientError("internal error", code="InternalFailure", status=500)
+    )

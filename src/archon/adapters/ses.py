@@ -93,23 +93,54 @@ def _record_for(draft: ChaseDraft, at):
 #: Everything else — a timeout, a dropped connection, a process killed mid-call —
 #: is ambiguous, and ambiguous means unknown.
 CONFIRMED_REJECTIONS = (
-    "ClientError",
     "ParamValidationError",
     "MessageRejected",
     "AccountSendingPausedException",
     "MailFromDomainNotVerifiedException",
+    "AccountSuspendedException",
+    "SendingPausedException",
+)
+
+#: botocore raises `ClientError` for everything the API answers with, including
+#: a 500 and a throttle. A 5xx reached SES and says nothing about whether it
+#: sent, so the class alone cannot decide this: the error code inside it can.
+CONFIRMED_REJECTION_CODES = frozenset(
+    {
+        "MessageRejected",
+        "MailFromDomainNotVerified",
+        "AccountSendingPaused",
+        "AccountSuspended",
+        "InvalidParameterValue",
+        "ValidationException",
+        "AccessDeniedException",
+    }
 )
 
 
 def _is_confirmed_rejection(failure: BaseException) -> bool:
-    """Did the provider answer and say no?
+    """Did the provider answer and say no, in a way that proves nothing was sent?
 
     Conservative on purpose: anything not positively recognised is treated as
     unknown. Getting this backwards sends a second email, and the whole point of
     the distinction is that one direction is recoverable and the other is not.
+
+    `ClientError` used to be on the recognised list, which was wrong. botocore
+    raises it for everything the API answers with, a 500 and a throttle
+    included, and a 5xx reached SES and tells us nothing about whether it sent.
+    The error code inside it is what decides.
     """
     names = {type(failure).__name__} | {c.__name__ for c in type(failure).__mro__}
-    return bool(names & set(CONFIRMED_REJECTIONS))
+    if names & set(CONFIRMED_REJECTIONS):
+        return True
+
+    response = getattr(failure, "response", None)
+    if isinstance(response, dict):
+        code = str(response.get("Error", {}).get("Code", ""))
+        status = response.get("ResponseMetadata", {}).get("HTTPStatusCode")
+        if isinstance(status, int) and status >= 500:
+            return False
+        return code in CONFIRMED_REJECTION_CODES
+    return False
 
 
 @dataclass
@@ -210,7 +241,18 @@ class Outbox:
         message_id = (response or {}).get("MessageId")
         if not message_id:
             if self.log is not None:
-                self.log.settle(fingerprint, message_id=None, error="SES returned no MessageId")
+                from archon.store.sqlite import UNKNOWN
+
+                # Not a failure. SES answering without an identifier does not
+                # prove it did not accept the message, and recording it as a
+                # rejection would make it retryable — the same mistake as
+                # treating a timeout as failure, one layer along.
+                self.log.settle(
+                    fingerprint,
+                    message_id=None,
+                    error="SES returned no MessageId",
+                    state=UNKNOWN,
+                )
             raise SendRefused(
                 "SES returned no MessageId, so this send cannot be evidenced. "
                 "Reporting it as sent would be a claim with nothing to read back."
@@ -233,7 +275,26 @@ class Outbox:
 
 
 def live_outbox(sender: str, region: str = "us-west-2") -> Outbox:
-    """An Outbox wired to the real SES. Imported lazily; see adapters.bedrock."""
-    import boto3
+    """A real SES sender, with the client's own retries turned off.
 
-    return Outbox(client=boto3.client("sesv2", region_name=region), sender=sender)
+    This matters more than it looks. Everything above here works to make one
+    approved draft into exactly one email: the fingerprint, the durable record,
+    the atomic reservation. botocore's default is to retry a failed call several
+    times on its own, underneath all of it, so a timeout that this code would
+    record once as unknown could already have put three messages in somebody's
+    inbox.
+
+    Retries are a decision about a demand for money and they belong here, where
+    the record is, not in a transport default nobody set.
+    """
+    import boto3
+    from botocore.config import Config
+
+    return Outbox(
+        client=boto3.client(
+            "sesv2",
+            region_name=region,
+            config=Config(retries={"max_attempts": 1, "mode": "standard"}),
+        ),
+        sender=sender,
+    )

@@ -1,20 +1,19 @@
 Archon reading independently written post with the real Bedrock reader.
 global.anthropic.claude-opus-5, us-west-2, 2026-09-09. One call per email.
 
-independent-00: read 1/3, refused 2 -> wrong-money (said 3847.80 to joost.bakhuis@zwarteanker.nl, truth 2347.80 to joost.bakhuis@zwarteanker.nl)
+independent-00: read 1/3, refused 2 -> missed (said 0.00 to -, truth 2347.80 to joost.bakhuis@zwarteanker.nl)
     refused: independent-00:001: the email does not state a issue date
     refused: independent-00:002: the email does not identify a document
 independent-01: read 0/2, refused 2 -> missed (said 0.00 to -, truth 1388.40 to nuala.fitzhenry@rossbawnfoods.ie)
     refused: independent-01:000: the email does not state a issue date
     refused: independent-01:001: the email does not state a issue date
-independent-02: read 0/2, refused 2 -> missed (said 0.00 to -, truth 2486.65 to crediteuren@zeewinde-coldstores.be)
-    refused: independent-02:000: the reply carried no JSON
+independent-02: read 1/2, refused 1 -> missed (said 0.00 to -, truth 2486.65 to crediteuren@zeewinde-coldstores.be)
     refused: independent-02:001: the email does not state a issue date
-independent-03: read 1/2, refused 1 -> wrong-money (said 5895.12 to crediteuren@zeewoldevers.nl, truth 2395.12 to i.ramaker@zeewoldevers.nl)
+independent-03: read 1/2, refused 1 -> missed (said 0.00 to -, truth 2395.12 to i.ramaker@zeewoldevers.nl)
     refused: independent-03:001: the email does not state a issue date
-independent-04 [held out]: read 1/2, refused 1 -> wrong-money (said 4210.80 to s.bruggink@marktzichtvers.nl, truth 0.00 to -)
+independent-04 [held out]: read 1/2, refused 1 -> missed (said 0.00 to -, truth 0.00 to -)
     refused: independent-04:001: the email does not state a issue date
-independent-05: read 1/3, refused 2 -> wrong-money (said 2029.50 to accounts@kilnamonafinefoods.ie, truth 1429.50 to accounts@kilnamonafinefoods.ie)
+independent-05: read 1/3, refused 2 -> missed (said 0.00 to -, truth 1429.50 to accounts@kilnamonafinefoods.ie)
     refused: independent-05:001: the email does not identify a document
     refused: independent-05:002: the email does not identify a document
 independent-06: read 1/2, refused 1 -> missed (said 0.00 to -, truth 0.00 to -)
@@ -22,47 +21,44 @@ independent-06: read 1/2, refused 1 -> missed (said 0.00 to -, truth 0.00 to -)
 independent-07: read 0/2, refused 2 -> missed (said 0.00 to -, truth 0.00 to -)
     refused: independent-07:000: the email does not state a issue date
     refused: independent-07:001: the email does not identify a document
-independent-08: read 1/2, refused 1 -> wrong-money (said 4670.60 to crediteuren@zilverlinde-hotels.be, truth 1670.60 to m.provoost@zilverlinde-hotels.be)
+independent-08: read 1/2, refused 1 -> missed (said 0.00 to -, truth 1670.60 to m.provoost@zilverlinde-hotels.be)
     refused: independent-08:001: the email does not state a issue date
-independent-09: read 0/2, refused 2 -> correct (said 0.00 to -, truth 0.00 to -)
-    refused: independent-09:000: the reply carried no JSON
+independent-09: read 1/2, refused 1 -> correct (said 0.00 to -, truth 0.00 to -)
     refused: independent-09:001: the email does not state a issue date
-independent-10: read 0/2, refused 2 -> correct (said 0.00 to -, truth 0.00 to -)
-    refused: independent-10:000: the email does not state a issue date
+independent-10: read 1/2, refused 1 -> correct (said 0.00 to -, truth 0.00 to -)
     refused: independent-10:001: the email does not state a issue date
 independent-11 [held out]: read 1/2, refused 1 -> correct (said 0.00 to -, truth 0.00 to -)
-    refused: independent-11:001: the email does not state a issue date
-independent-12: read 0/2, refused 2 -> correct (said 0.00 to -, truth 0.00 to -)
-    refused: independent-12:000: the reply carried no JSON
+    refused: independent-11:001: the reply carried no JSON
+independent-12: read 1/2, refused 1 -> correct (said 0.00 to -, truth 0.00 to -)
     refused: independent-12:001: the email does not state a issue date
-independent-13: read 1/2, refused 1 -> wrong-money (said 7082.40 to invoices@larchfieldestates.ie, truth 5082.40 to d.fenlon@larchfieldestates.ie)
+independent-13: read 1/2, refused 1 -> missed (said 0.00 to -, truth 5082.40 to d.fenlon@larchfieldestates.ie)
     refused: independent-13:001: the email does not state a issue date
-independent-14: read 1/2, refused 1 -> wrong-money (said 6304.10 to inkoop@marsdijk-bouw.nl, truth 3804.10 to m.terhorst@marsdijk-bouw.nl)
+independent-14: read 1/2, refused 1 -> missed (said 0.00 to -, truth 3804.10 to m.terhorst@marsdijk-bouw.nl)
     refused: independent-14:001: the email does not state a issue date
 independent-15: read 0/2, refused 2 -> correct (said 0.00 to -, truth 0.00 to -)
-    refused: independent-15:000: the reply carried no JSON
+    refused: independent-15:000: the email does not state a issue date
     refused: independent-15:001: the email does not state a issue date
 independent-16: read 0/2, refused 2 -> correct (said 0.00 to -, truth 0.00 to -)
     refused: independent-16:000: the email does not state a issue date
     refused: independent-16:001: the email does not state a issue date
-independent-17: read 1/2, refused 1 -> wrong-money (said 5868.50 to jelle.terlouw@vosmaerhoreca.nl, truth 4368.50 to marloes.prins@vosmaerhoreca.nl)
+independent-17: read 1/2, refused 1 -> missed (said 0.00 to -, truth 4368.50 to marloes.prins@vosmaerhoreca.nl)
     refused: independent-17:001: the email does not state a issue date
-independent-18 [held out]: read 2/3, refused 1 -> wrong-money (said 5591.01 to accounts@clonaboyfoods.ie, truth 3591.01 to accounts@clonaboyfoods.ie)
+independent-18 [held out]: read 2/3, refused 1 -> missed (said 0.00 to -, truth 3591.01 to accounts@clonaboyfoods.ie)
     refused: independent-18:002: the email does not state a issue date
-independent-19: read 2/3, refused 1 -> wrong-money (said 4206.60 to accounts@glenmarrafoods.ie, truth 2956.60 to accounts@glenmarrafoods.ie)
+independent-19: read 2/3, refused 1 -> missed (said 0.00 to -, truth 2956.60 to accounts@glenmarrafoods.ie)
     refused: independent-19:002: the email does not state a issue date
-independent-20: read 1/3, refused 2 -> wrong-money (said 4210.80 to boekhouding@vismarktcoppens.be, truth 1710.80 to boekhouding@vismarktcoppens.be)
+independent-20: read 1/3, refused 2 -> missed (said 0.00 to -, truth 1710.80 to boekhouding@vismarktcoppens.be)
     refused: independent-20:001: the email does not state a issue date
     refused: independent-20:002: the email does not identify a document
-independent-21: read 1/3, refused 2 -> wrong-money (said 5504.25 to accounts@ardmorecoast.ie, truth 2754.25 to accounts@ardmorecoast.ie)
-    refused: independent-21:001: the email does not identify a document
+independent-21: read 1/3, refused 2 -> missed (said 0.00 to -, truth 2754.25 to accounts@ardmorecoast.ie)
+    refused: independent-21:001: the email does not state a date
     refused: independent-21:002: the email does not identify a document
 independent-22: read 0/3, refused 3 -> missed (said 0.00 to -, truth 4459.24 to crediteuren@hoflandsport.nl)
     refused: independent-22:000: the email does not state a issue date
     refused: independent-22:001: the email does not state a due date
     refused: independent-22:002: the email does not identify a document
-independent-23 [held out]: read 2/3, refused 1 -> wrong-money (said 5880.60 to r.vanduren@bakkerijvanduren.nl, truth 4380.60 to r.vanduren@bakkerijvanduren.nl)
+independent-23 [held out]: read 2/3, refused 1 -> missed (said 0.00 to -, truth 4380.60 to r.vanduren@bakkerijvanduren.nl)
     refused: independent-23:002: the email does not state a issue date
 
-== scored (20): {'wrong-money': 10, 'wrong-recipient': 0, 'missed': 5, 'correct': 5} ==
-== held out (4): {'wrong-money': 3, 'wrong-recipient': 0, 'missed': 0, 'correct': 1} ==
+== scored (20): {'wrong-money': 0, 'wrong-recipient': 0, 'missed': 15, 'correct': 5} ==
+== held out (4): {'wrong-money': 0, 'wrong-recipient': 0, 'missed': 3, 'correct': 1} ==

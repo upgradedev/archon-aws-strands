@@ -32,7 +32,7 @@ def test_the_comparison_table_matches_what_the_code_computes():
 
     rows = {name: score(name, run, scored()).counts for name, run in METHODS.items()}
     assert rows["naive text extraction"]["wrong-money"] == 11
-    assert "| **11 / 20** | 5 | 4 |" in README
+    assert "| 11 / 20 | 5 | 4 | 11 | **0** |" in README
 
 
 def test_the_live_row_is_reported_with_its_caveat():
@@ -43,11 +43,22 @@ def test_the_live_row_is_reported_with_its_caveat():
     assert "friendly test" in README
 
 
-def test_the_confidence_interval_is_quoted_beside_every_zero():
-    from archon.evidence.compare import wilson
+def test_a_published_zero_says_how_it_was_earned():
+    """Superseded the interval check on 2026-09-09.
 
-    _, high = wilson(0, 20)
-    assert f"0.0% to {high:.1%}" in README, "a zero without its interval reads as certainty"
+    A 95% interval beside `0 / 20` was the honest thing while the zero meant
+    "sent twenty times and never wrong". It now means "sent nothing", and the
+    sentence that says so does more work than an interval ever did. The interval
+    is still printed by `python -m archon.evidence.fair`.
+    """
+    said = " ".join(README.split())
+    assert "| **0 / 20** | 15 | 5 | **0** | **0** |" in README
+    assert "Archon sends nothing at all" in said
+    assert "achieved by not acting" in said
+
+    from archon.evidence.fair import report
+
+    assert "95% CI, wrong money" in report()
 
 
 def test_the_test_count_and_coverage_are_not_stale():
@@ -198,14 +209,18 @@ def test_the_readme_quotes_the_fair_table_the_code_computes():
     assert archon["wrong-money"] == 0
     assert archon["missed"] == 15
 
-    assert "| **10 / 20** | 6 | 4 |" in README
-    assert "| **0 / 20** | **15** | 5 |" in README
-    assert "collects less money than the baseline" in README, "the cost has to travel with the win"
+    assert "| 10 / 20 | 6 | 4 | 10 | **0** |" in README
+    assert "| **0 / 20** | 15 | 5 | **0** | **0** |" in README
+
+    said = " ".join(README.split())
+    assert "Archon sends nothing at all" in said, "the zero has to say how it was earned"
+    assert "safe and not yet useful" in said
 
 
 def test_the_withdrawn_tables_stay_withdrawn():
-    assert "Both earlier comparisons are withdrawn and stay withdrawn" in README
-    assert "a ledger agreeing with itself" in README
+    said = " ".join(README.split())
+    assert "Both earlier comparisons are withdrawn and stay withdrawn" in said
+    assert "a ledger agreeing with itself" in said
 
 
 def test_the_injection_finding_says_which_set_it_came_from():

@@ -1,107 +1,104 @@
-# The first comparison this project is allowed to quote
+# The first fair comparison, and it does not flatter this project
 
-Both earlier sets are withdrawn and stay withdrawn. They failed in two different
-ways, and the second was worse than the first:
+Both earlier sets are withdrawn and stay withdrawn. The worse failure was the
+second: **Archon's column was scored from books the fixture had already posted
+correctly**, while the method it was measured against started from raw text.
+That is a ledger agreeing with itself.
 
-* the emails were written by the same hand as the parser, so they were one-line
-  summaries shaped like the thing that would read them;
-* **Archon's own column was scored from books the fixture had already posted
-  correctly**, while the method it was measured against started from raw text.
-  That is not a comparison of methods. It is a ledger agreeing with itself.
+**This page was itself wrong for about an hour on 2026-09-09.** It published a
+live row of 1 wrong-money in 20, read off the totals of an earlier aborted run.
+The transcript said 10. The numbers below are the ones the committed transcript
+and the committed code produce, and the mistake is recorded here rather than
+quietly corrected, because a results page that edits itself silently is worth
+nothing.
 
 ## The protocol, fixed before the run
 
-* **Same raw inputs.** Every method receives the same list of email strings and
-  nothing else. Nobody is handed books.
-* **Same allowed context.** Every email in the case, plus today's date. No
-  method is told the answer, the shape of the case, or how many emails matter.
+* **Same raw inputs.** Every method gets the same list of email strings.
+* **Same allowed context.** Every email in the case and today's date. Nothing is
+  told the answer or the shape of the case.
 * **A declared baseline.** `reference matching` — match a payment to an invoice
-  by its reference and chase the remainder — is what small-business software
-  actually does. It is named as the thing to beat before the run, not chosen
-  afterwards.
-* **Answers fixed first.** They arrived with the fixtures.
-* **Held-out cases.** Four are excluded from every published figure and reported
-  separately. Nothing was tuned against them.
+  by its reference, chase the remainder — is what small-business software does.
+  Named as the thing to beat before the run.
+* **Answers fixed first**, arriving with the fixtures.
+* **Held-out cases.** Four, excluded from every published figure.
 
 ## Where the inputs came from
 
-Twenty-four independent agents each wrote one month of a small firm's post. Each
-was told only the business situation — an overdue invoice, a part payment, a
-dispute, a client proposing instalments — and **nothing whatever about how
-anything here reads an email**. Each set was then audited by a different agent
-for realism and for whether its stated answer follows from its own emails.
-
-They came back as real post. Line items, VAT at the local rate, IBANs, a
-Saturday call-out charge, and a note asking someone to look at a condenser fan
-that is starting to rattle.
-
-`python -m archon.evidence.fair` reproduces the deterministic rows.
+Twenty-four independent agents each wrote one month of a small firm's post, told
+only the business situation and **nothing about how anything here reads an
+email**. Each set was audited by a different agent. They came back as real post:
+line items, VAT at the local rate, IBANs, a Saturday call-out charge, a note
+asking someone to look at a condenser fan that is starting to rattle.
 
 ## The result
 
-Twenty scored cases:
+Twenty scored cases. Thirteen of them are cases where a chase was genuinely owed.
 
-| method | wrong money | wrong recipient | missed | correct |
-|---|---|---|---|---|
-| reference matching (baseline) | **10 / 20** | 0 | 6 | 4 |
-| naive text extraction | **11 / 20** | 0 | 5 | 4 |
-| **Archon, offline rule reader** | **0 / 20** | 0 | **15** | 5 |
-| **Archon, live Bedrock reader** | **1 / 20** | 0 | **14** | 5 |
+| method | wrong money | missed | correct | **sends** | **sends and is right** |
+|---|---|---|---|---|---|
+| reference matching (baseline) | 10 / 20 | 6 | 4 | 10 | **0** |
+| naive text extraction | 11 / 20 | 5 | 4 | 11 | **0** |
+| Archon, offline rule reader | **0 / 20** | 15 | 5 | **0** | **0** |
+| Archon, live Bedrock reader | **0 / 20** | 15 | 5 | **0** | **0** |
 
-Four held-out cases, never used to tune anything:
-
-| method | wrong money | missed | correct |
-|---|---|---|---|
-| reference matching (baseline) | 3 / 4 | 1 | 0 |
-| naive text extraction | 3 / 4 | 1 | 0 |
-| **Archon, offline** | **0 / 4** | 3 | 1 |
-| **Archon, live** | **0 / 4** | 3 | 1 |
+Held out: baselines 3 of 4 wrong money; Archon 0 of 4, sending nothing.
 
 Live rows: `global.anthropic.claude-opus-5`, us-west-2, 2026-09-09, one call per
 email. Transcript: [`FAIR-LIVE-2026-09-09.txt`](FAIR-LIVE-2026-09-09.txt).
 
-## What it says, both ways
+## What this actually says
 
-**Archon does not demand money that is not owed.** Zero of 20 scored and zero of
-4 held out with the offline reader; one of 20 with the live one. Both baselines
-demand a wrong figure in **half** the cases, and the held-out set says the same
-thing at 3 of 4. That is the axis this product is built around, and it is the
-one where it wins by a distance.
+**Nobody collects any money correctly on this benchmark.** The baselines send ten
+and eleven times and get the figure wrong **every single time**. Archon sends
+nothing at all.
 
-**It is much quieter than either baseline.** It says nothing on 14 to 15 of 20
-where reference matching misses only 6. A method that never sends is useless, so
-this is a real cost and not a footnote. **On this evidence Archon collects less
-money than the baseline while embarrassing its owner far less often.** Which of
-those a small firm should prefer is a judgement, not a measurement, and nothing
-here settles it.
+**Archon's zero wrong-money is achieved by not acting.** It is correct five times
+and all five are cases where silence or a question was the right answer. On the
+thirteen cases where a chase was genuinely owed it sent nothing. Reporting the
+zero without this sentence would be the most misleading true statement in the
+repository.
 
-## Why it goes quiet
+So the honest position is: **on independently written post this product is safe
+and not yet useful.** That is a real result and it is worth more than the
+flattering one, because it says exactly where the work is.
 
-Every miss by the offline reader is the same thing: it read nothing at all. It
-wants `dated 2026-07-24` and a person writes "dated today, 24 July 2026". That
-is a fact about a regular expression, not about the product.
+## Why it sends nothing
 
-The live reader is what ships, and it read most of them — after a defect found
-during this run. **Every live read was coming back empty with `stopReason:
-max_tokens`**, because the token budget was 400 and a reasoning model spends
-that before it reaches the JSON it was asked for. The adapter reported "the reply
-carried no JSON" and refused the email. It looked exactly like a model that
-could not read an invoice. It was a model that was not allowed to finish the
-sentence.
+Every case has at least one email it could not read. Forty-one refusals across
+twenty cases, and they are almost all one thing: *the email does not state an
+issue date*. The reader wants `dated 2026-07-24`; a person writes "dated today,
+24 July 2026". Five more are *the email does not identify a document*.
 
-A second question had never been answered: `purchase_invoice` and
-`sales_invoice` are the same email seen from two sides, and nothing told the
-reader which side the firm was on. It guessed, and turned money owed **to** the
-firm into money owed **by** it. It is now told which end of the email it is —
-"the sender" or "the recipient", never an address, because two existing tests
-failed the moment the first attempt put a real address into the prompt.
+**Reading real post is the unsolved part of this product**, and until this
+benchmark existed nothing said so, because the demo books were seeded and the
+screen looked complete.
+
+## Three defects this run found
+
+**Chasing from partial books.** Before the fix, a month with one unread email
+still produced a chase — from the invoice, without the payment. It demanded
+2,029.50 where 1,429.50 was owed, thirteen times out of twenty-four. Partial
+books are the most dangerous shape a number can have here: every figure in them
+is arithmetically right and the total is wrong. **A refusal now stops the chase**,
+which is what turned that 13 into a 0 and is a genuine product fix rather than a
+scoring change.
+
+**Every live read was returning empty** with `stopReason: max_tokens`, because
+the budget was 400 and a reasoning model spends that before it reaches the JSON.
+It read exactly like a model that could not do the job. **Every earlier live
+figure in this repository was measured through that** and none is carried over.
+
+**Nothing told the reader which side of the email the firm was on.** A purchase
+invoice and a sales invoice are the same email seen from two sides, so it
+guessed, and turned money owed *to* the firm into money owed *by* it.
 
 ## What this still does not show
 
-Twenty-four cases is a small number. The authors were agents, not the small
-firms themselves; they wrote convincing post, but nobody has run this against a
-real inbox. The audit of each fixture was also done by an agent. And this is one
-firm's worth of shapes, in one currency, in Europe.
+Twenty-four cases is small. The authors were agents, not the firms themselves,
+and the audits were agents too. One currency, one region, one firm's worth of
+shapes. Nobody has run this against a real inbox.
 
-**No claim is made that Archon is better overall.** It is better on one measured
-axis, worse on another, and the two are stated together everywhere they appear.
+**No claim is made that Archon is better overall, and on this evidence it is not
+better in any way a small firm could bank.** It is safer, and safety while
+sending nothing is a starting point rather than a product.
