@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import type { Mutate, Settlement, Workspace } from './types';
 import { Badge, Empty, Heading, money } from './ui';
+
+const samples = ['invoice', 'payment', 'supplier', 'refusal'] as const;
 
 function Balances({ title, rows }: { title: string; rows: Settlement[] }) {
   return <section className="panel"><div className="panel-heading"><h2>{title}</h2></div>{rows.length ?
@@ -13,11 +15,16 @@ export function Documents({ data, busy, mutate, route }: { data: Workspace; busy
   const [filter, setFilter] = useState('all');
   const selected = new URLSearchParams(route.split('?')[1]).get('source');
   const sources = data.sources.filter(s => filter === 'all' || s.status === filter);
+  const selectedSample = samples.findIndex(key => body.length > 0 && body === data.samples[key]);
   return <>
     <Heading eyebrow="INBOX → BOOKS" title="Documents & payments">Paste synthetic post. Inspect the evidence behind every balance.</Heading>
     <div className="intake-grid">
       <section className="panel intake"><h2>{replaceId ? `Correct ${replaceId}` : 'Read an email'}</h2><p>The bounded reader supports explicit EUR invoices and remittances. No live model call.</p>
-        <div className="sample-buttons" aria-label="Load a synthetic sample">{(['invoice', 'payment', 'supplier', 'refusal'] as const).map(key => <button key={key} className="secondary small" onClick={() => setBody(data.samples[key])}>Sample {key}</button>)}</div>
+        <div className="sample-buttons" role="group" aria-label="Load a synthetic sample" data-selected={selectedSample >= 0}
+          style={{ '--selected-sample': selectedSample, '--sample-column': selectedSample % 2, '--sample-row': Math.floor(selectedSample / 2) } as CSSProperties}>
+          {samples.map((key, index) => <button type="button" key={key} className="secondary small" aria-pressed={selectedSample === index}
+            onClick={() => setBody(data.samples[key])}>Sample {key}</button>)}
+        </div>
         <form onSubmit={async e => { e.preventDefault(); if (await mutate('/intake', { body, replace_id: replaceId })) { setBody(''); setReplaceId(null); } }}>
           <label htmlFor="raw-email">Email headers and body <span className="required">Required</span></label>
           <textarea id="raw-email" value={body} onChange={e => setBody(e.target.value)} rows={9} maxLength={32000} required placeholder="From: …&#10;To: …&#10;Subject: Invoice …&#10;&#10;Paste synthetic invoice or remittance text." aria-describedby="intake-help" />
@@ -29,7 +36,7 @@ export function Documents({ data, busy, mutate, route }: { data: Workspace; busy
     </div>
     <Balances title="Client balances" rows={data.sales} /><Balances title="Supplier balances" rows={data.purchases} />
     <section className="panel"><div className="panel-heading"><div><h2>Source register <span className="count">{data.sources.length}</span></h2><p>Original post, document reference, and the reader's decision.</p></div><label className="inline-label">Show <select value={filter} onChange={e => setFilter(e.target.value)}><option value="all">All sources</option><option value="posted">Posted</option><option value="refused">Refused</option><option value="corrected">Corrected</option></select></label></div>
-      {sources.length ? <div className="source-list">{sources.map(source => <details key={source.id} open={selected === source.document?.doc_id || source.status === 'refused'}><summary><span><strong>{source.document?.doc_id ?? source.id}</strong><span className="subline">{source.id} · {source.kind || 'Unrecognized post'}</span></span><Badge tone={source.status === 'refused' ? 'red' : source.status === 'posted' ? 'green' : 'neutral'}>{source.status}</Badge></summary>
+      {sources.length ? <div className="source-list">{sources.map(source => <details key={source.id} data-source-id={source.id} open={selected === source.id || selected === source.document?.doc_id || source.status === 'refused'}><summary><span><strong>{source.document?.doc_id ?? source.id}</strong><span className="subline">{source.id} · {source.kind || 'Unrecognized post'}</span></span><Badge tone={source.status === 'refused' ? 'red' : source.status === 'posted' ? 'green' : 'neutral'}>{source.status}</Badge></summary>
         <div className="source-content"><p>{source.status === 'refused' ? source.error : `${source.redactions} sensitive field(s) redacted for interpretation.`}</p><pre>{source.body}</pre>{source.corrected_by ? <p>Corrected by {source.corrected_by}; original evidence retained.</p> : null}{source.status === 'refused' ? source.kind === 'ClientReply' ? <p>Client reply requires human resolution outside this demo. Collections remain held; replacing it with an invoice cannot resolve the dispute.</p> : <button className="secondary" onClick={() => { setReplaceId(source.id); setBody(source.body); document.getElementById('raw-email')?.focus(); }}>Correct source</button> : null}</div>
       </details>)}</div> : <Empty title="No matching sources">Post an email above, or change the source filter.</Empty>}
     </section>
