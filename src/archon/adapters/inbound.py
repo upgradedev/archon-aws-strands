@@ -29,6 +29,7 @@ here reaches it. The test suite contains that email.
 
 from __future__ import annotations
 
+import hashlib
 import io
 import json
 import re
@@ -406,9 +407,12 @@ class LocalReader:
 
         paid, settles = one(self._PAID), one(self._SETTLES)
         if paid and settles:
+            receipt_key = hashlib.sha256(body.encode()).hexdigest()[:12]
             return {
                 "kind": "receipt",
-                "doc_id": f"RC-{settles.replace(' ', '')}",
+                # Separate remittances against one invoice must not collide.
+                # Re-reading identical evidence still yields the same identity.
+                "doc_id": f"RC-{settles.replace(' ', '')}-{receipt_key}",
                 "settles": settles.replace(" ", ""),
                 "issued": one(self._DATED),
                 "amount": paid,
@@ -428,8 +432,7 @@ class LocalReader:
         # that is the only kind worth chasing. A "To:" header carrying an
         # address is what makes it chaseable, because a chase needs somewhere to
         # go.
-        billed_to = one(self._TO)
-        if self._ISSUED_BY_US.search(body) and billed_to:
+        if self._ISSUED_BY_US.search(body):
             # The address itself is masked by now and is put back by the caller
             # from the raw text. All this decides is which way the money runs.
             return {
@@ -447,6 +450,7 @@ class LocalReader:
             "counterparty": self._counterparty(one(self._FROM)),
             **common,
         }
+
 
 #: What a page must yield before it is treated as readable. A PDF that extracts
 #: two stray characters is a scan with a stray character, not a document.

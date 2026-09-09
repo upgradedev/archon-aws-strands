@@ -62,6 +62,15 @@ jobs:
       - name: Python lint
         if: always()
         run: python -m ruff check src tests
+      - name: Early build and test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-checkpoint-${{ github.run_id }}
+          path: |
+            frontend/dist/
+            frontend/artifacts/
+            frontend/coverage/
       - name: Real HTTP browser journeys, desktop and mobile
         if: always() && steps.build.outcome == 'success'
         working-directory: frontend
