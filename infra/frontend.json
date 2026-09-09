@@ -1,0 +1,7 @@
+{
+  "product": "archon",
+  "repository": "upgradedev/archon-aws-strands",
+  "stack": "archon-frontend",
+  "region": "eu-west-1",
+  "api_domain": ""
+}
