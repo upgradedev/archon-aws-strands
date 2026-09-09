@@ -1,32 +1,53 @@
 import type { Mutate, Workspace } from './types';
 import { Badge, Empty, Heading, money } from './ui';
+import { Approvals } from './Approvals';
+import { DraftEvidence } from './DraftEvidence';
+import { linkedSources, reasonTarget, routeInfo, unique, workspaceLink } from './ledger';
 
-export function Queue({ data, busy, mutate }: { data: Workspace; busy: boolean; mutate: Mutate }) {
+export function Queue({ data, busy, mutate, route = '/workspace', stale = false, reviewEpoch = 0 }: {
+  data: Workspace; busy: boolean; mutate: Mutate; route?: string; stale?: boolean; reviewEpoch?: number;
+}) {
+  const { params } = routeInfo(route);
+  const target = reasonTarget(data);
+  const invoice = params.get('invoice') ?? data.draft?.invoice_id ?? target.id ?? data.sales[0]?.doc_id ?? '';
+  const balance = data.sales.find(s => s.doc_id === invoice);
+  const sources = linkedSources(data, invoice);
+  const selectedSource = params.get('source');
+  const source = selectedSource ? sources.find(s => s.id === selectedSource || s.document?.doc_id === selectedSource) : sources[0];
+  const view = params.get('view') === 'terms' ? 'terms' : 'draft';
   const held = data.holds.length > 0;
+  const canPrepare = !!target.id && target.id === invoice && !target.issue && !held && !stale && !busy && (!selectedSource || !!source);
+  const items = unique([...data.queue.ready, ...data.queue.blocked], item => item.invoice_id);
   return <>
-    <Heading eyebrow="YOUR DAILY WORKSPACE" title="Action queue">Know what is owed. See what can move. Approve every outgoing word.</Heading>
-    <section className="stats" aria-label="Ledger balances">
-      {[
-        ['Owed to you', data.metrics.owed_by_clients, 'Open client invoices'],
-        ['Overdue', data.metrics.overdue_amount, `${data.metrics.overdue_count} overdue invoice${data.metrics.overdue_count === 1 ? '' : 's'}`],
-        ['You owe', data.metrics.owed_to_suppliers, 'Open supplier invoices'],
-        ['Bank movement', data.metrics.bank, 'Recorded payments and receipts'],
-      ].map(([label, amount, note]) => <div className="stat" key={label}><p>{label}</p><strong>{money(amount)}</strong><small>{note}</small></div>)}
-    </section>
-    {held ? <div className="notice warning"><strong>Collections held · incomplete evidence</strong><p>{data.holds.length} refused source email(s) may change these balances. Correct them before any chase can be prepared.</p><a href="#/documents">Review refused sources →</a></div> : null}
-    <section className="panel">
-      <div className="panel-heading"><div><h2>Ready for review <span className="count">{held ? 0 : data.queue.ready.length}</span></h2><p>Oldest overdue first, then largest balance. Ranked by the books.</p></div><Badge tone="blue">EUR ledger</Badge></div>
-      {!data.queue.ready.length ? <Empty title="Nothing to chase yet">Add a sales invoice and its payments in <a href="#/documents">Documents & payments</a>. Settled invoices and agreed arrangements stay out of this queue.</Empty> :
-        <div className="table-scroll"><table><caption className="sr-only">Outstanding sales invoices</caption><thead><tr><th>Client / invoice</th><th>Age</th><th className="numeric">Outstanding</th><th>Status</th></tr></thead><tbody>{data.queue.ready.map(item => <tr key={item.invoice_id}>
-          <td><strong>{item.client}</strong><a className="subline" href={`#/documents?source=${encodeURIComponent(item.invoice_id)}`}>{item.invoice_id} · View evidence ↗</a></td>
-          <td>{item.days_overdue} days overdue</td><td className="numeric money">{money(item.outstanding)}</td><td><Badge tone={held ? 'red' : 'amber'}>{held ? 'Evidence held' : 'Approval required'}</Badge></td>
-        </tr>)}</tbody></table></div>}
-      <div className="panel-footer"><p>Six ledger readers must report before the composer runs.</p><button className="primary" disabled={busy || held || !data.queue.ready.length} onClick={async () => { if (await mutate('/reason')) location.hash = '/approvals'; }}>{busy ? 'Working…' : 'Run Strands & prepare draft'} <span aria-hidden="true">→</span></button></div>
-      {held || !data.queue.ready.length ? <p className="disabled-reason">{held ? 'Disabled until every refused source is corrected.' : 'Available when an invoice is overdue and chaseable.'}</p> : null}
-    </section>
-    <section className="panel"><div className="panel-heading"><div><h2>On hold & not yet due <span className="count">{data.queue.blocked.length}</span></h2><p>Every balance stays visible, with the reason it cannot be chased.</p></div></div>
-      {data.queue.blocked.length ? <ul className="hold-list">{data.queue.blocked.map(item => <li key={item.invoice_id}><div><strong>{item.client} · {item.invoice_id}</strong><p>{item.reason}</p></div><span className="money">{money(item.outstanding)}</span></li>)}</ul> : <p className="section-note">No held or future-due invoices in this workspace.</p>}
-    </section>
-    <div className="note-grid"><div><h3>Real books. Synthetic business.</h3><p>Every number comes from posted source documents and decimal arithmetic. No bank or mailbox is connected.</p></div><div><h3>The honest limit</h3><p>The independent benchmark produced zero chases. Unreadable post remains a blocker; a clean error column does not prove useful collections.</p></div></div>
+    <Heading eyebrow="FINOPS / COLLECTIONS DESK" title="Workspace">Inspect one case. Follow its sources. Review one exact decision.</Heading>
+    <div className="scope-line"><span>My Joinery · EUR · As of {data.as_of} · Revision {data.revision}</span><a href="#/records?intake=open">Add invoice or payment →</a></div>
+    {held ? <div className="notice warning"><strong>Collections held · incomplete evidence</strong><p>{data.holds.length} refused source email(s) may change these balances.</p><a href="#/records?filter=refused">Review refused sources →</a></div> : null}
+    <div className="collections-desk" data-testid="selected-workspace">
+      <aside className="panel case-context" aria-label="Queue and case sources">
+        <div className="panel-heading"><div><h2>Priority queue <span className="count">{items.length}</span></h2><p>Overdue invoices and recorded holds.</p></div></div>
+        {items.length ? <ul className="case-list hold-list">{items.map(item => <li key={item.invoice_id}><a className="case-row" href={workspaceLink(item.invoice_id)} aria-current={item.invoice_id === invoice ? 'true' : undefined}>
+          <div><strong>{item.client}</strong><span className="subline">{item.invoice_id}</span></div><strong className="case-amount">{money(item.outstanding)}</strong>
+          <span className="case-status">{item.reason || (held ? 'Evidence held' : `${item.days_overdue} days overdue`)}{target.id === item.invoice_id ? ' · Backend priority' : ''}</span>
+        </a></li>)}</ul> : <Empty title="Nothing to chase yet">Add a sales invoice and its payments in <a href="#/records?intake=open">Records</a>. Settled invoices and agreed arrangements stay out of the ready queue.</Empty>}
+        <div className="panel-heading"><div><h2>Case sources</h2><p>{balance ? `${invoice} · retained post` : 'Select an invoice to inspect its evidence.'}</p></div></div>
+        <div className="case-sources">{sources.length ? sources.map(item => <a className="source-choice" key={item.id} href={workspaceLink(invoice, item.id, view)} aria-current={source?.id === item.id ? 'true' : undefined}>
+          <strong>{item.kind === 'Receipt' ? 'Recorded receipt' : 'Invoice'} · {item.document?.doc_id}</strong><span>{item.id} · {item.status}</span>{item.document?.amount ? <span>{money(item.document.amount)}</span> : null}
+        </a>) : <p className="section-note">No linked posted source is available for this selection.</p>}</div>
+        {data.holds.length ? <div className="case-sources"><h3>Source holds</h3>{data.holds.map(item => <a key={item.id} className="source-choice" href={`#/records?filter=refused&source=${encodeURIComponent(item.id)}`}><strong>{item.id}</strong><span>{item.error}</span></a>)}</div> : null}
+        <div className="case-guidance"><p>The backend prepares only its oldest overdue invoice, then the largest on a tie. Selecting evidence does not retarget that operation.</p><p>Six ledger readers must report before the composer runs.</p></div>
+      </aside>
+      <section className="case-review" aria-label="Document and signoff">
+        {!balance ? <div className="panel"><Empty title={invoice ? 'Selected invoice unavailable' : 'No invoice selected'}>{invoice ? <>The invoice {invoice} is not in this session. <a href="#/workspace">Return to current cases</a>.</> : <>Post a synthetic invoice in <a href="#/records?intake=open">Records</a> to start.</>}</Empty></div> : <>
+          <section className="panel document-preview"><div className="panel-heading"><div><p className="eyebrow">SELECTED CASE</p><h2>{invoice} · {balance.counterparty}</h2></div><Badge tone="blue">{money(balance.outstanding)} outstanding</Badge></div>
+            <div className="source-preview">{source ? <details open key={source.id} data-source-id={source.id}><summary>{source.document?.doc_id} · {source.id} · Original source</summary><pre>{source.body}</pre><a href={`#/records?source=${encodeURIComponent(source.id)}`}>Open in source register ↗</a></details> : <p>{selectedSource ? 'Selected source does not belong to this invoice. Choose a case source.' : 'Original invoice source unavailable. The ledger balance alone is not a source document.'}</p>}</div>
+            <dl className="arithmetic-trace" aria-label="Invoice arithmetic"><div><dt>Invoice total</dt><dd>{money(balance.gross)}</dd></div><span aria-hidden="true">−</span><div><dt>Recorded receipts</dt><dd>{money(balance.settled)}</dd></div><span aria-hidden="true">=</span><div><dt>Outstanding</dt><dd>{money(balance.outstanding)}</dd></div></dl>
+          </section>
+          <div className="workspace-tabs" role="group" aria-label="Case review"><a href={workspaceLink(invoice, source?.id, 'draft')} aria-current={view === 'draft' ? 'page' : undefined}>Draft & signoff</a><a href={workspaceLink(invoice, source?.id, 'terms')} aria-current={view === 'terms' ? 'page' : undefined}>Payment arrangement</a></div>
+          {view === 'draft' ? <section className="prepare-panel"><button className="primary" disabled={!canPrepare} onClick={async () => { const origin = location.hash; if (await mutate('/reason')) { if (location.hash === origin) location.hash = workspaceLink(invoice, source?.id).slice(1); } }}>{busy ? 'Working…' : 'Run Strands & prepare draft'}</button><p className="field-help">{stale ? 'Refresh durable state before preparing or approving.' : held ? 'Disabled until every refused source is corrected.' : target.id !== invoice && target.id ? <>This case is evidence only for collection drafting. <a href={workspaceLink(target.id)}>Open backend priority {target.id} →</a></> : target.issue || `Prepares the backend priority ${target.id}. No email is sent.`}</p></section> : null}
+          {view === 'terms' || !data.draft || data.draft.invoice_id === invoice ? <Approvals key={`${invoice}-${source?.id}-${view}-${reviewEpoch}-${data.revision}`} data={data} busy={busy} mutate={mutate} mode={view} selectedInvoice={invoice} stale={stale || !!selectedSource && !source} /> : <section className="panel"><Empty title="Draft belongs to another invoice">The stored draft is for {data.draft.invoice_id}. <a href={workspaceLink(data.draft.invoice_id)}>Review that exact draft →</a></Empty><DraftEvidence data={data} invoiceId={invoice} /></section>}
+        </>}
+        {!balance ? <section className="prepare-panel"><button className="primary" disabled>Run Strands & prepare draft</button><p className="field-help">{target.issue || 'Select the backend priority invoice before preparing a draft.'}</p></section> : null}
+      </section>
+    </div>
   </>;
 }

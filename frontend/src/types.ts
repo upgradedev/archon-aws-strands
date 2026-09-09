@@ -30,7 +30,7 @@ export interface Workspace {
   cashflow: { inflow: string; outflow: string; net: string };
   trial_balance: string; arrangements: Arrangement[];
   proposal: { invoice_id: string; outcome: string; why: string; fingerprint: string;
-    plan: Arrangement | null } | null;
+    at?: string; body?: string; plan: Arrangement | null } | null;
   graph: { at: string; mode: string; reports: Record<string, string> } | null;
   draft: { invoice_id: string; recipient: string; subject: string; body: string;
     fingerprint: string; at: string; claims: string[] } | null;
