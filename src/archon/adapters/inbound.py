@@ -182,6 +182,17 @@ def addresses_on(raw: str) -> dict[str, str]:
     return found
 
 
+def _usable_address(value: object) -> bool:
+    """An address a chase could actually be sent to.
+
+    The model is shown `[REDACTED_EMAIL]` and sometimes echoes it back. That echo
+    is truthy, so a plain falsiness check let the marker stand where an address
+    belonged and skipped the local fill-in entirely.
+    """
+    text = str(value or "")
+    return "@" in text and "REDACTED" not in text.upper()
+
+
 def _whose_books(here: dict[str, str], ours: str) -> str:
     """Say which SIDE of this email the firm is on, naming no address.
 
@@ -254,8 +265,16 @@ def read_email(
     # The address the model was never shown. Taken from the raw text on this
     # machine and put back only now, so a chase has somewhere to go.
     here = addresses_on(raw)
-    if fields.get("kind") == "sales_invoice" and not fields.get("counterparty_email"):
-        fields["counterparty_email"] = here.get("To", "")
+    if fields.get("kind") == "sales_invoice" and not _usable_address(
+        fields.get("counterparty_email")
+    ):
+        # Whichever side we are on, the counterparty is the OTHER one. Taking the
+        # To: header regardless meant that when the firm was the recipient the
+        # chase was addressed to the person sending it.
+        we_are_the_recipient = bool(ours) and ours == here.get("To")
+        fields["counterparty_email"] = (
+            here.get("From", "") if we_are_the_recipient else here.get("To", "")
+        )
 
     try:
         document = _document(fields, source_ref)
@@ -291,9 +310,18 @@ class LocalReader:
     label = "read by rules, offline; no model was called"
 
     _ID = re.compile(r"\b(?:invoice|inv\.?|ref(?:erence)?)[\s:#]*([A-Z]{1,4}[-_ ]?\d{1,8})\b", re.I)
+    #: The words that actually introduce the date of a document. A bare "on"
+    #: was added here so a remittance reading "paid 600.00 EUR on 2026-08-20"
+    #: would parse, and it then matched any date preceded by that word: "we
+    #: are closed on 2026-08-24" became an invoice date.
+    #:
+    #: The payment form keeps a gap, because a person writes the amount between
+    #: the verb and the date, and that amount contains a full stop. The gap is
+    #: bounded at forty characters and cannot cross a line.
     _DATED = re.compile(
-        r"\b(?:dated|issued|invoice date|paid on|received on|value date|on)"
-        r"[\s:]*(\d{4}-\d{2}-\d{2})",
+        r"\b(?:dated|issued|invoice date|value date)[\s:]*(\d{4}-\d{2}-\d{2})"
+        r"|\b(?:paid|sent|transferred|received|credited|remitted)\b"
+        r"[^\n]{0,40}?\bon\s+(\d{4}-\d{2}-\d{2})",
         re.I,
     )
     _DUE = re.compile(r"\bdue[\s:]*(?:on[\s:]*)?(\d{4}-\d{2}-\d{2})", re.I)
@@ -363,8 +391,18 @@ class LocalReader:
 
     def _fields(self, body: str) -> dict:
         def one(pattern: re.Pattern[str]) -> str | None:
+            """The first captured group that actually matched.
+
+            `_DATED` has two alternatives and therefore two groups, so taking
+            group 1 blindly returned None whenever the payment form matched.
+            """
             found = pattern.search(body)
-            return found.group(1).strip() if found else None
+            if not found:
+                return None
+            for group in found.groups():
+                if group:
+                    return group.strip()
+            return None
 
         paid, settles = one(self._PAID), one(self._SETTLES)
         if paid and settles:

@@ -152,3 +152,64 @@ def test_the_screen_never_falls_back_to_the_other_reader(client):
 def test_which_reader_ran_is_recorded(client):
     client.post("/post", data={"body": INVOICE, "reader": "rules"})
     assert session.read_by == "rules"
+
+
+# --- from the adversarial review of 2026-09-09 --------------------------------
+
+
+def test_a_date_after_a_bare_on_is_not_an_invoice_date():
+    """The pattern was widened to read a remittance and took too much with it.
+
+    "We are closed on 2026-08-24" is not an issue date, and a reader that takes
+    it produces an invoice aged from the wrong day.
+    """
+    reader = LocalReader()
+    assert reader._DATED.search("Our office reopens on 2026-09-01.") is None
+    assert reader._DATED.search("The skip is collected on 2026-09-03.") is None
+
+
+def test_the_payment_date_is_still_read_through_the_amount():
+    """A person writes the figure between the verb and the date."""
+    found = LocalReader()._DATED.search("We have paid 600.00 EUR on 2026-08-20 against JN-1.")
+    assert found is not None
+    assert "2026-08-20" in found.groups()
+
+
+def test_an_invoice_date_wins_over_a_stray_one_elsewhere_in_the_email():
+    reader = LocalReader()
+    found = reader._DATED.search("We are closed on 2026-08-24. Invoice JN-2 dated 2026-07-05.")
+    assert next(g for g in found.groups() if g) == "2026-07-05"
+
+
+def test_a_redaction_marker_is_never_used_as_a_client_address():
+    """The model is shown the marker and sometimes echoes it back.
+
+    That echo is truthy, so a plain falsiness check let it stand where an
+    address belonged and skipped the local fill-in entirely.
+    """
+    from archon.adapters.inbound import _usable_address
+
+    assert not _usable_address("[REDACTED_EMAIL]")
+    assert not _usable_address("")
+    assert not _usable_address(None)
+    assert _usable_address("accounts@buildco.example")
+
+
+def test_the_counterparty_is_the_other_side_of_the_email():
+    """When the firm is the recipient, To: is the firm itself.
+
+    Filling the chase address from To: regardless would address a demand for
+    money to the person sending it.
+    """
+    received = (
+        "From: accounts@buildco.example\n"
+        "To: me@myjoinery.example\n"
+        "Subject: Invoice BC-9\n\n"
+        "Our invoice to My Joinery. Invoice BC-9 dated 2026-07-02, due 2026-08-01. "
+        "Net 100.00 EUR, VAT 24.00 EUR, total 124.00 EUR."
+    )
+    reading = read_email(received, "email:r", client=LocalReader(), ours="me@myjoinery.example")
+    document = reading.document
+    if type(document).__name__ == "SalesInvoice":
+        assert document.client_email == "accounts@buildco.example"
+        assert document.client_email != "me@myjoinery.example"

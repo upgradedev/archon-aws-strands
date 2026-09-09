@@ -5,7 +5,7 @@
 Built for **Agents for Humans (AWS)**, track **Professional Agents**, on the **Strands Agents SDK** and **Amazon Bedrock**.
 
 [![CI](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml)
-[![tests](https://img.shields.io/badge/tests-489%20offline%2C%20no%20key%2C%20no%20network-22c55e)](#run-it)
+[![tests](https://img.shields.io/badge/tests-494%20offline%2C%20no%20key%2C%20no%20network-22c55e)](#run-it)
 [![coverage](https://img.shields.io/badge/branch%20coverage-92%25-22c55e)](#run-it)
 [![model](https://img.shields.io/badge/Bedrock-claude--opus--5-8b5cf6)](#how-it-is-put-together)
 [![licence](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
@@ -258,7 +258,7 @@ tool; the judgement did not.
 
 | | |
 |---|---|
-| the ledger, six domains, P&L, cash, metrics | real, 489 tests, 92% branch coverage |
+| the ledger, six domains, P&L, cash, metrics | real, 494 tests, 92% branch coverage |
 | the six-agent Strands graph | real, runs on `strands-agents` 1.53 and 1.54 |
 | Bedrock | real, `eu.anthropic.claude-opus-5`, verified by a live call |
 | SES send, idempotent, with receipt | real code; **the account is in the SES sandbox**, so it can send only to verified addresses |
