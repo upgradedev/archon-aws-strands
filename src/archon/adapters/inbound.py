@@ -148,6 +148,33 @@ def _document(fields: dict, source_ref: str):
     raise UnreadablePost(f"no posting rule for a {kind!r}")
 
 
+#: Addresses on the raw email, read here and never sent anywhere.
+_HEADER_ADDRESS = re.compile(r"^(From|To|Reply-To):\s*(?:.*?<)?([^\s<>@]+@[^\s<>,;]+)", re.I | re.M)
+
+
+def addresses_on(raw: str) -> dict[str, str]:
+    """Who the email is from and to, taken from the text before it is redacted.
+
+    This exists because of a real contradiction. Redaction masks every address on
+    the way to the model, which is right: a model does not need to know who owes
+    the money in order to read what is owed. But a chase has to be *addressed*,
+    and the ledger does need it.
+
+    So the address is lifted here, on this machine, and handed to the document
+    directly. The model still sees `[REDACTED_EMAIL]` and could not leak a client
+    address if it tried, because it was never shown one.
+
+    Before this, no sales invoice could be read from an email at all: the reader
+    looked for an address in text where every address had already been masked,
+    found none, and refused. The entire collections journey existed only in the
+    seeded demo books.
+    """
+    found: dict[str, str] = {}
+    for header, address in _HEADER_ADDRESS.findall(raw):
+        found.setdefault(header.title(), address.strip().rstrip(">,;"))
+    return found
+
+
 def read_email(raw: str, source_ref: str, client=None, model_id: str = MODEL_ID) -> Reading:
     """Sanitize, ask, then check. Raises `UnreadablePost` rather than guessing."""
     if client is None:  # pragma: no cover - needs credentials
@@ -171,6 +198,12 @@ def read_email(raw: str, source_ref: str, client=None, model_id: str = MODEL_ID)
         raise UnreadablePost("the reply carried unparseable JSON") from exc
     if not isinstance(fields, dict):
         raise UnreadablePost("the reply was not an object")
+
+    # The address the model was never shown. Taken from the raw text on this
+    # machine and put back only now, so a chase has somewhere to go.
+    here = addresses_on(raw)
+    if fields.get("kind") == "sales_invoice" and not fields.get("counterparty_email"):
+        fields["counterparty_email"] = here.get("To", "")
 
     try:
         document = _document(fields, source_ref)
@@ -206,7 +239,11 @@ class LocalReader:
     label = "read by rules, offline; no model was called"
 
     _ID = re.compile(r"\b(?:invoice|inv\.?|ref(?:erence)?)[\s:#]*([A-Z]{1,4}[-_ ]?\d{1,8})\b", re.I)
-    _DATED = re.compile(r"\b(?:dated|issued|invoice date)[\s:]*(\d{4}-\d{2}-\d{2})", re.I)
+    _DATED = re.compile(
+        r"\b(?:dated|issued|invoice date|paid on|received on|value date|on)"
+        r"[\s:]*(\d{4}-\d{2}-\d{2})",
+        re.I,
+    )
     _DUE = re.compile(r"\bdue[\s:]*(?:on[\s:]*)?(\d{4}-\d{2}-\d{2})", re.I)
     _NET = re.compile(r"\bnet[\s:]*([\d,]+\.\d{2})", re.I)
     _VAT = re.compile(r"\bvat[\s:]*([\d,]+\.\d{2})", re.I)
@@ -214,6 +251,33 @@ class LocalReader:
     _PAID = re.compile(r"\b(?:paid|remitted|transferred)[\s:]*([\d,]+\.\d{2})", re.I)
     _SETTLES = re.compile(r"\bagainst[\s:]*(?:invoice[\s:]*)?([A-Z]{1,4}[-_ ]?\d{1,8})\b", re.I)
     _FROM = re.compile(r"^From:\s*(.+)$", re.M)
+    _TO = re.compile(r"^To:\s*(.+)$", re.M)
+    #: An invoice the trader ISSUED says so. Without a signal like this the
+    #: offline reader called everything a purchase, so the whole collections
+    #: journey — the thing this product is about — could not be reached from a
+    #: pasted email at all, and existed only in the seeded demo books.
+    _ISSUED_BY_US = re.compile(
+        r"\b(?:invoice (?:to|for)|billed to|charged to|our invoice to)\b", re.I
+    )
+
+    #: A client's name as a person writes it in the sentence that names them.
+    _BILLED_TO_NAME = re.compile(
+        r"\b(?:invoice (?:to|for)|billed to|charged to|our invoice to)\s+"
+        r"([A-Z][\w&.'-]*(?:\s+[A-Z][\w&.'-]*){0,3})",
+    )
+
+    @classmethod
+    def _client_name(cls, body: str) -> str:
+        """The client's name, stopping where the sentence does.
+
+        Without the cut this swallowed the next sentence whole and produced
+        "BuildCo Ltd. Invoice JN-4410" as a company name, which would then have
+        been printed at the top of a demand for money.
+        """
+        found = cls._BILLED_TO_NAME.search(body)
+        if not found:
+            return ""
+        return found.group(1).split(".")[0].strip(" ,;:")
 
     @staticmethod
     def _counterparty(sender: str | None) -> str:
@@ -260,15 +324,38 @@ class LocalReader:
                 "amount": paid,
             }
         doc_id = one(self._ID)
-        return {
-            "kind": "purchase_invoice",
+        common = {
             "doc_id": doc_id.replace(" ", "") if doc_id else None,
-            "counterparty": self._counterparty(one(self._FROM)),
             "issued": one(self._DATED),
             "due": one(self._DUE),
             "net": one(self._NET),
             "vat": one(self._VAT),
             "gross": one(self._GROSS),
+        }
+
+        # Which way the money runs is read off the text, never assumed. An
+        # invoice that says who it was billed TO is one the trader issued, and
+        # that is the only kind worth chasing. A "To:" header carrying an
+        # address is what makes it chaseable, because a chase needs somewhere to
+        # go.
+        billed_to = one(self._TO)
+        if self._ISSUED_BY_US.search(body) and billed_to:
+            # The address itself is masked by now and is put back by the caller
+            # from the raw text. All this decides is which way the money runs.
+            return {
+                "kind": "sales_invoice",
+                # Not from the To: header: that is redacted by now, and
+                # "supplier, name redacted" standing where a client's name
+                # belongs is worse than an honest blank. The caller fills this
+                # from the address it lifted off the raw text.
+                "counterparty": self._client_name(body) or "",
+                "counterparty_email": "",
+                **common,
+            }
+        return {
+            "kind": "purchase_invoice",
+            "counterparty": self._counterparty(one(self._FROM)),
+            **common,
         }
 
 #: What a page must yield before it is treated as readable. A PDF that extracts
