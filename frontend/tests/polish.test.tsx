@@ -40,7 +40,9 @@ test('missing source relationships stay unavailable and never manufacture a badg
   const data = filled(); const receipt = postedReceipt(); delete receipt.document!.amount;
   data.sources.push(receipt);
   rerender(<DraftEvidence data={data} invoiceId="JN-4410" />);
-  expect(screen.getByRole('link', { name: 'Receipt source ↗ PAYMENT-7 mail:receipt/7' })).toBeInTheDocument();
+  const link = screen.getByRole('link', { name: 'Receipt source PAYMENT-7 mail:receipt/7' });
+  expect(link).toHaveAttribute('href', '#/documents?source=mail%3Areceipt%2F7');
+  expect(within(link).getByText('↗')).toHaveAttribute('aria-hidden', 'true');
 });
 
 test('source badge does not rewrite the exact draft or supply an approval', () => {
