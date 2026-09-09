@@ -21,7 +21,7 @@ export function Documents({ data, busy, mutate, route }: { data: Workspace; busy
     <div className="intake-grid">
       <section className="panel intake"><h2>{replaceId ? `Correct ${replaceId}` : 'Read an email'}</h2><p>The bounded reader supports explicit EUR invoices and remittances. No live model call.</p>
         <div className="sample-buttons" role="group" aria-label="Load a synthetic sample" data-selected={selectedSample >= 0}
-          style={{ '--selected-sample': selectedSample } as CSSProperties}>
+          style={{ '--selected-sample': selectedSample, '--sample-column': selectedSample % 2, '--sample-row': Math.floor(selectedSample / 2) } as CSSProperties}>
           {samples.map((key, index) => <button type="button" key={key} className="secondary small" aria-pressed={selectedSample === index}
             onClick={() => setBody(data.samples[key])}>Sample {key}</button>)}
         </div>

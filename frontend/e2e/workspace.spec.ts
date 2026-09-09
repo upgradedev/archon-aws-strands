@@ -165,6 +165,10 @@ test('draft ledger badges open actual invoice and receipt sources without approv
   const evidence = page.getByRole('region', { name: 'Draft ledger evidence' });
   await expect(evidence.getByText('1,260.00 EUR', { exact: true })).toBeVisible();
   await expect(evidence.getByText(/not independent bank verification/)).toBeVisible();
+  expect(await evidence.locator(':scope > p').first().evaluate(element => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(16);
+  expect(await evidence.getByRole('heading', { name: 'Sourced · posted invoice' }).evaluate(element => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(14);
+  expect(await evidence.getByRole('link', { name: /Invoice source/ }).evaluate(element => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(14);
+  expect(await evidence.locator('.source-badge small').first().evaluate(element => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(12);
   await expect(page.locator('.email > pre')).toHaveText(state.draft.body);
   await expect(page.getByRole('button', { name: /Approve exact draft/ })).toBeDisabled();
   await page.screenshot({ path: info.outputPath('source-backed-approval.png'), fullPage: true });
@@ -182,6 +186,8 @@ test('draft ledger badges open actual invoice and receipt sources without approv
   await expect(page.getByRole('button', { name: /Approve exact draft/ })).toBeDisabled();
   await go(page, 'Action queue');
   await expect(page.getByRole('region', { name: 'Ledger balances' })).toContainText('1,260.00 EUR');
+  expect(await page.locator('.stat p').first().evaluate(element => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(14);
+  expect(await page.getByRole('navigation').getByRole('link').first().evaluate(element => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(14);
   await page.screenshot({ path: info.outputPath('precision-ledger-kpis.png'), fullPage: true });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
@@ -191,6 +197,13 @@ test('sample sliding pill preserves keyboard selection and reduced-motion prefer
   await page.goto('/#/documents');
   const group = page.getByRole('group', { name: 'Load a synthetic sample' });
   await expect(group.getByRole('button', { pressed: false })).toHaveCount(4);
+  expect(await group.getByRole('button').first().evaluate(element => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(14);
+  if (page.viewportSize()!.width <= 600) {
+    const boxes = await group.getByRole('button').evaluateAll(elements => elements.map(element => ({ x: element.getBoundingClientRect().x, y: element.getBoundingClientRect().y })));
+    expect(boxes[0].y).toBe(boxes[1].y);
+    expect(boxes[2].y).toBeGreaterThan(boxes[0].y);
+    expect(boxes[2].x).toBe(boxes[0].x);
+  }
   await group.getByRole('button', { name: 'Sample invoice', exact: true }).focus();
   await page.keyboard.press('Enter');
   await expect(group.getByRole('button', { pressed: true })).toHaveText('Sample invoice');
