@@ -3,5 +3,5 @@
   "repository": "upgradedev/archon-aws-strands",
   "stack": "archon-frontend",
   "region": "eu-west-1",
-  "api_domain": ""
+  "api_domain": "h25u6z4wxk.execute-api.eu-west-1.amazonaws.com"
 }
