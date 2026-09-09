@@ -157,3 +157,54 @@ test('independent visitors, deep links, keyboard skip, and new workspace', async
   await page.getByRole('button', { name: 'Start new workspace', exact: true }).click();
   await expect(page.getByText('No matching sources', { exact: true })).toBeVisible();
 });
+
+test('draft ledger badges open actual invoice and receipt sources without approving', async ({ page }, info) => {
+  await draft(page);
+  const session = await page.evaluate(() => localStorage.getItem('archon.demo.session.v1'));
+  const state = await (await page.request.get('/api/workspace', { headers: { 'X-Archon-Session': session! } })).json();
+  const evidence = page.getByRole('region', { name: 'Draft ledger evidence' });
+  await expect(evidence.getByText('1,260.00 EUR', { exact: true })).toBeVisible();
+  await expect(evidence.getByText(/not independent bank verification/)).toBeVisible();
+  await expect(page.locator('.email > pre')).toHaveText(state.draft.body);
+  await expect(page.getByRole('button', { name: /Approve exact draft/ })).toBeDisabled();
+  await page.screenshot({ path: info.outputPath('source-backed-approval.png'), fullPage: true });
+  for (const [label, source] of [['Invoice source', state.sources[0]], ['Receipt source', state.sources[1]]] as const) {
+    const link = evidence.getByRole('link', { name: new RegExp(label) });
+    await expect(link).toHaveAttribute('href', `#/documents?source=${encodeURIComponent(source.id)}`);
+    await link.click();
+    const opened = page.locator(`[data-source-id="${source.id}"]`);
+    await expect(opened).toHaveAttribute('open', '');
+    await expect(opened.locator('pre')).toHaveText(source.body);
+    await page.reload();
+    await expect(opened).toHaveAttribute('open', '');
+    await go(page, 'Approvals & arrangements');
+  }
+  await expect(page.getByRole('button', { name: /Approve exact draft/ })).toBeDisabled();
+  await go(page, 'Action queue');
+  await expect(page.getByRole('region', { name: 'Ledger balances' })).toContainText('1,260.00 EUR');
+  await page.screenshot({ path: info.outputPath('precision-ledger-kpis.png'), fullPage: true });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test('sample sliding pill preserves keyboard selection and reduced-motion preferences', async ({ page }, info) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/#/documents');
+  const group = page.getByRole('group', { name: 'Load a synthetic sample' });
+  await expect(group.getByRole('button', { pressed: false })).toHaveCount(4);
+  await group.getByRole('button', { name: 'Sample invoice', exact: true }).focus();
+  await page.keyboard.press('Enter');
+  await expect(group.getByRole('button', { pressed: true })).toHaveText('Sample invoice');
+  await page.keyboard.press('Tab');
+  await expect(group.getByRole('button', { name: 'Sample payment', exact: true })).toBeFocused();
+  await page.keyboard.press('Space');
+  await expect(group.getByRole('button', { pressed: true })).toHaveText('Sample payment');
+  expect(await group.evaluate(element => getComputedStyle(element, '::before').transitionDuration)).toBe('0s');
+  await page.screenshot({ path: info.outputPath('selected-sample-pill.png'), fullPage: true });
+  await page.getByLabel(/Email headers/).fill('custom synthetic text');
+  await expect(group.getByRole('button', { pressed: true })).toHaveCount(0);
+  await go(page, 'Action queue');
+  await expect(page.getByText('Nothing to chase yet', { exact: true })).toBeVisible();
+  const tile = page.locator('.stat').first();
+  await tile.hover();
+  expect(await tile.evaluate(element => getComputedStyle(element).transform)).toBe('none');
+});

@@ -25,12 +25,13 @@
       "preconditions": "Empty synthetic workspace",
       "steps": [
         "Documents: Sample invoice → Read & post",
-        "Sample payment → Read & post"
+        "Sample payment → Read & post",
+        "In Approvals, open the invoice and receipt source badges; reload each deep link"
       ],
-      "expected outcome": "Invoice 1860.00 EUR less receipt 600.00 EUR gives 1260.00 EUR outstanding; source links reveal original post",
+      "expected outcome": "Invoice 1860.00 EUR less receipt 600.00 EUR gives 1260.00 EUR outstanding; source links reveal original post. Exact source handles open the original posted invoice/receipt. Current ledger figures are read from API fields; no draft-text parsing or independent bank-verification claim.",
       "negative/recovery case": "Missing reference, USD or contradictory totals produce visible refusal",
-      "automation mapping": "test_raw_post_real_strands_exact_approval_and_durable_receipt; raw emails → real HTTP / Strands → exact draft → simulated durable receipt",
-      "observed result/evidence": "Mapped automation PASS — CI https://github.com/upgradedev/archon-aws-strands/actions/runs/34326637050 at 2c2a6ce. See verification counts and frontend-evidence-34326637050 (JUnit, coverage, desktop/mobile traces and screenshots). Pipeline evidence only, not human execution of every step or live AWS acceptance.",
+      "automation mapping": "test_raw_post_real_strands_exact_approval_and_durable_receipt; raw emails → real HTTP / Strands → exact draft → simulated durable receipt; draft ledger badges open actual invoice and receipt sources without approving; evidence uses explicit posted invoice and receipt relationships, not matching prose",
+      "observed result/evidence": "Mapped automation PASS — CI https://github.com/upgradedev/archon-aws-strands/actions/runs/34326637050 at 2c2a6ce. See verification counts and frontend-evidence-34326637050 (JUnit, coverage, desktop/mobile traces and screenshots). Pipeline evidence only, not human execution of every step or live AWS acceptance. UI polish checks: NOT_RUN — pending GitHub Actions compilation, unit and real-HTTP desktop/mobile verification. Human signoff NOT_RUN; no live AWS acceptance claimed for this revision.",
       "human signoff": "NOT_RUN"
     },
     {
@@ -56,12 +57,13 @@
       "steps": [
         "Read recipient, subject, body and fingerprint",
         "tick review",
-        "approve exact draft"
+        "approve exact draft",
+        "Inspect the current-ledger evidence block without approving"
       ],
-      "expected outcome": "One simulated provider-accepted receipt, same fingerprint; no real email; delivery unproven",
+      "expected outcome": "One simulated provider-accepted receipt, same fingerprint; no real email; delivery unproven. Opening source links neither changes the exact email nor checks its approval confirmation; absent, unrelated, refused or corrected sources produce no fabricated links.",
       "negative/recovery case": "Approval disabled without confirmation; altered evidence or old draft refused",
-      "automation mapping": "test_late_payment_invalidates_exact_approval; stale approval after another tab posts payment is refused by actual API",
-      "observed result/evidence": "Mapped automation PASS — CI https://github.com/upgradedev/archon-aws-strands/actions/runs/34326637050 at 2c2a6ce. See verification counts and frontend-evidence-34326637050 (JUnit, coverage, desktop/mobile traces and screenshots). Pipeline evidence only, not human execution of every step or live AWS acceptance.",
+      "automation mapping": "test_late_payment_invalidates_exact_approval; stale approval after another tab posts payment is refused by actual API; source badge does not rewrite the exact draft or supply an approval; missing source relationships stay unavailable and never manufacture a badge",
+      "observed result/evidence": "Mapped automation PASS — CI https://github.com/upgradedev/archon-aws-strands/actions/runs/34326637050 at 2c2a6ce. See verification counts and frontend-evidence-34326637050 (JUnit, coverage, desktop/mobile traces and screenshots). Pipeline evidence only, not human execution of every step or live AWS acceptance. UI polish checks: NOT_RUN — pending GitHub Actions compilation, unit and real-HTTP desktop/mobile verification. Human signoff NOT_RUN; no live AWS acceptance claimed for this revision.",
       "human signoff": "NOT_RUN"
     },
     {
@@ -137,12 +139,13 @@
       "steps": [
         "Use all navigation links",
         "reload document deep link",
-        "Tab to skip link and press Enter"
+        "Tab to skip link and press Enter",
+        "Use Tab, Enter and Space on the sample switcher; edit its text, then repeat with reduced motion"
       ],
-      "expected outcome": "Correct page persists; main receives focus; document evidence opens; no page-wide horizontal overflow",
+      "expected outcome": "Correct page persists; main receives focus; document evidence opens; no page-wide horizontal overflow. Existing Sample button names remain; aria-pressed marks only the sample matching current text. Editing/clearing deselects it, selection does not post, and reduced motion disables pill/KPI transitions.",
       "negative/recovery case": "Unknown route provides return link; loading/empty/error states remain operable",
-      "automation mapping": "independent visitors, deep links, keyboard skip, and new workspace; raw emails → real HTTP / Strands → exact draft → simulated durable receipt",
-      "observed result/evidence": "Mapped automation PASS — CI https://github.com/upgradedev/archon-aws-strands/actions/runs/34326637050 at 2c2a6ce. See verification counts and frontend-evidence-34326637050 (JUnit, coverage, desktop/mobile traces and screenshots). Pipeline evidence only, not human execution of every step or live AWS acceptance.",
+      "automation mapping": "independent visitors, deep links, keyboard skip, and new workspace; raw emails → real HTTP / Strands → exact draft → simulated durable receipt; sample pill selection follows current text and native keyboard without posting; sample sliding pill preserves keyboard selection and reduced-motion preferences",
+      "observed result/evidence": "Mapped automation PASS — CI https://github.com/upgradedev/archon-aws-strands/actions/runs/34326637050 at 2c2a6ce. See verification counts and frontend-evidence-34326637050 (JUnit, coverage, desktop/mobile traces and screenshots). Pipeline evidence only, not human execution of every step or live AWS acceptance. UI polish checks: NOT_RUN — pending GitHub Actions compilation, unit and real-HTTP desktop/mobile verification. Human signoff NOT_RUN; no live AWS acceptance claimed for this revision.",
       "human signoff": "NOT_RUN"
     },
     {
@@ -191,6 +194,23 @@
       "automation mapping": "blocked storage still opens a session and discloses its lifetime; requests abort after 35 seconds and clear their timer",
       "observed result/evidence": "Mapped automation PASS — CI https://github.com/upgradedev/archon-aws-strands/actions/runs/34326637050 at 2c2a6ce. See verification counts and frontend-evidence-34326637050 (JUnit, coverage, desktop/mobile traces and screenshots). Pipeline evidence only, not human execution of every step or live AWS acceptance.",
       "human signoff": "NOT_RUN"
+    },
+    {
+      "id": "AR-UAT-13",
+      "persona": "Sole trader reviewing daily finances on desktop or phone",
+      "requirement": "Precision financial presentation without invented performance signals",
+      "preconditions": "Synthetic invoice and partial receipt posted; desktop/mobile and reduced-motion settings",
+      "steps": [
+        "Open Action queue",
+        "Read all four KPI tiles and source money tables",
+        "Hover a tile with a pointer, repeat with reduced motion",
+        "Check narrow-screen layout and high-contrast focus/selection"
+      ],
+      "expected outcome": "Dark elevated KPI cards show the unchanged API amounts with tabular numerals; source tables stay crisp and readable. Hover is subtle and decorative, never a trend or confidence metric. Reduced motion removes movement; high contrast retains selected-state borders.",
+      "negative/recovery case": "No sources or incomplete evidence retain existing empty/held states. No badge implies bank verification or real delivery.",
+      "automation mapping": "draft ledger badges open actual invoice and receipt sources without approving (precision-ledger-kpis.png); sample sliding pill preserves keyboard selection and reduced-motion preferences; existing stale-evidence and safe-retry journeys",
+      "observed result/evidence": "UI polish checks: NOT_RUN — pending GitHub Actions compilation, unit and real-HTTP desktop/mobile verification. Human signoff NOT_RUN; no live AWS acceptance claimed for this revision.",
+      "human signoff": "NOT_RUN"
     }
   ],
   "verification": {
@@ -235,5 +255,11 @@
     "artifact_contents": "dist, Python/unit/browser JUnit, measured coverage, full npm audit, desktop/mobile traces and screenshots",
     "limitations": "Mapped automation passed; this does not attest human execution of every testbook step. Live AWS/S3 browser acceptance is recorded separately above. Human UAT and independent real delivery remain unverified. Public model is scripted and provider simulated; no real model or email calls occurred.",
     "human_signoff": "NOT_RUN"
+  },
+  "ui_polish": {
+    "status": "NOT_RUN",
+    "evidence": "UI polish checks: NOT_RUN — pending GitHub Actions compilation, unit and real-HTTP desktop/mobile verification. Human signoff NOT_RUN; no live AWS acceptance claimed for this revision.",
+    "source_contract": "Gross, settled and outstanding come from Workspace.sales for draft.invoice_id. Source links use existing Source.id with status=posted, SalesInvoice.document.doc_id or Receipt.document.settles equal to that invoice. Receipt amounts use document.amount, never extracted from prose. Reconciled means linked in this ledger, not independently bank-verified. Sample selection is exact current textarea/sample equality.",
+    "dependencies": "No new dependencies; APIs, types and approval mutations unchanged."
   }
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Mutate, Workspace } from './types';
 import { Badge, Empty, Heading, money } from './ui';
+import { DraftEvidence } from './DraftEvidence';
 
 export function Approvals({ data, busy, mutate }: { data: Workspace; busy: boolean; mutate: Mutate }) {
   const [checked, setChecked] = useState(false);
@@ -12,7 +13,7 @@ export function Approvals({ data, busy, mutate }: { data: Workspace; busy: boole
   return <>
     <Heading eyebrow="HUMAN DECISIONS" title="Approvals & arrangements">Your approval belongs to these exact words, this recipient, and this evidence.</Heading>
     <section className="panel"><div className="panel-heading"><div><h2>Collection draft</h2><p>Every money claim is re-derived at approval. Drafts expire after 30 minutes.</p></div><Badge tone="amber">Simulated delivery</Badge></div>
-      {draft ? <div className="draft-grid"><article className="email"><dl><dt>To</dt><dd>{draft.recipient}</dd><dt>Subject</dt><dd>{draft.subject}</dd><dt>Invoice</dt><dd><a href={`#/documents?source=${encodeURIComponent(draft.invoice_id)}`}>{draft.invoice_id} · Source evidence ↗</a></dd></dl><pre>{draft.body}</pre><details><summary>Exact content fingerprint</summary><code className="fingerprint">{draft.fingerprint}</code></details></article>
+      {draft ? <div className="draft-grid"><article className="email"><dl><dt>To</dt><dd>{draft.recipient}</dd><dt>Subject</dt><dd>{draft.subject}</dd><dt>Invoice</dt><dd><a href={`#/documents?source=${encodeURIComponent(draft.invoice_id)}`}>{draft.invoice_id} · Source evidence ↗</a></dd></dl><pre>{draft.body}</pre><DraftEvidence data={data} invoiceId={draft.invoice_id} /><details><summary>Exact content fingerprint</summary><code className="fingerprint">{draft.fingerprint}</code></details></article>
         <aside className="approval-box"><h3>Review before approving</h3><p>The public outbox is simulated. This records an approval and a simulated provider receipt. No message is sent to this address.</p>
           <label className="checkbox"><input type="checkbox" checked={checked} onChange={e => setChecked(e.target.checked)} disabled={!!receipt} /><span>I reviewed this recipient, subject, body and balance.</span></label>
           <button className="primary" disabled={busy || !checked || !!receipt} onClick={async () => { if (await mutate('/approve', { fingerprint: draft.fingerprint })) { setChecked(false); location.hash = '/activity'; } }}>Approve exact draft · simulate</button>
