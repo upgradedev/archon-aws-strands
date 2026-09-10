@@ -5,6 +5,12 @@ on:
     branches: [main, "build/**", "codex/**"]
   pull_request:
   workflow_dispatch:
+    inputs:
+      ar3_grant_json:
+        description: Parent-only exact grant JSON; empty means no model collection
+        required: false
+        type: string
+        default: ""
 
 jobs:
   test:
@@ -200,6 +206,56 @@ jobs:
           print("domain core is free of boto3 and strands")
           PY
 
+  ar3-parent-collection:
+    # Source preparation never sets this input or configures the protected environment.
+    if: github.event_name == 'workflow_dispatch' && inputs.ar3_grant_json != '' && github.run_attempt == 1
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ar3-bounded-evaluation
+    concurrency:
+      group: archon-bounded-parent-collection
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AWS_EC2_METADATA_DISABLED: "true"
+      AR3_GRANT_JSON: ${{ inputs.ar3_grant_json }}
+      AR3_GRANT_SHA256: ${{ vars.AR3_GRANT_SHA256 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install existing dependencies on runner only
+        run: python -m pip install -e ".[dev]" httpx==0.28.1
+      - name: Validate exact parent grant before obtaining AWS credentials
+        run: python -m evaluation.ar3_collect preflight --candidate-sha "$GITHUB_SHA"
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AR3_EVAL_ROLE_ARN }}
+          aws-region: eu-west-1
+          role-duration-seconds: 900
+          disable-retry: true
+          inline-session-policy: >-
+            {"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":"bedrock:InvokeModel",
+            "Resource":["arn:aws:bedrock:eu-west-1:*:inference-profile/eu.anthropic.claude-opus-5",
+            "arn:aws:bedrock:eu-*::foundation-model/anthropic.claude-opus-5"]}]}
+      - name: One finite parent-granted collection, no repair or retry
+        run: python -m evaluation.ar3_collect collect --candidate-sha "$GITHUB_SHA" --output ar3-collected
+      - name: Preserve every available journal including interrupted or failed collection
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ar3-parent-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ar3-collected/
+          retention-days: 90
+          if-no-files-found: warn
+
   ar3-source-preparation:
     # Source branch/PR checks only. No live workflow, credentials or activation input.
     if: github.event_name != 'workflow_dispatch'
@@ -222,8 +278,12 @@ jobs:
         run: python -m pip install -e ".[dev]" httpx==0.28.1
       - name: Instrument lint and offline negative controls
         run: |
-          python -m ruff check evaluation/ar3.py tests/test_ar3_evaluation.py
+          python -m ruff check evaluation/ar3.py evaluation/ar3_collect.py tests/test_ar3_evaluation.py tests/test_ar3_collector.py
           python -m pytest tests/test_ar3_evaluation.py --junitxml=ar3-instrument-junit.xml
+          python -m pytest tests/test_ar3_collector.py --basetemp=ar3-collector-fixtures --junitxml=ar3-collector-junit.xml
+      - name: Export inert request sizes and conditional reference cost, no grant or AWS client
+        if: always() && !cancelled()
+        run: python -m evaluation.ar3_collect prepare --candidate-sha "$CANDIDATE_SHA" --output ar3-collector-plan.json
       - name: Prepare baseline evidence and inert exact requests, never invoke a model
         if: always() && !cancelled()
         run: python -m evaluation.ar3 --candidate-sha "$CANDIDATE_SHA" --output ar3-output
@@ -238,5 +298,8 @@ jobs:
           path: |
             ar3-output/
             ar3-instrument-junit.xml
+            ar3-collector-plan.json
+            ar3-collector-junit.xml
+            ar3-collector-fixtures/
           retention-days: 90
           if-no-files-found: error

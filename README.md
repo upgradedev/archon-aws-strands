@@ -195,6 +195,49 @@ accepted final response reasons. Original replay bytes are retained before parsi
 Author-created development cases, not independent accuracy; arithmetic is deterministic, not AI reasoning.
 Model/infra costs remain unknown. AR3/C1, human benefit and any paid model activation remain owner-gated.
 
+The [bounded collector](evaluation/ar3_collect.py) is evaluation-only direct Bedrock Converse, **not
+the Strands graph**. Source CI exports exact frozen requests/sizes and exercises the full collector
+with fake responses before replaying the unchanged evaluator; fake artifacts are labelled offline.
+No model ran merely because these checks passed. The frozen 12 cases, prompt, model and `maxTokens=4000`
+are unchanged. No CountTokens, tools, media, explicit cache creation, thinking override, fallback or
+repair loop is added. Provider-default adaptive thinking may yield reasoning blocks rejected by the
+frozen response contract; preserve that outcome, do not strip blocks or retune the protocol.
+
+Reservations use `2 * canonical_serialized_request_UTF8_bytes + 4096` input tokens per request:
+the byte term deliberately overcounts visible text/JSON, with an additional multiplier and fixed
+template allowance. This is a **conditional conservative assumption**, not a tokenizer measurement
+or universal bound. The parent must verify it for this model, default thinking, implicit caching and
+standard-tier billing before granting any call. Input bounds above 20000, output other than 4000,
+more than 12 calls, expired/wrong grants and insufficient whole-cohort reservations fail closed.
+Botocore `total_max_attempts=1`, a 900-second collector boundary and 5/60-second connect/read timeouts
+bound execution. The time boundary is checked between calls, not a hard interruption of an in-flight
+SDK call; the workflow has a 20-minute outer limit including install/upload. Unknown outcomes consume
+their full reservation. Observed ceiling/cache-write/retry violations halt subsequent calls, not undo
+an already-started call. Full SDK envelopes/usage/request IDs are retained before inspection (not
+original HTTP wire bytes), with opaque SDK binary values represented by typed base64 objects and
+flushed chunked stdout backup; log delivery itself is not guaranteed.
+
+Future activation is parent-only in the existing manual `ci.yml`, never push/PR. The parent configures
+the protected `ar3-bounded-evaluation` environment with `AR3_EVAL_ROLE_ARN` (an existing eligible role)
+and `AR3_GRANT_SHA256` (SHA256 of the **exact UTF-8 JSON input bytes**). No IAM resources or settings are
+created here. The inline session policy permits only this model's EU inference profile/foundation
+model `bedrock:InvokeModel`; permission/trust compatibility remains untested until parent activation.
+The grant binds `schema=archon-bounded-converse-v1`, `candidate_sha`, `instrument_sha`,
+`protocol_sha256`, exported `plan_sha256`, `model_id`, `region`, `max_calls=12`, `max_output_tokens=4000`,
+`max_input_tokens<=20000`, `max_seconds=900`, `input_bound_method` from the export,
+`input_bound_verified=true`, `billing_assumptions_verified=true`, `service_tier=standard_default`,
+`thinking_policy=FROZEN_PROVIDER_DEFAULT_NO_OVERRIDE`, exact `repository`, `actor`, `workflow_ref`,
+next manual `run_number` (string), `run_attempt="1"`, and `expires_utc` within one hour. It also requires
+`grant_id`, `parent_budget_ledger_ref`, `price_evidence`, `input_bound_evidence`, `budget_usd`,
+`input_usd_per_million` and `output_usd_per_million` as positive finite decimal strings for money/rates.
+The reference 5.50/27.50-per-million export estimate is **not** that grant, a bill or a shared budget.
+The parent reserves the whole app slice in the separate aggregate ledger before configuration;
+this collector cannot coordinate or infer another app's spend. A new run number or any rerun needs
+new authority; rerun attempts above 1 are refused. Concurrent source runs can advance the workflow
+counter, which causes safe denial, not automatic grant repair. After approval and green exact-source CI,
+the activation command format is `gh workflow run ci.yml --repo upgradedev/archon-aws-strands --ref
+<reviewed-branch> --field ar3_grant_json='<exact-approved-JSON>'`. **Do not run this as a source check.**
+
 The opt-in `x1_benchmark` input on [frontend verification](https://github.com/upgradedev/archon-aws-strands/actions/workflows/frontend-ci.yml)
 runs the [frozen X1 protocol](frontend/benchmarks/x1-protocol.json): ten new-payment and ten
 forwarded-duplicate journeys, no retries, a 15-minute invocation limit, raw outcomes and nearest-rank
