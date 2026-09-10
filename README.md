@@ -30,6 +30,22 @@ Current frontend SHA: [release.json](https://d2ssmv59q16d0b.cloudfront.net/relea
 Current backend SHA and runtime modes: [API health](https://d2ssmv59q16d0b.cloudfront.net/api/health).
 A branch CI pass is not evidence that this SHA is deployed.
 
+[Current AWS acceptance](https://d2ssmv59q16d0b.cloudfront.net/acceptance.html) compares the
+tested frontend/backend pair with the served versions. The public aggregate receipt is produced
+only after all browser journeys and both release checks pass, with no failed or skipped cases.
+An unavailable or historical receipt is not current acceptance. Human UAT remains NOT_RUN.
+Source CI can require repository access; the sanitized aggregate does not. Historical testbooks
+and run-scoped receipts are retained. The browser job receives no AWS credentials; a separate
+main-only publisher can write only the existing frontend bucket. New frontend publication stops
+if the deployed backend's packaged source differs; deploy that reviewed backend first and rerun.
+
+## Contents
+
+[Decision controls](#what-changes-the-decision) · [Workstation](#react-workstation-usage) ·
+[Run it](#run-it) · [Architecture](#how-it-is-put-together) · [Evidence](#evidence-and-limits) ·
+[Limitations](#limitations) · [Pre-existing work](#pre-existing-work-disclosed) ·
+[Components](#third-party-components) · [Submission](#for-whoever-submits-this) · [Licence](#licence)
+
 ## What changes the decision
 
 - A payment carries an explicit bank transfer reference. Email hashes identify evidence bytes,
