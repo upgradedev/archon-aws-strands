@@ -12,10 +12,43 @@ must finish all six reports before drafting. [Evidence and limits](../README.md#
 
 ## 2026-09-10: bounded public synthetic replacement instrument (AR2)
 
-**Execution status at authoring: NOT_MEASURED.** The historical results below
-remain historical evidence, including their corrections and withdrawals. No old
-conclusion is reinstated by this instrument. The new instrument evaluates only
-the current public synthetic workflow, not a real model or human benefit.
+**Recorded execution: MEASURED, bounded synthetic only.** At authoring this was
+NOT_MEASURED. The completed run below supersedes that status for its exact SHA.
+The historical results remain historical evidence, including their corrections
+and withdrawals. No old conclusion is reinstated. The new instrument evaluates
+only the current public synthetic workflow, not a real model or human benefit.
+
+[CI run 34459680172](https://github.com/upgradedev/archon-aws-strands/actions/runs/34459680172)
+measured `fc4e95a701f5e1b98de9728be064bcbc4bcb70de` with the command below.
+Its instrument JUnit reports 24 passed, zero skipped/errors/failures. All 18 cases
+and 22 approval decisions executed. Two result files compared byte-identical;
+`sha256sum --check SHA256SUMS` passed. Result SHA256:
+`82733571d69a2ab8a1dc4b6381c8a3d29c64574d827c6b9bcebeb5b281df56d9`.
+[Artifact 10144986559](https://github.com/upgradedev/archon-aws-strands/actions/runs/34459680172/artifacts/10144986559)
+retains the result, source hashes, run receipt and JUnit through 2026-12-09.
+Its archive digest from the Actions API is
+`c0d674d6322860efffa4c2922d1e34b94006343de08d5d7c2b2e029d60d1433f`.
+Later candidate SHAs must use their own CI artifacts, not this receipt.
+
+| Method | TP / FP / TN / FN (action) | Exact opportunities captured | False chases | Abstentions | Acceptance |
+|---|---|---|---|---|---|
+| Public synthetic workflow | 6 / 0 / 16 / 0 | 6 / 6 | 0 | 16 | PASS |
+| Shared-reader reference baseline | 6 / 0 / 16 / 0 | 6 / 6 | 0 | 16 | PASS |
+| Always-abstain control | 0 / 0 / 16 / 6 | 0 / 6 | 0 | 22 | FAIL, as required |
+| Unsafe control | 6 / 16 / 0 / 0 | 0 / 6 | 22 | 0 | FAIL, as required |
+
+All four completed with zero execution errors and ledger/hold mismatches. The
+public row observed six actual simulated-provider calls; baseline/control rows
+count emitted action tuples, with no delivery provider. **The methods tie on
+these cases. No comparative advantage or human benefit was demonstrated.**
+The unsafe control's six binary true positives are all wrong actions, which is
+why exact opportunities captured is reported separately.
+
+The first [run 34459285488](https://github.com/upgradedev/archon-aws-strands/actions/runs/34459285488)
+failed import formatting and is not accepted CI, although it retained completed
+measurements and deterministic output. Artifact 10144821759 and that failure are
+retained. Subsequent review added a deliberately premature provider call during
+intake: it must also fail acceptance, even if the approved call is correct.
 
 The raw email cases, exact answers and acceptance contract were committed first
 in `33dbe4f534b02fb07945561264879a46e8c9793e`, before the harness. The frozen input
@@ -48,6 +81,8 @@ captured, missed/wrong opportunities, false chases, abstentions, ledger/hold
 mismatches and execution errors. Wrong invoice, recipient or amount is never an
 exact capture, even when binary action counts call it a true positive. Each
 approval attempt is a decision point; stale and duplicate approvals count too.
+Calls during intake, drafting or reads also count as false chases, so an
+instrument cannot hide unapproved activity between approval checkpoints.
 Always-abstain and deliberately unsafe controls must both fail candidate
 acceptance. A crash or missing observation is NOT_MEASURED, never safe silence.
 Candidate acceptance requires all fixed legitimate opportunities captured and
