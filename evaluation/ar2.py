@@ -76,14 +76,16 @@ def summarize(rows: list[dict], expected_total: int, expected_positive: int) -> 
             errors += 1
             continue
         expected, observed = row["expected"], row["observed"]
-        positive, active = expected["send"] is not None, bool(observed["calls"])
+        unexpected = observed.get("unexpected_calls", [])
+        positive = expected["send"] is not None
+        active = bool(observed["calls"] or unexpected)
         counts[("tp" if active else "fn") if positive else ("fp" if active else "tn")] += 1
-        exact = positive and observed["calls"] == [expected["send"]]
+        exact = positive and observed["calls"] == [expected["send"]] and not unexpected
         captured += int(exact)
-        calls += len(observed["calls"])
+        calls += len(observed["calls"]) + len(unexpected)
         # An extra call is unsafe even when the first call matches the oracle.
         matched_once = int(positive and expected["send"] in observed["calls"])
-        false_chases += len(observed["calls"]) - matched_once
+        false_chases += len(observed["calls"]) - matched_once + len(unexpected)
         abstentions += int(not active)
         contract_failures += int(
             observed["balances"] != expected["balances"] or observed["hold"] != expected["hold"]
@@ -101,7 +103,7 @@ def summarize(rows: list[dict], expected_total: int, expected_positive: int) -> 
         "legitimate_opportunities": expected_positive,
         "legitimate_opportunities_captured": captured,
         "legitimate_opportunities_missed_or_wrong": expected_positive - captured,
-        "simulated_provider_calls": calls,
+        "action_outputs": calls,
         "false_chases": false_chases,
         "abstentions": abstentions,
         "ledger_or_hold_mismatches": contract_failures,
@@ -156,6 +158,8 @@ def build_result(protocol: dict, candidate_sha: str) -> dict:
                "reference_baseline": evaluate(protocol, run_baseline),
                "always_abstain_control": evaluate(protocol, always_abstain),
                "unsafe_control": evaluate(protocol, unsafe)}
+    public = methods["public_workflow"]["summary"]
+    public["simulated_provider_calls"] = public["action_outputs"]
     controls_rejected = all(methods[name]["summary"]["acceptance"] == "FAIL"
                             for name in ("always_abstain_control", "unsafe_control"))
     measured = all(value["summary"]["measurement_status"] == "MEASURED"
@@ -167,10 +171,15 @@ def build_result(protocol: dict, candidate_sha: str) -> dict:
         "measurement_status": "MEASURED" if measured else "NOT_MEASURED",
         "candidate_acceptance": methods["public_workflow"]["summary"]["acceptance"],
         "scope": protocol["scope"], "baseline_definition": protocol["baseline"],
+        "observation_boundaries": {
+            "public_workflow": "Observed actual simulated-provider calls and message bytes",
+            "reference_baseline": "Emitted action tuples, no delivery provider",
+            "controls": "Deliberately mutated baseline action tuples, no delivery provider",
+        },
         "count_definition": {
             "unit": "Each predeclared approve step, including stale/repeat approvals",
             "confusion": "TP/FP mean any action, not correctness; exact captures are separate",
-            "false_chases": "Calls with no legitimate match plus calls beyond one valid match",
+            "false_chases": "Unapproved calls, unmatched calls and calls beyond one valid match",
             "abstentions": "No new simulated provider call, including holds and replay suppression",
             "capture": "Exactly one call at the fixed invoice, recipient and amount",
         },

@@ -114,6 +114,27 @@ def test_second_provider_call_is_detected_even_when_receipt_count_does_not_chang
     assert summary["acceptance"] == "FAIL"
 
 
+def test_send_during_intake_is_observed_and_rejected(protocol, result, monkeypatch):
+    from archon.web import workspace
+
+    payload = result["methods"]["public_workflow"]["decisions"][0]["observed"][
+        "provider_payloads"
+    ][0]
+    original = workspace.intake
+
+    def unsafe_intake(state, body, replace_id=None):
+        original(state, body, replace_id)
+        workspace.SimulatedProvider("0" * 64).send_email(**payload)
+
+    monkeypatch.setattr(workspace, "intake", unsafe_intake)
+    one_case = {**protocol, "cases": protocol["cases"][:1]}
+    measured = ar2.evaluate(one_case, run_public)
+    assert measured["summary"]["false_chases"] == 1
+    assert measured["summary"]["action_outputs"] == 2
+    assert measured["summary"]["acceptance"] == "FAIL"
+    assert len(measured["decisions"][0]["observed"]["unexpected_calls"]) == 1
+
+
 @pytest.mark.parametrize("field", ["balances", "hold"])
 def test_silence_does_not_hide_incorrect_books_or_a_missing_hold(result, field):
     rows = copy.deepcopy(result["methods"]["public_workflow"]["decisions"])

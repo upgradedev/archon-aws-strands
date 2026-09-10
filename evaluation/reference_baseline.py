@@ -70,7 +70,7 @@ def run_baseline(steps: list[dict], context: dict) -> list[dict]:
             elif step["op"] == "draft":
                 draft = current()
             elif step["op"] == "reload":
-                # Reconstruct the baseline's own durable approval memory, without gold labels.
+                # Retain the flat state for this task; no process-persistence claim.
                 sent = copy.deepcopy(sent)
             elif step["op"] == "approve":
                 calls = []

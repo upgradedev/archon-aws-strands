@@ -83,8 +83,8 @@ def run_public(steps: list[dict], context: dict) -> list[dict]:
                     return response.json()
 
                 saved_fingerprint = "0" * 64
+                accounted_for = 0
                 for index, step in enumerate(steps):
-                    before = len(sent)
                     op = step["op"]
                     if op == "reload":
                         client.close()
@@ -101,7 +101,9 @@ def run_public(steps: list[dict], context: dict) -> list[dict]:
                     elif op == "approve":
                         payload["fingerprint"] = saved_fingerprint
                     path_name = "reason" if op == "draft" else op
+                    before = len(sent)
                     response = client.post(f"/api/{path_name}", headers=headers, json=payload)
+                    after = len(sent)
                     if response.status_code not in (200, 409, 422):
                         raise RuntimeError(f"{op} failed: HTTP {response.status_code}")
                     trace.append({"step": index, "op": op, "status": response.status_code,
@@ -111,11 +113,14 @@ def run_public(steps: list[dict], context: dict) -> list[dict]:
                         draft = state["draft"]
                         saved_fingerprint = draft["fingerprint"] if draft else "0" * 64
                     if op == "approve":
-                        calls = sent[before:]
+                        calls = sent[before:after]
+                        unexpected = sent[accounted_for:before] + sent[after:]
                         observations.append({
                             "step": index,
                             "calls": [sent_action(call) for call in calls],
                             "provider_payloads": calls,
+                            "unexpected_calls": [sent_action(call) for call in unexpected],
+                            "unexpected_provider_payloads": unexpected,
                             "balances": {s["doc_id"]: s["outstanding"] for s in state["sales"]},
                             "hold": bool(state["holds"]),
                             "sources": [{"id": s["id"], "status": s["status"],
@@ -125,6 +130,9 @@ def run_public(steps: list[dict], context: dict) -> list[dict]:
                             "receipt_count": len(state["receipts"]),
                             "trace": copy.deepcopy(trace),
                         })
+                        accounted_for = len(sent)
+                if len(sent) != accounted_for:
+                    raise RuntimeError("Provider calls remain outside a measured decision")
             finally:
                 client.close()
     return observations
