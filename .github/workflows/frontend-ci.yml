@@ -137,6 +137,7 @@ jobs:
             frontend/proof-results/
             frontend/UAT.testbook.json
             frontend/UAT.testbook.html
+          retention-days: 90
 
   x1-source-benchmark:
     if: github.event_name == 'workflow_dispatch' && inputs.x1_benchmark == true
@@ -148,7 +149,7 @@ jobs:
       contents: read
     env:
       AWS_EC2_METADATA_DISABLED: "true"
-      ARCHON_SESSION_DB: ${{ runner.temp }}/archon-x1.sqlite3
+      ARCHON_SESSION_DB: /tmp/archon-x1.sqlite3
       ARCHON_COMMIT_SHA: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v4
@@ -184,4 +185,3 @@ jobs:
             frontend/benchmarks/x1-protocol.json
           retention-days: 90
           if-no-files-found: error
-          retention-days: 90
