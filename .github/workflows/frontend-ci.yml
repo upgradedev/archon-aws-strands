@@ -5,6 +5,12 @@ on:
     branches: ["codex/**", main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      x1_benchmark:
+        description: Run the frozen 20-attempt source-only hero measurement after source checks
+        type: boolean
+        required: false
+        default: false
   workflow_call:
 
 permissions:
@@ -40,6 +46,8 @@ jobs:
       ARCHON_COMMIT_SHA: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: "22.18.0"
@@ -130,3 +138,51 @@ jobs:
             frontend/UAT.testbook.json
             frontend/UAT.testbook.html
           retention-days: 90
+
+  x1-source-benchmark:
+    if: github.event_name == 'workflow_dispatch' && inputs.x1_benchmark == true
+    needs: [secrets, verify]
+    runs-on: ubuntu-24.04
+    # Installation/build and artifact upload are outside the separately enforced 15-minute invocation.
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    env:
+      AWS_EC2_METADATA_DISABLED: "true"
+      ARCHON_SESSION_DB: /tmp/archon-x1.sqlite3
+      ARCHON_COMMIT_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.18.0"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Existing Python dependencies, CI runner only
+        run: python -m pip install -e ".[dev]" httpx==0.28.1
+      - name: Existing locked browser dependencies, CI runner only
+        working-directory: frontend
+        run: |
+          npm install --global npm@11.19.1 --ignore-scripts
+          npm ci --logs-dir=artifacts/x1-npm-logs
+          npx playwright install --with-deps chromium
+      - name: Build exact source frontend before timing
+        working-directory: frontend
+        run: npm run build
+      - name: One frozen source-only invocation, no retries or replacement samples
+        working-directory: frontend
+        run: node benchmarks/run.mjs
+      - name: Retain raw outcomes including failed and unstarted slots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: x1-source-${{ github.run_id }}-${{ github.sha }}
+          include-hidden-files: true
+          path: |
+            frontend/artifacts/x1/final/
+            frontend/benchmarks/x1-protocol.json
+          retention-days: 90
+          if-no-files-found: error
