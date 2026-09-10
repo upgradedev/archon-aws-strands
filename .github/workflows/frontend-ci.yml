@@ -180,6 +180,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: x1-source-${{ github.run_id }}-${{ github.sha }}
+          include-hidden-files: true
           path: |
             frontend/artifacts/x1/
             frontend/benchmarks/x1-protocol.json

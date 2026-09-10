@@ -149,6 +149,7 @@ describe('X1 frozen source instrument', () => {
     const workflow = readFileSync('../.github/workflows/frontend-ci.yml', 'utf8');
     expect(workflow).toContain("github.event_name == 'workflow_dispatch' && inputs.x1_benchmark == true");
     expect(workflow).toContain('needs: [secrets, verify]'); expect(workflow).toContain('runs-on: ubuntu-24.04');
+    expect(workflow).toContain('include-hidden-files: true'); // Keep Playwright .last-run.json referenced by SHA256SUMS.
     // The manual instrument refuses a changed application; normal source CI must still permit future product work.
     const launcher = readFileSync('benchmarks/run.mjs', 'utf8');
     expect(launcher).toContain("git('diff', APPLICATION, candidate, '--', '../src', 'src', '../pyproject.toml', 'package.json', 'package-lock.json')");
