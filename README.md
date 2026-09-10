@@ -181,6 +181,14 @@ AgentCore is not implemented; the [design note](docs/BEDROCK_AGENTCORE_ARCHITECT
 
 ## Evidence and limits
 
+The opt-in `x1_benchmark` input on [frontend verification](https://github.com/upgradedev/archon-aws-strands/actions/workflows/frontend-ci.yml)
+runs the [frozen X1 protocol](frontend/benchmarks/x1-protocol.json): ten new-payment and ten
+forwarded-duplicate journeys, no retries, a 15-minute invocation limit, raw outcomes and nearest-rank
+p50/p95 with failures retained in the denominator. Run-specific artifacts include source/served-build
+identities, timing boundaries and checksums. This measures CI browser orchestration with a scripted
+model, not AWS/model latency or human time saved. Paid model calls/cost are zero only for verified
+scripted runs; AWS infrastructure and runner dollar costs remain unknown. It never deploys or sends mail.
+
 Both earlier comparisons are withdrawn and stay withdrawn. They scored Archon from books that
 fixtures had already posted correctly: a ledger agreeing with itself. Their historical files and
 transcripts remain retained; they are not current product performance claims.
