@@ -1,0 +1,9 @@
+{
+  "doc-01":{"kind":"sales_invoice","doc_id":"JN-101","issued":"2026-09-01","due":"2026-09-20","net":"100.00","vat":"20.00","gross":"120.00","counterparty_email":"accounts@buildco.example"},
+  "doc-02":{"kind":"purchase_invoice","doc_id":"PI-102","issued":"2026-09-01","due":"2026-09-20","net":"200.00","vat":"40.00","gross":"240.00","counterparty_email":null},
+  "doc-03":{"kind":"receipt","issued":"2026-09-02","settles":"JN-101","amount":"45.00","transfer_id":"BANK-003"},
+  "doc-04":{"kind":"sales_invoice","doc_id":"JN-104","issued":"2026-09-01","due":"2026-09-20","net":"300.00","vat":"60.00","gross":"360.00","counterparty_email":"accounts@buildco.example"},
+  "doc-05":{"kind":"receipt","issued":"2026-09-03","settles":"JN-101","amount":"25.00","transfer_id":"BANK-005"},
+  "doc-06":{"kind":"sales_invoice","doc_id":"JN-106","issued":"2026-09-01","due":"2026-09-20","net":"400.00","vat":"80.00","gross":"480.00","counterparty_email":"accounts@buildco.example"},
+  "doc-07":null,"doc-08":null,"doc-09":null,"doc-10":null,"doc-11":null,"doc-12":null
+}
