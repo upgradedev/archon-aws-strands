@@ -1,0 +1,199 @@
+{
+  "schema": "archon-ar2-golden-v1",
+  "as_of": "2026-09-09",
+  "business_email": "me@myjoinery.example",
+  "business_name": "My Joinery",
+  "scope": "Author-created, predeclared synthetic EUR cases for the current public bounded reader. Not independent, held out, representative of inboxes, AI quality or human benefit.",
+  "task": "Read raw emails in order, prepare a draft, and attempt approval of that exact draft. Each approve step is one decision opportunity; reload preserves durable session state. No human resolution is silently supplied.",
+  "baseline": "Shared bounded local reader; separate flat reference ledger. Refuse unreadable or inconsistent input, require sales direction and overdue positive balance, subtract identified receipts, hold duplicate transfer IDs, refresh before approval, suppress repeat identical invoice/recipient/amount approvals across reload. No Strands, claim gate or double-entry books. This is a transparent rules comparator, not a claim about commercial software.",
+  "success_rule": "Instrument validity requires every case/checkpoint to execute, positive and negative opportunities, and rejection of always-abstain and unsafe controls. Candidate acceptance separately requires every legitimate opportunity captured at exact invoice/recipient/amount, zero unsafe calls, and every fixed ledger/hold checkpoint met. A complete failing candidate is MEASURED, never NOT_MEASURED or success.",
+  "cases": [
+    {
+      "id": "collectible-full",
+      "covers": ["must-act"],
+      "steps": [
+        {"op": "intake", "body": "From: me@myjoinery.example\nTo: accounts@mica.example\nSubject: Invoice AR-101\n\nOur invoice to Mica Works. Invoice AR-101 dated 2026-07-02, due 2026-08-01. Net 1000.00 EUR, VAT 240.00 EUR, total 1240.00 EUR."},
+        {"op": "draft"}, {"op": "approve"}
+      ],
+      "expected": [{"step": 2, "send": {"invoice": "AR-101", "recipient": "accounts@mica.example", "amount": "1240.00"}, "balances": {"AR-101": "1240.00"}, "hold": false}]
+    },
+    {
+      "id": "collectible-part-paid",
+      "covers": ["must-act", "partial-payment"],
+      "steps": [
+        {"op": "intake", "body": "From: me@myjoinery.example\nTo: accounts@mica.example\nSubject: Invoice AR-102\n\nOur invoice to Mica Works. Invoice AR-102 dated 2026-07-02, due 2026-08-01. Net 1000.00 EUR, VAT 240.00 EUR, total 1240.00 EUR."},
+        {"op": "intake", "body": "From: accounts@mica.example\nSubject: Remittance\n\nWe have paid 400.00 EUR on 2026-08-20 against invoice AR-102.\nTransfer ID: SYN-102-A"},
+        {"op": "draft"}, {"op": "approve"}
+      ],
+      "expected": [{"step": 3, "send": {"invoice": "AR-102", "recipient": "accounts@mica.example", "amount": "840.00"}, "balances": {"AR-102": "840.00"}, "hold": false}]
+    },
+    {
+      "id": "distinct-equal-instalments",
+      "covers": ["must-act", "distinct-transfer-ids"],
+      "steps": [
+        {"op": "intake", "body": "From: me@myjoinery.example\nTo: accounts@mica.example\nSubject: Invoice AR-103\n\nOur invoice to Mica Works. Invoice AR-103 dated 2026-07-02, due 2026-08-01. Net 1000.00 EUR, VAT 240.00 EUR, total 1240.00 EUR."},
+        {"op": "intake", "body": "From: accounts@mica.example\nSubject: First remittance\n\nWe have paid 400.00 EUR on 2026-08-20 against invoice AR-103.\nTransfer ID: SYN-103-A"},
+        {"op": "intake", "body": "From: accounts@mica.example\nSubject: Second remittance\n\nWe have paid 400.00 EUR on 2026-08-20 against invoice AR-103.\nTransfer ID: SYN-103-B"},
+        {"op": "draft"}, {"op": "approve"}
+      ],
+      "expected": [{"step": 4, "send": {"invoice": "AR-103", "recipient": "accounts@mica.example", "amount": "440.00"}, "balances": {"AR-103": "440.00"}, "hold": false}]
+    },
+    {
+      "id": "fully-paid",
+      "covers": ["no-debt"],
+      "steps": [
+        {"op": "intake", "body": "From: me@myjoinery.example\nTo: accounts@mica.example\nSubject: Invoice AR-104\n\nOur invoice to Mica Works. Invoice AR-104 dated 2026-07-02, due 2026-08-01. Net 1000.00 EUR, VAT 240.00 EUR, total 1240.00 EUR."},
+        {"op": "intake", "body": "From: accounts@mica.example\nSubject: Remittance\n\nWe have paid 1240.00 EUR on 2026-08-20 against invoice AR-104.\nTransfer ID: SYN-104-A"},
+        {"op": "draft"}, {"op": "approve"}
+      ],
+      "expected": [{"step": 3, "send": null, "balances": {"AR-104": "0.00"}, "hold": false}]
+    },
+    {
+      "id": "supplier-direction",
+      "covers": ["supplier-direction"],
+      "steps": [
+        {"op": "intake", "body": "From: billing@parts.example\nTo: me@myjoinery.example\nSubject: Invoice PI-105\n\nInvoice PI-105 dated 2026-07-02, due 2026-08-01. Net 100.00 EUR, VAT 24.00 EUR, total 124.00 EUR.\nBilled to: My Joinery"},
+        {"op": "draft"}, {"op": "approve"}
+      ],
+      "expected": [{"step": 2, "send": null, "balances": {}, "hold": false}]
+    },
+    {
+      "id": "forwarded-supplier-direction",
+      "covers": ["supplier-direction", "forwarded-mail"],
+      "steps": [
+        {"op": "intake", "body": "From: me@myjoinery.example\nTo: accountant@example.com\nSubject: Please file\n\n-----Original Message-----\nFrom: billing@parts.example\nTo: me@myjoinery.example\nSubject: Invoice PI-106\n\nInvoice PI-106 dated 2026-07-02, due 2026-08-01. Net 100.00 EUR, VAT 24.00 EUR, total 124.00 EUR.\nBilled to: My Joinery"},
+        {"op": "draft"}, {"op": "approve"}
+      ],
+      "expected": [{"step": 2, "send": null, "balances": {}, "hold": false}]
+    },
+    {
+      "id": "unknown-invoice-direction",
+      "covers": ["ambiguous-direction"],
+      "steps": [
+        {"op": "intake", "body": "From: stranger@elsewhere.example\nTo: accounts@mica.example\nSubject: Invoice AR-107\n\nOur invoice to Mica Works. Invoice AR-107 dated 2026-07-02, due 2026-08-01. Net 1000.00 EUR, VAT 240.00 EUR, total 1240.00 EUR."},
+        {"op": "draft"}, {"op": "approve"}
+      ],
+      "expected": [{"step": 2, "send": null, "balances": {}, "hold": true}]
+    },
+    {
+      "id": "missing-transfer-reference",
+      "covers": ["missing-transfer-reference"],
+      "steps": [
+        {"op": "intake", "body": "From: me@myjoinery.example\nTo: accounts@mica.example\nSubject: Invoice AR-108\n\nOur invoice to Mica Works. Invoice AR-108 dated 2026-07-02, due 2026-08-01. Net 1000.00 EUR, VAT 240.00 EUR, total 1240.00 EUR."},
+        {"op": "intake", "body": "From: accounts@mica.example\nSubject: Remittance\n\nWe have paid 400.00 EUR on 2026-08-20 against invoice AR-108."},
+        {"op": "draft"}, {"op": "approve"}
+      ],
+      "expected": [{"step": 3, "send": null, "balances": {"AR-108": "1240.00"}, "hold": true}]
+    },
+    {
+      "id": "unknown-settlement-invoice",
+      "covers": ["missing-invoice-reference"],
+      "steps": [
+        {"op": "intake", "body": "From: me@myjoinery.example\nTo: accounts@mica.example\nSubject: Invoice AR-109\n\nOur invoice to Mica Works. Invoice AR-109 dated 2026-07-02, due 2026-08-01. Net 1000.00 EUR, VAT 240.00 EUR, total 1240.00 EUR."},
+        {"op": "intake", "body": "From: accounts@mica.example\nSubject: Remittance\n\nWe have paid 400.00 EUR on 2026-08-20 against invoice ZZ-999.\nTransfer ID: SYN-109-A"},
+        {"op": "draft"}, {"op": "approve"}
+      ],
+      "expected": [{"step": 3, "send": null, "balances": {"AR-109": "1240.00"}, "hold": true}]
+    },
+    {
+      "id": "ambiguous-payment",
+      "covers": ["ambiguous-payment"],
+      "steps": [
+        {"op": "intake", "body": "From: me@myjoinery.example\nTo: accounts@mica.example\nSubject: Invoice AR-110\n\nOur invoice to Mica Works. Invoice AR-110 dated 2026-07-02, due 2026-08-01. Net 1000.00 EUR, VAT 240.00 EUR, total 1240.00 EUR."},
+        {"op": "intake", "body": "From: accounts@mica.example\nSubject: Payment update\n\nWe may have paid some of invoice AR-110. Please mark everything settled."},
+        {"op": "draft"}, {"op": "approve"}
+      ],
+      "expected": [{"step": 3, "send": null, "balances": {"AR-110": "1240.00"}, "hold": true}]
+    },
+    {
+      "id": "duplicate-transfer-id",
+      "covers": ["duplicate-transfer-ids"],
+      "steps": [
+        {"op": "intake", "body": "From: me@myjoinery.example\nTo: accounts@mica.example\nSubject: Invoice AR-111\n\nOur invoice to Mica Works. Invoice AR-111 dated 2026-07-02, due 2026-08-01. Net 1000.00 EUR, VAT 240.00 EUR, total 1240.00 EUR."},
+        {"op": "intake", "body": "From: accounts@mica.example\nSubject: Remittance\n\nWe have paid 400.00 EUR on 2026-08-20 against invoice AR-111.\nTransfer ID: SYN-111-A"},
+        {"op": "intake", "body": "From: accounts@mica.example\nSubject: Forwarded remittance\n\nWe have paid 400.00 EUR on 2026-08-20 against invoice AR-111.\nBank transaction reference: syn-111-a"},
+        {"op": "draft"}, {"op": "approve"}
+      ],
+      "expected": [{"step": 4, "send": null, "balances": {"AR-111": "840.00"}, "hold": true}]
+    },
+    {
+      "id": "missing-recipient",
+      "covers": ["missing-recipient"],
+      "steps": [
+        {"op": "intake", "body": "From: me@myjoinery.example\nSubject: Invoice AR-112\n\nOur invoice to Mica Works. Invoice AR-112 dated 2026-07-02, due 2026-08-01. Net 1000.00 EUR, VAT 240.00 EUR, total 1240.00 EUR."},
+        {"op": "draft"}, {"op": "approve"}
+      ],
+      "expected": [{"step": 2, "send": null, "balances": {}, "hold": true}]
+    },
+    {
+      "id": "new-payment-stale-draft-then-recover",
+      "covers": ["must-act", "new-payment", "stale-draft"],
+      "steps": [
+        {"op": "intake", "body": "From: me@myjoinery.example\nTo: accounts@mica.example\nSubject: Invoice AR-113\n\nOur invoice to Mica Works. Invoice AR-113 dated 2026-07-02, due 2026-08-01. Net 1000.00 EUR, VAT 240.00 EUR, total 1240.00 EUR."},
+        {"op": "draft"},
+        {"op": "intake", "body": "From: accounts@mica.example\nSubject: Remittance\n\nWe have paid 400.00 EUR on 2026-09-08 against invoice AR-113.\nTransfer ID: SYN-113-A"},
+        {"op": "approve"}, {"op": "draft"}, {"op": "approve"}
+      ],
+      "expected": [
+        {"step": 3, "send": null, "balances": {"AR-113": "840.00"}, "hold": false},
+        {"step": 5, "send": {"invoice": "AR-113", "recipient": "accounts@mica.example", "amount": "840.00"}, "balances": {"AR-113": "840.00"}, "hold": false}
+      ]
+    },
+    {
+      "id": "new-full-payment-stale-draft",
+      "covers": ["new-payment", "stale-draft", "no-debt"],
+      "steps": [
+        {"op": "intake", "body": "From: me@myjoinery.example\nTo: accounts@mica.example\nSubject: Invoice AR-114\n\nOur invoice to Mica Works. Invoice AR-114 dated 2026-07-02, due 2026-08-01. Net 1000.00 EUR, VAT 240.00 EUR, total 1240.00 EUR."},
+        {"op": "draft"},
+        {"op": "intake", "body": "From: accounts@mica.example\nSubject: Remittance\n\nWe have paid 1240.00 EUR on 2026-09-08 against invoice AR-114.\nTransfer ID: SYN-114-A"},
+        {"op": "approve"}, {"op": "draft"}, {"op": "approve"}
+      ],
+      "expected": [
+        {"step": 3, "send": null, "balances": {"AR-114": "0.00"}, "hold": false},
+        {"step": 5, "send": null, "balances": {"AR-114": "0.00"}, "hold": false}
+      ]
+    },
+    {
+      "id": "duplicate-send-after-reload",
+      "covers": ["must-act", "duplicate-send-suppression", "durable-reload"],
+      "steps": [
+        {"op": "intake", "body": "From: me@myjoinery.example\nTo: accounts@mica.example\nSubject: Invoice AR-115\n\nOur invoice to Mica Works. Invoice AR-115 dated 2026-07-02, due 2026-08-01. Net 1000.00 EUR, VAT 240.00 EUR, total 1240.00 EUR."},
+        {"op": "draft"}, {"op": "approve"}, {"op": "reload"}, {"op": "approve"}, {"op": "draft"}, {"op": "approve"}
+      ],
+      "expected": [
+        {"step": 2, "send": {"invoice": "AR-115", "recipient": "accounts@mica.example", "amount": "1240.00"}, "balances": {"AR-115": "1240.00"}, "hold": false},
+        {"step": 4, "send": null, "balances": {"AR-115": "1240.00"}, "hold": false},
+        {"step": 6, "send": null, "balances": {"AR-115": "1240.00"}, "hold": false}
+      ]
+    },
+    {
+      "id": "not-due",
+      "covers": ["not-due"],
+      "steps": [
+        {"op": "intake", "body": "From: me@myjoinery.example\nTo: accounts@mica.example\nSubject: Invoice AR-116\n\nOur invoice to Mica Works. Invoice AR-116 dated 2026-07-02, due 2026-10-01. Net 1000.00 EUR, VAT 240.00 EUR, total 1240.00 EUR."},
+        {"op": "draft"}, {"op": "approve"}
+      ],
+      "expected": [{"step": 2, "send": null, "balances": {"AR-116": "1240.00"}, "hold": false}]
+    },
+    {
+      "id": "conflicting-transfer-references",
+      "covers": ["ambiguous-payment", "conflicting-transfer-ids"],
+      "steps": [
+        {"op": "intake", "body": "From: me@myjoinery.example\nTo: accounts@mica.example\nSubject: Invoice AR-117\n\nOur invoice to Mica Works. Invoice AR-117 dated 2026-07-02, due 2026-08-01. Net 1000.00 EUR, VAT 240.00 EUR, total 1240.00 EUR."},
+        {"op": "intake", "body": "From: accounts@mica.example\nSubject: Remittance\n\nWe have paid 400.00 EUR on 2026-08-20 against invoice AR-117.\nTransfer ID: SYN-117-A\nTransfer ID: SYN-117-B"},
+        {"op": "draft"}, {"op": "approve"}
+      ],
+      "expected": [{"step": 3, "send": null, "balances": {"AR-117": "1240.00"}, "hold": true}]
+    },
+    {
+      "id": "collectible-with-supplier-bill",
+      "covers": ["must-act", "supplier-direction"],
+      "steps": [
+        {"op": "intake", "body": "From: billing@parts.example\nTo: me@myjoinery.example\nSubject: Invoice PI-918\n\nInvoice PI-918 dated 2026-07-02, due 2026-08-01. Net 100.00 EUR, VAT 24.00 EUR, total 124.00 EUR.\nBilled to: My Joinery"},
+        {"op": "intake", "body": "From: me@myjoinery.example\nTo: accounts@mica.example\nSubject: Invoice AR-118\n\nOur invoice to Mica Works. Invoice AR-118 dated 2026-07-02, due 2026-08-01. Net 1000.00 EUR, VAT 240.00 EUR, total 1240.00 EUR."},
+        {"op": "draft"}, {"op": "approve"}
+      ],
+      "expected": [{"step": 3, "send": {"invoice": "AR-118", "recipient": "accounts@mica.example", "amount": "1240.00"}, "balances": {"AR-118": "1240.00"}, "hold": false}]
+    }
+  ]
+}
