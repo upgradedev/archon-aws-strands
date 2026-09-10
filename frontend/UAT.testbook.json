@@ -1,9 +1,15 @@
 {
   "reconciliation_revision": {
-    "status": "SOURCE_CI_PENDING",
+    "status": "SOURCE_CHECKPOINT_PASS",
+    "observed_at": "2026-09-10T11:08:24Z",
+    "source_commit": "6ae7ad30b150f7c7ca6937f943c2914d0c1aaa20",
+    "run_url": "https://github.com/upgradedev/archon-aws-strands/actions/runs/34469372353",
+    "measured": { "python_tests": 588, "frontend_unit_tests": 79, "real_http_browser_tests": 38, "separate_proof_renderer_tests": 22 },
+    "measurement_command": "gh run view 34469372353 --repo upgradedev/archon-aws-strands --log",
     "scope": "Guided new-payment decision, duplicate abstention, plain-text file preview, exact durable evidence copy/download. Existing backend contracts, thresholds and receipts unchanged.",
     "human_signoff": "NOT_RUN",
-    "live_aws_acceptance": "NOT_RUN for this candidate; source CI does not prove deployment. Consult current_automated_acceptance for the served pair."
+    "current_aws_status": "/acceptance.html",
+    "scope_note": "Dated source-only checkpoint at the named commit, not a current deployment claim. Later changes require their own exact-SHA CI. Current AWS status is exclusively reported by /acceptance.html against the served frontend/backend pair."
   },
   "current_automated_acceptance": {
     "page": "/acceptance.html",
@@ -42,7 +48,7 @@
       "automation mapping": "central journey withdraws the old draft after payment and exports the fresh reviewed outcome; test_reconciliation_payment_duplicate_and_export_keep_exact_evidence; frontend/tests/reconciliation.test.tsx",
       "persona": "Joiner reviewing collections after new inbox evidence",
       "preconditions": "Fresh isolated synthetic session; source candidate or explicitly identified release",
-      "observed result/evidence": "SOURCE_CI_PENDING; see reconciliation_revision. No human or live AWS acceptance claimed.",
+      "observed result/evidence": "SOURCE_CHECKPOINT_PASS at 6ae7ad30b150f7c7ca6937f943c2914d0c1aaa20, 2026-09-10T11:08:24Z, run34469372353. See reconciliation_revision. Current AWS status: /acceptance.html. Human signoff remains NOT_RUN.",
       "human signoff": "NOT_RUN",
       "negative/recovery case": "Old draft cannot be approved; expired, stale and non-priority cases cannot bypass the existing gate. Clipboard failure offers the same download and selectable text."
     },
@@ -54,7 +60,7 @@
       "automation mapping": "plain text file preview leads to duplicate abstention and retained human resolution; frontend/tests/reconciliation.test.tsx; test_reconciliation_payment_duplicate_and_export_keep_exact_evidence",
       "persona": "Joiner checking whether a forwarded remittance is another payment",
       "preconditions": "Fresh isolated synthetic session and UTF-8 plain-text .txt/.eml inputs",
-      "observed result/evidence": "SOURCE_CI_PENDING; see reconciliation_revision. No human or live AWS acceptance claimed.",
+      "observed result/evidence": "SOURCE_CHECKPOINT_PASS at 6ae7ad30b150f7c7ca6937f943c2914d0c1aaa20, 2026-09-10T11:08:24Z, run34469372353. See reconciliation_revision. Current AWS status: /acceptance.html. Human signoff remains NOT_RUN.",
       "human signoff": "NOT_RUN",
       "negative/recovery case": "Empty, binary, non-UTF8, oversized, MIME and unsupported files leave editor/ledger unchanged. Late reads cannot cross sessions. A duplicate must never get an invented second identity."
     },

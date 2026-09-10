@@ -24,7 +24,8 @@ export function ReconciliationStart({ data }: { data: Workspace }) {
 
 export function Reconciliation({ data, invoice, stale, view = 'draft' }: { data: Workspace; invoice: string; stale: boolean; view?: string }) {
   const decision = reconciliation(data, invoice, stale, useClock(data.draft?.at));
-  const href = view === 'terms' && decision.href?.startsWith('#collection') || view === 'terms' && decision.href?.startsWith('#prepare') ? workspaceLink(invoice) : decision.href;
+  const localReview = decision.href === '#collection-draft' || decision.href === '#prepare-current-draft';
+  const href = view === 'terms' && localReview ? workspaceLink(invoice) : decision.href;
   const latest = data.sources.at(-1);
   return <section className="reconciliation-brief" aria-label="Current reconciliation decision" data-testid="reconciliation-decision">
     <p className="eyebrow">NEXT DECISION · REVISION {data.revision}</p><h2>{decision.title}</h2><p>{decision.why}</p>

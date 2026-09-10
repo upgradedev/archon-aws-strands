@@ -121,7 +121,7 @@ details summary { font-size: 14px; color: #d0cbef; padding-block: 5px; } .finger
 .reconciliation-hero p,.reconciliation-brief>p { margin-block: 12px; }
 .reconciliation-hero ol { margin: 0; padding-left: 24px; align-self: center; }
 .reconciliation-hero li { padding: 10px 0 10px 6px; }
-.reconciliation-hero a.primary,.reconciliation-brief a.secondary { display: inline-block; margin-top: 10px; }
+.reconciliation-hero a.primary,.reconciliation-brief a.secondary,.workflow-guide a.secondary { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 11px 16px; border: 1px solid #615b94; border-radius: 10px; font-weight: 600; margin-top: 10px; }
 .reconciliation-limit { grid-column: 1/-1; color: #bec6dc; font-size: 14px; }
 .payment-change { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; margin-top: 20px; border-block: 1px solid #525275; padding-block: 18px; }
 .payment-change strong { display: block; font-size: 25px; color: #c3ffe9; font-variant-numeric: tabular-nums; margin-top: 7px; }

@@ -19,9 +19,14 @@ async function workspace(page: Page) {
 }
 
 test('central journey withdraws the old draft after payment and exports the fresh reviewed outcome', async ({ page, context }, info) => {
+  if (info.project.name === 'mobile') await page.setViewportSize({ width: 375, height: 812 });
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   await page.goto('/');
-  await page.getByRole('link', { name: 'Start reconciliation', exact: true }).click();
+  const start = page.getByRole('link', { name: 'Start reconciliation', exact: true });
+  await expect(start).toBeVisible();
+  expect((await start.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  await page.screenshot({ path: info.outputPath('reconciliation-start.png') });
+  await start.click();
   await expect(page.getByLabel(/Email headers/)).toHaveValue(/Invoice JN-4410/);
   await post(page);
   await page.getByRole('link', { name: 'Review changed decision →', exact: true }).click();
@@ -77,6 +82,7 @@ test('central journey withdraws the old draft after payment and exports the fres
 });
 
 test('plain text file preview leads to duplicate abstention and retained human resolution', async ({ page }, info) => {
+  if (info.project.name === 'mobile') await page.setViewportSize({ width: 375, height: 812 });
   await page.goto('/#/records?intake=open');
   await expect(page.getByLabel(/Email headers/)).toBeVisible();
   const initial = await state(page);
