@@ -1,4 +1,16 @@
 {
+  "reconciliation_revision": {
+    "status": "SOURCE_CHECKPOINT_PASS",
+    "observed_at": "2026-09-10T11:08:24Z",
+    "source_commit": "6ae7ad30b150f7c7ca6937f943c2914d0c1aaa20",
+    "run_url": "https://github.com/upgradedev/archon-aws-strands/actions/runs/34469372353",
+    "measured": { "python_tests": 588, "frontend_unit_tests": 79, "real_http_browser_tests": 38, "separate_proof_renderer_tests": 22 },
+    "measurement_command": "gh run view 34469372353 --repo upgradedev/archon-aws-strands --log",
+    "scope": "Guided new-payment decision, duplicate abstention, plain-text file preview, exact durable evidence copy/download. Existing backend contracts, thresholds and receipts unchanged.",
+    "human_signoff": "NOT_RUN",
+    "current_aws_status": "/acceptance.html",
+    "scope_note": "Dated source-only checkpoint at the named commit, not a current deployment claim. Later changes require their own exact-SHA CI. Current AWS status is exclusively reported by /acceptance.html against the served frontend/backend pair."
+  },
   "current_automated_acceptance": {
     "page": "/acceptance.html",
     "receipt": "/acceptance.json",
@@ -28,6 +40,30 @@
   "version": 2,
   "scope": "React UI, real Python HTTP API, Strands scripted tool calls, durable demo sessions. No live email/model calls. Human signoff is independent of automation.",
   "cases": [
+    {
+      "id": "AR-UAT-23",
+      "requirement": "New payment withdraws an obsolete draft and makes the next decision explicit",
+      "steps": ["Dashboard: Start reconciliation; review and post invoice", "Review changed decision; run Strands and inspect the 1860 EUR draft", "Before approval, add sample payment from Try new evidence before approving", "Inspect linked receipt and derived before/current balance; old draft must disappear", "Run Strands again; review fresh 1260 EUR draft and simulate approval", "Prepare, inspect, copy and download durable evidence in Workspace; reload receipt"],
+      "expected outcome": "Obsolete fingerprint refused even with current revision. Review confirmation resets. Export and clipboard match durable redacted bytes; exactly one simulated receipt persists.",
+      "automation mapping": "central journey withdraws the old draft after payment and exports the fresh reviewed outcome; test_reconciliation_payment_duplicate_and_export_keep_exact_evidence; frontend/tests/reconciliation.test.tsx",
+      "persona": "Joiner reviewing collections after new inbox evidence",
+      "preconditions": "Fresh isolated synthetic session; source candidate or explicitly identified release",
+      "observed result/evidence": "SOURCE_CHECKPOINT_PASS at 6ae7ad30b150f7c7ca6937f943c2914d0c1aaa20, 2026-09-10T11:08:24Z, run34469372353. See reconciliation_revision. Current AWS status: /acceptance.html. Human signoff remains NOT_RUN.",
+      "human signoff": "NOT_RUN",
+      "negative/recovery case": "Old draft cannot be approved; expired, stale and non-priority cases cannot bypass the existing gate. Clipboard failure offers the same download and selectable text."
+    },
+    {
+      "id": "AR-UAT-24",
+      "requirement": "Ordinary supported file intake and evidence-backed duplicate abstention",
+      "steps": ["Open a text email file in Records", "Try unsupported PDF and multipart email; inspect clear rejection", "Preview plain-text invoice and payment files, explicitly use text and submit", "Prepare draft; use Check a forwarded duplicate and submit retained Transfer ID", "Read hold and unchanged balance; resolve against original receipt with note and consent", "Reload and export evidence; original sources and resolution must remain"],
+      "expected outcome": "File preview performs no intake request. Duplicate blocks preparation, makes no additional credit and creates no provider outcome. Explicit resolution retains original bytes and requires fresh draft review.",
+      "automation mapping": "plain text file preview leads to duplicate abstention and retained human resolution; frontend/tests/reconciliation.test.tsx; test_reconciliation_payment_duplicate_and_export_keep_exact_evidence",
+      "persona": "Joiner checking whether a forwarded remittance is another payment",
+      "preconditions": "Fresh isolated synthetic session and UTF-8 plain-text .txt/.eml inputs",
+      "observed result/evidence": "SOURCE_CHECKPOINT_PASS at 6ae7ad30b150f7c7ca6937f943c2914d0c1aaa20, 2026-09-10T11:08:24Z, run34469372353. See reconciliation_revision. Current AWS status: /acceptance.html. Human signoff remains NOT_RUN.",
+      "human signoff": "NOT_RUN",
+      "negative/recovery case": "Empty, binary, non-UTF8, oversized, MIME and unsupported files leave editor/ledger unchanged. Late reads cannot cross sessions. A duplicate must never get an invented second identity."
+    },
     {
       "id": "AR-UAT-18",
       "requirement": "Semantic payment identity and retained correction",

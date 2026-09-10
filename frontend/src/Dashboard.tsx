@@ -2,13 +2,14 @@ import type { Workspace } from './types';
 import { Badge, Empty, Heading, money } from './ui';
 import { dashboardMetrics, reasonTarget, workspaceLink } from './ledger';
 import { useClock } from './useClock';
+import { ReconciliationStart } from './Reconciliation';
 
 export function Dashboard({ data, stale }: { data: Workspace; stale: boolean }) {
   const metrics = dashboardMetrics(data, useClock(data.draft?.at));
   const target = reasonTarget(data);
   return <>
     <Heading eyebrow="FINOPS / MY JOINERY" title="Dashboard">Your posted ledger, the work it needs, and the evidence behind it.</Heading>
-    <section className="notice"><strong>For the joiner reconciling client invoices from an inbox</strong><p>Try Records → sample invoice → sample payment → Workspace → Run Strands → review the exact draft. The graph runs; its model is scripted and its receipt is simulated.</p><a href="#/records?intake=open">Try editable workflows →</a></section>
+    <ReconciliationStart data={data} />
     <div className="scope-line"><span>All records in this synthetic session · As of {data.as_of}</span><Badge tone={stale || data.holds.length ? 'amber' : 'blue'}>{stale ? 'Last known snapshot' : `Ledger revision ${data.revision}`}</Badge></div>
     <section className="stats dashboard-stats" aria-label="Ledger balances">{metrics.map(metric => <a key={metric.id} className="stat" data-testid={`metric-${metric.id}`} href={metric.href}>
       <p>{metric.label}<span aria-hidden="true"> ↗</span></p><strong>{'amount' in metric ? money(metric.amount) : metric.count === null ? 'Unknown' : metric.count}</strong><small>{metric.note}</small>

@@ -3,6 +3,7 @@ import { useEffect, useState, type CSSProperties } from 'react';
 import type { Mutate, Settlement, Workspace } from './types';
 import { Badge, Empty, Heading, money } from './ui';
 import { cents, routeInfo, unique, workspaceLink } from './ledger';
+import { FileIntake } from './FileIntake';
 
 const samples = ['invoice', 'payment', 'supplier', 'refusal'] as const;
 
@@ -16,7 +17,17 @@ export function Documents({ data, busy, mutate, route }: { data: Workspace; busy
   const view = params.get('view') ?? 'sources';
   const urlFilter = params.get('filter') ?? 'all';
   const query = params.get('q') ?? '';
-  const [body, setBody] = useState('');
+  const journey = params.get('journey');
+  const [body, setBody] = useState(() => {
+    if (journey === 'invoice' && !data.sales.length) return data.samples.invoice;
+    if (journey === 'payment' && params.get('invoice') === 'JN-4410') return data.samples.payment;
+    if (journey === 'duplicate') {
+      const receipt = data.sources.filter(s => s.status === 'posted' && s.kind === 'Receipt' && s.document?.settles === params.get('invoice')).at(-1);
+      if (receipt) return receipt.body + '\nForwarded for reference.';
+    }
+    return '';
+  });
+  const [submitted, setSubmitted] = useState(false);
   const [flow, setFlow] = useState('');
   const [replaceId, setReplaceId] = useState<string | null>(null);
   const [filter, setFilter] = useState(urlFilter);
@@ -49,6 +60,8 @@ export function Documents({ data, busy, mutate, route }: { data: Workspace; busy
     <label className="records-search">Search records<input type="search" value={query} onChange={e => changeParam('q', e.target.value)} placeholder="Invoice, party or source reference" /></label>
     {intake ? <div className="intake-grid">
       <section className="panel intake"><h2>{replaceId ? `Correct ${replaceId}` : 'Read an email'}</h2><p>The bounded reader supports explicit EUR invoices and remittances. No live model call.</p>
+        {journey ? <div className="notice"><h3>{journey === 'invoice' ? 'First, prepare a draft from the invoice' : journey === 'duplicate' ? 'Is this the same payment arriving twice?' : 'New evidence must change the review'}</h3><p>{journey === 'invoice' ? 'Review and post this editable invoice. Then open its decision and prepare a draft before adding payment evidence.' : journey === 'duplicate' ? 'This is a forward of the selected case’s latest posted receipt, retaining its Transfer ID. Submit it to observe the hold, then link the original in the human resolution form.' : 'Review and submit the payment. The server invalidates any previous draft; return to the case for a fresh decision. For your own synthetic example, supply the matching invoice and actual invented event reference.'}</p></div> : null}
+        <FileIntake disabled={busy} onUse={text => { setBody(text); setSubmitted(false); }} />
         <section className="workflow-guide" aria-label="Three editable API workflows"><h3>Try a complete decision</h3>
           <p>These controls fill the editable source below. Nothing posts until you submit it.</p>
           <div className="flex flex-wrap gap-3">
@@ -57,13 +70,14 @@ export function Documents({ data, busy, mutate, route }: { data: Workspace; busy
             <button type="button" className="secondary small" disabled={busy || !heldPayment} onClick={() => { if (heldPayment) { setReplaceId(heldPayment.id); setBody(heldPayment.body); setFlow('Correction: the original source is below. Add the actual Transfer ID for a distinct bank event, then Read corrected source. Do not invent a second identity for a duplicate.'); } }}>Correct held payment</button>
           </div>{flow ? <p>{flow}</p> : null}
           {latest ? <p data-testid="latest-source-decision">Latest server decision: {latest.id} · {latest.status}. {latest.error || latest.document?.doc_id}</p> : <p>No source decision yet.</p>}
+          {submitted && latest ? <p>{latest.status === 'refused' ? 'Collection is held. Inspect the retained source below and correct or resolve its evidence.' : 'Evidence saved. Review the current decision before approving.'} <a className="secondary" href={workspaceLink(latest.document?.settles ?? (latest.kind === 'SalesInvoice' ? latest.document?.doc_id : params.get('invoice')))}>Review changed decision →</a></p> : null}
         </section>
         <div className="sample-buttons" role="group" aria-label="Load a synthetic sample" data-selected={selectedSample >= 0}
           style={{ '--selected-sample': selectedSample, '--sample-column': selectedSample % 2, '--sample-row': Math.floor(selectedSample / 2) } as CSSProperties}>
           {samples.map((key, index) => <button type="button" key={key} className="secondary small" aria-pressed={selectedSample === index}
             disabled={busy} onClick={() => setBody(data.samples[key])}>Sample {key}</button>)}
         </div>
-        <form onSubmit={async e => { e.preventDefault(); if (await mutate('/intake', { body, replace_id: replaceId })) { setBody(''); setReplaceId(null); } }}>
+        <form onSubmit={async e => { e.preventDefault(); if (await mutate('/intake', { body, replace_id: replaceId })) { setBody(''); setReplaceId(null); setSubmitted(true); } }}>
           <label htmlFor="raw-email">Email headers and body <span className="required">Required</span></label>
           <textarea id="raw-email" disabled={busy} value={body} onChange={e => setBody(e.target.value)} rows={7} maxLength={32000} required placeholder="From: …&#10;To: …&#10;Subject: Invoice …&#10;&#10;Paste synthetic invoice or remittance text." aria-describedby="intake-help" />
           <p className="field-help">Business: {data.business?.name ?? 'My Joinery'} · {data.business?.email ?? 'me@myjoinery.example'}. For a forward, retain the original From/To headers. Remittances require an explicit Transfer ID.</p><p id="intake-help" className="field-help">Synthetic data only. Include dates, currency, reference, net, VAT and total. Payments must reference a posted sales invoice.</p>

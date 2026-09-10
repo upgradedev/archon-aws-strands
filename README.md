@@ -15,11 +15,18 @@ what was received, and why a draft is ready or held. Paste synthetic email in Re
 no mailbox is connected. This replaces a manual comparison of invoice, remittance and draft
 within this demonstration. Time savings and recovered money have not been measured.
 
-Try it: Records → Add synthetic email → Sample invoice → Read & post email → Sample payment →
-Read & post email → Workspace → Run Strands → inspect sources → approve the exact draft.
-The sample is 1,860.00 EUR invoiced minus 600.00 EUR received, leaving 1,260.00 EUR.
-Edit any sample before posting. A missing Transfer ID or conflicting invoice direction is refused;
-use Correct source, supply the actual evidence, and read again. Original sources remain retained.
+This source revision adds a guided reconciliation journey; deployment is tracked separately below.
+From Dashboard, choose Start reconciliation and review the editable invoice. Post it, open
+Review changed decision and run Strands. Before approving that draft, open Try new evidence before
+approving and add the sample payment. The original draft disappears. The decision shows why the
+recorded 600.00 EUR payment changes the proposed chase from 1,860.00 EUR to 1,260.00 EUR, linked to
+the retained source and transfer reference. Run the graph again and review the new exact draft.
+
+Then try Check a forwarded duplicate. It retains the posted receipt's transfer reference;
+submitting it holds collection without crediting another payment. Review the original evidence
+and record the duplicate resolution in Records before preparing a fresh draft. A missing Transfer ID
+requires correction with actual evidence. Original sources and earlier provider receipts stay retained.
+The changed decision is a supported workflow demonstration, not comparative AI or human superiority.
 
 The public path runs real HTTP requests and a real Strands graph with six ledger tools.
 The model is **scripted**, extraction uses bounded rules, and the outbox is **simulated**.
@@ -80,7 +87,14 @@ Dashboard balances derive from retained posted documents using exact cents. Obse
 outcomes count posts, refusals, corrections, resolutions and approval records. Human active time,
 time saved, revenue and recovery benefits remain Unknown. Quarter reports are labelled separately.
 
-In History, Prepare evidence bundle reads durable state. The readable export includes redacted
+Records also previews UTF-8 `.txt` and plain-text `.eml` files up to 32 KB. Choose a file, inspect
+its literal text, then Use file text in editor. Only Read & post email submits it to the reader.
+Empty, binary, oversized, encoded, HTML and multipart files are rejected with recovery guidance;
+PDFs, images and attachments are not supported in this intake. Paste preserves the existing API path.
+
+In Workspace or History, Prepare evidence bundle reads durable state. Download or Copy readable
+evidence keeps that exact snapshot; clipboard failure leaves the download and selectable text available.
+The readable export includes redacted
 source excerpts, source hashes, decisions, corrections, backend and ledger revisions, runtime mode,
 failure/recovery guidance and limits. Redaction is best effort; review before sharing.
 The bundle does not attest authenticity, bank settlement, compliance or email arrival.
