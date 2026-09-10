@@ -181,6 +181,20 @@ AgentCore is not implemented; the [design note](docs/BEDROCK_AGENTCORE_ARCHITECT
 
 ## Evidence and limits
 
+AR3 is source-prepared, not a real-model result. Its [frozen development protocol](evaluation/ar3_data/protocol.json)
+separates twelve synthetic inputs from gold labels and compares the existing rule reader with future
+exact-request offline replay using the same redaction and document guards. The evaluation-only citation
+contract checks source/revision and literal spans; it is not shipped ingestion functionality or semantic
+entailment. Source CI runs `python -m evaluation.ar3 --candidate-sha "$CANDIDATE_SHA" --output ar3-output`
+with blocked network/cloud clients, negative fixtures and retained failures. The [prior receipt inventory](evaluation/ar3_data/prior-inventory.json)
+found no comparable full request/response pairs: historical text and scripted runs are not new AI evidence.
+Exclusive, fsynced journals preallocate every slot, checkpoint requests before adapters and raw responses
+before parsing. Interrupted runs retain completed/started/unrun slots without a successful final summary;
+an in-flight response lost before its checkpoint remains unknown. Only `end_turn`/`stop_sequence` are
+accepted final response reasons. Original replay bytes are retained before parsing; runs are never pooled.
+Author-created development cases, not independent accuracy; arithmetic is deterministic, not AI reasoning.
+Model/infra costs remain unknown. AR3/C1, human benefit and any paid model activation remain owner-gated.
+
 The opt-in `x1_benchmark` input on [frontend verification](https://github.com/upgradedev/archon-aws-strands/actions/workflows/frontend-ci.yml)
 runs the [frozen X1 protocol](frontend/benchmarks/x1-protocol.json): ten new-payment and ten
 forwarded-duplicate journeys, no retries, a 15-minute invocation limit, raw outcomes and nearest-rank

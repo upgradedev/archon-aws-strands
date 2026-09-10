@@ -13,6 +13,8 @@ jobs:
       AWS_EC2_METADATA_DISABLED: "true"
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -197,3 +199,44 @@ jobs:
               sys.exit(f"the domain core must stay offline and SDK-free: {bad}")
           print("domain core is free of boto3 and strands")
           PY
+
+  ar3-source-preparation:
+    # Source branch/PR checks only. No live workflow, credentials or activation input.
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      AWS_EC2_METADATA_DISABLED: "true"
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Existing dependencies on CI runner only
+        run: python -m pip install -e ".[dev]" httpx==0.28.1
+      - name: Instrument lint and offline negative controls
+        run: |
+          python -m ruff check evaluation/ar3.py tests/test_ar3_evaluation.py
+          python -m pytest tests/test_ar3_evaluation.py --junitxml=ar3-instrument-junit.xml
+      - name: Prepare baseline evidence and inert exact requests, never invoke a model
+        if: always() && !cancelled()
+        run: python -m evaluation.ar3 --candidate-sha "$CANDIDATE_SHA" --output ar3-output
+      - name: Verify retained evidence checksums
+        if: always() && !cancelled()
+        run: cd ar3-output && sha256sum --check SHA256SUMS
+      - name: Retain source preparation and failures without replacing prior runs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ar3-source-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ar3-output/
+            ar3-instrument-junit.xml
+          retention-days: 90
+          if-no-files-found: error

@@ -1,0 +1,20 @@
+{
+  "observed_utc": "2026-09-10T20:06:00Z",
+  "source_commit": "9eb840b86cef0635dccf3809698248c0cd0f5fd8",
+  "scope": "Read-only inventory of tracked historical transcript files, their introducing commits, matching existing CI artifact metadata, and the current workflow catalog. Not an exhaustive audit of expired artifacts or private local logs. No AWS or model request made.",
+  "comparable_replay_count": 0,
+  "conclusion": "Historical files claim real Bedrock use, but none retains exact per-document request bytes bound to complete raw Converse responses and source revision. Their parsed scores cannot be re-scored under this new citation/extraction protocol. No comparable real response was found; no real-model accuracy figure is fabricated or inferred from call count/success. Preserve withdrawals and earlier bad outcomes unchanged.",
+  "source_entries": [
+    {"path":"evidence/ARCHON-LIVE-READER-2026-09-08.txt","sha256_lf":"f602f1a91d603a098644b9c67d7359b5f64cae836fbbdc3fd4db3c937d4ab904","introduced_commit":"5d6c98ded644249fc0912ada388e4609b5b9b531","declared_mode":"Bedrock reader global.anthropic.claude-opus-5 / us-west-2 / 2026-09-08","model_call_run_url":null,"retained":"Parsed read/refusal counts and decisions, not raw request/response pairs","usage":null,"model_cost_usd":null},
+    {"path":"evidence/FAIR-LIVE-2026-09-09.txt","sha256_lf":"cb07abb8a43a3a981359bbf0cde6a8cc6971446098f5e33f8b14501a6fd98bbc","introduced_commit":"1734ca087fb3e640df350bb492559f936c5f9980","declared_mode":"Bedrock reader global.anthropic.claude-opus-5 / us-west-2 / 2026-09-09","model_call_run_url":null,"retained":"Per-case parsed decisions/refusal reasons; no raw JSON or exact prompt binding","usage":null,"model_cost_usd":null},
+    {"path":"evidence/HARD-LIVE-2026-09-08.txt","sha256_lf":"590b5c15fd06c540a44021a6dc8461899a78ca84340441e93d6d258750f7d0ba","introduced_commit":"7b1a6a324699e70d8f6eed14301c67af59634ff5","declared_mode":"One-pass model global.anthropic.claude-opus-5, per transcript footer; region not stated in transcript","model_call_run_url":null,"retained":"Parsed arithmetic/chase outcomes, not document extraction/citation response evidence","usage":null,"model_cost_usd":null},
+    {"path":"evidence/SIX-VIEWS-2026-09-05.txt","sha256_lf":"36c1f0b9fdb7448174d5ef70af43ec3733c987a68fe0168bd3c19f7fbcbcbb94","introduced_commit":"1571ee2c58cfbde08274bb7dde42e054d4cffe97","declared_mode":"Rendered domain/composer output; model id/region not retained in transcript","model_call_run_url":null,"retained":"Rendered summaries and aggregate usage, not full raw model request/response envelopes or per-document inputs","usage":{"inputTokens":11092,"outputTokens":1366,"totalTokens":12458},"model_cost_usd":null}
+  ],
+  "ci_checks": [
+    {"run_url":"https://github.com/upgradedev/archon-aws-strands/actions/runs/33951226788","head_sha":"1571ee2c58cfbde08274bb7dde42e054d4cffe97","mode":"source ci push, not a model-call receipt","artifact_api_observed":[],"conclusion":"success"},
+    {"run_url":"https://github.com/upgradedev/archon-aws-strands/actions/runs/34311476732","head_sha":"1734ca087fb3e640df350bb492559f936c5f9980","mode":"source ci push, not a model-call receipt","artifact_api_observed":[],"conclusion":"success"}
+  ],
+  "excluded_scripted_evidence": ["AR2 run34459932488 and X1 runs34474646280/34477573045 use scripted/rule adapters, not paid model responses", "AWS browser acceptance is not evidence of real model use: public runtime is scripted"],
+  "commands": ["git log -1 --format='%H %cI' -- <transcript>","SHA256 over transcript bytes with CRLF normalized to committed LF, checked again in source CI", "gh run list --repo upgradedev/archon-aws-strands --commit <introducing-sha>", "gh api repos/upgradedev/archon-aws-strands/actions/runs/<id>/artifacts", "gh api repos/upgradedev/archon-aws-strands/actions/workflows"],
+  "next_gate": "Any future real run requires separate owner-approved model/budget/activation. Offline replay requires full exact-request-bound raw responses; adding an unverified provenance label does not authenticate them."
+}
