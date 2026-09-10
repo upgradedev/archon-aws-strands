@@ -12,12 +12,15 @@ const evidence = {
 const health = { commit: back, status: 'ok', mode: 'synthetic', live_send: false, live_model: false,
   model: 'LedgerScriptModel', provider: 'SimulatedProvider', orchestration: 'Strands' };
 
-for (const scenario of ['current', 'missing', 'malformed', 'stale frontend', 'stale backend', 'failed gate', 'skipped', 'unsafe link', 'live mode']) {
+for (const scenario of ['current', 'missing', 'malformed', 'stale frontend', 'stale HTML', 'missing HTML marker', 'stale backend', 'failed gate', 'skipped', 'unsafe link', 'live mode']) {
   test(`release proof renderer: ${scenario}`, async ({ page }) => {
     const record = structuredClone(evidence);
     if (scenario === 'failed gate') record.checks.postflight = 'failure';
     if (scenario === 'skipped') record.counts.skipped = 1;
     if (scenario === 'unsafe link') record.run_url = 'javascript:alert(1)';
+    await page.route(url => url.pathname === '/', route => route.fulfill({ contentType: 'text/html',
+      body: scenario === 'missing HTML marker' ? '<html><head></head></html>'
+        : `<html><head><meta name="application-commit" content="${scenario === 'stale HTML' ? '3'.repeat(40) : front}"></head></html>` }));
     await page.route('**/release.json', route => route.fulfill({ json: { commit: scenario === 'stale frontend' ? '3'.repeat(40) : front } }));
     await page.route('**/api/health', route => route.fulfill({ json: { ...health,
       commit: scenario === 'stale backend' ? '3'.repeat(40) : back, live_send: scenario === 'live mode' } }));

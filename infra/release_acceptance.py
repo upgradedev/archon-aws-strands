@@ -15,6 +15,7 @@ import tempfile
 import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
+from html.parser import HTMLParser
 from pathlib import Path
 
 from frontend_publish import aws
@@ -33,13 +34,33 @@ def require(condition, message):
         raise ValueError(message)
 
 
-def get_json(url):
+def get_text(url):
     request = urllib.request.Request(url, headers={"Cache-Control": "no-cache"})
     with urllib.request.urlopen(request, timeout=30) as response:
         require(response.status == 200, "live read failed")
         body = response.read(1024 * 1024 + 1)
     require(len(body) <= 1024 * 1024, "oversized live response")
-    return json.loads(body)
+    return body.decode("utf-8")
+
+
+def get_json(url):
+    return json.loads(get_text(url))
+
+
+def served_frontend(frontend, request=get_text):
+    class Markers(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.commits = []
+
+        def handle_starttag(self, tag, attrs):
+            values = dict(attrs)
+            if tag == "meta" and values.get("name") == "application-commit":
+                self.commits.append(values.get("content"))
+
+    parser = Markers()
+    parser.feed(request(URL))
+    require(parser.commits == [frontend], "served HTML differs from tested frontend")
 
 
 def git(*args):
@@ -137,13 +158,18 @@ def validate_receipt(value):
             "invalid counts")
 
 
-def publish(value, command=aws, request=get_json, git_command=git):
+def publish(value, command=aws, request=get_json, git_command=git, request_text=get_text):
     validate_receipt(value)
     require(os.environ.get("GITHUB_REF") == "refs/heads/main", "publisher main only")
     require(os.environ.get("GITHUB_SHA") == value["frontend_commit"], "publisher checkout mismatch")
+    producer = os.environ.get("ACCEPTANCE_RUN_ATTEMPT", "")
+    current = os.environ.get("GITHUB_RUN_ATTEMPT", "")
+    require(re.fullmatch(r"[1-9][0-9]*", producer) and re.fullmatch(r"[1-9][0-9]*", current)
+            and int(producer) <= int(current), "invalid producing attempt")
     require(os.environ.get("GITHUB_RUN_ID") == value["run_id"]
-            and os.environ.get("GITHUB_RUN_ATTEMPT") == value["run_attempt"], "receipt from another run")
+            and producer == value["run_attempt"], "receipt from another producing run")
     require(request(URL + "release.json").get("commit") == value["frontend_commit"], "stale frontend receipt")
+    served_frontend(value["frontend_commit"], request_text)
     pair(value["frontend_commit"], value["backend_commit"], request, git_command)
     response = command("cloudformation", "describe-stacks", "--stack-name", "archon-frontend", "--region", "eu-west-1")
     outputs = {item["OutputKey"]: item["OutputValue"] for item in response["Stacks"][0]["Outputs"]}
@@ -154,11 +180,21 @@ def publish(value, command=aws, request=get_json, git_command=git):
         target = Path(directory) / "acceptance.json"
         target.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
         key = f"acceptance/runs/{value['run_id']}-{value['run_attempt']}.json"
-        command("s3api", "put-object", "--bucket", bucket, "--key", key, "--body", str(target),
-                "--content-type", "application/json", "--cache-control", "no-store,max-age=0",
-                "--if-none-match", "*", "--region", "eu-west-1")
+        try:
+            command("s3api", "put-object", "--bucket", bucket, "--key", key, "--body", str(target),
+                    "--content-type", "application/json", "--cache-control", "no-store,max-age=0",
+                    "--if-none-match", "*", "--region", "eu-west-1")
+        except subprocess.CalledProcessError as error:
+            # Retry publication without rewriting a successful producer's history.
+            require("(PreconditionFailed)" in (error.stderr or "") or "(412)" in (error.stderr or ""),
+                    "immutable publication failed")
+            existing = Path(directory) / "existing.json"
+            command("s3api", "get-object", "--bucket", bucket, "--key", key,
+                    "--region", "eu-west-1", str(existing))
+            require(existing.read_bytes() == target.read_bytes(), "immutable receipt conflict")
         # Recheck after the immutable write. A late deployment leaves historical proof only.
         require(request(URL + "release.json").get("commit") == value["frontend_commit"], "release changed before latest update")
+        served_frontend(value["frontend_commit"], request_text)
         pair(value["frontend_commit"], value["backend_commit"], request, git_command)
         command("s3api", "put-object", "--bucket", bucket, "--key", "acceptance.json", "--body", str(target),
                 "--content-type", "application/json", "--cache-control", "no-store,max-age=0", "--region", "eu-west-1")

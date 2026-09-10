@@ -29,6 +29,7 @@ class ReleaseAcceptance(unittest.TestCase):
                        "orchestration": "Strands"}
         self.env = {"GITHUB_REPOSITORY": gate.REPO, "GITHUB_REF": "refs/heads/main", "GITHUB_SHA": FRONT,
                     "GITHUB_RUN_ID": "123", "GITHUB_RUN_ATTEMPT": "2",
+                    "ACCEPTANCE_RUN_ATTEMPT": "2",
                     "PREFLIGHT": "success", "JOURNEYS": "success", "POSTFLIGHT": "success"}
 
     def git(self, *args):
@@ -36,6 +37,9 @@ class ReleaseAcceptance(unittest.TestCase):
 
     def request(self, url):
         return {"commit": FRONT} if url.endswith("release.json") else self.health
+
+    def html(self, url):
+        return f'<html><head><meta name="application-commit" content="{FRONT}"></head></html>'
 
     def pair(self):
         return gate.pair(FRONT, BACK, self.request, self.git)
@@ -122,7 +126,7 @@ class ReleaseAcceptance(unittest.TestCase):
     def test_publisher_creates_immutable_first_then_latest_no_deletes(self):
         self.calls = []
         with patch.dict(os.environ, self.env):
-            gate.publish(self.receipt(), self.command, self.request, self.git)
+            gate.publish(self.receipt(), self.command, self.request, self.git, self.html)
         writes = [args for args in self.calls if args[:2] == ("s3api", "put-object")]
         self.assertEqual(len(writes), 2)
         self.assertIn("acceptance/runs/123-2.json", writes[0])
@@ -134,7 +138,7 @@ class ReleaseAcceptance(unittest.TestCase):
         self.calls = []
         value = self.receipt()
         with patch.dict(os.environ, self.env), self.assertRaises(ValueError):
-            gate.publish(value, self.command, lambda url: {"commit": BACK}, self.git)
+            gate.publish(value, self.command, lambda url: {"commit": BACK}, self.git, self.html)
         self.assertEqual(self.calls, [])
         for key, added in (("raw_session", "private"), ("human_uat", "PASS"), ("run_url", "javascript:alert(1)")):
             bad = {**copy.deepcopy(value), key: added}
@@ -151,10 +155,55 @@ class ReleaseAcceptance(unittest.TestCase):
                 return {"commit": FRONT if reads == 1 else BACK}
             return self.health
         with patch.dict(os.environ, self.env), self.assertRaises(ValueError):
-            gate.publish(self.receipt(), self.command, request, self.git)
+            gate.publish(self.receipt(), self.command, request, self.git, self.html)
         writes = [args for args in self.calls if args[:2] == ("s3api", "put-object")]
         self.assertEqual(len(writes), 1)
         self.assertIn("acceptance/runs/123-2.json", writes[0])
+
+    def test_html_marker_missing_duplicate_or_partial_rollback_refused(self):
+        for html in ("<html></html>", self.html("").replace(FRONT, BACK), self.html("") * 2):
+            self.calls = []
+            with self.subTest(html=html), patch.dict(os.environ, self.env), self.assertRaises(ValueError):
+                gate.publish(self.receipt(), self.command, self.request, self.git, lambda url: html)
+            self.assertEqual(self.calls, [])
+
+    def test_late_html_switch_keeps_history_only(self):
+        self.calls = []
+        reads = iter((self.html(""), self.html("").replace(FRONT, BACK)))
+        with patch.dict(os.environ, self.env), self.assertRaises(ValueError):
+            gate.publish(self.receipt(), self.command, self.request, self.git, lambda url: next(reads))
+        self.assertEqual(sum(args[:2] == ("s3api", "put-object") for args in self.calls), 1)
+
+    def test_publisher_retry_preserves_producer_attempt_and_identical_history(self):
+        value = self.receipt()
+        for conflict in (False, True):
+            self.calls = []
+            def command(*args):
+                if args[:2] == ("s3api", "put-object") and "--if-none-match" in args:
+                    self.calls.append(args)
+                    raise subprocess.CalledProcessError(255, args, stderr="An error occurred (PreconditionFailed)")
+                if args[:2] == ("s3api", "get-object"):
+                    self.calls.append(args)
+                    Path(args[-1]).write_text("{}" if conflict else json.dumps(value, indent=2) + "\n", encoding="utf-8")
+                    return {}
+                return self.command(*args)
+            with self.subTest(conflict=conflict), patch.dict(os.environ, {**self.env, "GITHUB_RUN_ATTEMPT": "3"}):
+                if conflict:
+                    with self.assertRaises(ValueError):
+                        gate.publish(value, command, self.request, self.git, self.html)
+                else:
+                    result = gate.publish(value, command, self.request, self.git, self.html)
+                    self.assertIn("123-2.json", result["public_receipt"])
+            latest = [args for args in self.calls if args[:2] == ("s3api", "put-object") and "acceptance.json" in args]
+            self.assertEqual(len(latest), 0 if conflict else 1)
+
+    def test_publisher_cannot_substitute_another_producer_attempt(self):
+        value = self.receipt()
+        for producer in ("", "1", "3", "../2"):
+            self.calls = []
+            with self.subTest(producer=producer), patch.dict(os.environ, {**self.env, "ACCEPTANCE_RUN_ATTEMPT": producer}), self.assertRaises(ValueError):
+                gate.publish(value, self.command, self.request, self.git, self.html)
+            self.assertEqual(self.calls, [])
 
 
 if __name__ == "__main__":

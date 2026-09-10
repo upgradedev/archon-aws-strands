@@ -10,10 +10,13 @@ function show(state, title, message) {
   verdict.textContent = title;
   detail.textContent = message;
 }
-async function read(path) {
+async function read(path, html = false) {
   const response = await fetch(path, { cache: 'no-store', credentials: 'omit' });
   if (!response.ok) throw new Error('Unavailable evidence');
-  return response.json();
+  if (!html) return response.json();
+  const document = new DOMParser().parseFromString(await response.text(), 'text/html');
+  const markers = document.querySelectorAll('meta[name="application-commit"]');
+  return markers.length === 1 ? markers[0].getAttribute('content') : null;
 }
 function valid(record) {
   const counts = record?.counts;
@@ -31,14 +34,14 @@ function valid(record) {
     && record.live_send === false && record.live_model === false;
 }
 try {
-  const [release, health, record] = await Promise.all([read('/release.json'), read('/api/health'), read('/acceptance.json')]);
-  if (!valid(record) || !sha.test(release?.commit ?? '') || !sha.test(health?.commit ?? '')) throw new Error('Invalid evidence');
+  const [release, health, record, served] = await Promise.all([read('/release.json'), read('/api/health'), read('/acceptance.json'), read('/', true)]);
+  if (!valid(record) || !sha.test(release?.commit ?? '') || !sha.test(health?.commit ?? '') || !sha.test(served ?? '')) throw new Error('Invalid evidence');
   for (const [label, value] of [['Frontend tested', record.frontend_commit], ['Backend tested', record.backend_commit], ['Observed at', record.observed_at], ['Browser cases', `${record.counts.passed}/${record.counts.total}; no failures or skips`]]) {
     const term = document.createElement('dt'), description = document.createElement('dd');
     term.textContent = label; description.textContent = value; facts.append(term, description);
   }
   run.href = record.run_url; run.hidden = false;
-  if (release.commit !== record.frontend_commit || health.commit !== record.backend_commit) {
+  if (release.commit !== record.frontend_commit || served !== record.frontend_commit || health.commit !== record.backend_commit) {
     show('stale', 'Historical evidence only', 'The served frontend or backend differs from this record. Current release acceptance is not established.');
   } else if (health.status !== 'ok' || health.mode !== 'synthetic' || health.live_send !== false || health.live_model !== false
       || health.model !== 'LedgerScriptModel' || health.provider !== 'SimulatedProvider' || health.orchestration !== 'Strands') {

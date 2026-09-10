@@ -15,6 +15,10 @@ jobs:
     uses: ./.github/workflows/frontend-ci.yml
   release:
     needs: verify
+    concurrency:
+      group: archon-frontend-writer
+      cancel-in-progress: false
+      queue: max
     if: github.ref == 'refs/heads/main'
     outputs:
       backend_sha: ${{ steps.backend.outputs.sha }}

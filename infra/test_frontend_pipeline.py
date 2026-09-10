@@ -71,6 +71,13 @@ def validate(deploy, uat):
     assert publisher["permissions"] == {"contents": "read", "actions": "read", "id-token": "write"}
     assert not any("playwright" in step.get("run", "") or "npm" in step.get("run", "") for step in publisher["steps"])
     assert any("release_acceptance.py publish" in step.get("run", "") for step in publisher["steps"])
+    assert job["outputs"] == {"receipt_artifact": "${{ steps.receipt.outputs.artifact }}",
+                              "receipt_attempt": "${{ steps.receipt.outputs.attempt }}"}
+    assert publisher["env"]["ACCEPTANCE_RUN_ATTEMPT"] == "${{ needs.acceptance.outputs.receipt_attempt }}"
+    download = next(step for step in publisher["steps"] if "actions/download-artifact@" in step.get("uses", ""))
+    assert download["with"]["name"] == "${{ needs.acceptance.outputs.receipt_artifact }}"
+    assert publisher["concurrency"] == jobs["release"]["concurrency"] == {
+        "group": "archon-frontend-writer", "cancel-in-progress": "false", "queue": "max"}
 
 
 class MainAcceptanceContract(unittest.TestCase):
@@ -118,6 +125,16 @@ class MainAcceptanceContract(unittest.TestCase):
 
     def test_publisher_cannot_run_before_acceptance(self):
         self.uat["jobs"]["publish"]["needs"] = "release"
+        with self.assertRaises(AssertionError):
+            validate(self.deploy, self.uat)
+
+    def test_publisher_retry_cannot_replace_producer_identity(self):
+        self.uat["jobs"]["publish"]["env"]["ACCEPTANCE_RUN_ATTEMPT"] = "${{ github.run_attempt }}"
+        with self.assertRaises(AssertionError):
+            validate(self.deploy, self.uat)
+
+    def test_frontend_and_receipt_publishers_cannot_have_different_writer_locks(self):
+        self.uat["jobs"]["publish"]["concurrency"]["group"] = "unrelated-lock"
         with self.assertRaises(AssertionError):
             validate(self.deploy, self.uat)
 

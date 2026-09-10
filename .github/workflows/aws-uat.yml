@@ -29,6 +29,9 @@ concurrency:
 jobs:
   acceptance:
     runs-on: ubuntu-latest
+    outputs:
+      receipt_artifact: ${{ steps.receipt.outputs.artifact }}
+      receipt_attempt: ${{ steps.receipt.outputs.attempt }}
     permissions:
       contents: read
     timeout-minutes: 20
@@ -70,11 +73,15 @@ jobs:
           python infra/frontend_smoke.py --url "$ARCHON_UI_URL" --sha "$EXPECTED_RELEASE"
           python infra/release_acceptance.py pair --sha "$EXPECTED_RELEASE" --backend "$EXPECTED_BACKEND" --output acceptance-postflight.json
       - name: Prepare sanitized observed acceptance summary
+        id: receipt
         env:
           PREFLIGHT: ${{ steps.preflight.outcome }}
           JOURNEYS: ${{ steps.journeys.outcome }}
           POSTFLIGHT: ${{ steps.postflight.outcome }}
-        run: python infra/release_acceptance.py receipt --output acceptance.json
+        run: |
+          python infra/release_acceptance.py receipt --output acceptance.json
+          echo "artifact=acceptance-summary-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
+          echo "attempt=${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
       - name: Hand only aggregate evidence to separate publisher
         uses: actions/upload-artifact@v4
         with:
@@ -112,6 +119,12 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    concurrency:
+      group: archon-frontend-writer
+      cancel-in-progress: false
+      queue: max
+    env:
+      ACCEPTANCE_RUN_ATTEMPT: ${{ needs.acceptance.outputs.receipt_attempt }}
     permissions:
       contents: read
       actions: read
@@ -125,7 +138,7 @@ jobs:
           python-version: '3.12'
       - uses: actions/download-artifact@v4
         with:
-          name: acceptance-summary-${{ github.run_id }}-${{ github.run_attempt }}
+          name: ${{ needs.acceptance.outputs.receipt_artifact }}
           path: acceptance-summary
       - uses: aws-actions/configure-aws-credentials@v4
         with:
