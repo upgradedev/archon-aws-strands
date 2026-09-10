@@ -9,7 +9,6 @@ from pathlib import Path
 
 import boto3
 import pytest
-
 from evaluation import ar2
 from evaluation.public_workflow import offline_only, run_public, sent_action
 
