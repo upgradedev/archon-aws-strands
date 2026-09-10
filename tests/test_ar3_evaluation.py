@@ -8,7 +8,6 @@ import sys
 import textwrap
 
 import pytest
-
 from evaluation import ar3
 
 
