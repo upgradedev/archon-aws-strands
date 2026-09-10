@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { postEmailAndReadState } from './intake';
 
 test('editable payment refusal correction and semantic duplicate resolution use real HTTP', async ({ page }, info) => {
   await page.goto('/#/documents');
@@ -54,11 +55,8 @@ test('supplier direction and externally resolved dispute retain evidence and req
   await page.getByRole('button', { name: 'Sample supplier', exact: true }).click();
   const supplier = (await page.getByLabel(/Email headers/).inputValue()).replace('\nSubject:', '\nTo: me@myjoinery.example\nSubject:') + '\nBilled to: My Joinery';
   await page.getByLabel(/Email headers/).fill('From: me@myjoinery.example\n\n----- Forwarded message -----\n' + supplier);
-  await page.getByRole('button', { name: 'Read & post email', exact: true }).click();
+  const state = await postEmailAndReadState(page);
   await expect(page.getByTestId('latest-source-decision')).toContainText('posted');
-  const session = await page.evaluate(() => localStorage.getItem('archon.demo.session.v1'));
-  const headers = { 'X-Archon-Session': session! };
-  const state = await (await page.request.get('/api/workspace', { headers })).json();
   expect(state.purchases).toHaveLength(1); expect(state.sales).toHaveLength(1);
   await go(page, 'Workspace'); await page.getByRole('link', { name: 'Payment arrangement', exact: true }).click();
   await page.getByLabel("Client's proposed terms").fill('I dispute this invoice.');
