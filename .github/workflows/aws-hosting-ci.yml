@@ -23,6 +23,7 @@ jobs:
         run: |
           python infra/test_frontend_hosting.py
           python infra/test_archon_api_stack.py
+          python infra/test_release_acceptance.py
       - name: Validate main release and Playwright workflow contracts
         run: |
           python -m pip install PyYAML==6.0.3

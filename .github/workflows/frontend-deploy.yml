@@ -16,12 +16,16 @@ jobs:
   release:
     needs: verify
     if: github.ref == 'refs/heads/main'
+    outputs:
+      backend_sha: ${{ steps.backend.outputs.sha }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: "22.18.0"
@@ -42,6 +46,11 @@ jobs:
           npm ci
           npm audit --omit=dev --audit-level=low
           npm run build
+      - name: Require compatible deployed backend before publishing frontend
+        id: backend
+        run: |
+          python infra/release_acceptance.py pair --sha "${{ github.sha }}" --output release-pair.json
+          python -c 'import json,os; p=json.load(open("release-pair.json")); print("sha="+p["backend_commit"], file=open(os.environ["GITHUB_OUTPUT"], "a"))'
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ vars.FRONTEND_RELEASE_ROLE_ARN }}
@@ -63,6 +72,9 @@ jobs:
     needs: release
     permissions:
       contents: read
+      actions: read
+      id-token: write
     uses: ./.github/workflows/aws-uat.yml
     with:
       release_sha: ${{ github.sha }}
+      backend_sha: ${{ needs.release.outputs.backend_sha }}

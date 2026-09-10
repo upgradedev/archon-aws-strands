@@ -12,6 +12,7 @@ build/
 site/
 frontend/coverage/
 frontend/test-results/
+frontend/proof-results/
 frontend/playwright-report/
 frontend/artifacts/
 frontend/*.tsbuildinfo

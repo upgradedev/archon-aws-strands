@@ -99,7 +99,7 @@ export function App() {
         {error ? <div className="notice error" role="alert"><strong>We couldn't complete that action</strong><p>{error}</p><button className="secondary" onClick={() => void refresh()} disabled={busy}>Refresh durable state</button><p className="field-help">Review current evidence before approving again. An uncertain send must never be retried automatically.</p></div> : null}
         <div className="status-line" role="status" aria-live="polite">{busy ? progress : notice}</div>
         {data ? <>{page === 'dashboard' ? <Dashboard data={data} stale={stale} /> : page === 'workspace' ? <Queue data={data} busy={busy} mutate={mutate} route={route} stale={stale} reviewEpoch={reviewEpoch} /> : page === 'records' ? <Documents key={session.current} data={data} busy={busy || stale} mutate={mutate} route={route} /> : page === 'history' ? <Activity key={session.current} data={data} loadEvidence={() => request<Bundle>('/evidence', session.current)} /> : <div className="empty"><h1 tabIndex={-1}>Page not found</h1><p><a href="#/dashboard">Return to Dashboard</a></p></div>}</> : !error ? <div className="loading" role="status"><div className="loading-bar" /><h1>Opening your ledger</h1><p>Creating or reading your isolated demo session.</p></div> : null}
-        <footer className="footer"><span>ARCHON / Source-backed bookkeeping</span><span>EUR only · Synthetic data only · No real messages</span></footer>
+        <footer className="footer"><span>ARCHON / Source-backed bookkeeping</span><a href="/acceptance.html">Release acceptance</a><span>EUR only · Synthetic data only · No real messages</span></footer>
       </main>
     </div>
   </div>;

@@ -1,4 +1,10 @@
 {
+  "current_automated_acceptance": {
+    "page": "/acceptance.html",
+    "receipt": "/acceptance.json",
+    "scope": "Observed AWS browser automation at a specific frontend/backend pair, compared with the currently served pair. Missing or mismatched evidence is not a pass. Historical blocks below remain pinned to their original runs.",
+    "human_uat": "NOT_RUN"
+  },
   "reliable_workflows_revision": {
     "status": "AUTOMATION_PASS_AT_PINNED_REVISION",
     "verified_implementation_commit": "1793e7dfcc6002ecccff8767eb238d4a52466e1b",

@@ -26,7 +26,8 @@ def validate(deploy, uat):
     assert acceptance["needs"] == "release"
     assert acceptance["uses"] == "./.github/workflows/aws-uat.yml"
     assert acceptance["with"]["release_sha"] == "${{ github.sha }}"
-    assert acceptance["permissions"] == {"contents": "read"}
+    assert acceptance["permissions"] == {"contents": "read", "actions": "read", "id-token": "write"}
+    assert acceptance["with"]["backend_sha"] == "${{ needs.release.outputs.backend_sha }}"
     assert "continue-on-error" not in acceptance
     assert "secrets" not in acceptance
     for trigger in ("workflow_call", "workflow_dispatch"):
@@ -37,6 +38,7 @@ def validate(deploy, uat):
     assert uat["concurrency"]["queue"] == "max"
     assert uat["concurrency"]["cancel-in-progress"] == "false"
     job = uat["jobs"]["acceptance"]
+    assert job["permissions"] == {"contents": "read"}
     assert "continue-on-error" not in job
     assert job["env"]["EXPECTED_RELEASE"] == "${{ inputs.release_sha }}"
     steps = job["steps"]
@@ -49,12 +51,26 @@ def validate(deploy, uat):
     assert steps.index(indexed["preflight"]) < steps.index(indexed["journeys"])
     assert steps.index(indexed["postflight"]) > steps.index(indexed["journeys"])
     assert not any("configure-aws-credentials" in step.get("uses", "") for step in steps)
-    artifact = next(step for step in steps if step.get("uses", "").startswith("actions/upload-artifact@"))
+    artifact = next((step for step in steps if step.get("uses", "").startswith("actions/upload-artifact@") and step.get("if") == "always()"), None)
+    assert artifact is not None
     assert artifact["if"] == "always()"
     assert artifact["with"]["retention-days"] == "90"
     for path in ("frontend/test-results/", "frontend/artifacts/browser-junit.xml",
                  "frontend/playwright-report/", "frontend/UAT.testbook.*"):
         assert path in artifact["with"]["path"].splitlines()
+    for stage in ("preflight", "postflight"):
+        assert 'release_acceptance.py pair' in indexed[stage]["run"]
+        assert '--backend "$EXPECTED_BACKEND"' in indexed[stage]["run"]
+    release_steps = jobs["release"]["steps"]
+    backend = next(step for step in release_steps if step.get("id") == "backend")
+    publish_frontend = next(step for step in release_steps if "frontend_publish.py" in step.get("run", ""))
+    assert release_steps.index(backend) < release_steps.index(publish_frontend)
+    assert 'release_acceptance.py pair' in backend["run"]
+    publisher = uat["jobs"]["publish"]
+    assert publisher["needs"] == "acceptance" and publisher["if"] == "github.ref == 'refs/heads/main'"
+    assert publisher["permissions"] == {"contents": "read", "actions": "read", "id-token": "write"}
+    assert not any("playwright" in step.get("run", "") or "npm" in step.get("run", "") for step in publisher["steps"])
+    assert any("release_acceptance.py publish" in step.get("run", "") for step in publisher["steps"])
 
 
 class MainAcceptanceContract(unittest.TestCase):
@@ -92,6 +108,23 @@ class MainAcceptanceContract(unittest.TestCase):
 
     def test_cloud_credentials_in_browser_job_are_rejected(self):
         self.uat["permissions"]["id-token"] = "write"
+        with self.assertRaises(AssertionError):
+            validate(self.deploy, self.uat)
+
+    def test_job_level_browser_credentials_are_rejected(self):
+        self.uat["jobs"]["acceptance"]["permissions"]["id-token"] = "write"
+        with self.assertRaises(AssertionError):
+            validate(self.deploy, self.uat)
+
+    def test_publisher_cannot_run_before_acceptance(self):
+        self.uat["jobs"]["publish"]["needs"] = "release"
+        with self.assertRaises(AssertionError):
+            validate(self.deploy, self.uat)
+
+    def test_backend_check_cannot_be_removed(self):
+        for step in self.deploy["jobs"]["release"]["steps"]:
+            if step.get("id") == "backend":
+                step["run"] = "true"
         with self.assertRaises(AssertionError):
             validate(self.deploy, self.uat)
 
