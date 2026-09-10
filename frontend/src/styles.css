@@ -115,6 +115,27 @@ details summary { font-size: 14px; color: #d0cbef; padding-block: 5px; } .finger
 .evidence-sources { display: grid; gap: 16px; } .evidence-sources h4 { margin-bottom: 8px; font-size: 14px; }
 .source-badges { display: flex; gap: 10px; flex-wrap: wrap; } .source-badge { display: grid; gap: 5px; border: 1px solid #4b4e78; border-radius: 10px; padding: 10px 12px; background: #202843; color: #c9c5ff; font-size: 14px; overflow-wrap: anywhere; }
 .source-badge small,.source-badge-label { font-size: 14px; } .source-badge small { color: #b7bfd6; } .evidence-limit { margin-top: 16px; } .evidence-unavailable { color: var(--muted); font-size: 16px; }
+.reconciliation-hero,.reconciliation-brief { padding: 24px; margin-bottom: 24px; border: 1px solid #615b94; border-radius: 16px; background: linear-gradient(120deg,#292448,#101c32); }
+.reconciliation-hero { display: grid; grid-template-columns: minmax(0,1.4fr) minmax(0,1fr); gap: 20px; }
+.reconciliation-hero h2,.reconciliation-brief h2 { font-size: clamp(22px,2.3vw,30px); line-height: 1.25; margin: 10px 0; }
+.reconciliation-hero p,.reconciliation-brief>p { margin-block: 12px; }
+.reconciliation-hero ol { margin: 0; padding-left: 24px; align-self: center; }
+.reconciliation-hero li { padding: 10px 0 10px 6px; }
+.reconciliation-hero a.primary,.reconciliation-brief a.secondary { display: inline-block; margin-top: 10px; }
+.reconciliation-limit { grid-column: 1/-1; color: #bec6dc; font-size: 14px; }
+.payment-change { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; margin-top: 20px; border-block: 1px solid #525275; padding-block: 18px; }
+.payment-change strong { display: block; font-size: 25px; color: #c3ffe9; font-variant-numeric: tabular-nums; margin-top: 7px; }
+.payment-change span { color: #c0c7df; font-size: 14px; }
+.payment-change p { grid-column: 1/-1; margin: 0; overflow-wrap: anywhere; }
+.latest-evidence { overflow-wrap: anywhere; }
+.reconciliation-next { padding-block: 12px; }
+.reconciliation-next p { color: #c0c7df; margin-block: 10px; }
+.file-intake { border-block: 1px solid var(--line); padding: 16px 0; margin-block: 18px; }
+.file-intake p { margin-block: 12px; color: var(--muted); }
+.file-intake pre { max-height: 280px; overflow: auto; margin-block: 16px; }
+.file-intake input { width: 100%; min-width: 0; }
+@media (max-width:760px) { .reconciliation-hero { grid-template-columns: 1fr; } .reconciliation-hero,.reconciliation-brief { padding: 18px 16px; } .payment-change { grid-template-columns: 1fr; } }
+@media (forced-colors:active) { .reconciliation-hero,.reconciliation-brief { background: Canvas; color: CanvasText; border-color: CanvasText; } .payment-change strong { color: CanvasText; } }
 .dashboard-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 18px; }
 .priority-callout { display: block; margin: 0 20px 20px; padding: 20px; border: 1px solid #4b477c; border-radius: 14px; background: linear-gradient(110deg,#302958,#182043); color: #e8ebf5; }
 .priority-callout>strong { display: block; color: #c3ffe9; font-size: 28px; margin: 15px 0; } .priority-callout:hover { text-decoration: none; border-color: #9d92d6; }

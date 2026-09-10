@@ -3,9 +3,11 @@ import { Badge, Empty, Heading, money } from './ui';
 import { Approvals } from './Approvals';
 import { DraftEvidence } from './DraftEvidence';
 import { linkedSources, reasonTarget, routeInfo, unique, workspaceLink } from './ledger';
+import { Reconciliation } from './Reconciliation';
+import { EvidenceBundle, type Bundle } from './EvidenceBundle';
 
-export function Queue({ data, busy, mutate, route = '/workspace', stale = false, reviewEpoch = 0 }: {
-  data: Workspace; busy: boolean; mutate: Mutate; route?: string; stale?: boolean; reviewEpoch?: number;
+export function Queue({ data, busy, mutate, route = '/workspace', stale = false, reviewEpoch = 0, loadEvidence }: {
+  data: Workspace; busy: boolean; mutate: Mutate; route?: string; stale?: boolean; reviewEpoch?: number; loadEvidence?: () => Promise<Bundle>;
 }) {
   const { params } = routeInfo(route);
   const target = reasonTarget(data);
@@ -21,6 +23,7 @@ export function Queue({ data, busy, mutate, route = '/workspace', stale = false,
   return <>
     <Heading eyebrow="FINOPS / COLLECTIONS DESK" title="Workspace">Inspect one case. Follow its sources. Review one exact decision.</Heading>
     <div className="scope-line"><span>My Joinery · EUR · As of {data.as_of} · Revision {data.revision}</span><a href="#/records?intake=open">Add invoice or payment →</a></div>
+    <Reconciliation data={data} invoice={invoice} stale={stale || !!selectedSource && !source} view={view} />
     {held ? <div className="notice warning"><strong>Collections held · incomplete evidence</strong><p>{data.holds.length} refused source email(s) may change these balances.</p><a href="#/records?filter=refused">Review refused sources →</a></div> : null}
     <div className="collections-desk" data-testid="selected-workspace">
       <aside className="panel case-context" aria-label="Queue and case sources">
@@ -43,11 +46,12 @@ export function Queue({ data, busy, mutate, route = '/workspace', stale = false,
             <dl className="arithmetic-trace" aria-label="Invoice arithmetic"><div><dt>Invoice total</dt><dd>{money(balance.gross)}</dd></div><span aria-hidden="true">−</span><div><dt>Recorded receipts</dt><dd>{money(balance.settled)}</dd></div><span aria-hidden="true">=</span><div><dt>Outstanding</dt><dd>{money(balance.outstanding)}</dd></div></dl>
           </section>
           <div className="workspace-tabs" role="group" aria-label="Case review"><a href={workspaceLink(invoice, source?.id, 'draft')} aria-current={view === 'draft' ? 'page' : undefined}>Draft & signoff</a><a href={workspaceLink(invoice, source?.id, 'terms')} aria-current={view === 'terms' ? 'page' : undefined}>Payment arrangement</a></div>
-          {view === 'draft' ? <section className="prepare-panel"><button className="primary" disabled={!canPrepare} onClick={async () => { const origin = location.hash; if (await mutate('/reason')) { if (location.hash === origin) location.hash = workspaceLink(invoice, source?.id).slice(1); } }}>{busy ? 'Working…' : 'Run Strands & prepare draft'}</button><p className="field-help">{stale ? 'Refresh durable state before preparing or approving.' : held ? 'Disabled until every refused source is corrected.' : target.id !== invoice && target.id ? <>This case is evidence only for collection drafting. <a href={workspaceLink(target.id)}>Open backend priority {target.id} →</a></> : target.issue || `Prepares the backend priority ${target.id}. No email is sent.`}</p></section> : null}
+          {view === 'draft' ? <section className="prepare-panel" id="prepare-current-draft" tabIndex={-1}><button className="primary" disabled={!canPrepare} onClick={async () => { const origin = location.hash; if (await mutate('/reason')) { if (location.hash === origin) location.hash = workspaceLink(invoice, source?.id).slice(1); } }}>{busy ? 'Working…' : 'Run Strands & prepare draft'}</button><p className="field-help">{stale ? 'Refresh durable state before preparing or approving.' : held ? 'Disabled until every refused source is corrected.' : target.id !== invoice && target.id ? <>This case is evidence only for collection drafting. <a href={workspaceLink(target.id)}>Open backend priority {target.id} →</a></> : target.issue || `Prepares the backend priority ${target.id}. No email is sent.`}</p></section> : null}
           {view === 'terms' || !data.draft || data.draft.invoice_id === invoice ? <Approvals key={`${invoice}-${source?.id}-${view}-${reviewEpoch}-${data.revision}`} data={data} busy={busy} mutate={mutate} mode={view} selectedInvoice={invoice} stale={stale || !!selectedSource && !source} /> : <section className="panel"><Empty title="Draft belongs to another invoice">The stored draft is for {data.draft.invoice_id}. <a href={workspaceLink(data.draft.invoice_id)}>Review that exact draft →</a></Empty><DraftEvidence data={data} invoiceId={invoice} /></section>}
         </>}
         {!balance ? <section className="prepare-panel"><button className="primary" disabled>Run Strands & prepare draft</button><p className="field-help">{target.issue || 'Select the backend priority invoice before preparing a draft.'}</p></section> : null}
       </section>
     </div>
+    {loadEvidence ? <EvidenceBundle load={loadEvidence} revision={data.revision} /> : null}
   </>;
 }

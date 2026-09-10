@@ -218,6 +218,43 @@ def test_late_payment_invalidates_exact_approval(client):
     assert "1,060.00 EUR" in current["draft"]["body"]
 
 
+def test_reconciliation_payment_duplicate_and_export_keep_exact_evidence(client):
+    session = create(client)
+    change(client, session, "intake", body=workspace.SAMPLES["invoice"])
+    original = change(client, session, "reason").json()
+    assert "1,860.00 EUR" in original["draft"]["body"]
+    paid = change(client, session, "intake", body=workspace.SAMPLES["payment"]).json()
+    retained = json.loads(json.dumps(paid["sources"]))
+    assert paid["draft"] is None and paid["sales"][0]["outstanding"] == "1260.00"
+    # Even supplying the NEW revision cannot authorize the obsolete content.
+    assert change(client, session, "approve",
+                  fingerprint=original["draft"]["fingerprint"]).status_code == 409
+    fresh = change(client, session, "reason").json()
+    assert fresh["draft"]["fingerprint"] != original["draft"]["fingerprint"]
+    forward = workspace.SAMPLES["payment"] + "\nForwarded for reference."
+    held = change(client, session, "intake", body=forward).json()
+    assert held["sources"][-1]["status"] == "refused"
+    assert held["draft"] is None and held["sales"][0]["settled"] == "600.00"
+    assert change(client, session, "reason").status_code == 422
+    assert change(client, session, "approve",
+                  fingerprint=fresh["draft"]["fingerprint"]).status_code == 409
+    result = change(client, session, "resolve", source_id="email:003",
+                    decision="duplicate-payment", duplicate_of="email:002",
+                    note="Compared retained source and the same supplied bank reference.").json()
+    assert result["sources"][:2] == retained
+    assert result["sources"][2]["body"] == forward
+    assert result["sales"][0]["outstanding"] == "1260.00" and result["draft"] is None
+    fresh = change(client, session, "reason").json()
+    approved = change(client, session, "approve", fingerprint=fresh["draft"]["fingerprint"])
+    assert approved.status_code == 200
+    assert len(read(client, session)["receipts"]) == 1
+    bundle = client.get("/api/evidence", headers={"X-Archon-Session": session}).json()
+    assert bundle["revision"] == approved.json()["revision"]
+    assert "duplicate-payment" in bundle["text"] and "email:003" in bundle["text"]
+    assert fresh["draft"]["fingerprint"] in bundle["text"]
+    assert "accounts@buildco.example" not in bundle["text"]
+
+
 def test_refused_input_holds_every_chase_until_corrected(client):
     session = create(client)
     drafted(client, session)
