@@ -10,6 +10,60 @@ Public extraction is bounded, the model scripted and acceptance simulated; the r
 must finish all six reports before drafting. [Evidence and limits](../README.md#evidence-and-limits) ·
 [Required disclosures](../README.md#pre-existing-work-disclosed).
 
+## 2026-09-10: bounded public synthetic replacement instrument (AR2)
+
+**Execution status at authoring: NOT_MEASURED.** The historical results below
+remain historical evidence, including their corrections and withdrawals. No old
+conclusion is reinstated by this instrument. The new instrument evaluates only
+the current public synthetic workflow, not a real model or human benefit.
+
+The raw email cases, exact answers and acceptance contract were committed first
+in `33dbe4f534b02fb07945561264879a46e8c9793e`, before the harness. The frozen input
+is [ar2-golden-v1.json](ar2-golden-v1.json), SHA256
+`4e94e162f9c72224496ef41f27aa6aab00c95a9065a65ec306195a72b0af2a25`.
+These are author-created golden cases informed by the public reader's supported
+format. They are neither independent nor held out. They cannot establish inbox
+accuracy, comparative AI quality, time saved, money collected or human benefit.
+
+`python -m evaluation.ar2 --candidate-sha "$CANDIDATE_SHA" --output ar2-output`
+runs only in GitHub Actions. Each method receives the same ordered raw intake,
+draft, approval and reload tasks, with the same business and date. Expected
+answers and case labels are withheld from method arguments. The public method
+calls the actual ASGI API, bounded reader, ledger, Strands scripted graph, draft
+gate and simulated provider using a fresh temporary SQLite session. It counts
+actual new provider calls and their message contents, including across a new API
+client/store connection. It does not exercise the live AWS endpoint, real SES,
+concurrent sends, process death or a real model. Network/cloud clients are denied.
+
+The simple baseline uses the same bounded reader and a separate flat reference
+ledger. It checks invoice direction and due date, subtracts explicitly identified
+receipts, holds unreadable/inconsistent input and duplicate transfer IDs,
+rechecks the balance on approval and suppresses repeat exact approvals. It has
+no Strands graph, double-entry books or claim gate. This isolates downstream
+workflow on a shared reader; it is not a claim about commercial software. A tie
+is an acceptable result and does not demonstrate a benefit from the graph.
+
+The JSON reports action confusion counts, exact legitimate opportunities
+captured, missed/wrong opportunities, false chases, abstentions, ledger/hold
+mismatches and execution errors. Wrong invoice, recipient or amount is never an
+exact capture, even when binary action counts call it a true positive. Each
+approval attempt is a decision point; stale and duplicate approvals count too.
+Always-abstain and deliberately unsafe controls must both fail candidate
+acceptance. A crash or missing observation is NOT_MEASURED, never safe silence.
+Candidate acceptance requires all fixed legitimate opportunities captured and
+zero false chases or ledger/hold mismatches. No production policy is altered.
+
+The workflow retains `result.json`, `receipt.json`, `source-sha256.json`,
+`SHA256SUMS` and instrument JUnit output, including failed runs, for 90 days.
+Artifacts name the exact candidate SHA, run and attempt. Two independent runs
+must produce identical result bytes. Output directories are create-only, so a
+retry cannot overwrite a failing receipt. The receipt records resolved SDK/API
+versions; hashes attest bytes and provenance, not truth. This does not replace
+the retained old transcripts. **AR2 concerns bounded synthetic evaluation only;
+C1 real AI and human benefit remain NOT_MEASURED.**
+
+## Historical comparison (retained without re-scoring)
+
 Both earlier sets are withdrawn and stay withdrawn. The worse failure was the
 second: **Archon's column was scored from books the fixture had already posted
 correctly**, while the method it was measured against started from raw text.
