@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "protocol_id": "archon-x1-source-hero-v1",
+  "frozen_date_utc": "2026-09-10",
+  "application_source_commit": "3839d36ac018d52c0b9dcf2fe8e72aee9b077a91",
+  "scope": "Source-CI Chromium orchestration of the existing synthetic hero against loopback Vite and real HTTP FastAPI/SQLite. Not AWS, model inference latency, human active time, time saved, or comparative quality.",
+  "sample_plan": {
+    "branches": ["new-payment", "forwarded-duplicate"],
+    "attempts_per_branch": 10,
+    "total_attempts": 20,
+    "order": "Alternate new-payment then forwarded-duplicate for ordinal 1 through 10.",
+    "fresh_session_and_browser_context_per_attempt": true,
+    "workers": 1,
+    "retries": 0,
+    "warmup_attempts": 0,
+    "attempt_timeout_ms": 35000,
+    "invocation_limit_ms": 900000,
+    "limit_boundary": "Monotonic runner clock immediately before spawning Playwright through child-process exit; includes browser/server startup and all attempts, excludes dependency installation/build and post-run aggregation/artifact upload. Kill the process group at 900000 ms. Always retain the preallocated 20-slot journal, including unstarted and interrupted slots.",
+    "cold_warm": "Fresh browser context/session each attempt; shared browser/server process. First ordinal is first-use, remaining ordinals reused-process; not proven AWS cold/warm starts. No warmup or discarded first attempt."
+  },
+  "workflows": {
+    "new-payment": [
+      "Setup outside journey timer: empty synthetic session, home page ready, runtime and served-build identity checked.",
+      "Start timer immediately before the runner invokes Start reconciliation click; post editable sample JN-4410 invoice.",
+      "Review changed decision; run real scripted Strands; verify 1860 EUR draft; check review consent and retain original fingerprint.",
+      "Try new evidence; add the existing 600 EUR payment with transfer DEMO-BANK-600-A; verify before/after evidence, invalidated draft, cleared approval and no receipt. A diagnostic stale-fingerprint approval must return 409.",
+      "Prepare new 1260 EUR draft; require new fingerprint and fresh consent; approve exact content through SimulatedProvider; verify exactly one simulated provider-accepted receipt.",
+      "Prepare readable evidence in Workspace; verify new fingerprint and retained payment source, copy byte-equivalent text, download and verify identical UTF-8 bytes. Stop timer after complete downloaded bytes and assertions are available."
+    ],
+    "forwarded-duplicate": [
+      "Setup outside journey timer: empty synthetic session, Records file chooser ready, runtime and served-build identity checked; read existing invoice/payment sample texts.",
+      "Start timer immediately before runner selects invoice.eml; preview then explicitly use/post invoice; preview then explicitly use/post payment.eml.",
+      "Run real scripted Strands; open forwarded duplicate of retained payment through guided link, preserving transfer reference; post it.",
+      "Verify collection held, graph disabled, original 600 EUR credit not doubled, no draft or receipt.",
+      "Resolve through explicit human-resolution controls linking email:003 to email:002 with a fixed note; reload durable state; verify 1260 EUR outstanding, original source intact and no receipt/draft.",
+      "Prepare readable evidence with duplicate-payment resolution and retained original source; download and verify identical UTF-8 bytes. Stop timer after complete downloaded bytes and assertions are available. No approval/send in this branch."
+    ]
+  },
+  "timing": {
+    "unit": "milliseconds",
+    "clock": "Node performance.now(), monotonic within the CI runner process; UTC timestamps are provenance only.",
+    "journey": "First specified action invocation to final verified evidence download bytes, including browser automation, assertions, simulated consent, diagnostic API reads/stale-approval negative control, HTTP work and browser rendering/waits. Excludes initial session/navigation/runtime checks and final journal serialization. Failure elapsed is observed/censored, never a completed journey.",
+    "browser_http": "Runner-observed Playwright request event to requestfinished/requestfailed event (response body transfer complete, not JSON parsing). Also record request-to-response event. Includes proxy/server/network/browser/event scheduling; not server-exclusive or model latency. Unknown/censored ends remain null.",
+    "diagnostic_http": "Runner API call invocation to full response JSON/body consumption; includes diagnostic parsing and automation overhead. Explicitly separated from browser HTTP rows.",
+    "request_fields": ["ordinal", "phase", "channel", "method", "path", "status", "start_offset_ms", "headers_ms", "body_ms", "error", "request_body_bytes", "response_body_bytes"],
+    "bytes": "UTF-8 request/decoded response body bytes, excluding headers, TLS and wire compression. Null means unavailable, not zero.",
+    "graph": "The /api/reason HTTP rows are inclusive scripted Strands endpoint durations, not live model latency.",
+    "percentile_estimator": "Nearest rank: sort successful complete journey_ms; p50=x[ceil(0.50*n)-1], p95=x[ceil(0.95*n)-1]. No interpolation. Null for n=0. Report success-only n alongside fixed planned denominator 10 per branch/20 overall. Failed, timed-out, interrupted and unstarted slots remain in raw outcomes and failure counts, not successful latency samples."
+  },
+  "environment": {
+    "runner": "ubuntu-24.04, hosted GitHub Actions",
+    "node": "22.18.0",
+    "python": "3.12",
+    "browser": "Chromium supplied by existing pinned @playwright/test 1.63.0 and package-lock.json; record actual version",
+    "viewport": { "width": 1440, "height": 1050 },
+    "ui_origin": "http://127.0.0.1:4173",
+    "api_origin": "http://127.0.0.1:8000",
+    "versions": "Record candidate Git SHA, preregistration ancestor SHA and protocol SHA256, application baseline SHA, exact source-build index/assets SHA256 checked against served loopback bytes, /api/health commit and modes, Node/Python/browser/OS versions and CI run URL. Require unchanged frontend/src and src relative to application baseline; backend health commit must equal candidate checkout SHA. These are source-build identities, not deployed AWS versions.",
+    "safety": "No external origins or live URL inputs, AWS credentials/state bucket, Bedrock/model keys, real mail or deployment. Require health live_model=false, live_send=false, LedgerScriptModel, SimulatedProvider and bounded-local-rules before any journey. Sessions and all inputs synthetic."
+  },
+  "cost": {
+    "model_invocations": "0 and model_cost_usd=0 only after the scripted runtime/source safety checks pass; otherwise null/unverified. Scripted Strands invocations are not paid model invocations.",
+    "aws_infrastructure_cost_usd": null,
+    "aws_infrastructure_cost_status": "UNKNOWN_NOT_MEASURED: no AWS measurement; never infer zero from zero paid model calls.",
+    "runner_cost_usd": null,
+    "runner_cost_status": "NOT_MEASURED; observed runner seconds, request counts and body byte counts are inputs, not billing.",
+    "human_time_saved": "NOT_MEASURED"
+  },
+  "evidence_policy": {
+    "preregistration": "Commit this JSON before instrument implementation; instrument pins that ancestor and exact JSON SHA256. Preserve ancestry at merge. No measurement before instrument source regression passes.",
+    "raw": "Initialize all 20 unique ordered slots before Playwright startup; persist at start, request completion, journey boundary and attempt completion. Preserve partial outcomes if instrument/server/global timeout fails. Retain immutable run-specific raw JSON, summary, protocol, build/version metadata and SHA256 manifest as CI artifacts for 90 days.",
+    "fail_closed": "Manual benchmark job fails unless all 20 unique planned attempts pass, expected runtime/build checks pass, evidence is complete and invocation stays within the fixed budget. A failed workflow still publishes all available evidence. No outcome-based threshold tuning, sample removal, retry, replacement, or automatic rerun. Any later corrected instrument/run must be explicitly identified and retain earlier failed artifacts.",
+    "source_checks": "Existing Vitest runner verifies plan, quantiles, failure/timeout/partial/setup-failure retention, safety gates and reporter accounting with synthetic already-spent fixtures; normal source CI still runs existing product tests. Benchmark is manual opt-in on existing frontend verification workflow, source-only with read-only repository permission. No AR2 corpus, harness or evaluation changes."
+  }
+}
