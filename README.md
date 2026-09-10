@@ -185,7 +185,9 @@ The opt-in `x1_benchmark` input on [frontend verification](https://github.com/up
 runs the [frozen X1 protocol](frontend/benchmarks/x1-protocol.json): ten new-payment and ten
 forwarded-duplicate journeys, no retries, a 15-minute invocation limit, raw outcomes and nearest-rank
 p50/p95 with failures retained in the denominator. Run-specific artifacts include source/served-build
-identities, timing boundaries and checksums. This measures CI browser orchestration with a scripted
+identities, timing boundaries and checksums. Finalized byte snapshots are separate from child-writable
+journals; `kill_requested` is not `exit_confirmed`. Corrected-instrument runs remain separate, never pooled.
+This measures CI browser orchestration with a scripted
 model, not AWS/model latency or human time saved. Paid model calls/cost are zero only for verified
 scripted runs; AWS infrastructure and runner dollar costs remain unknown. It never deploys or sends mail.
 

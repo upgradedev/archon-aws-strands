@@ -182,7 +182,7 @@ jobs:
           name: x1-source-${{ github.run_id }}-${{ github.sha }}
           include-hidden-files: true
           path: |
-            frontend/artifacts/x1/
+            frontend/artifacts/x1/final/
             frontend/benchmarks/x1-protocol.json
           retention-days: 90
           if-no-files-found: error

@@ -11,7 +11,7 @@ import { boundedProcess } from '../benchmarks/supervisor';
 
 const health: Health = { commit: APPLICATION, mode: 'synthetic', live_model: false, live_send: false,
   model: 'LedgerScriptModel', provider: 'SimulatedProvider', reader: 'bounded-local-rules', orchestration: 'Strands' };
-const invocation = { elapsed_ms: 100000, exit_code: 0, limit_reached: false, errors: [] };
+const invocation = { elapsed_ms: 100000, exit_code: 0, limit_reached: false, kill_requested: false, exit_confirmed: true, errors: [] };
 function successful(): Slot[] {
   return plan().map<Slot>((slot, i) => ({ ...slot, status: 'passed', journey_ms: (i + 1) * 100, elapsed_ms: 3000,
     worker_index: 0, journey_start_offset_ms: 100, journey_end_offset_ms: 100 + (i + 1) * 100,
@@ -59,7 +59,7 @@ describe('X1 frozen source instrument', () => {
     expect(() => nearestRank([1], 0)).toThrow();
   });
   it('retains an all-unstarted denominator and unknown cost for startup failure', () => {
-    const report = summarize(plan(), { elapsed_ms: null, exit_code: null, limit_reached: false, errors: ['setup failed'] });
+    const report = summarize(plan(), { ...invocation, elapsed_ms: null, exit_code: null, exit_confirmed: false, errors: ['setup failed'] });
     expect(report.accepted).toBe(false);
     expect(report.groups.map(g => [g.planned, g.not_passed, g.successful_latency_n, g.p50_ms, g.p95_ms])).toEqual([
       [20, 20, 0, null, null], [10, 10, 0, null, null], [10, 10, 0, null, null]]);
@@ -90,7 +90,7 @@ describe('X1 frozen source instrument', () => {
     const partial = successful()[0]; partial.status = 'running'; partial.journey_ms = null;
     const restored = restoreSlot(plan()[0], partial);
     expect(restored.status).toBe('interrupted'); expect(restored.requests).toHaveLength(1);
-    expect(restored.journey_ms).toBeNull(); expect(restored.errors).toContain('Runner ended before attempt completion');
+    expect(restored.journey_ms).toBeNull(); expect(restored.errors).toContain('Snapshot captured before attempt completion; child exit may be unconfirmed');
     expect(() => restoreSlot(plan()[1], partial)).toThrow(/misidentified/);
   });
   it('fails closed when a nominal pass lacks evidence, has a retry, or has incomplete request accounting', () => {
@@ -110,7 +110,8 @@ describe('X1 frozen source instrument', () => {
     expect(result.journey_ms).toBeNull(); expect(result.journey_censored_ms).toBe(55);
   });
   it('fails the aggregate despite complete samples if process budget, exit or instrument integrity fails', () => {
-    for (const modified of [{ elapsed_ms: 900001 }, { exit_code: 1 }, { limit_reached: true }, { errors: ['bad provenance'] }]) {
+    for (const modified of [{ elapsed_ms: 900001 }, { exit_code: 1 }, { limit_reached: true },
+      { kill_requested: true }, { exit_confirmed: false }, { errors: ['bad provenance'] }]) {
       expect(summarize(successful(), { ...invocation, ...modified }).accepted).toBe(false);
     }
   });
@@ -146,10 +147,14 @@ describe('X1 frozen source instrument', () => {
     expect(config).toContain('workers: 1'); expect(config).toContain('retries: 0');
     expect(config).toContain('timeout: 35000'); expect(config).toContain('repeatEach: 1');
     expect(config).not.toContain('process.env.ARCHON_UI_URL');
+    expect(config).toContain("outputFile: resolve(journal, 'browser-junit.xml')");
+    expect(config).toContain("outputDir: resolve(journal, 'playwright')");
     const workflow = readFileSync('../.github/workflows/frontend-ci.yml', 'utf8');
     expect(workflow).toContain("github.event_name == 'workflow_dispatch' && inputs.x1_benchmark == true");
     expect(workflow).toContain('needs: [secrets, verify]'); expect(workflow).toContain('runs-on: ubuntu-24.04');
     expect(workflow).toContain('include-hidden-files: true'); // Keep Playwright .last-run.json referenced by SHA256SUMS.
+    expect(workflow).toContain('frontend/artifacts/x1/final/');
+    expect(workflow).not.toMatch(/frontend\/artifacts\/x1\/\s*\n/); // Never upload mutable child journals.
     // The manual instrument refuses a changed application; normal source CI must still permit future product work.
     const launcher = readFileSync('benchmarks/run.mjs', 'utf8');
     expect(launcher).toContain("git('diff', APPLICATION, candidate, '--', '../src', 'src', '../pyproject.toml', 'package.json', 'package-lock.json')");
@@ -157,23 +162,79 @@ describe('X1 frozen source instrument', () => {
   it('retains twenty slots and checksums end-to-end when the launcher refuses an unsafe setup', () => {
     const folder = mkdtempSync(resolve(tmpdir(), 'archon-x1-refusal-'));
     const out = resolve(folder, 'evidence');
+    const final = resolve(out, 'final');
     try {
       const result = spawnSync(process.execPath, ['benchmarks/run.mjs'], { encoding: 'utf8',
         env: { ...process.env, X1_OUTPUT: out, ARCHON_UI_URL: 'https://forbidden.example' }, timeout: 10000 });
       expect(result.error).toBeUndefined(); expect(result.status, result.stderr).toBe(1);
-      const raw = JSON.parse(readFileSync(resolve(out, 'raw-outcomes.json'), 'utf8'));
+      const raw = JSON.parse(readFileSync(resolve(final, 'raw-outcomes.json'), 'utf8'));
       expect(raw).toHaveLength(20); expect(raw.every((s: Slot) => s.status === 'not_started')).toBe(true);
-      const summary = JSON.parse(readFileSync(resolve(out, 'summary.json'), 'utf8'));
+      const summary = JSON.parse(readFileSync(resolve(final, 'summary.json'), 'utf8'));
       expect(summary.groups[0]).toMatchObject({ planned: 20, not_passed: 20, p50_ms: null });
       expect(summary.invocation.errors[0]).toContain('Source-only benchmark refuses');
-      expect(readdirSync(out).filter(name => /-\d\d\.json$/.test(name))).toHaveLength(20);
-      for (const line of readFileSync(resolve(out, 'SHA256SUMS'), 'utf8').trim().split('\n')) {
-        const [hash, name] = line.split('  '); expect(sha256(readFileSync(resolve(out, name)))).toBe(hash);
+      expect(summary.invocation).toMatchObject({ kill_requested: false, exit_confirmed: false });
+      expect(readdirSync(resolve(final, 'journal-snapshot')).filter(name => /-\d\d\.json$/.test(name))).toHaveLength(20);
+      for (const line of readFileSync(resolve(final, 'SHA256SUMS'), 'utf8').trim().split('\n')) {
+        const [hash, name] = line.split('  '); expect(sha256(readFileSync(resolve(final, name)))).toBe(hash);
       }
-      const retained = readFileSync(resolve(out, 'raw-outcomes.json'));
+      const retained = readFileSync(resolve(final, 'raw-outcomes.json'));
       const overwrite = spawnSync(process.execPath, ['benchmarks/run.mjs'], { encoding: 'utf8', env: { ...process.env, X1_OUTPUT: out }, timeout: 10000 });
       expect(overwrite.status).toBe(1); expect(overwrite.stderr).toContain('Refusing to overwrite');
-      expect(readFileSync(resolve(out, 'raw-outcomes.json'))).toEqual(retained);
+      expect(readFileSync(resolve(final, 'raw-outcomes.json'))).toEqual(retained);
+    } finally { rmSync(folder, { recursive: true, force: true }); }
+  });
+  it('keeps finalized checksum bytes unchanged after a synthetic late child overwrites its journals', async () => {
+    const folder = mkdtempSync(resolve(tmpdir(), 'archon-x1-late-child-'));
+    vi.stubEnv('X1_OUTPUT', folder); vi.resetModules();
+    const { journal, finalized, saveSlot, readJSON, writeJSON, finalizeEvidence } = await import('../benchmarks/storage');
+    try {
+      const slots = plan(); slots[0] = { ...successful()[0], status: 'running', journey_ms: null };
+      slots.forEach(saveSlot); writeJSON('metadata.json', { stage: 'before finalization' });
+      const stopped = { ...invocation, elapsed_ms: 900000, exit_code: null, limit_reached: true,
+        kill_requested: true, exit_confirmed: false, errors: ['kill request failed; exit unconfirmed'] };
+      const summary = finalizeEvidence(stopped);
+      expect(summary.accepted).toBe(false);
+      expect(summary.groups[0]).toMatchObject({ planned: 20, passed: 0, not_passed: 20 });
+      const manifest = readFileSync(resolve(finalized, 'SHA256SUMS'));
+      const entries = manifest.toString().trim().split('\n').map(line => line.split('  '));
+      const before = entries.map(([hash, name]) => {
+        const bytes = readFileSync(resolve(finalized, name)); expect(sha256(bytes)).toBe(hash); return bytes;
+      });
+      const late = spawnSync(process.execPath, ['-e', `
+        const fs = require('node:fs'), path = require('node:path');
+        const dir = process.argv[1], slot = JSON.parse(process.argv[2]);
+        fs.writeFileSync(path.join(dir, slot.id + '.json'), JSON.stringify(slot));
+        fs.writeFileSync(path.join(dir, 'metadata.json'), JSON.stringify({ stage: 'late child write' }));
+        fs.writeFileSync(path.join(dir, 'late-only.json'), '{}');
+      `, journal, JSON.stringify(successful()[0])], { encoding: 'utf8', timeout: 10000 });
+      expect(late.error).toBeUndefined(); expect(late.status, late.stderr).toBe(0);
+      expect(readJSON<Slot>(`${slots[0].id}.json`).status).toBe('passed');
+      expect(readJSON('metadata.json')).toEqual({ stage: 'late child write' });
+      stopped.exit_confirmed = true; stopped.errors.push('late observer mutation');
+      expect(readFileSync(resolve(finalized, 'SHA256SUMS'))).toEqual(manifest);
+      entries.forEach(([hash, name], i) => {
+        const bytes = readFileSync(resolve(finalized, name)); expect(bytes).toEqual(before[i]); expect(sha256(bytes)).toBe(hash);
+      });
+      const raw = JSON.parse(readFileSync(resolve(finalized, 'raw-outcomes.json'), 'utf8'));
+      expect(raw).toHaveLength(20); expect(raw[0].status).toBe('interrupted');
+      expect(JSON.parse(readFileSync(resolve(finalized, `journal-snapshot/${slots[0].id}.json`), 'utf8')).status).toBe('running');
+      expect(JSON.parse(readFileSync(resolve(finalized, 'snapshot.json'), 'utf8'))).toMatchObject({ kill_requested: true, exit_confirmed: false });
+      expect(readdirSync(resolve(finalized, 'journal-snapshot'))).not.toContain('late-only.json');
+      expect(() => finalizeEvidence(invocation)).toThrow(/EEXIST/);
+    } finally { rmSync(folder, { recursive: true, force: true }); }
+  });
+  it('retains missing and corrupt registered slots in the finalized denominator and preserves captured corrupt bytes', async () => {
+    const folder = mkdtempSync(resolve(tmpdir(), 'archon-x1-partial-snapshot-'));
+    vi.stubEnv('X1_OUTPUT', folder); vi.resetModules();
+    const { finalized, saveSlot, writeJSON, finalizeEvidence } = await import('../benchmarks/storage');
+    try {
+      plan().slice(2).forEach(saveSlot); writeJSON(`${plan()[1].id}.json`, { invalid: 'captured fixture' });
+      const summary = finalizeEvidence({ ...invocation, exit_confirmed: false });
+      expect(summary.accepted).toBe(false); expect(summary.groups[0]).toMatchObject({ planned: 20, not_passed: 20 });
+      const raw = JSON.parse(readFileSync(resolve(finalized, 'raw-outcomes.json'), 'utf8'));
+      expect(raw).toHaveLength(20); expect(raw[0].errors[0]).toContain('Registered slot missing');
+      expect(raw[1].errors[0]).toContain('Invalid/misidentified');
+      expect(JSON.parse(readFileSync(resolve(finalized, `journal-snapshot/${plan()[1].id}.json`), 'utf8'))).toEqual({ invalid: 'captured fixture' });
     } finally { rmSync(folder, { recursive: true, force: true }); }
   });
   it('records successful and failed request events through persisted recorder and reporter fixtures', async () => {
@@ -231,20 +292,27 @@ describe('X1 process budget', () => {
     const result = boundedProcess(spawn, kill);
     await vi.advanceTimersByTimeAsync(899999); expect(kill).not.toHaveBeenCalled();
     await vi.advanceTimersByTimeAsync(1);
-    expect((await result).limit_reached).toBe(true); expect(kill).toHaveBeenCalledTimes(1); expect(kill).toHaveBeenCalledWith(123);
+    const captured = await result;
+    expect(captured).toMatchObject({ limit_reached: true, kill_requested: true, exit_confirmed: false, exit_code: null });
+    process.emit('exit', 0); // Confirmation after the boundary must not revise the returned evidence.
+    expect(captured).toMatchObject({ exit_confirmed: false, exit_code: null });
+    expect(kill).toHaveBeenCalledTimes(1); expect(kill).toHaveBeenCalledWith(123);
     expect(spawn).toHaveBeenCalledTimes(1);
   });
   it('clears the watchdog on normal completion and records the real exit status', async () => {
     vi.useFakeTimers(); const process = child(), kill = vi.fn();
     const result = boundedProcess(() => process, kill); process.emit('exit', 7);
-    expect((await result).exit_code).toBe(7);
+    expect(await result).toMatchObject({ exit_code: 7, exit_confirmed: true, kill_requested: false, limit_reached: false });
     await vi.advanceTimersByTimeAsync(900000); expect(kill).not.toHaveBeenCalled();
   });
   it('retains spawn and kill errors as failures rather than silently passing or hanging', async () => {
-    expect((await boundedProcess(() => { throw new Error('spawn failed'); }, vi.fn())).errors).toEqual(['Error: spawn failed']);
+    expect(await boundedProcess(() => { throw new Error('spawn failed'); }, vi.fn())).toMatchObject({
+      errors: ['Error: spawn failed'], kill_requested: false, exit_confirmed: false });
     vi.useFakeTimers(); const process = child();
     const result = boundedProcess(() => process, () => { throw new Error('kill failed'); });
     await vi.advanceTimersByTimeAsync(900000);
-    expect((await result).errors).toContain('Error: kill failed');
+    const captured = await result;
+    expect(captured.errors).toContain('Error: kill failed');
+    expect(captured).toMatchObject({ kill_requested: true, exit_confirmed: false, exit_code: null });
   });
 });

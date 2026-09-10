@@ -8,6 +8,10 @@ export const BRANCHES = ['new-payment', 'forwarded-duplicate'] as const;
 export type Branch = typeof BRANCHES[number];
 export type Status = 'not_started' | 'running' | 'passed' | 'failed' | 'timed_out' | 'interrupted';
 export type Health = { commit: string; mode: string; live_model: boolean; live_send: boolean; model: string; provider: string; reader: string; orchestration: string };
+export type Invocation = {
+  elapsed_ms: number | null; exit_code: number | null; limit_reached: boolean;
+  kill_requested: boolean; exit_confirmed: boolean; errors: string[];
+};
 export type RequestRow = {
   ordinal: number; phase: 'setup' | 'journey' | 'after_journey'; channel: 'browser' | 'diagnostic';
   method: string; path: string; status: number | null; start_offset_ms: number;
@@ -96,11 +100,11 @@ export function restoreSlot(expected: Slot, value: Slot): Slot {
   if (value.id !== expected.id || value.branch !== expected.branch || value.ordinal !== expected.ordinal
       || !Array.isArray(value.requests) || !Array.isArray(value.errors)) throw new Error('Invalid/misidentified raw slot');
   if (value.status === 'running') {
-    value.status = 'interrupted'; value.errors.push('Runner ended before attempt completion');
+    value.status = 'interrupted'; value.errors.push('Snapshot captured before attempt completion; child exit may be unconfirmed');
   }
   return value;
 }
-export function summarize(slots: Slot[], invocation: { elapsed_ms: number | null; exit_code: number | null; limit_reached: boolean; errors: string[] }) {
+export function summarize(slots: Slot[], invocation: Invocation) {
   assertPlan(slots);
   const groups = [null, ...BRANCHES].map(branch => {
     const rows = slots.filter(s => !branch || s.branch === branch);
@@ -114,7 +118,8 @@ export function summarize(slots: Slot[], invocation: { elapsed_ms: number | null
   const verified = slots.every(verifiedRuntime);
   return {
     scope: 'SOURCE_CI_SCRIPTED_BROWSER_ORCHESTRATION_NOT_AWS_MODEL_OR_HUMAN_LATENCY',
-    accepted: groups[0].passed === 20 && invocation.exit_code === 0 && !invocation.limit_reached
+    accepted: groups[0].passed === 20 && invocation.exit_code === 0 && invocation.exit_confirmed
+      && !invocation.kill_requested && !invocation.limit_reached
       && invocation.elapsed_ms !== null && invocation.elapsed_ms <= LIMIT_MS && invocation.errors.length === 0,
     invocation, groups,
     scripted_graph_http_calls: slots.flatMap(s => s.requests).filter(r => r.path === '/api/reason').length,
