@@ -181,6 +181,63 @@ AgentCore is not implemented; the [design note](docs/BEDROCK_AGENTCORE_ARCHITECT
 
 ## Evidence and limits
 
+AR3 is source-prepared, not a real-model result. Its [frozen development protocol](evaluation/ar3_data/protocol.json)
+separates twelve synthetic inputs from gold labels and compares the existing rule reader with future
+exact-request offline replay using the same redaction and document guards. The evaluation-only citation
+contract checks source/revision and literal spans; it is not shipped ingestion functionality or semantic
+entailment. Source CI runs `python -m evaluation.ar3 --candidate-sha "$CANDIDATE_SHA" --output ar3-output`
+with blocked network/cloud clients, negative fixtures and retained failures. The [prior receipt inventory](evaluation/ar3_data/prior-inventory.json)
+found no comparable full request/response pairs: historical text and scripted runs are not new AI evidence.
+Exclusive, fsynced journals preallocate every slot, checkpoint requests before adapters and raw responses
+before parsing. Interrupted runs retain completed/started/unrun slots without a successful final summary;
+an in-flight response lost before its checkpoint remains unknown. Only `end_turn`/`stop_sequence` are
+accepted final response reasons. Original replay bytes are retained before parsing; runs are never pooled.
+Author-created development cases, not independent accuracy; arithmetic is deterministic, not AI reasoning.
+Model/infra costs remain unknown. AR3/C1, human benefit and any paid model activation remain owner-gated.
+
+The [bounded collector](evaluation/ar3_collect.py) is evaluation-only direct Bedrock Converse, **not
+the Strands graph**. Source CI exports exact frozen requests/sizes and exercises the full collector
+with fake responses before replaying the unchanged evaluator; fake artifacts are labelled offline.
+No model ran merely because these checks passed. The frozen 12 cases, prompt, model and `maxTokens=4000`
+are unchanged. No CountTokens, tools, media, explicit cache creation, thinking override, fallback or
+repair loop is added. Provider-default adaptive thinking may yield reasoning blocks rejected by the
+frozen response contract; preserve that outcome, do not strip blocks or retune the protocol.
+
+Reservations use `2 * canonical_serialized_request_UTF8_bytes + 4096` input tokens per request:
+the byte term deliberately overcounts visible text/JSON, with an additional multiplier and fixed
+template allowance. This is a **conditional conservative assumption**, not a tokenizer measurement
+or universal bound. The parent must verify it for this model, default thinking, implicit caching and
+standard-tier billing before granting any call. Input bounds above 20000, output other than 4000,
+more than 12 calls, expired/wrong grants and insufficient whole-cohort reservations fail closed.
+Botocore `total_max_attempts=1`, a 900-second collector boundary and 5/60-second connect/read timeouts
+bound execution. The time boundary is checked between calls, not a hard interruption of an in-flight
+SDK call; the workflow has a 20-minute outer limit including install/upload. Unknown outcomes consume
+their full reservation. Observed ceiling/cache-write/retry violations halt subsequent calls, not undo
+an already-started call. Full SDK envelopes/usage/request IDs are retained before inspection (not
+original HTTP wire bytes), with opaque SDK binary values represented by typed base64 objects and
+flushed chunked stdout backup; log delivery itself is not guaranteed.
+
+Future activation is parent-only in the existing manual `ci.yml`, never push/PR. The parent configures
+the protected `ar3-bounded-evaluation` environment with `AR3_EVAL_ROLE_ARN` (an existing eligible role)
+and `AR3_GRANT_SHA256` (SHA256 of the **exact UTF-8 JSON input bytes**). No IAM resources or settings are
+created here. The inline session policy permits only this model's EU inference profile/foundation
+model `bedrock:InvokeModel`; permission/trust compatibility remains untested until parent activation.
+The grant binds `schema=archon-bounded-converse-v1`, `candidate_sha`, `instrument_sha`,
+`protocol_sha256`, exported `plan_sha256`, `model_id`, `region`, `max_calls=12`, `max_output_tokens=4000`,
+`max_input_tokens<=20000`, `max_seconds=900`, `input_bound_method` from the export,
+`input_bound_verified=true`, `billing_assumptions_verified=true`, `service_tier=standard_default`,
+`thinking_policy=FROZEN_PROVIDER_DEFAULT_NO_OVERRIDE`, exact `repository`, `actor`, `workflow_ref`,
+next manual `run_number` (string), `run_attempt="1"`, and `expires_utc` within one hour. It also requires
+`grant_id`, `parent_budget_ledger_ref`, `price_evidence`, `input_bound_evidence`, `budget_usd`,
+`input_usd_per_million` and `output_usd_per_million` as positive finite decimal strings for money/rates.
+The reference 5.50/27.50-per-million export estimate is **not** that grant, a bill or a shared budget.
+The parent reserves the whole app slice in the separate aggregate ledger before configuration;
+this collector cannot coordinate or infer another app's spend. A new run number or any rerun needs
+new authority; rerun attempts above 1 are refused. Concurrent source runs can advance the workflow
+counter, which causes safe denial, not automatic grant repair. After approval and green exact-source CI,
+the activation command format is `gh workflow run ci.yml --repo upgradedev/archon-aws-strands --ref
+<reviewed-branch> --field ar3_grant_json='<exact-approved-JSON>'`. **Do not run this as a source check.**
+
 The opt-in `x1_benchmark` input on [frontend verification](https://github.com/upgradedev/archon-aws-strands/actions/workflows/frontend-ci.yml)
 runs the [frozen X1 protocol](frontend/benchmarks/x1-protocol.json): ten new-payment and ten
 forwarded-duplicate journeys, no retries, a 15-minute invocation limit, raw outcomes and nearest-rank
@@ -190,6 +247,35 @@ journals; `kill_requested` is not `exit_confirmed`. Corrected-instrument runs re
 This measures CI browser orchestration with a scripted
 model, not AWS/model latency or human time saved. Paid model calls/cost are zero only for verified
 scripted runs; AWS infrastructure and runner dollar costs remain unknown. It never deploys or sends mail.
+
+The separate [X1 correlation component](telemetry/lambda_entry.py) is **source-only, not deployed**.
+It wraps the unchanged Lambda handler with additive response headers and one bounded metadata log;
+no event body, path/query, caller identity, session, authorization or exception text is logged by it.
+Only runtime `context.aws_request_id` supplies `x-archon-lambda-request-id`; caller request IDs never
+become trusted telemetry. Source commit and function-version headers support mismatch detection.
+Context is invocation-local and reset on failure. Missing context/logs remain unknown, not inferred.
+The [offline exporter](telemetry/correlate.py) requires a unique API response/structured receipt/text
+REPORT join with matching source, function ARN/version and log group/stream. Duplicate, missing or
+mismatched rows stay in the denominator. Duration/billed duration retain explicit ms units;
+infrastructure/model dollars stay null, never calculated from duration alone.
+
+Future operator input is a JSON object with `expected_runtime` (source_sha, function_arn,
+function_version, log_group), `requests` (consecutive ordinal, status, response_headers pairs from
+`capture_response`, which retains only the three correlation response headers), and `events`
+(logGroupName, logStreamName, message from an independently retained CloudWatch export).
+After explicit collection authorization, `python -m telemetry.correlate --input <export.json>
+--output <new-directory>` retains exact input bytes before parsing, then checksummed result files;
+exit2 means incomplete correlation, not zero usage. Limits:1000 API rows,10000 events,10MiB input.
+CI runs synthetic full-flow/negative controls without AWS/network. No new live runner or activation
+is wired. A future release must explicitly package `telemetry/` beside `archon/`, review/select
+`telemetry.lambda_entry.handler`, capture response headers and verify exact runtime identity/logs.
+Current infra, app source, frozen AR3 evaluator/collector/protocol and X1 benchmark are unchanged.
+This separation preserves their source pins. No IAM, environment or deployment changes are included.
+Log delivery can fail; only text REPORT format is supported. Supplied exports/configured SHA labels
+are not cryptographic origin or deployment attestations. This is not full-service cost, model latency
+or user time saved. Runtime fields and REPORT units follow the
+[AWS context](https://docs.aws.amazon.com/lambda/latest/dg/python-context.html) and
+[logging references](https://docs.aws.amazon.com/lambda/latest/dg/python-logging.html).
 
 Both earlier comparisons are withdrawn and stay withdrawn. They scored Archon from books that
 fixtures had already posted correctly: a ledger agreeing with itself. Their historical files and
