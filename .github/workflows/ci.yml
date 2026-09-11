@@ -138,12 +138,27 @@ jobs:
           PY
 
       - name: lint
-        run: python -m ruff check src tests
+        run: python -m ruff check src tests telemetry
 
       # No key, no network, no AWS account. A suite that needs credentials is a
       # suite that cannot prove anything to a judge who has none.
       - name: tests, offline
         run: python -m pytest --cov --cov-report=term-missing
+
+      - name: X1 correlation component, offline only and not deployed
+        run: >-
+          python -m pytest tests/test_x1_correlation.py
+          --cov=telemetry --cov-fail-under=85
+          --junitxml=x1-correlation-junit.xml --basetemp=x1-correlation-fixtures
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: x1-correlation-source-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            x1-correlation-junit.xml
+            x1-correlation-fixtures/
+          retention-days: 90
 
       # The screen is a deliverable, so it is asserted like one: it renders, it
       # holds the gate through a browser round trip, and it fetches nothing from

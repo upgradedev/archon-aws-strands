@@ -248,6 +248,35 @@ This measures CI browser orchestration with a scripted
 model, not AWS/model latency or human time saved. Paid model calls/cost are zero only for verified
 scripted runs; AWS infrastructure and runner dollar costs remain unknown. It never deploys or sends mail.
 
+The separate [X1 correlation component](telemetry/lambda_entry.py) is **source-only, not deployed**.
+It wraps the unchanged Lambda handler with additive response headers and one bounded metadata log;
+no event body, path/query, caller identity, session, authorization or exception text is logged by it.
+Only runtime `context.aws_request_id` supplies `x-archon-lambda-request-id`; caller request IDs never
+become trusted telemetry. Source commit and function-version headers support mismatch detection.
+Context is invocation-local and reset on failure. Missing context/logs remain unknown, not inferred.
+The [offline exporter](telemetry/correlate.py) requires a unique API response/structured receipt/text
+REPORT join with matching source, function ARN/version and log group/stream. Duplicate, missing or
+mismatched rows stay in the denominator. Duration/billed duration retain explicit ms units;
+infrastructure/model dollars stay null, never calculated from duration alone.
+
+Future operator input is a JSON object with `expected_runtime` (source_sha, function_arn,
+function_version, log_group), `requests` (consecutive ordinal, status, response_headers pairs from
+`capture_response`, which retains only the three correlation response headers), and `events`
+(logGroupName, logStreamName, message from an independently retained CloudWatch export).
+After explicit collection authorization, `python -m telemetry.correlate --input <export.json>
+--output <new-directory>` retains exact input bytes before parsing, then checksummed result files;
+exit2 means incomplete correlation, not zero usage. Limits:1000 API rows,10000 events,10MiB input.
+CI runs synthetic full-flow/negative controls without AWS/network. No new live runner or activation
+is wired. A future release must explicitly package `telemetry/` beside `archon/`, review/select
+`telemetry.lambda_entry.handler`, capture response headers and verify exact runtime identity/logs.
+Current infra, app source, frozen AR3 evaluator/collector/protocol and X1 benchmark are unchanged.
+This separation preserves their source pins. No IAM, environment or deployment changes are included.
+Log delivery can fail; only text REPORT format is supported. Supplied exports/configured SHA labels
+are not cryptographic origin or deployment attestations. This is not full-service cost, model latency
+or user time saved. Runtime fields and REPORT units follow the
+[AWS context](https://docs.aws.amazon.com/lambda/latest/dg/python-context.html) and
+[logging references](https://docs.aws.amazon.com/lambda/latest/dg/python-logging.html).
+
 Both earlier comparisons are withdrawn and stay withdrawn. They scored Archon from books that
 fixtures had already posted correctly: a ledger agreeing with itself. Their historical files and
 transcripts remain retained; they are not current product performance claims.
