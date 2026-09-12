@@ -1,10 +1,12 @@
 import type { Workspace } from './types';
 import { Badge, Empty, Heading, money } from './ui';
 import { EvidenceBundle, type Bundle } from './EvidenceBundle';
+import { workspaceLink } from './ledger';
 
 export function Activity({ data, loadEvidence }: { data: Workspace; loadEvidence?: () => Promise<Bundle> }) {
   return <>
     <Heading eyebrow="THE DURABLE RECORD" title="History">Read back what was approved, what the provider confirmed, and what remains unknown.</Heading>
+    {data.receipts.length ? <section className="decision-outcome" aria-label="Recorded collection outcome"><p className="eyebrow">SAVED DECISION · SIMULATED OUTBOX</p><h2>Read back the result before doing anything else</h2><p>The latest recorded attempt is {data.receipts.at(-1)!.state} for {data.receipts.at(-1)!.invoice_id}. No real email was sent, and approving a chase does not reduce the amount owed.</p><a className="secondary" href={workspaceLink(data.receipts.at(-1)!.invoice_id)}>Return to this collection case →</a></section> : null}
     <EvidenceBundle revision={data.revision} load={loadEvidence} />
     <div className="notice"><strong>Public provider: simulated outbox</strong><p>Provider acceptance is not delivery. Real sending requires a separate operator configuration, a durable ledger, explicit authorization and a controlled verified recipient.</p></div>
     <section className="panel"><div className="panel-heading"><h2>Delivery receipts <span className="count">{data.receipts.length}</span></h2></div>{data.receipts.length ? <div className="receipt-list">{data.receipts.map(receipt => <article key={receipt.fingerprint}><div className="flex flex-wrap items-center justify-between gap-3"><h3>{receipt.invoice_id} · {money(receipt.amount)}</h3><Badge tone="blue">Simulated · {receipt.state}</Badge></div><p>{receipt.to_address}</p><dl><dt>Receipt ID</dt><dd>{receipt.message_id ?? 'No provider identifier'}</dd><dt>Recorded</dt><dd>{receipt.at}</dd><dt>Arrival</dt><dd>Unproven · no real email sent</dd></dl>{receipt.error ? <p role="alert">{receipt.error}</p> : null}<details><summary>Approved content fingerprint</summary><code className="fingerprint">{receipt.fingerprint}</code></details></article>)}</div> : <Empty title="No delivery attempts">Approving an exact draft creates a simulated receipt here. Reading or drafting alone never sends.</Empty>}</section>

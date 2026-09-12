@@ -8,8 +8,8 @@ export function Dashboard({ data, stale }: { data: Workspace; stale: boolean }) 
   const metrics = dashboardMetrics(data, useClock(data.draft?.at));
   const target = reasonTarget(data);
   return <>
-    <Heading eyebrow="FINOPS / MY JOINERY" title="Dashboard">Your posted ledger, the work it needs, and the evidence behind it.</Heading>
-    <ReconciliationStart data={data} />
+    <Heading eyebrow="COLLECTIONS / MY JOINERY" title="Dashboard">Check what is still owed before chasing.</Heading>
+    <ReconciliationStart data={data} stale={stale} />
     <div className="scope-line"><span>All records in this synthetic session · As of {data.as_of}</span><Badge tone={stale || data.holds.length ? 'amber' : 'blue'}>{stale ? 'Last known snapshot' : `Ledger revision ${data.revision}`}</Badge></div>
     <section className="stats dashboard-stats" aria-label="Ledger balances">{metrics.map(metric => <a key={metric.id} className="stat" data-testid={`metric-${metric.id}`} href={metric.href}>
       <p>{metric.label}<span aria-hidden="true"> ↗</span></p><strong>{'amount' in metric ? money(metric.amount) : metric.count === null ? 'Unknown' : metric.count}</strong><small>{metric.note}</small>
