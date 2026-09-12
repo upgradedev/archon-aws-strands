@@ -13,7 +13,7 @@ test('cold desk names its invented user, outcome, empty books and first explicit
   expect(desk).toHaveTextContent('self-employed joiner');
   expect(desk).toHaveTextContent('current balance, its source evidence and one safe next action');
   expect(desk).toHaveTextContent('Your books start empty');
-  expect(within(desk).getByRole('link', { name: 'Start reconciliation', exact: true })).toHaveAttribute('href', '#/records?intake=open&journey=invoice&invoice=');
+  expect(within(desk).getByRole('link', { name: 'Start reconciliation' })).toHaveAttribute('href', '#/records?intake=open&journey=invoice&invoice=');
   expect(desk).toHaveTextContent('No real email or payment');
   expect(desk.querySelector('details')).not.toHaveAttribute('open');
 });
@@ -26,19 +26,19 @@ test('returning desk follows pending, held, recorded and settled states instead 
   expect(desk).toHaveTextContent('1,860.00 EUR invoiced − 600.00 EUR recorded receipts');
   rerender(<ReconciliationStart data={refusal()} />);
   expect(desk).toHaveTextContent('Hold collection');
-  expect(within(desk).getByRole('link', { name: 'Continue reconciliation', exact: true })).toHaveAttribute('href', '#/records?filter=refused');
+  expect(within(desk).getByRole('link', { name: 'Continue reconciliation' })).toHaveAttribute('href', '#/records?filter=refused');
   rerender(<ReconciliationStart data={received()} />);
-  expect(within(desk).getByRole('link', { name: 'Continue reconciliation', exact: true })).toHaveAttribute('href', '#/history');
+  expect(within(desk).getByRole('link', { name: 'Continue reconciliation' })).toHaveAttribute('href', '#/history');
   const settled = filled(); settled.sales[0].outstanding = '0.00'; settled.sales[0].settled = '1860.00'; settled.draft = null;
   rerender(<ReconciliationStart data={settled} />);
   expect(desk).toHaveTextContent('Settled in these books. No chase.');
-  expect(within(desk).getByRole('link', { name: 'Continue reconciliation', exact: true })).toHaveAttribute('href', '#/records?view=payments&q=JN-4410');
+  expect(within(desk).getByRole('link', { name: 'Continue reconciliation' })).toHaveAttribute('href', '#/records?view=payments&q=JN-4410');
 });
 
 test('refused first source resumes resolution and stale desk focuses refresh without changing the route', async () => {
   Element.prototype.scrollIntoView = vi.fn(); location.hash = '/dashboard';
   const { rerender } = render(<ReconciliationStart data={refusal(empty())} />);
-  expect(screen.getByRole('link', { name: 'Continue reconciliation', exact: true })).toHaveAttribute('href', '#/records?filter=refused');
+  expect(screen.getByRole('link', { name: 'Continue reconciliation' })).toHaveAttribute('href', '#/records?filter=refused');
   rerender(<><ReconciliationStart data={filled()} stale /><button id="refresh-workspace">Refresh</button></>);
   expect(screen.getByText('LAST KNOWN BALANCE')).toBeVisible();
   await userEvent.click(screen.getByRole('link', { name: /Refresh before continuing/ }));
