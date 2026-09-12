@@ -8,7 +8,7 @@ export function Dashboard({ data, stale }: { data: Workspace; stale: boolean }) 
   const metrics = dashboardMetrics(data, useClock(data.draft?.at));
   const target = reasonTarget(data);
   return <>
-    <Heading eyebrow="COLLECTIONS / MY JOINERY" title="Dashboard">Know what is still owed before asking a client to pay.</Heading>
+    <Heading eyebrow="COLLECTIONS / MY JOINERY" title="Dashboard">Check what is still owed before chasing.</Heading>
     <ReconciliationStart data={data} stale={stale} />
     <div className="scope-line"><span>All records in this synthetic session · As of {data.as_of}</span><Badge tone={stale || data.holds.length ? 'amber' : 'blue'}>{stale ? 'Last known snapshot' : `Ledger revision ${data.revision}`}</Badge></div>
     <section className="stats dashboard-stats" aria-label="Ledger balances">{metrics.map(metric => <a key={metric.id} className="stat" data-testid={`metric-${metric.id}`} href={metric.href}>

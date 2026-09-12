@@ -144,7 +144,7 @@ details summary { font-size: 14px; color: #d0cbef; padding-block: 5px; } .finger
 .decision-outcome { border: 1px solid #549484; border-radius: 14px; padding: 20px; margin-bottom: 20px; background: #152c2c; }
 .decision-outcome p { margin-block: 12px; }
 .decision-outcome a { display: inline-flex; min-height: 44px; align-items: center; padding: 10px 14px; border: 1px solid #549484; border-radius: 8px; }
-@media (max-width:760px) { .reconciliation-hero { gap: 12px; } .reconciliation-hero>.reconciliation-limit { margin-block: 0; } .desk-case-balance { display: grid; grid-template-columns: minmax(0,1fr); gap: 10px; } }
+@media (max-width:760px) { .reconciliation-hero { gap: 12px; } .reconciliation-hero .eyebrow { margin-block: 0 8px; } .reconciliation-hero>.reconciliation-limit { margin-block: 0; } .desk-case-balance { display: grid; grid-template-columns: minmax(0,1fr); gap: 10px; } }
 @media (forced-colors:active) { .desk-context,.review-reset,.decision-outcome { background: Canvas; color: CanvasText; border: 1px solid CanvasText; } .desk-balance,.desk-case-balance strong,.desk-next { color: CanvasText; } }
 .reconciliation-next { padding-block: 12px; }
 .reconciliation-next p { color: #c0c7df; margin-block: 10px; }

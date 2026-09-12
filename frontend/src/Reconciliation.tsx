@@ -17,9 +17,9 @@ export function ReconciliationStart({ data, stale = false }: { data: Workspace; 
   const returning = data.sources.length > 0 || data.activity.length > 0;
   const href = decision.href?.startsWith('#/') ? decision.href : invoice ? workspaceLink(invoice) : intakeLink('invoice');
   return <section className="reconciliation-hero" aria-label="Reconciliation journey">
-    <div><p className="eyebrow">ALEX'S COLLECTIONS DESK · MY JOINERY</p>
+    <div><p className="eyebrow">ALEX'S COLLECTIONS DESK</p>
       <h2>{returning ? decision.title : 'Would you still chase after a payment arrives?'}</h2>
-      <p>{returning ? decision.why : 'Help Alex, a self-employed joiner, decide what to chase after a client pays. Get the current balance, its source evidence and one safe next action.'}</p>
+      <p>{returning ? decision.why : 'Alex, a self-employed joiner, checks client payments. Get the current balance, its source evidence and one safe next action.'}</p>
       {stale ? <a className="primary" href="#refresh-workspace" onClick={e => jump(e, 'refresh-workspace')}>Refresh before continuing <span aria-hidden="true">→</span></a>
         : <a className="primary" href={href}>{invoice || returning ? 'Continue reconciliation' : 'Start reconciliation'} <span aria-hidden="true">→</span></a>}
       <p className="desk-next">{returning ? `Next: ${decision.action}.` : 'First: review and post an editable sample invoice. No account needed.'}</p>
