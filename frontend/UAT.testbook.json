@@ -1,4 +1,23 @@
 {
+  "decision_desk_wave": {
+    "milestone": "UX-AR-10S",
+    "status": "SOURCE_CANDIDATE_REQUIRES_EXACT_SHA_CI",
+    "scope": "Alex's collections decision desk, state-specific return path, current ledger provenance, durable review invalidation, explicit simulated authority, recoverable unavailable/offline states. Previous cases and historical evidence remain applicable at their named revisions.",
+    "automation": "frontend/e2e/decision-desk.spec.ts in the existing desktop/mobile real-HTTP suite; frontend/tests/decision-desk.test.tsx plus all existing regressions. GitHub Actions only; synthetic sessions, LedgerScriptModel and SimulatedProvider checked before each new browser journey.",
+    "evidence": "Exact run frontend-evidence and ui-screenshots artifacts; browser JUnit and source-and-runtime.json attachments. Screenshots: desk-cold-start, desk-returning-payment, desk-invalidated-draft, desk-completed-simulation, desk-held-evidence, desk-offline-recovery, desk-settled-no-chase, desk-unavailable-session.",
+    "acceptance_scope": "Source CI is not deployment evidence or independent human UAT. Coordinator owns merge and current AWS acceptance. Publication workflow, old case counts, freshness checks and backend source-byte parity stay unchanged.",
+    "human_comprehension_C3": {
+      "status": "NOT_RUN",
+      "method": "An independent participant unfamiliar with the app sees the exact build at cold start for ten seconds without coaching. Hide it, then record their own words: who uses it, what problem it solves, what result they expect, and which action they would take first. Record participant independence, build SHA, viewport, date, exact responses and misunderstandings in C3. Then observe payment-change and simulated-authorization tasks separately.",
+      "owner": "Coordinator records real human evidence in C3; neither Playwright nor this testbook claims comprehension."
+    },
+    "added_cases": [
+      { "id": "AR-UAT-25", "requirement": "Cold and returning decision desk with keyboard completion", "steps": ["Identify Alex's job and the first action", "Use Tab and Enter to post the invoice and prepare a draft", "Check review, then add payment before approving", "Reload Dashboard and follow the new decision", "Reload the withdrawn-draft explanation", "Prepare and explicitly authorize the fresh simulated draft", "Read and reload the one recorded outcome"], "expected": "1860.00 less 600.00 leaves 1260.00 EUR; prior draft absent; consent does not carry; exactly one simulated receipt and unchanged debt after approval.", "automation_mapping": "decision desk keyboard journey returns to changed evidence and explicitly simulates one approval", "human_signoff": "NOT_RUN" },
+      { "id": "AR-UAT-26", "requirement": "Held and offline returning state", "steps": ["Post invoice and refused source", "Return Dashboard", "Disconnect and refresh", "Reconnect, explicitly refresh, then resolve source evidence"], "expected": "Posted balance remains visible as partial/last-known evidence. Hold never invites approval. Reconnecting alone does not restore authorization.", "automation_mapping": "returning held desk keeps the posted amount visible and requires offline recovery before action", "human_signoff": "NOT_RUN" },
+      { "id": "AR-UAT-27", "requirement": "Fully settled abstention", "steps": ["Prepare a draft", "Post an editable full-payment remittance", "Reload Dashboard and inspect the case"], "expected": "Zero outstanding with linked receipts, no chase, old review unusable, no approval or simulated provider outcome.", "automation_mapping": "full payment returns a no-chase decision with the prior draft unusable", "human_signoff": "NOT_RUN" },
+      { "id": "AR-UAT-28", "requirement": "Unavailable session and explicit empty recovery", "steps": ["Open a session whose handle is unavailable", "Read the error", "Choose a new workspace and confirm"], "expected": "Unavailable balance is never shown as zero. Replacing browser access is explicit and does not claim record deletion; new books are empty.", "automation_mapping": "unavailable desk never invents zero balances and offers explicit empty-workspace recovery", "human_signoff": "NOT_RUN" }
+    ]
+  },
   "reconciliation_revision": {
     "status": "SOURCE_CHECKPOINT_PASS",
     "observed_at": "2026-09-10T11:08:24Z",

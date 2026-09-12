@@ -128,6 +128,24 @@ details summary { font-size: 14px; color: #d0cbef; padding-block: 5px; } .finger
 .payment-change span { color: #c0c7df; font-size: 14px; }
 .payment-change p { grid-column: 1/-1; margin: 0; overflow-wrap: anywhere; }
 .latest-evidence { overflow-wrap: anywhere; }
+.desk-context { align-self: center; padding: 18px; border: 1px solid #53577b; border-radius: 12px; background: #10182c; min-width: 0; }
+.desk-context h3,.desk-context p { overflow-wrap: anywhere; }
+.desk-balance { display: block; color: #c3ffe9; font-size: clamp(28px,3vw,40px); font-variant-numeric: tabular-nums; margin-block: 12px; overflow-wrap: anywhere; }
+.desk-next { color: #d7daf0; font-size: 14px; }
+.desk-details { grid-column: 1/-1; color: var(--muted); }
+.desk-details summary { min-height: 44px; padding-block: 10px; }
+.desk-case-balance { display: flex; align-items: center; flex-wrap: wrap; gap: 16px 28px; padding-block: 16px; border-block: 1px solid #53577b; margin-block: 18px; }
+.desk-case-balance strong { display: block; font-size: 28px; font-variant-numeric: tabular-nums; color: #c3ffe9; overflow-wrap: anywhere; }
+.desk-case-balance span { font-size: 14px; color: #c7cce1; }
+.desk-case-balance p { flex: 1; min-width: 180px; }
+.desk-case-balance a { min-height: 44px; display: inline-flex; align-items: center; }
+.review-reset { margin-block: 18px; padding: 16px; border-left: 4px solid #f5bf61; background: #302a31; border-radius: 4px 10px 10px 4px; overflow-wrap: anywhere; }
+.review-reset p { margin-block: 10px; }
+.decision-outcome { border: 1px solid #549484; border-radius: 14px; padding: 20px; margin-bottom: 20px; background: #152c2c; }
+.decision-outcome p { margin-block: 12px; }
+.decision-outcome a { display: inline-flex; min-height: 44px; align-items: center; padding: 10px 14px; border: 1px solid #549484; border-radius: 8px; }
+@media (max-width:760px) { .reconciliation-hero { gap: 12px; } .reconciliation-hero>.reconciliation-limit { margin-block: 0; } .desk-case-balance { display: grid; grid-template-columns: minmax(0,1fr); gap: 10px; } }
+@media (forced-colors:active) { .desk-context,.review-reset,.decision-outcome { background: Canvas; color: CanvasText; border: 1px solid CanvasText; } .desk-balance,.desk-case-balance strong,.desk-next { color: CanvasText; } }
 .reconciliation-next { padding-block: 12px; }
 .reconciliation-next p { color: #c0c7df; margin-block: 10px; }
 .file-intake { border-block: 1px solid var(--line); padding: 16px 0; margin-block: 18px; }
