@@ -11,6 +11,7 @@ from types import SimpleNamespace
 import pytest
 from fastapi.testclient import TestClient
 
+from archon.adapters.composition import COMPOSER_JSON_RULES, composer_lines
 from archon.adapters.grounded_post import SourceFields, validate_reading
 from archon.adapters.inbound import UnreadablePost, read_email
 from archon.adapters.metered import (
@@ -72,7 +73,11 @@ class Provider:
                                    "name": tools[0]["toolSpec"]["name"], "input": {}}}]
             stop = "tool_use"
         else:
-            content = [{"text": workspace.OPENING + "\n" + workspace.CLOSING}]
+            structured = any(b.get("text", "").endswith(COMPOSER_JSON_RULES)
+                             for b in request.get("system", []))
+            text = (json.dumps({"opening": workspace.OPENING, "closing": workspace.CLOSING})
+                    if structured else workspace.OPENING + "\n" + workspace.CLOSING)
+            content = [{"text": text}]
             stop = "end_turn"
         return {"output": {"message": {"role": "assistant", "content": content}},
                 "stopReason": stop,
@@ -276,6 +281,59 @@ def test_actual_strands_bedrock_adapter_routes_every_graph_turn_through_metered_
     assert state["graph"]["mode"] == "Actual provider adapter"
     assert len(state["graph"]["reports"]) == 6
     assert state["draft"]["fingerprint"] == workspace.draft_for(state).fingerprint()
+
+
+@pytest.mark.parametrize("text", [
+    '**Collection chase — JN-4410**\n**Opening line:**\nThank you.\n**Closing line:**\nPlease reply.',
+    '{"opening":"Hello","closing":"Thanks","invoice":"JN-4410"}',
+    '{"opening":"Hello","opening":"Changed","closing":"Thanks"}',
+    '{"opening":"Hello"}', '[]', 'null',
+    '{"opening":null,"closing":"Thanks"}',
+    '{"opening":"Hello\\nExtra line","closing":"Thanks"}',
+    '{"opening":"","closing":"Thanks"}',
+    json.dumps({"opening": "x" * 2001, "closing": "Thanks"}),
+])
+def test_live_composer_refuses_unstructured_or_ambiguous_output(text):
+    with pytest.raises(ValueError, match="text contract"):
+        composer_lines(text)
+
+
+@pytest.mark.parametrize("unsafe", [False, True])
+def test_worker_structured_composer_keeps_all_readers_and_the_no_digit_gate(setup, unsafe):
+    sessions, journal = setup
+    seed(sessions)
+    state, version = sessions.get(HANDLE)
+    state.update(graph=None, draft=None)
+    sessions.put(HANDLE, state, version)
+
+    class Composer(Provider):
+        def converse(self, **kwargs):
+            result = super().converse(**kwargs)
+            if not kwargs.get("toolConfig", {}).get("tools"):
+                assert kwargs["system"][-1]["text"].endswith(COMPOSER_JSON_RULES)
+                if unsafe:
+                    result["output"]["message"]["content"] = [{"text": json.dumps({
+                        "opening": "You owe 999 EUR.", "closing": "Please reply.",
+                    })}]
+            return result
+
+    provider = Composer()
+    queued = change(sessions, "reason")
+    live.run(sessions, journal, HANDLE, queued["live"]["job"]["id"],
+             client_factory=lambda: provider)
+    saved, _ = sessions.get(HANDLE)
+    assert len(provider.calls) == 13
+    assert provider.counts[-1]["input"]["converse"]["system"] == provider.calls[-1]["system"]
+    if unsafe:
+        assert saved["provider_job"]["status"] == "failed"
+        assert "contains a digit" in saved["provider_job"]["error"]
+        assert saved["draft"] is None and saved["graph"] is None
+    else:
+        assert saved["provider_job"]["status"] == "completed"
+        assert len(saved["graph"]["reports"]) == 6
+        assert saved["draft"]["opening"] == workspace.OPENING
+        assert saved["draft"]["fingerprint"] == workspace.draft_for(saved).fingerprint()
+    assert saved["sends"] == {}
 
 
 def test_pending_job_is_committed_before_dispatch_and_replay_does_not_create_new_job(setup):

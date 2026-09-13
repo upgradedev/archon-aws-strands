@@ -99,7 +99,7 @@ def _readers(
     ]
 
 
-def _composer(books: Books, as_of: date, model: object | None) -> Agent:
+def _composer(books: Books, as_of: date, model: object | None, suffix: str = "") -> Agent:
     """The composer, deliberately toolless.
 
     It had a ``candidate()`` tool and that was a hole: it could answer from its
@@ -113,12 +113,15 @@ def _composer(books: Books, as_of: date, model: object | None) -> Agent:
     """
     given = tools.chase_candidate(books, as_of)
     brief = wiring.COMPOSER_RULES + "\n\n" + "The debt in question: " + given
+    if suffix:
+        brief += "\n\n" + suffix
     return Agent(
         name=COMPOSER, model=model, system_prompt=brief, tools=[], callback_handler=None
     )
 
 
-def build(books: Books, as_of: date, frm: date, to: date, model: object | None = None):
+def build(books: Books, as_of: date, frm: date, to: date, model: object | None = None,
+          *, composer_suffix: str = ""):
     """Wire the graph. Construction only; nothing runs until it is called.
 
     ``model`` is injected rather than reached for. Passing ``None`` uses the
@@ -132,7 +135,7 @@ def build(books: Books, as_of: date, frm: date, to: date, model: object | None =
     readers = _readers(books, as_of, frm, to, model)
     for name, agent in readers:
         builder.add_node(agent, name)
-    builder.add_node(_composer(books, as_of, model), COMPOSER)
+    builder.add_node(_composer(books, as_of, model, composer_suffix), COMPOSER)
     gate = gating.all_reported(wiring.REQUIRED_REPORTS)
     for source, target in wiring.EDGES:
         builder.add_edge(source, target, condition=gate)

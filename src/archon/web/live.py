@@ -11,6 +11,7 @@ from archon.adapters.grounded_post import SourceFields, validate_reading
 from archon.adapters.metered import Admission, LiveRefused, MeteredConverse, model_for
 from archon.adapters.ses import live_outbox
 from archon.adapters.token_counter import CountingRuntime
+from archon.agents.draft import UnsafeDraft
 from archon.store.execution import DurableSendLog, Journal
 from archon.store.sessions import Conflict, S3Sessions, configured_store
 from archon.web import workspace
@@ -140,6 +141,7 @@ def run(store, journal, handle, job_id, *, client_factory=None, outbox_factory=l
                 workspace.reason(
                     state, model=model_for(metered),
                     model_label="Real Strands graph · Amazon Bedrock · model advice, ledger facts",
+                    structured_composer=True,
                 )
             else:
                 raise LiveRefused("Unknown worker operation.")
@@ -148,7 +150,7 @@ def run(store, journal, handle, job_id, *, client_factory=None, outbox_factory=l
         state = original  # A failed graph must not publish a half-created draft.
         job = state["provider_job"]
         job.update(status="failed", error=(
-            str(exc) if isinstance(exc, (LiveRefused, Conflict)) else
+            str(exc) if isinstance(exc, (LiveRefused, Conflict, UnsafeDraft)) else
             "Provider operation failed. Review the durable evidence before trying a new action."
         ), finished_at=workspace.now())
     finally:

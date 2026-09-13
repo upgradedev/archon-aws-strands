@@ -223,10 +223,12 @@ def draft_for(state: dict) -> ChaseDraft | None:
     )
 
 
-def reason(state: dict, *, model=None, model_label: str | None = None) -> None:
+def reason(state: dict, *, model=None, model_label: str | None = None,
+           structured_composer: bool = False) -> None:
     if holds(state):
         raise ValueError("Correct every refused email first. Partial books cannot support a chase.")
     from archon.adapters.ledger_script import LedgerScriptModel
+    from archon.adapters.composition import COMPOSER_JSON_RULES, composer_lines
     from archon.agents import wiring
     from archon.agents.graph import build
     from archon.demo import two_lines
@@ -234,7 +236,8 @@ def reason(state: dict, *, model=None, model_label: str | None = None) -> None:
     books = books_for(state)
     if model is None:
         model = LedgerScriptModel(default=f"{OPENING}\n{CLOSING}")
-    result = build(books, AS_OF, date(2026, 7, 1), AS_OF, model=model)(
+    options = {"composer_suffix": COMPOSER_JSON_RULES} if structured_composer else {}
+    result = build(books, AS_OF, date(2026, 7, 1), AS_OF, model=model, **options)(
         "Read each ledger domain and prepare an exact collection draft."
     )
     reports = {}
@@ -245,7 +248,8 @@ def reason(state: dict, *, model=None, model_label: str | None = None) -> None:
         raise ValueError(
             "The Strands graph did not complete every required report. Nothing drafted."
         )
-    opening, closing = two_lines(reports.pop(wiring.COMPOSER))
+    parse = composer_lines if structured_composer else two_lines
+    opening, closing = parse(reports.pop(wiring.COMPOSER))
     state["graph"] = {
         "at": now(),
         "reports": reports,
