@@ -1,23 +1,11 @@
 name: Recover observed provider report
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - deploy/release_acceptance.py
-      - tests/test_live_release.py
-      - .github/workflows/recover-acceptance.yml
-  push:
-    branches: [main]
-    paths:
-      - deploy/release_acceptance.py
-      - tests/test_live_release.py
-      - .github/workflows/recover-acceptance.yml
 permissions:
   contents: read
   actions: read
 jobs:
   recover:
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
