@@ -10,7 +10,7 @@ export function EvidenceBundle({ load, revision }: { load?: () => Promise<Bundle
   const [error, setError] = useState('');
   const [copyStatus, setCopyStatus] = useState('');
   return <section className="panel"><div className="panel-heading"><h2>Evidence bundle</h2></div>
-    <p className="section-note">Redacted sources, decisions, corrections, runtime identity and limits. A hash identifies bytes, not truth. Review before sharing.</p>
+    <p className="section-note">Redacted sources, decisions, corrections, runtime identity and limits. A hash identifies bytes, not truth. Exporting preserves recorded provider outcomes; it does not prove bank settlement or email arrival. Review before sharing.</p>
     <button className="secondary" disabled={!load || busy} onClick={async () => { setBusy(true); setError(''); setCopyStatus(''); try { const result = await load!(); if (mounted.current) setBundle(result); } catch (failure) { if (mounted.current) setError(errorText(failure)); } finally { if (mounted.current) setBusy(false); } }}>{busy ? 'Reading durable evidence…' : 'Prepare evidence bundle'}</button>
     {!load ? <p>Evidence export is unavailable in this embedded view. Open History in the connected workstation.</p> : null}
     {error ? <p role="alert">{error} Retry this read when the workspace is available.</p> : null}

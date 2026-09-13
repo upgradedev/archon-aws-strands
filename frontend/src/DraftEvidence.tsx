@@ -36,6 +36,6 @@ export function DraftEvidence({ data, invoiceId }: { data: Workspace; invoiceId:
           : <p className="evidence-unavailable">No linked posted receipt sources are available.</p>}
       </div>
     </div>
-    <p className="evidence-limit">Sourced means retained post. Reconciled means receipts linked by invoice reference in these books, not independent bank verification. Delivery remains simulated.</p>
+    <p className="evidence-limit">Sourced means retained post. Reconciled means receipts linked by invoice reference in these books, not independent bank verification. {data.live?.mail ? 'Explicit approval can send real email through controlled Amazon SES. Provider acceptance is not delivery proof.' : 'Delivery remains simulated.'}</p>
   </section>;
 }
