@@ -27,10 +27,10 @@ test('demo switching waits for old reads and keeps navigation actions locked whi
   await userEvent.click(screen.getByRole('button', { name: 'Load demo workspace' }));
   expect(api.openWorkspace).toHaveBeenCalledTimes(2);
   await route('/dashboard');
-  expect(screen.getByRole('button', { name: 'Refresh', exact: true })).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Refresh' })).toBeDisabled();
   expect(screen.getByRole('button', { name: 'New workspace' })).toBeDisabled();
   await act(async () => finishDemo({ session: 'demo', workspace: { ...empty(), demo_seed: 'joinery-v1' } }));
-  await waitFor(() => expect(screen.getByRole('button', { name: 'Refresh', exact: true })).toBeEnabled());
+  await waitFor(() => expect(screen.getByRole('button', { name: 'Refresh' })).toBeEnabled());
   expect(screen.getByRole('region', { name: 'Populated fictional demo' })).toBeVisible();
   expect(api.request).not.toHaveBeenCalled();
 });
