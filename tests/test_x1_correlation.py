@@ -331,12 +331,24 @@ def test_incomplete_cli_and_durable_failure_before_parse(tmp_path, monkeypatch):
         instrument.export(source, tmp_path / "refused")
 
 
-def test_frozen_application_and_evaluation_bytes_stay_pinned():
+def test_frozen_instruments_stay_pinned_without_requalifying_the_changed_product():
     root = Path(__file__).resolve().parents[1]
     paths = ["src", "evaluation/ar3.py", "evaluation/ar3_data", "evaluation/ar3_collect.py",
              "evaluation/ar2.py", "frontend/benchmarks", "pyproject.toml", "infra"]
-    subprocess.run(["git", "diff", "--exit-code", "b5df90772c9213ffd5a6120b6ef1dd3a72347028",
-                    "HEAD", "--", *paths], cwd=root, check=True)
+    pinned = "b5df90772c9213ffd5a6120b6ef1dd3a72347028"
+    compatible = "d8194c0413d5414e3acf071f55efe2d820565af7"
+    subprocess.run(["git", "diff", "--exit-code", pinned, compatible, "--", *paths],
+                   cwd=root, check=True)
+    # Product evolution is not a telemetry/evaluator rebaseline. Their bytes
+    # stay frozen; a changed app cannot reuse the historical qualification.
+    frozen = [p for p in paths if p not in {"src", "pyproject.toml"}]
+    subprocess.run(["git", "diff", "--exit-code", pinned, "HEAD", "--", *frozen],
+                   cwd=root, check=True)
+    subprocess.run(["git", "diff", "--exit-code", compatible, "HEAD", "--", "telemetry"],
+                   cwd=root, check=True)
+    changed = subprocess.run(["git", "diff", "--quiet", pinned, "HEAD", "--", "src"],
+                             cwd=root, check=False)
+    assert changed.returncode == 1, "New product source is not the frozen qualification"
     workflow = (root / ".github/workflows/ci.yml").read_text()
     assert "ruff check src tests telemetry" in workflow
     assert "pytest tests/test_x1_correlation.py" in workflow

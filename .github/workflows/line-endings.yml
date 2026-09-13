@@ -8,6 +8,9 @@ permissions:
 jobs:
   checkout-bytes:
     runs-on: windows-latest
+    env:
+      AWS_EC2_METADATA_DISABLED: 'true'
+      ARCHON_WINDOWS_EVALUATION: '1'
     steps:
       - uses: actions/checkout@v4
         with:

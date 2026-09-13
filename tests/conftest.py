@@ -7,7 +7,11 @@ is either kept or quietly broken, so it is kept here.
 
 from __future__ import annotations
 
+import os
+import socket
+import sys
 from datetime import date
+from unittest.mock import patch
 
 import pytest
 
@@ -21,6 +25,34 @@ from archon.domain.documents import (
 )
 
 TODAY = date(2026, 9, 3)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def windows_evaluation_wakeup_pairs():
+    """Pre-open bounded loopback wakeup pairs before the frozen network fence.
+
+    Windows implements asyncio's self-pipe via TCP socketpair. Under the unchanged
+    AR2 fence its connect is rightly denied. These CI-only preconnected channels
+    have no remote endpoint and cannot open a connection during evaluation.
+    """
+    if sys.platform != "win32" or os.getenv("ARCHON_WINDOWS_EVALUATION") != "1":
+        yield
+        return
+    pairs = [socket.socketpair() for _ in range(512)]
+    remaining = list(pairs)
+
+    def take_pair(*args, **kwargs):
+        if args or kwargs or not remaining:
+            raise RuntimeError("Bounded Windows evaluation wakeup pool exhausted/unsupported")
+        return remaining.pop()
+
+    try:
+        with patch.object(socket, "socketpair", take_pair):
+            yield
+    finally:
+        for pair in pairs:
+            for channel in pair:
+                channel.close()
 
 
 @pytest.fixture

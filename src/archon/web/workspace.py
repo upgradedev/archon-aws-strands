@@ -487,7 +487,8 @@ def counter(state: dict, fingerprint: str, body: str) -> None:
     state.setdefault("terms_history", []).append(record)
     state["proposal"], state["draft"], state["graph"] = None, None, None
     event(state, "Owner counterproposal recorded",
-          f"{plan.invoice_id}: awaiting client acceptance; no message sent, no debt or hold changed.")
+          f"{plan.invoice_id}: awaiting client acceptance; "
+          "no message sent, no debt or hold changed.")
 
 
 def agree(state: dict, fingerprint: str) -> None:

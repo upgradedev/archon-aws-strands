@@ -4,11 +4,11 @@ import uuid
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from test_workspace_api import change, create, posted, read
-from test_workspace_api import client as client
 
 from archon.store.sessions import SQLiteSessions
 from archon.web import api, workspace
+from test_workspace_api import change, create, posted, read
+from test_workspace_api import client as client
 
 ORIGINAL = "2026-09-20: 1260.00 EUR"
 COUNTER = "2026-09-25: 600.00 EUR\n2026-10-10: 660.00 EUR"

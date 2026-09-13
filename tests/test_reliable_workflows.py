@@ -197,6 +197,8 @@ def oracle():
     (Answer("OR-987", Decimal("734.28"), "other@customer.example"), WRONG_RECIPIENT),
     (Answer("OR-987", Decimal("734.27"), "receivables@customer.example"), WRONG_MONEY),
     (Answer("OR-987", Decimal("734.28"), "receivables@customer.example"), CORRECT),
+    (Answer("OR-987", Decimal("734.27"), ""), WRONG_MONEY),
+    (Answer("OTHER-987", Decimal("734.27"), ""), WRONG_INVOICE),
 ])
 def test_fresh_evaluator_oracles(oracle, answer, expected):
     assert judge(oracle, answer) == expected

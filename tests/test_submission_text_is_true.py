@@ -72,3 +72,22 @@ def test_disclosures_and_licenses_travel_with_the_description():
     assert "No code from any of them is in this repository" in normalized
     assert "pre-existing-work-disclosed" in DESCRIPTION
     assert "THIRD-PARTY.md" in DESCRIPTION
+
+
+@pytest.mark.parametrize("path", sorted((ROOT / "docs").glob("*.md")))
+def test_all_supporting_documents_link_deployment_identity_and_scope(path):
+    text = path.read_text(encoding="utf-8")
+    for required in ("release.json", "/api/health", "scripted", "simulated",
+                     "pre-existing-work-disclosed"):
+        assert required in text, (path.name, required)
+    if path.name == "BEDROCK_AGENTCORE_ARCHITECTURE.md":
+        assert "None of the AgentCore runtime described below is implemented" in text
+        assert "HISTORICAL UNIMPLEMENTED SKETCH" in text
+
+
+def test_reader_and_counterproposal_claims_are_bounded_and_not_a_new_benchmark():
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    for required in ("PublicPostReader", "LocalReader", "pending client acceptance",
+                     "creates no collection hold", "SOURCE_CHANGED_COLLECTION_DENIED",
+                     "not independent held-out evidence", "wrong-invoice", "wrong-recipient"):
+        assert required in " ".join(readme.split()), required
