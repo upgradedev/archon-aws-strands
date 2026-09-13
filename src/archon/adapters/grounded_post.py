@@ -9,6 +9,27 @@ from archon.adapters.inbound import UnreadablePost
 from archon.domain.documents import Receipt
 
 
+class SourceFields:
+    """Live extraction field meanings, outside the historical reader protocol.
+
+    These instructions reach the metered client before counting and admission.
+    The default local reader and frozen evaluation requests stay unchanged.
+    """
+
+    def __init__(self, client):
+        self.client = client
+
+    def converse(self, **request):
+        instructions = (
+            "Field meanings: for an invoice, issued is its issue date. For a receipt, "
+            "issued is the explicitly stated payment date (paid, sent, received or "
+            "transferred on), not an invoice issue date. Never substitute today's date "
+            "or an invoice due date for a missing payment date. Return null if absent."
+        )
+        request["system"] = [*request.get("system", []), {"text": instructions}]
+        return self.client.converse(**request)
+
+
 def validate_reading(body, reading):
     document = reading.document
     # This live input lane currently supports explicit ISO dates and EUR decimal

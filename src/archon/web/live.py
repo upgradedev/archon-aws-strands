@@ -7,7 +7,7 @@ import os
 import secrets
 from datetime import UTC, datetime
 
-from archon.adapters.grounded_post import validate_reading
+from archon.adapters.grounded_post import SourceFields, validate_reading
 from archon.adapters.metered import Admission, LiveRefused, MeteredConverse, model_for
 from archon.adapters.ses import live_outbox
 from archon.adapters.token_counter import CountingRuntime
@@ -133,7 +133,8 @@ def run(store, journal, handle, job_id, *, client_factory=None, outbox_factory=l
             metered = MeteredConverse(client_factory(), admission, journal, job_id)
             if job["operation"] == "intake":
                 workspace.intake(
-                    state, **job["payload"], reader=metered, validate_reading=validate_reading
+                    state, **job["payload"], reader=SourceFields(metered),
+                    validate_reading=validate_reading
                 )
             elif job["operation"] == "reason":
                 workspace.reason(

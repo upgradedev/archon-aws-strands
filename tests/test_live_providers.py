@@ -11,7 +11,7 @@ from types import SimpleNamespace
 import pytest
 from fastapi.testclient import TestClient
 
-from archon.adapters.grounded_post import validate_reading
+from archon.adapters.grounded_post import SourceFields, validate_reading
 from archon.adapters.inbound import UnreadablePost, read_email
 from archon.adapters.metered import (
     MODEL_ID,
@@ -247,7 +247,7 @@ def test_source_validation_refuses_balanced_but_invented_values():
 def test_receipt_prompt_defines_payment_date_without_filling_missing_model_fields(issued):
     class ReceiptReader(Provider):
         def converse(self, **kwargs):
-            prompt = kwargs["messages"][0]["content"][0]["text"]
+            prompt = kwargs["system"][-1]["text"]
             assert "For a receipt, issued is the explicitly stated payment date" in prompt
             assert "Never substitute today's date" in prompt
             response = {"kind": "receipt", "issued": issued, "amount": "600.00",
@@ -256,9 +256,11 @@ def test_receipt_prompt_defines_payment_date_without_filling_missing_model_field
 
     if issued is None:
         with pytest.raises(UnreadablePost, match="does not state a date"):
-            read_email(workspace.SAMPLES["payment"], "source", client=ReceiptReader())
+            read_email(workspace.SAMPLES["payment"], "source",
+                       client=SourceFields(ReceiptReader()))
     else:
-        reading = read_email(workspace.SAMPLES["payment"], "source", client=ReceiptReader())
+        reading = read_email(workspace.SAMPLES["payment"], "source",
+                             client=SourceFields(ReceiptReader()))
         assert reading.document.received_on.isoformat() == issued
         validate_reading(workspace.SAMPLES["payment"], reading)
 
