@@ -1,7 +1,8 @@
-# Incoming HTTP webhook: provisional contract
+# Incoming HTTP webhook: opt-in source extension
 
-**NOT YET DEPLOYED.** This contract describes the source implementation under integration.
-Backend ingress is not active until the reviewed main release and its matching acceptance evidence establish it.
+This contract describes the opt-in incoming extension in this source revision.
+The per-workspace key starts disabled, and producer setup is required. Check served identities
+and matching release acceptance before using it; source availability alone does not establish activation.
 
 For the joiner reviewing inbox records in the [AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/),
 controlled-live mode uses Bedrock and restricted SES; retained simulation uses a scripted
@@ -22,7 +23,7 @@ does not install a mail rule, subscribe to a mailbox, fetch old messages, or arr
 Use only fictional document text within the public intake's supported format.
 The [user guide](USER-GUIDE.md) documents ISO dates, decimal EUR values and source references.
 
-## Interface prepared in source
+## Interface
 
 The Incoming navigation page exposes setup and queued/completed/refused results. Connection
 opt-in is available only in controlled-live mode. Its maximum lifetime is **24 hours**, further
@@ -61,7 +62,7 @@ Disable request body:
 }
 ```
 
-External request example (illustrative only; not a deployed endpoint demonstration):
+External request example (illustrative request syntax, not a live invocation receipt):
 
 ```http
 POST /api/incoming
@@ -133,9 +134,12 @@ This contract does not promise cancellation or reversal of a provider call alrea
 
 ## Verification boundary
 
-Route models and bounds were read from `archon.web.api`; configuration, token issuance and
-deduplication from `archon.web.incoming`; saved event metadata from `archon.web.live` in the
-implementation checkout. That was a read-only source inspection, not a live observation or a
-test run. Final UI labels, integrated source and negative-path checks still need exact-SHA CI
-and release acceptance. Controlled provider calls, mailbox setup and production acceptance
-were not performed as part of this documentation work.
+The [2026-09-13 baseline](EVALUATION.md#recorded-product-acceptance-not-a-new-result), frontend
+`40c7ade` / backend `2bb3db3`, predates this extension. Its acceptance does not cover Incoming.
+Check the frontend/backend identities actually served, the extension's exact-SHA CI and matching
+release acceptance before configuring a producer. A configured mode is not proof of a successful intake.
+
+At the 2026-09-14 documentation review, route models and bounds were read from `archon.web.api`;
+configuration, token issuance and deduplication from `archon.web.incoming`; saved event metadata
+from `archon.web.live`. That source inspection made no provider calls and performed no mailbox
+setup or production acceptance. The current validation record belongs to the matching CI/release run.

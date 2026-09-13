@@ -38,6 +38,10 @@ These live records, not the historical version table, identify the deployment.
 | `pytest` | 9.0.2 | MIT |
 | `pytest-cov` | 7.1.0 | MIT |
 | `ruff` | 0.16.0 | MIT |
+| `markdown-it-py` | 4.0.0 (CI pin) | MIT |
+
+`markdown-it-py==4.0.0` parses and renders CommonMark with tables for the CI documentation review
+in `tools/docs_review.py`. It is a development dependency, not a product runtime or frontend dependency.
 
 All permissive, all compatible with this project's MIT licence, and none
 requiring the source of a derived work to be released under their terms.
@@ -93,5 +97,7 @@ boundary are application controls beyond the SDK. They are implemented in this r
 
 [Prior work](PRIOR-WORK.md) retains the earlier product names and pattern/visual influences.
 [Graphics](GRAPHICS.md) labels supplied JPGs as concept art, not deployed capabilities.
-The proposed [incoming webhook](incoming-webhook.md) is not yet deployed and adds no direct
-mailbox service integration. This table does not authorize new accounts, providers or paid calls.
+The opt-in [incoming webhook](incoming-webhook.md) in this source revision adds no direct mailbox
+service integration. Its per-workspace key starts disabled and producer setup is required;
+check served identities and matching acceptance before use. This table does not authorize new
+accounts, providers or paid calls.

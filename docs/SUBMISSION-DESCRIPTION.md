@@ -57,8 +57,9 @@ or held-out reuse is claimed. The withdrawn injection result establishes no curr
 
 The firm and records are invented. Public input is bounded English plain text, ISO dates and EUR;
 there is no bank feed, payment execution, OCR, payroll provider, deployed AgentCore or Aurora.
-A session-scoped incoming HTTP webhook is being implemented but is **not yet deployed**.
-Its provisional contract allows owner-enabled external mail/export intake with a separate token,
+A session-scoped incoming HTTP webhook is an opt-in extension in this source revision.
+Its per-workspace key starts disabled and producer setup is required; check served identities and
+matching acceptance before use. Its contract allows external mail/export intake with a separate token,
 maximum 24-hour expiry within the seven-day workspace, durable deduplication and no automatic send.
 It is not a Gmail/Outlook login; producer setup remains with the owner.
 
@@ -67,7 +68,7 @@ It is not a Gmail/Outlook login; producer setup remains with the owner.
 [acceptance](https://d2ssmv59q16d0b.cloudfront.net/acceptance.html) identify the served pair.
 [CI evidence](https://github.com/upgradedev/archon-aws-strands/actions) is scoped to its exact SHA.
 CloudFront/private S3 serve React; API Gateway and Lambda save conditional S3 session state and
-dispatch the separate Bedrock/SES worker. This draft has no new CI or deployed acceptance claim.
+dispatch the separate Bedrock/SES worker. Validation must identify the exact revision described.
 
 ## Disclosure
 

@@ -123,6 +123,7 @@ worker can, with budget, expiry, exact recipient and explicit approval checks.
 
 ## Input automation
 
-The incoming HTTP webhook is provisional and **not yet deployed**. It is intake-only, enabled
-explicitly for one session and driven by an external system. It is not a mailbox login or an
-automatic collection workflow. See [incoming-webhook.md](incoming-webhook.md) for the contract.
+This source revision includes an opt-in incoming HTTP webhook. The per-workspace key starts disabled;
+the owner enables it and configures the external producer. Check served identities and matching
+acceptance before using it. It accepts intake only, not mailbox login or automatic collection.
+See [incoming-webhook.md](incoming-webhook.md) for setup, scope, expiry and retry behavior.

@@ -35,7 +35,7 @@ Its service names, API paths, thresholds and claims are not a specification of w
 | AgentCore runtime, Action Groups, hosted Guardrails | **no** | Strands SDK + Bedrock model calls are the actual implementation |
 | API Gateway, Lambda, private S3 sessions | **yes**, plus the separate controlled provider worker | `infra/`, `deploy/`, `archon.web.live` |
 | S3 truth seals, DynamoDB, Aurora DSQL | **no** | Session hashes are not authenticity certificates |
-| direct mailbox/bank integration | **no** | Incoming HTTP intake is separately provisional and not yet deployed |
+| direct mailbox/bank integration | **no** | Incoming HTTP intake is a separate opt-in source extension; disabled per-workspace key and producer setup required |
 
 The threshold in the mapping below, holding a draft only above €5,000, is **not** how the gate works and never was.
 The gate checks facts, approval, exact text, recipient, revision and expiry. There is no amount at which
@@ -44,8 +44,9 @@ those requirements stop applying.
 Source check: `rg -n -i agentcore src/` finds no AgentCore implementation in the supplied baseline.
 [Current architecture](ARCHITECTURE.md) describes CloudFront/private S3, API Gateway, Lambda,
 S3 compare-and-swap sessions, the durable worker, Bedrock and controlled SES.
-[Incoming webhook](incoming-webhook.md) is a separate intake-only proposal, not evidence that the
-original sketch's mailbox or Action Group topology exists.
+[Incoming webhook](incoming-webhook.md) is a separate intake-only source extension. Check its
+served identities and acceptance before use; it does not implement the original sketch's mailbox
+or Action Group topology.
 
 ## Historical proposal, retained for comparison
 

@@ -62,16 +62,17 @@ No mailbox is connected. There is no bank feed, payment execution, payroll provi
 integration. Nothing is submitted to any tax authority. Recorded transfer references and headers
 are supplied evidence, not proof of authenticity. Real customer data is outside this demo's scope.
 
-### Automated input: provisional, not yet deployed
+### Automated input: opt-in extension
 
-A session-scoped HTTP webhook is being implemented for external mail/export systems.
-The user explicitly enables it and supplies the external system with a separate intake-only
+A session-scoped HTTP webhook in this source revision accepts input from external mail/export systems.
+The per-workspace key starts disabled; producer setup is required. The user explicitly enables
+the connection and supplies the external system with a separate intake-only
 bearer token, never the workspace credential. Its lifetime is at most 24 hours and ends no later
 than workspace expiry. It deduplicates exact event IDs durably and uses live Bedrock intake under
 the existing budget and job limits.
 It cannot approve a draft or send an email. This is not direct Gmail or Outlook login.
-See the [provisional incoming-webhook contract](docs/incoming-webhook.md); backend ingress is
-not active until deployment and acceptance establish it.
+See the [incoming-webhook contract](docs/incoming-webhook.md). Check served identities and
+matching acceptance before using the extension; source availability alone does not establish activation.
 
 ## Run it
 
@@ -106,9 +107,9 @@ ledger. Each reports before the composer can run; the composer holds no tools. B
 model interpretation and wording, while deterministic code selects the invoice and verifies
 amounts. Removing Strands prevents draft preparation.
 
-<img src="docs/infrastructure.svg" alt="Archon AWS infrastructure: CloudFront serves React from private S3 and routes through API Gateway to Lambda; conditional S3 sessions and a separate worker govern Bedrock and controlled SES. The dashed incoming webhook is not deployed." width="100%">
+<img src="docs/infrastructure.svg" alt="Archon AWS infrastructure: CloudFront serves React from private S3 and routes through API Gateway to Lambda; conditional S3 sessions and a separate worker govern Bedrock and controlled SES. The dashed incoming webhook is an opt-in source extension; verify served identity and acceptance before use." width="100%">
 
-[View infrastructure at full size](docs/infrastructure.svg). The dashed webhook extension is not deployed.
+[View infrastructure at full size](docs/infrastructure.svg). The dashed extension requires opt-in and producer setup.
 
 CloudFront serves React from private S3 and routes `/api/*` through API Gateway to Lambda.
 The API saves jobs and dispatches a separate durable worker; its role cannot invoke Bedrock or
@@ -142,7 +143,7 @@ Human active time, time saved and recovered money remain Unknown.
 
 [Evaluation and evidence](docs/EVALUATION.md) retains original result links, withdrawn comparisons,
 frozen protocols, failure categories, and the boundary between product acceptance and model benefit.
-This documentation revision has not been tested locally or accepted by CI.
+For this revision's validation, inspect exact-SHA CI and matching release acceptance.
 
 <a id="contents"></a>
 <a id="third-party-components"></a>

@@ -50,10 +50,11 @@ A recorded counterproposal preserves the client's original reply. It is pending 
 sends no message, changes no debt and creates no collection hold. An agreed plan changes collection
 timing, not the outstanding balance.
 
-## Provisional automated input
+## Opt-in automated input
 
-The [incoming HTTP webhook](incoming-webhook.md) is not yet deployed.
-It is an opt-in intake path for an owner's external mail/export system, with a separate scoped
+This source revision includes the [incoming HTTP webhook](incoming-webhook.md).
+Its per-workspace key starts disabled and the owner must configure an external producer.
+Check served identities and matching acceptance before use. The intake path uses a separate scoped
 token, maximum 24-hour lifetime within workspace expiry and durable event-ID deduplication.
 It uses live Bedrock intake under existing limits and cannot send or approve email.
 It is not direct Gmail/Outlook login, a bank connection, or automatic collection.

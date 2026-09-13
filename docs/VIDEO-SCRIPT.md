@@ -77,4 +77,4 @@ not acting. Full human UAT and benefit measurement remain NOT_RUN. End on the AW
 - Do not claim compliance, competitive superiority, measured time savings or collected money.
 - Do not narrate a scripted decision as a live model result or the deterministic seed as AI extraction.
 - Do not show [concept art](GRAPHICS.md) as product screenshots, GBP support or connected banks.
-- Do not record the [incoming webhook](incoming-webhook.md) as deployed until its main release is verified.
+- Before demonstrating the [incoming webhook](incoming-webhook.md), check served identities and matching acceptance; explain the disabled initial key and required producer setup.

@@ -63,7 +63,7 @@ flowchart LR
   mode -->|synthetic| simulated["Simulated acceptance only"]
 ```
 
-## Deployed AWS infrastructure
+## AWS infrastructure and source extensions
 
 <img src="infrastructure.svg" alt="Archon AWS infrastructure: CloudFront and private S3 frontend, API Gateway, Lambda API, conditional S3 sessions and a separate Bedrock/SES worker." width="100%">
 
@@ -78,7 +78,7 @@ recorded in [Evaluation](EVALUATION.md); it does not establish acceptance of new
 | Separate provider Lambda | [Worker stack](../deploy/live_provider_stack.py), [worker](../src/archon/web/live.py) | Only configured model/region, sender/recipient and finite grant |
 | Durable provider journal/outbox | [Execution store](../src/archon/store/execution.py), [metering](../src/archon/adapters/metered.py), [SES](../src/archon/adapters/ses.py) | Reserve before provider calls; record outcomes; unknown sends never retry automatically |
 | Retained failure queue and alarm | [Worker stack](../deploy/live_provider_stack.py) | SQS holds async failure records; operator reconciliation, not an automatic resend pipeline |
-| Optional incoming HTTP webhook | [Provisional contract](incoming-webhook.md) | Not yet deployed; external producer can request intake only |
+| Opt-in incoming HTTP webhook | [Source contract](incoming-webhook.md) | Per-workspace key starts disabled; producer setup and served-identity/acceptance checks required; intake only |
 
 A public session holds one JSON document in private S3. The browser holds an opaque session handle,
 not a database credential. Session access expires after seven days, independently of bucket lifecycle

@@ -23,7 +23,9 @@ and [push run 34778227400](https://github.com/upgradedev/archon-aws-strands/acti
 896 Python tests, 155 frontend unit tests, 69 HTTP browser cases, three CI provider-double cases
 and 30 acceptance-renderer cases. Provider doubles are not actual AWS calls.
 Inspect with `gh run view <run-id> --repo upgradedev/archon-aws-strands --log`.
-No check has run on this documentation revision; its local status is NOT_RUN and new CI is pending.
+Those runs cover the named historical revision. Any later revision needs its own exact-SHA CI
+and matching release acceptance. The 2026-09-13 frontend `40c7ade` / backend `2bb3db3` pair predates
+the opt-in incoming extension and provides no acceptance evidence for that extension.
 
 | Evidence level | What it supports | What it does not support |
 |---|---|---|

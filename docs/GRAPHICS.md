@@ -35,7 +35,8 @@ GBP support. Photographed receipts, fuel tickets, PDFs and OCR are not public in
 The real action is exact human review of a collection email, with controlled SES sending only
 after explicit consent. It is not bank execution or general one-tap invoice approval.
 
-The incoming HTTP webhook is provisional and not yet deployed. Even when enabled, its
+The opt-in incoming HTTP webhook in this source revision starts with a disabled per-workspace key
+and requires producer setup plus served-identity/acceptance checks before use. Its
 [contract](incoming-webhook.md) allows intake only; it does not turn these bank/mailbox claims true.
 There is no Gmail/Outlook login or automatic outbound email.
 
