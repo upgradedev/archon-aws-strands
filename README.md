@@ -62,6 +62,14 @@ no mailbox is connected. This replaces a manual comparison of invoice, remittanc
 within this demonstration. Time savings and recovered money have not been measured.
 
 This source revision opens on a permanent introduction before accessing the session API.
+Choose **Explore populated demo**, then **Load demo workspace**, for five fictional
+source emails: a partially paid customer invoice, a fully paid one, their payments,
+and a supplier invoice. Loading uses deterministic parsing and ledger checks, not
+Bedrock, and creates no AI report, draft or email. Metrics are computed from those
+records. **Return to previous workspace** restores the most recently used session
+without overwriting its books; access still expires after seven days. A retained
+simulation displays a warning when live providers are available and offers a separate
+current-provider demo. Simulated receipts are never converted into real sends.
 Choose **Try the example** for a step-by-step invoice → payment → review → outcome check,
 or **Continue my workspace** for the existing dashboard. Neither silently clears the books.
 You inspect editable plain-text sources and approve the exact draft yourself;
