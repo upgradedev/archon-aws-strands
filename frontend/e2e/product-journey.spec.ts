@@ -60,6 +60,9 @@ test('landing paints before session access and the guided decision survives retu
   await page.getByRole('checkbox', { name: /I reviewed this recipient/ }).check(); await approve.click();
   const result = page.getByRole('region', { name: 'Guided check outcome' });
   await expect(result).toContainText('Simulated · provider-accepted'); await expect(result).toContainText('No real email was sent');
+  const outcomeHeading = result.getByRole('heading', { name: 'Your decision is recorded.' });
+  await expect(outcomeHeading).toBeFocused();
+  await expect(outcomeHeading).toBeInViewport();
   await expect(result).toContainText('1,260.00 EUR');
   await page.screenshot({ path: info.outputPath('product-outcome.png') });
   await result.getByRole('button', { name: 'Prepare evidence bundle', exact: true }).click();

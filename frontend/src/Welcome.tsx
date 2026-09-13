@@ -8,7 +8,7 @@ export function Welcome() {
           <h1 id="welcome-title" tabIndex={-1}>Chase the balance.<br /><em>Not the customer who paid.</em></h1>
           <p className="welcome-lead">Turn invoice and payment emails into a clear answer: what is still owed, why, and what you can safely do next.</p>
           <a className="primary welcome-cta" href="#/journey" data-testid="start-guided-example">Try the example <span aria-hidden="true">→</span></a>
-          <p className="welcome-small">An editable example, one step at a time. No account needed. Nothing is approved automatically.</p>
+          <p className="welcome-small">Synthetic demo · scripted model · simulated email. No account needed. You approve each step.</p>
           <a className="welcome-text-link" href="#/records?intake=open">Have a different example? Add supported text →</a>
         </div>
         <aside className="welcome-preview" aria-label="Illustrative example, not your saved balances">

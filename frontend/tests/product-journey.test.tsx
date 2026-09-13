@@ -7,7 +7,7 @@ import { empty, filled, received, refusal } from './fixtures';
 import * as api from '../src/api';
 
 vi.mock('../src/api', async original => ({ ...await original<typeof api>(), openWorkspace: vi.fn(), request: vi.fn(), storageWarning: '' }));
-beforeEach(() => { location.hash = ''; vi.mocked(api.openWorkspace).mockReset().mockResolvedValue({ session: 'retained', workspace: filled() }); vi.mocked(api.request).mockReset(); });
+beforeEach(() => { location.hash = ''; Element.prototype.scrollIntoView = vi.fn(); vi.mocked(api.openWorkspace).mockReset().mockResolvedValue({ session: 'retained', workspace: filled() }); vi.mocked(api.request).mockReset(); });
 async function navigate(hash: string) { await act(async () => { location.hash = hash; window.dispatchEvent(new HashChangeEvent('hashchange')); }); }
 const evidence = async () => ({ revision: 3, commit: 'source', text: 'Retained source evidence' });
 function paid() {
@@ -172,6 +172,17 @@ test('new evidence explains review withdrawal without recreating the obsolete dr
   show(data);
   expect(screen.getByRole('complementary', { name: 'Previous review invalidated' })).toHaveTextContent('previous confirmation does not carry');
   expect(screen.queryByRole('button', { name: /Approve exact draft/ })).not.toBeInTheDocument();
+});
+
+test('step changes focus the actual result while stable rerenders do not steal focus', () => {
+  const { rerender } = show(filled());
+  const done = received();
+  rerender(<Journey data={done} busy={false} stale={false} mutate={vi.fn()} route="/journey" reviewEpoch={0} loadEvidence={evidence} />);
+  const heading = screen.getByRole('heading', { name: 'Your decision is recorded.' });
+  expect(heading).toHaveFocus(); expect(heading.scrollIntoView).toHaveBeenCalledWith({ block: 'start' });
+  const link = screen.getByRole('link', { name: 'Return to overview →' }); link.focus();
+  rerender(<Journey data={done} busy={false} stale={false} mutate={vi.fn()} route="/journey" reviewEpoch={0} loadEvidence={evidence} />);
+  expect(link).toHaveFocus();
 });
 
 test.each(['provider-accepted', 'unknown', 'failed', 'unrecognized'])('outcome %s never claims real delivery or recovery of debt', async state => {
