@@ -6,6 +6,7 @@ let memorySession: string | null = null;
 const PREVIOUS_KEY = 'archon.demo.previous.v1';
 let previousSession: string | null = null;
 let opening: Promise<{ session: string; workspace: Workspace }> | null = null;
+let openingSeed: 'joinery' | undefined;
 export let storageWarning = '';
 
 export class ApiError extends Error {
@@ -63,17 +64,24 @@ export async function restorePreviousWorkspace(): Promise<{ session: string; wor
 }
 
 export async function openWorkspace(fresh = false, seed?: 'joinery'): Promise<{ session: string; workspace: Workspace }> {
-  if (opening) return opening;
+  if (opening) {
+    if (seed !== openingSeed) throw new ApiError('Wait for the current workspace to finish opening.', 409);
+    return opening;
+  }
   let stored: string | null = null;
   try { stored = localStorage.getItem(SESSION_KEY); }
   catch { storageWarning = 'Browser storage is blocked. This session handle lasts until this page closes.'; }
   const session = fresh ? null : memorySession ?? stored;
   if (session) return { session, workspace: await request<Workspace>('/workspace', session) };
+  openingSeed = seed;
   opening = request<{ session: string; workspace: Workspace }>('/sessions', null, seed ? { seed } : {}).then(created => {
+    if (seed && created.workspace.demo_seed !== 'joinery-v1') {
+      throw new ApiError('This API has not loaded the populated demo. Your previous workspace is unchanged.', 503);
+    }
     rememberSession(created.session, memorySession ?? stored);
     return created;
   });
-  try { return await opening; } finally { opening = null; }
+  try { return await opening; } finally { opening = null; openingSeed = undefined; }
 }
 
 export function errorText(error: unknown): string {
