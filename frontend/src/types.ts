@@ -52,6 +52,12 @@ export interface Workspace {
 }
 export type Mutate = (path: string, payload?: Record<string, unknown>) => Promise<boolean>;
 
+export interface IncomingConnection {
+  enabled: boolean; expires_at: string | null; path: string; scope: 'fictional-intake-only';
+  token?: string;
+  events: { event_id: string; job_id: string; status: string; created_at: string }[];
+}
+
 export interface ProviderJob {
   id: string; operation: string; status: 'queued' | 'running' | 'completed' | 'failed' | 'unknown';
   error?: string; created_at: string;

@@ -95,6 +95,9 @@ jobs:
       - name: Python lint
         if: always()
         run: python -m ruff check src tests
+      - name: Render current Markdown and diagrams for browser review
+        if: always()
+        run: python tools/docs_review.py frontend/artifacts/docs-review
       - name: Early build and test evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -130,6 +133,14 @@ jobs:
           path: frontend/test-results/**/*.png
           retention-days: 90
           if-no-files-found: warn
+      - name: Documentation and diagram review screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-visuals-${{ github.run_id }}
+          path: frontend/proof-results/**/docs-*.png
+          retention-days: 90
+          if-no-files-found: error
       - name: Compact closeout visual evidence
         if: always()
         uses: actions/upload-artifact@v4

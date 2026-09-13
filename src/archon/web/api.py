@@ -16,7 +16,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from archon.store.sessions import Conflict, MissingSession, configured_store
 from archon.web import workspace
 
-app = FastAPI(title="ARCHON synthetic workspace", docs_url=None, redoc_url=None)
+app = FastAPI(title="ARCHON controlled workspace", docs_url=None, redoc_url=None)
 SESSION_HEADER = Annotated[str, Header(alias="X-Archon-Session")]
 
 
@@ -67,6 +67,19 @@ class ResolutionRequest(Mutation):
     identities: dict[str, str] | None = Field(default=None, max_length=50)
 
 
+class IncomingConnection(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    action: Literal["enable", "disable"]
+    request_id: str = Field(min_length=16, max_length=80, pattern=r"^[a-zA-Z0-9_-]+$")
+    consent: Literal["fictional-intake"] | None = None
+
+
+class IncomingEvent(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    event_id: str = Field(min_length=8, max_length=100, pattern=r"^[a-zA-Z0-9_-]+$")
+    body: str = Field(min_length=1, max_length=32000)
+
+
 @app.middleware("http")
 async def boundary(request: Request, call_next):
     # Bound the bytes before JSON decoding, including chunked clients. No session
@@ -100,6 +113,8 @@ async def refusal(request: Request, exc: ValueError):
 
 def load(handle: str):
     state, version = store().get(handle)
+    if state.get("record_type"):
+        raise MissingSession("This key is not a workspace session.")
     if datetime.now(UTC) - datetime.fromisoformat(state["created_at"]) > timedelta(days=7):
         raise MissingSession("This seven-day demo session expired. Start a new workspace.")
     return state, version
@@ -189,6 +204,30 @@ def create_session(request: SessionRequest):
 def get_workspace(handle: SESSION_HEADER):
     state, _ = load(handle)
     return workspace.snapshot(state)
+
+
+@app.get("/api/incoming/connection")
+def incoming_status(handle: SESSION_HEADER):
+    from archon.web import incoming
+
+    state, _ = load(handle)
+    return incoming.status(store(), handle, state)
+
+
+@app.post("/api/incoming/connection")
+def incoming_connection(request: IncomingConnection, handle: SESSION_HEADER):
+    from archon.web import incoming
+
+    state, _ = load(handle)
+    return incoming.configure(store(), handle, state, **request.model_dump())
+
+
+@app.post("/api/incoming", status_code=202)
+def incoming_event(request: IncomingEvent,
+                   authorization: Annotated[str | None, Header()] = None):
+    from archon.web import incoming
+
+    return incoming.receive(store(), authorization, request.event_id, request.body, load)
 
 
 @app.post("/api/intake")

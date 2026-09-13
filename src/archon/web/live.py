@@ -47,7 +47,8 @@ def enqueue(handle, job_id):
         raise LiveRefused("The durable job exists but worker scheduling is unconfirmed.")
 
 
-def submit(store, handle, state, version, operation, payload, request_id, revision, dispatch=None):
+def submit(store, handle, state, version, operation, payload, request_id, revision, dispatch=None,
+           *, incoming_event=None):
     dispatch = dispatch or enqueue
     config = configuration()
     if operation not in OPERATIONS or state.get("provider_mode") != "live":
@@ -84,6 +85,9 @@ def submit(store, handle, state, version, operation, payload, request_id, revisi
         "request_id": request_id, "status": "queued", "created_at": workspace.now(),
         "sender": config["sender"], "recipient": config["recipient"],
     }
+    if incoming_event is not None:
+        state["provider_job"]["incoming_event"] = incoming_event
+        workspace.event(state, "Automatic intake received", incoming_event)
     state["requests"][request_id] = signature
     state["revision"] += 1
     store.put(handle, state, version)  # The durable pending record precedes invocation.

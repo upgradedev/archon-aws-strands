@@ -21,6 +21,7 @@ export function Icon({ name }: { name: string }) {
     workspace: 'M3 4h18v16H3zM12 4v16M3 9h9',
     records: 'M7 3h7l4 4v14H7zM14 3v5h5M10 12h5M10 16h5',
     history: 'M4 12h3l3-7 4 14 3-7h3',
+    incoming: 'M3 6h18v14H3zM3 6l9 7 9-7M12 2v7M9 6l3 3 3-3',
     queue: 'M4 5h16M4 12h10M4 19h7M17 16l3 3-3 3',
     documents: 'M7 3h7l4 4v14H7zM14 3v5h5M10 12h5M10 16h5',
     approvals: 'M12 3l8 4v6c0 4-8 8-8 8S4 17 4 13V7zM8 12l3 3 5-6',

@@ -1,0 +1,66 @@
+name: Incoming AWS acceptance
+on:
+  workflow_dispatch:
+    inputs:
+      release_sha:
+        description: Exact deployed frontend SHA
+        required: true
+        type: string
+      backend_sha:
+        description: Exact deployed backend SHA
+        required: true
+        type: string
+      authorized:
+        description: One fictional intake model call under the existing operator grant; no email
+        required: true
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: archon-incoming-acceptance
+  cancel-in-progress: false
+jobs:
+  incoming:
+    if: github.ref == 'refs/heads/main' && inputs.authorized == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      EXPECTED_RELEASE: ${{ inputs.release_sha }}
+      EXPECTED_BACKEND: ${{ inputs.backend_sha }}
+      ARCHON_INCOMING_AUTHORIZED: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify exact deployed pair before any provider work
+        run: |
+          test "$GITHUB_SHA" = "$EXPECTED_RELEASE"
+          python infra/frontend_smoke.py --url https://d2ssmv59q16d0b.cloudfront.net/ --sha "$EXPECTED_RELEASE"
+          python deploy/release_acceptance.py pair --sha "$EXPECTED_RELEASE" --backend "$EXPECTED_BACKEND"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.18.0'
+      - name: Install locked browser tools on CI only
+        working-directory: frontend
+        run: |
+          npm install --global npm@11.19.1 --ignore-scripts
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Exercise one actual intake, replay and revocation; no mail
+        working-directory: frontend
+        run: npx playwright test --config playwright.incoming.config.ts --forbid-only
+      - name: Retain sanitized evidence without sessions, keys or HTTP traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: incoming-aws-${{ github.run_id }}
+          path: |
+            frontend/artifacts/incoming-junit.xml
+            frontend/artifacts/incoming-aws.json
+            frontend/incoming-results/**/*.png
+          retention-days: 90
+          if-no-files-found: error

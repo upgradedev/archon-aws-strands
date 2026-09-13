@@ -1,70 +1,80 @@
-# Video script: public synthetic workflow
+# Video script: sample records to an exact reviewed email
 
-[Evidence and limits](../README.md#evidence-and-limits) · [Required disclosures](../README.md#pre-existing-work-disclosed)
+**Draft script, not a completed video. No recording or submission is represented by this file.**
 
-For a joiner reconciling invoice and remittance emails alone.
-Open [the AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/).
-Short try flow: Records → invoice → payment → Workspace → Run Strands → exact draft → History.
-The public reader is rules-based, the Strands graph is real, the model is scripted and all email
-acceptance is simulated. No mailbox is connected and no real email leaves.
+For a joiner reconciling invoice and remittance emails alone, open
+[the AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/) and inspect Records.
+The Strands graph is real in both modes. Controlled-live uses actual Bedrock and restricted SES;
+retained simulation uses a scripted model and simulated acceptance, with no real email.
+[Evidence and limits](EVALUATION.md) · [Required disclosures](../README.md#pre-existing-work-disclosed)
 
-Before recording, inspect /release.json and /api/health and retain their SHA values with the
-recording. This is a script, not a completed video or human UAT. CI and live acceptance must match
-the recorded revision. The seven timing targets total 295 seconds; actual duration is unmeasured.
+Before recording, inspect [release.json](https://d2ssmv59q16d0b.cloudfront.net/release.json),
+[/api/health](https://d2ssmv59q16d0b.cloudfront.net/api/health) and matching acceptance.
+Record those identities with the footage. The supplied prior accepted pair is 40c7ade / 2bb3db3;
+new source changes require their own acceptance before being presented as shipped.
+The seven planned segments total 175 seconds. Actual video duration is unmeasured.
+Use only fictional inputs; a recording plan is not new permission for provider calls or email.
 
-## 1. The joiner — 40 seconds
+## 1. The joiner — 20 seconds
 
-Show the empty Dashboard. Explain the repeated job: compare the client invoice with the
-remittance before asking for money. Explain that the firm and all emails are synthetic.
+Show the introduction and name the task: compare a client invoice with the remittance before
+asking for the remaining balance. Explain that the business and records are fictional.
 No customer time saving or recovered-money figure has been measured.
 
-## 2. Editable evidence — 45 seconds
+## 2. Load and inspect evidence — 25 seconds
 
-Open Records, select Sample invoice and inspect its original From/To headers.
-Post it. Select Sample payment and point to Transfer ID, then post it.
-Show 1,860.00 EUR minus 600.00 EUR equals 1,260.00 EUR outstanding.
-These are posted source figures, not independently verified bank transactions.
+Choose Explore populated demo, then Load demo workspace. Show the five sources in Records.
+Say explicitly: loading sample records uses deterministic parsing and ledger checks, with no
+AI report, Bedrock call, draft or email. Inspect the original invoice and payment reference.
+For the partially paid invoice show 1,860.00 EUR minus 600.00 EUR equals 1,260.00 EUR remaining.
+These are supplied source figures, not bank-verified transactions.
 
-## 3. Refusal and correction — 55 seconds
+## 3. Show the execution mode — 20 seconds
 
-Paste a payment with its Transfer ID removed. Submit and show the actual refusal.
-Collections are held. Choose Correct source and enter the correct synthetic reference and facts
-for a distinct payment. Post it and show that the original refusal remains retained.
-Do not invent a new reference to relabel the same payment.
+Show the session's actual mode label. In controlled-live mode, later semantic intake and
+Strands reasoning make real Bedrock calls under a finite operating grant.
+A retained simulation remains scripted and its email acceptance remains simulated.
+Do not edit the mode label into a shot or treat a sample-loaded screen as a live model result.
 
-## 4. Strands is load-bearing — 35 seconds
+## 4. Run the six readers — 25 seconds
 
-Run Strands from Workspace. Show the actual pending status and completed six domain reports.
-The composer holds no tools and waits for all six readers. Removing the SDK prevents this step.
-The model here is scripted; it does not reason. Operator Bedrock configuration is a separate mode.
+With the existing operation authorization, run Strands and show the actual pending/completed
+state and six domain reports. The composer holds no tools and waits for all six readers.
+Bedrock supplies interpretation and wording; ledger code verifies and inserts the figures.
+If it fails, show the failure; no scripted replacement stands in for live inference.
 
-## 5. Exact review and changed evidence — 65 seconds
+## 5. Exact review and changed evidence — 35 seconds
 
-Inspect the draft, recipient, source invoice, remittance and remaining balance together.
-Read every figure from the screen. Explain that changed sources, ledger revision or expiry
-require a fresh draft and review. Show an actual refusal/correction decision in History.
-Human resolution records an external dispute decision or duplicate-payment link; it is not
-automated arbitration and it never changes money.
+Show the draft beside the recipient, source invoice, remittance and remaining balance.
+Explain that changed sources, ledger revision, holds or expiry require a fresh review.
+Use a retained, real refusal/correction or duplicate-resolution entry if available in the recorded
+workspace. Otherwise explain the control without staging an invented successful outcome.
+A human resolution records an external decision; it does not arbitrate a dispute or move money.
 
-## 6. Simulated acceptance and recovery — 35 seconds
+## 6. Controlled outcome and recovery — 30 seconds
 
-Approve the exact current draft, show its simulated receipt and reload History.
-It remains the same recorded acceptance. No real email has been sent.
+If an exact controlled send is already authorized, review the actual recipient and body,
+approve real-email consent, then show the returned durable outcome and reload History.
+Otherwise use an already-retained receipt, clearly labeled with its original run, or demonstrate
+simulated approval in a visibly synthetic session. Neither option is a fresh live send.
 If the API is unavailable, show the error and refresh durable state before any retry.
-There is no SES fallback shot and no claim that a message went to an owned inbox.
-Provider acceptance does not prove arrival.
+There is no SES fallback shot. Provider acceptance does not prove arrival.
 
 ## 7. Evidence and limits — 20 seconds
 
-Prepare the readable evidence bundle, inspect revision, source decisions and limits.
-A hash identifies bytes, not truth. End on the AWS URL and repository.
-The earlier comparisons are withdrawn; the retained benchmark had zero Archon chases.
-That was silence, not measured accuracy. Human UAT and benefit measurement remain NOT_RUN.
+Show readable evidence and the dated acceptance record. A hash identifies bytes, not truth.
+The prior actual AWS run recorded three cases, 45 model calls and three SES acceptances.
+The owner's six received messages are separately HUMAN-ATTESTED; ID correlation remains unknown.
+Earlier comparisons are withdrawn; the retained evaluation had zero Archon chases, achieved by
+not acting. Full human UAT and benefit measurement remain NOT_RUN. End on the AWS URL and repository.
 
 ## What must not be said
 
 - Do not call the offline run agentic reasoning; the scripted model walks the graph.
-- Do not claim a live mailbox, real email delivery, bank verification or OCR.
+- Do not claim a live mailbox, bank verification, OCR, AgentCore or Aurora deployment.
+- Do not claim real email delivery from an SES ID; preserve the narrower human attestation and its unknown correlation.
 - Do not present a withdrawn or circular benchmark as current evidence.
 - Do not claim compliance, competitive superiority, measured time savings or collected money.
-- Do not narrate a scripted decision as a live model result.
+- Do not narrate a scripted decision as a live model result or the deterministic seed as AI extraction.
+- Do not show [concept art](GRAPHICS.md) as product screenshots, GBP support or connected banks.
+- Before demonstrating the [incoming webhook](incoming-webhook.md), check served identities and matching acceptance; explain the disabled initial key and required producer setup.
