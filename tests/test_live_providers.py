@@ -369,9 +369,13 @@ def test_truncated_live_reader_withholds_composer_and_retains_paid_attempts(setu
     assert saved["provider_job"]["status"] == "failed"
     assert saved["draft"] is None and saved["graph"] is None
     assert saved["sends"] == {}
-    assert len(provider.calls) == 12
     assert all(call.get("toolConfig", {}).get("tools") for call in provider.calls)
-    assert len(saved["provider_job"]["calls"]) == 12
+    # A failed node cancels unfinished readers; their scheduling order is not a contract.
+    # Bind retention to every actual attempted call, and prove no reader was retried.
+    names = [call["toolConfig"]["tools"][0]["toolSpec"]["name"] for call in provider.calls]
+    assert names.count("headline") == 2
+    assert all(names.count(name) <= 2 for name in set(names))
+    assert len(saved["provider_job"]["calls"]) == len(provider.calls)
     assert any(row["usage"]["outputTokens"] == 2048
                for row in saved["provider_job"]["calls"])
 
