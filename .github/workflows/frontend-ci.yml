@@ -109,7 +109,7 @@ jobs:
         if: always() && steps.build.outcome == 'success'
         working-directory: frontend
         run: |
-          npx playwright install --with-deps chromium
+          npx playwright install --with-deps chromium webkit
           npm run test:e2e
       - name: Acceptance renderer contracts with synthetic HTTP, not live AWS evidence
         if: always() && steps.build.outcome == 'success'

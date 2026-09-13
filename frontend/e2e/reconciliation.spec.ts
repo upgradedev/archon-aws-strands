@@ -21,7 +21,7 @@ async function workspace(page: Page) {
 test('central journey withdraws the old draft after payment and exports the fresh reviewed outcome', async ({ page, context }, info) => {
   if (info.project.name === 'mobile') await page.setViewportSize({ width: 375, height: 812 });
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
-  await page.goto('/');
+  await page.goto('/#/dashboard');
   const start = page.getByRole('link', { name: 'Start reconciliation', exact: true });
   await expect(start).toBeVisible();
   expect((await start.boundingBox())!.height).toBeGreaterThanOrEqual(44);

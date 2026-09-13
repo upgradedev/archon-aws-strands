@@ -46,7 +46,7 @@ test.beforeEach(async ({ page }, info) => {
 
 test('decision desk keyboard journey returns to changed evidence and explicitly simulates one approval', async ({ page }, info) => {
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
-  await page.goto('/');
+  await page.goto('/#/dashboard');
   await expect(page.getByRole('heading', { name: 'Dashboard', exact: true })).toBeFocused();
   const desk = page.getByRole('region', { name: 'Reconciliation journey' });
   await expect(desk).toContainText("ALEX'S COLLECTIONS DESK");
@@ -104,7 +104,7 @@ test('decision desk keyboard journey returns to changed evidence and explicitly 
 });
 
 test('returning held desk keeps the posted amount visible and requires offline recovery before action', async ({ page, context }, info) => {
-  await page.goto('/'); await page.getByRole('link', { name: 'Start reconciliation', exact: true }).click();
+  await page.goto('/#/dashboard'); await page.getByRole('link', { name: 'Start reconciliation', exact: true }).click();
   await postEmailAndReadState(page);
   await page.getByRole('button', { name: 'Sample refusal', exact: true }).click();
   const held = await postEmailAndReadState(page); expect(held.holds).toHaveLength(1);
@@ -132,7 +132,7 @@ test('returning held desk keeps the posted amount visible and requires offline r
 });
 
 test('full payment returns a no-chase decision with the prior draft unusable', async ({ page }, info) => {
-  await page.goto('/'); await page.getByRole('link', { name: 'Start reconciliation', exact: true }).click();
+  await page.goto('/#/dashboard'); await page.getByRole('link', { name: 'Start reconciliation', exact: true }).click();
   await postEmailAndReadState(page);
   await page.getByRole('link', { name: 'Review changed decision →', exact: true }).click();
   await page.getByRole('button', { name: /Run Strands/ }).click();
@@ -156,7 +156,7 @@ test('full payment returns a no-chase decision with the prior draft unusable', a
 });
 
 test('unavailable desk never invents zero balances and offers explicit empty-workspace recovery', async ({ page }, info) => {
-  await page.goto('/'); await expect(page.getByRole('link', { name: 'Start reconciliation', exact: true })).toBeVisible();
+  await page.goto('/#/dashboard'); await expect(page.getByRole('link', { name: 'Start reconciliation', exact: true })).toBeVisible();
   await page.evaluate(() => localStorage.setItem('archon.demo.session.v1', 'e'.repeat(64)));
   const response = page.waitForResponse(response => new URL(response.url()).pathname === '/api/workspace');
   await page.reload(); expect((await response).status()).toBe(401);

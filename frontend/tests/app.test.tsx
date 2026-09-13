@@ -43,7 +43,7 @@ test('workspace starts, navigates deep links and skip link focuses main', async 
   await route('/approvals'); expect(screen.getByRole('heading', { name: 'Workspace' })).toBeInTheDocument();
   await route('/activity'); expect(screen.getByRole('heading', { name: 'History' })).toBeInTheDocument();
   await route('/missing'); expect(screen.getByRole('heading', { name: 'Page not found' })).toBeInTheDocument();
-  await route(''); expect(screen.getByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
+  await route(''); expect(screen.getByRole('heading', { name: /Chase the balance/ })).toBeInTheDocument();
 });
 test('initial loading and failed connection have a recoverable state', async () => {
   let reject!: (failure: Error) => void;

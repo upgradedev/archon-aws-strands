@@ -410,3 +410,50 @@ def test_a_five_hundred_from_ses_is_not_treated_as_a_refusal():
     assert not _is_confirmed_rejection(
         ClientError("internal error", code="InternalFailure", status=500)
     )
+
+
+def test_sdk_lost_ack_cannot_retry_below_the_durable_reservation(store, monkeypatch):
+    """Exercise the real SDK pipeline with a synthetic, network-free transport.
+
+    The fake provider records acceptance then loses its reply. This is not SES
+    delivery evidence; it tests retry behaviour below Outbox.send_email.
+    """
+    from botocore.exceptions import ReadTimeoutError
+    from botocore.httpsession import URLLib3Session
+
+    from archon.adapters.ses import live_outbox
+
+    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "testing")
+    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "testing")
+    monkeypatch.setenv("AWS_EC2_METADATA_DISABLED", "true")
+    monkeypatch.setenv("AWS_MAX_ATTEMPTS", "7")
+    monkeypatch.setenv("AWS_RETRY_MODE", "adaptive")
+    accepted = []
+    session = Session(store_path=store)
+    draft = session.draft()
+
+    def accepted_then_lost(_transport, request):
+        # No socket is opened: every botocore HTTP send is intercepted here.
+        assert SendLog(store).find(draft.fingerprint()).state == QUEUED
+        accepted.append(request.body)
+        raise ReadTimeoutError(endpoint_url=request.url, error="synthetic lost reply")
+
+    monkeypatch.setattr(URLLib3Session, "send", accepted_then_lost)
+    for restart in range(2):
+        outbox = live_outbox(
+            "operator@example.com", authorized=True,
+            controlled_recipient=draft.to_address, log=SendLog(store),
+        )
+        try:
+            assert outbox.client.meta.config.retries == {
+                "total_max_attempts": 1, "mode": "standard",
+            }
+            assert outbox.client.meta.region_name == "eu-west-1"
+            with pytest.raises(SendRefused, match="unknown" if restart else "nobody knows"):
+                outbox.send(draft, session.verdict(draft))
+        finally:
+            outbox.client.close()
+        record = SendLog(store).find(draft.fingerprint())
+        assert record.state == UNKNOWN
+        assert record.message_id is None
+        assert len(accepted) == 1

@@ -15,7 +15,15 @@ what was received, and why a draft is ready or held. Paste synthetic email in Re
 no mailbox is connected. This replaces a manual comparison of invoice, remittance and draft
 within this demonstration. Time savings and recovered money have not been measured.
 
-This source revision adds a guided reconciliation journey; deployment is tracked separately below.
+This source revision opens on a permanent introduction before accessing the session API.
+Choose **Try the example** for a step-by-step invoice → payment → review → outcome check,
+or **Continue my workspace** for the existing dashboard. Neither silently clears the books.
+You inspect editable plain-text sources and approve the exact simulated draft yourself;
+the example never auto-approves. Existing records resume in the same session. Use **New workspace**
+and its explicit confirmation only when you want empty books. No PDFs, OCR or general email
+understanding are claimed by this bounded reader. Current deployment is tracked below.
+
+The deeper reconciliation path remains available:
 From Dashboard, choose Start reconciliation and review the editable invoice. Post it, open
 Review changed decision and run Strands. Before approving that draft, open Try new evidence before
 approving and add the sample payment. The original draft disappears. The decision shows why the
@@ -79,7 +87,9 @@ if the deployed backend's packaged source differs; deploy that reviewed backend 
 
 ## React workstation usage
 
-Navigation: Dashboard → Workspace → Records → History. Legacy bookmarks still resolve.
+Navigation: Introduction → Guided check, or Dashboard → Workspace → Records → History.
+The persistent navigation explains each task: balances, review/approval, invoices/payments and
+decisions/receipts. Legacy bookmarks still resolve.
 Invoice and source selection survives navigation and reload. Only the backend's oldest overdue
 invoice, largest on a tie, can be prepared; inspecting another invoice does not retarget it.
 
