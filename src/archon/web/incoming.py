@@ -68,8 +68,10 @@ def configure(store, handle, state, action, request_id, consent=None):
         if record["last_request_id"] != request_id:
             raise Conflict("Connection changed. Refresh before issuing a new request.")
     else:
+        if action == "disable" and (not record or not record["enabled"]):
+            return status(store, handle, state)
         requests = dict(record["requests"]) if record else {}
-        if len(requests) >= 50:
+        if len(requests) >= 50 and action == "enable":
             raise ValueError("This workspace reached its connection-change limit.")
         requests[request_id] = signature
         expiry = min(now() + timedelta(hours=24),
