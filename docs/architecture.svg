@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="2320" viewBox="0 0 1200 2320" role="img" aria-labelledby="architecture-title architecture-desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="2360" viewBox="0 0 1200 2360" role="img" aria-labelledby="architecture-title architecture-desc">
   <title id="architecture-title">Archon application architecture: evidence, reasoning and exact human approval</title>
-  <desc id="architecture-desc">Read from top to bottom. A fresh or retained React workspace accepts manual fictional plain text. Controlled-live intake persists a job before the private worker calls Bedrock for semantic extraction. Deterministic source checks either hold the source for human correction or post it to the ledger. A user-requested Strands graph runs six readers, each with one read-only tool: suppliers, sales, payroll, trading, cash and metrics. All six reports must be present before the toolless composer proposes tone; the ledger supplies the figures. A human approves the exact recipient, subject and body, bound by a SHA-256 fingerprint and explicit real-email consent. The send gate rechecks ledger facts and approval expiry. A durable outbox reserves before controlled Amazon SES sending and retains accepted, failed or unknown outcomes. Provider acceptance does not prove delivery; unknown sends are not automatically retried. The separate dashed amber webhook lane is source-ready, not deployed: an opt-in session-scoped ingest-only HTTP capability for external mail or export systems joins the same API and worker. It is distinct from the workspace credential, and does not trigger drafting or sending. Retained synthetic sessions use local field rules, the same ledger and a scripted Strands graph with simulated acceptance. Fictional data is distinct from real providers. No direct mailbox or bank connector, Aurora or AgentCore deployment is represented.</desc>
+  <desc id="architecture-desc">Read from top to bottom. A fresh or retained React workspace accepts manual fictional plain text. Controlled-live intake persists a job before the private worker calls Bedrock for semantic extraction. Deterministic source checks either hold the source for human correction or post it to the ledger. A user-requested Strands graph runs six readers, each with one read-only tool: suppliers, sales, payroll, trading, cash and metrics. All six reports must be present before the toolless composer proposes tone; the ledger supplies the figures. A human approves the exact recipient, subject and body, bound by a SHA-256 fingerprint and explicit real-email consent. The send gate rechecks ledger facts and approval expiry. A durable outbox reserves before controlled Amazon SES sending and retains accepted, failed or unknown outcomes. Provider acceptance does not prove delivery; unknown sends are not automatically retried. The dashed amber incoming extension must be enabled per workspace. External mail or export systems POST to /api/incoming using a separate session-scoped ingest-only Bearer capability. It joins the same API and worker, is distinct from the workspace credential, and cannot trigger reasoning, drafting or sending. Retained synthetic sessions use local field rules, the same ledger and a scripted Strands graph with simulated acceptance. Fictional data is distinct from real providers. No direct mailbox or bank connector, Aurora or AgentCore deployment is represented. This is source architecture; verify served SHAs and exact-pair acceptance for live deployment.</desc>
   <!-- Baseline inspected: 40c7ade. Sources: frontend/src/api.ts; src/archon/web/{workspace,live}.py;
        src/archon/agents/{graph,wiring,gate,draft}.py; src/archon/store/{sessions,execution}.py;
-       src/archon/adapters/{grounded_post,ses}.py. Dashed ingress follows the supplied integration contract,
-       not an assertion that the baseline implements or deploys it. Visual verification: CI required. -->
+       src/archon/adapters/{grounded_post,ses}.py. Opt-in ingress follows the supplied branch integration
+       contract. Source architecture does not attest deployment. Visual verification: CI required. -->
   <defs>
     <style>
       text { font-family: Arial, Helvetica, sans-serif; fill: #18344f; }
@@ -22,23 +22,23 @@
       .provider { fill: #e8f6f2; stroke: #16776c; stroke-width: 2; }
       .control { fill: #fff4dc; stroke: #a66d19; stroke-width: 2; }
       .boundary { fill: #f0f5fa; stroke: #7891a6; stroke-width: 2; }
-      .future { fill: #fffaf0; stroke: #a66d19; stroke-width: 2.5; stroke-dasharray: 9 7; }
+      .opt-in { fill: #fffaf0; stroke: #a66d19; stroke-width: 2.5; stroke-dasharray: 9 7; }
       .flow { fill: none; stroke: #31546f; stroke-width: 3; stroke-linejoin: round; marker-end: url(#arrow); }
       .bus { fill: none; stroke: #31546f; stroke-width: 3; stroke-linejoin: round; }
-      .future-flow { fill: none; stroke: #956019; stroke-width: 3; stroke-dasharray: 9 7; stroke-linejoin: round; marker-end: url(#amber-arrow); }
+      .opt-in-flow { fill: none; stroke: #956019; stroke-width: 3; stroke-dasharray: 9 7; stroke-linejoin: round; marker-end: url(#amber-arrow); }
       .hold-flow { fill: none; stroke: #956019; stroke-width: 3; stroke-linejoin: round; marker-end: url(#amber-arrow); }
     </style>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#31546f"/></marker>
     <marker id="amber-arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#956019"/></marker>
   </defs>
-  <rect width="1200" height="2320" fill="#ffffff"/>
+  <rect width="1200" height="2360" fill="#ffffff"/>
   <rect x="40" y="40" width="8" height="76" rx="4" fill="#16776c"/>
   <text x="68" y="76" class="title">Archon · application architecture</text>
   <text x="68" y="115" class="subtitle">Retained evidence → ledger facts → advice → an approved action</text>
   <g aria-label="Data and runtime distinction">
     <rect x="40" y="148" width="1120" height="88" rx="14" class="boundary"/>
     <text x="64" y="183" class="heading">Fictional business data. Real providers in controlled-live mode.</text>
-    <text x="64" y="216" class="body muted">Manual intake is the baseline. Dashed webhook paths are source-ready, not deployed.</text>
+    <text x="64" y="216" class="body muted">Manual intake or opt-in HTTP ingress. Enable the incoming extension per workspace.</text>
   </g>
   <g aria-label="Workspace and input paths">
     <rect x="40" y="294" width="330" height="164" rx="14" class="card"/>
@@ -52,8 +52,8 @@
     <text x="448" y="366" class="body">Paste fictional evidence</text>
     <text x="448" y="398" class="body">English · EUR · ISO dates</text>
     <text x="448" y="430" class="small muted">Explicit user action</text>
-    <rect x="802" y="272" width="358" height="242" rx="14" class="future"/>
-    <text x="824" y="306" class="label amber-text">SOURCE-READY</text>
+    <rect x="802" y="272" width="358" height="242" rx="14" class="opt-in"/>
+    <text x="824" y="306" class="label amber-text">OPT-IN INCOMING</text>
     <text x="824" y="344" class="heading">HTTP webhook</text>
     <text x="824" y="376" class="body">POST /api/incoming</text>
     <text x="824" y="410" class="body">External mail / export system</text>
@@ -61,7 +61,7 @@
     <text x="824" y="470" class="small">Bearer capability; separate from</text>
     <text x="824" y="497" class="small">the workspace credential</text>
     <path d="M 584 458 V 550" class="flow"/>
-    <path d="M 981 514 V 532 H 830 V 550" class="future-flow"/>
+    <path d="M 981 514 V 532 H 830 V 550" class="opt-in-flow"/>
     <rect x="274" y="552" width="652" height="112" rx="14" class="card"/>
     <text x="298" y="592" class="heading">Shared API → private worker</text>
     <text x="298" y="628" class="body">Durable event / request before async dispatch</text>
@@ -181,13 +181,14 @@
   <g aria-label="Legend">
     <text x="40" y="2243" class="label">LEGEND</text>
     <path d="M 160 2236 H 204" class="flow"/>
-    <text x="218" y="2243" class="small">Baseline flow</text>
+    <text x="218" y="2243" class="small">Process flow</text>
     <rect x="416" y="2221" width="28" height="24" rx="5" class="provider"/>
     <text x="458" y="2243" class="small">Real provider</text>
     <polygon points="670,2221 685,2236 670,2251 655,2236" class="control"/>
     <text x="700" y="2243" class="small">Required gate</text>
-    <path d="M 917 2236 H 963" class="future-flow"/>
-    <text x="977" y="2243" class="small">Source-ready</text>
+    <path d="M 917 2236 H 963" class="opt-in-flow"/>
+    <text x="977" y="2243" class="small">Opt-in ingress</text>
     <text x="40" y="2289" class="small muted">Cylinders: durable storage. No direct mailbox / bank feed, deployed Aurora or AgentCore.</text>
+    <text x="40" y="2330" class="small muted">Source architecture; verify served SHAs and exact-pair acceptance for live deployment.</text>
   </g>
 </svg>
