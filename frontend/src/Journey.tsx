@@ -3,7 +3,9 @@ import type { Mutate, Workspace } from './types';
 import { Approvals } from './Approvals';
 import { EvidenceBundle, type Bundle } from './EvidenceBundle';
 import { FileIntake, validateFileText } from './FileIntake';
-import { linkedSources, reasonTarget, routeInfo, workspaceLink } from './ledger';
+import { draftState, linkedSources, reasonTarget, routeInfo, workspaceLink } from './ledger';
+import { reconciliation, reviewReset } from './decision';
+import { useClock } from './useClock';
 import { Badge, Heading, money } from './ui';
 
 export function journeyState(data: Workspace, route: string) {
@@ -53,6 +55,11 @@ export function Journey({ data, busy, stale, mutate, route, reviewEpoch, loadEvi
   const state = journeyState(data, route);
   const { balance, invoice, sources, payments, draft, receipt, step } = state;
   const target = reasonTarget(data);
+  const now = useClock(draft?.at);
+  const status = draftState(data, now);
+  const decision = reconciliation(data, invoice ?? '', stale, now);
+  const reset = reviewReset(data);
+  const needsDraft = !draft || status === 'expired' || status === 'unavailable';
   const blocked = stale || !!data.holds.length || state.missing;
   const href = (part: string) => `#/journey?step=${part}${invoice ? `&invoice=${encodeURIComponent(invoice)}` : ''}`;
   return <>
@@ -63,8 +70,9 @@ export function Journey({ data, busy, stale, mutate, route, reviewEpoch, loadEvi
     <div className="guided-desk"><div className="guided-task">
       {!data.holds.length && !state.missing && step < 2 ? <SourceStep key={`${step}-${invoice ?? 'new'}`} data={data} payment={step === 1} invoice={invoice} disabled={busy || stale} mutate={mutate} hasPayment={payments.length > 0} finish={() => { location.hash = invoice ? `/journey?invoice=${encodeURIComponent(invoice)}` : '/journey'; }} /> : null}
       {!blocked && step === 2 ? <>
-        <section className="journey-review"><p className="eyebrow">STEP 3 / REVIEW THE NEXT ACTION</p><h2>{draft ? 'Read the exact reminder before deciding' : 'Prepare a reminder for what is still owed'}</h2><p>A recorded payment is deducted once. The graph reads the books; it does not verify your bank or decide for you.</p>
-          {!draft ? <><button className="primary" disabled={busy || !target.id || target.id !== invoice || !!target.issue} onClick={() => void mutate('/reason')}>Run Strands & prepare draft</button><p className="field-help">{target.id !== invoice ? 'This invoice is not currently the collection priority. Open the collection desk to inspect holds or another case.' : target.issue || 'Runs the real Strands graph using a scripted model. No email is sent.'}</p></> : null}
+        <section className="journey-review"><p className="eyebrow">STEP 3 / REVIEW THE NEXT ACTION</p><h2>{needsDraft ? decision.title : 'Read the exact reminder before deciding'}</h2><p>{needsDraft ? decision.why : 'A recorded payment is deducted once. The graph reads the books; it does not verify your bank or decide for you.'}</p>
+          {reset ? <aside className="review-reset" aria-label="Previous review invalidated"><h3>Previous draft cannot be approved</h3><p>New evidence changed the books. Review the current balance and prepare a fresh draft; the previous confirmation does not carry over.</p><a href="#/history">Inspect recorded change →</a></aside> : null}
+          {needsDraft ? <><button className="primary" disabled={busy || !target.id || target.id !== invoice || !!target.issue} onClick={() => void mutate('/reason')}>Run Strands & prepare draft</button><p className="field-help">{target.id !== invoice ? 'This invoice is not currently the collection priority. Open the collection desk to inspect holds or another case.' : target.issue || 'Runs the real Strands graph using a scripted model. No email is sent.'}</p></> : null}
           <div className="journey-actions"><a href={href('payment')}>← Add or review payment evidence</a><a href={workspaceLink(invoice, null, 'terms')}>Discuss a payment arrangement →</a></div>
         </section>
         {draft ? <Approvals key={`${invoice}-${data.revision}-${reviewEpoch}`} data={data} busy={busy} stale={stale} mutate={mutate} mode="draft" selectedInvoice={invoice} onApproved={() => { location.hash = href('result').slice(1); }} /> : null}

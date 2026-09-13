@@ -155,6 +155,25 @@ test('approval is exact, explicit, and returns to its own guided outcome', async
   expect(location.hash).toBe('#/journey?step=result&invoice=JN-4410');
 });
 
+test('settled cases stop chasing and an expired draft has an explicit recovery action', () => {
+  const settled = paid(); settled.sales[0].outstanding = '0.00';
+  const { rerender } = show(settled);
+  expect(screen.getByRole('heading', { name: 'Settled in these books. No chase.' })).toBeVisible();
+  expect(screen.getByRole('button', { name: /Run Strands/ })).toBeDisabled();
+  const expired = filled(); expired.draft!.at = new Date(Date.now() - 1800001).toISOString();
+  rerender(<Journey data={expired} busy={false} stale={false} mutate={vi.fn()} route="/journey" reviewEpoch={0} loadEvidence={evidence} />);
+  expect(screen.getByRole('button', { name: /Run Strands/ })).toBeEnabled();
+  expect(screen.getByRole('button', { name: /Approve exact draft/ })).toBeDisabled();
+});
+
+test('new evidence explains review withdrawal without recreating the obsolete draft', () => {
+  const data = paid();
+  data.activity.push({ id: 2, at: data.as_of, title: 'Strands graph completed', detail: 'Reports' }, { id: 3, at: data.as_of, title: 'Email posted', detail: 'Payment' });
+  show(data);
+  expect(screen.getByRole('complementary', { name: 'Previous review invalidated' })).toHaveTextContent('previous confirmation does not carry');
+  expect(screen.queryByRole('button', { name: /Approve exact draft/ })).not.toBeInTheDocument();
+});
+
 test.each(['provider-accepted', 'unknown', 'failed', 'unrecognized'])('outcome %s never claims real delivery or recovery of debt', async state => {
   const data = received(); data.receipts[0].state = state;
   const { mutate } = show(data);
