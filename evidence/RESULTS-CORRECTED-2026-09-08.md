@@ -6,8 +6,11 @@
 
 For the joiner reconciling inbox invoices: [live AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/).
 Try Records → invoice → payment → Workspace → Run Strands → exact review → History.
-Public extraction is bounded, the model scripted and acceptance simulated; the real Strands graph
-must finish all six reports before drafting. [Evidence and limits](../README.md#evidence-and-limits) ·
+This document retains the synthetic-path context: bounded extraction, scripted model and
+simulated acceptance. Controlled-live mode is a separate runtime using the same interface;
+its current activation and acceptance are reported by the links below, not this historical text.
+The real Strands graph must finish all six reports before drafting.
+[Evidence and limits](../README.md#evidence-and-limits) ·
 [Required disclosures](../README.md#pre-existing-work-disclosed).
 
 **This supersedes the Archon column in `RESULTS-2026-09-04.md` and
