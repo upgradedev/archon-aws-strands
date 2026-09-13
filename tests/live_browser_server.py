@@ -32,8 +32,9 @@ journal.create("operating-grant", {
     "input_usd_per_million_ceiling": "5", "output_usd_per_million_ceiling": "25",
     "mail_usd_ceiling": "0.01",
 })
-for name, value in {"ENABLED": "true", "WORKER_ARN": "ci-only-worker",
-                    "SENDER": "sender@example.test", "RECIPIENT": "controlled@example.test"}.items():
+identities = {"ENABLED": "true", "WORKER_ARN": "ci-only-worker",
+              "SENDER": "sender@example.test", "RECIPIENT": "controlled@example.test"}
+for name, value in identities.items():
     os.environ["ARCHON_LIVE_" + name] = value
 
 
