@@ -48,7 +48,9 @@ test('real-provider approval is explicit, durable and not repeated after reload'
   await expect(page.getByRole('region', { name: 'Empty workspace help' })).toBeVisible();
   expect((await saved(page))).toEqual(empty);
   expect(seedPosts).toEqual(['/api/sessions']); page.off('request', trackSeed);
-  await page.getByRole('link', { name: 'Guided check', exact: true }).click();
+  const guidedCheck = page.getByRole('link', { name: 'Guided check', exact: true });
+  await expect(guidedCheck).toBeVisible({ timeout: 10000 });
+  await guidedCheck.click({ timeout: 10000 });
   await expect(input).toHaveValue(/Invoice JN-4410/);
   const offset = Number((Number((process.env.GITHUB_RUN_ID ?? '1').slice(-5)) / 100 +
     ['desktop', 'mobile', 'webkit'].indexOf(info.project.name) / 100).toFixed(2));
