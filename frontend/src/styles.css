@@ -1,5 +1,49 @@
 @import "tailwindcss";
 
+.welcome-shell { background: #101827; min-height: 100vh; }
+.welcome-header { max-width: 1320px; margin: auto; padding: 26px 40px; display: flex; align-items: center; justify-content: space-between; gap: 18px; border-bottom: 1px solid #344054; }
+.welcome-resume { font-size: 15px; color: #e4e9ef; padding-block: 12px; }
+.welcome-shell main { max-width: 1320px; padding: 0 40px; }
+.welcome-hero { padding: 64px 0 44px; display: grid; grid-template-columns: minmax(0,1.25fr) minmax(0,1fr); gap: 56px; align-items: center; }
+.welcome-message .eyebrow { color: #afc3bd; font-size: 12px; letter-spacing: 1.5px; }
+.welcome-message h1 { font-size: clamp(36px,4.3vw,62px); letter-spacing: -2px; line-height: 1.08; font-weight: 600; margin: 22px 0; }
+.welcome-message h1 em { color: #a8decb; font-family: Georgia,serif; font-weight: 400; }
+.welcome-lead { color: #c5cdd7; font-size: 19px; max-width: 550px; }
+.welcome-shell .welcome-cta { display: inline-flex; gap: 38px; align-items: center; border-radius: 9px; padding: 16px 22px; margin-top: 28px; font-weight: 650; background: #bcf1d9; color: #12362a; min-height: 52px; }
+.welcome-cta:hover { background: #ddffec !important; text-decoration: none; }
+.welcome-small { color: #aebac8; font-size: 14px; max-width: 440px; margin-top: 14px; }
+.welcome-text-link { display: inline-block; min-height: 44px; padding-block: 14px; color: #bfe3d6; font-size: 14px; }
+.welcome-preview { background: #f2eee5; border: 1px solid #ded9ce; color: #283c3b; padding: 30px; border-radius: 16px; box-shadow: 0 20px 60px #0003; }
+.preview-label { display: flex; justify-content: space-between; gap: 16px; font-size: 11px; font-weight: 700; letter-spacing: 1.3px; color: #586660; margin-bottom: 28px; }
+.preview-dot { width: 8px; height: 8px; border-radius: 50%; background: #428169; }
+.welcome-preview>p { font-size: 14px; color: #5e6962; }
+.welcome-preview h2 { font: 400 30px/1.2 Georgia,serif; margin: 8px 0 24px; letter-spacing: -.5px; }
+.welcome-preview dl>div,.journey-ledger dl>div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding-block: 14px; border-bottom: 1px solid #cdcfc2; }
+.welcome-preview dt { color: #55635e; }
+.welcome-preview dd { font-size: 17px; font-variant-numeric: tabular-nums; font-weight: 600; }
+.welcome-preview .preview-total { margin-top: 12px; border: 0; }
+.preview-total dd { font-size: clamp(24px,2.3vw,32px); color: #245d48; }
+.preview-decision { display: flex; gap: 12px; padding: 18px; background: #e1e7da; border-radius: 8px; margin: 18px 0; }
+.preview-decision>span { font-size: 28px; line-height: 1; }
+.preview-decision p { font-size: 14px; }.preview-decision strong { display: block; margin-top: 6px; }
+.welcome-preview small { font-size: 12px; color: #5a655e; line-height: 1.7; display: block; }
+.welcome-boundary { display: flex; align-items: baseline; gap: 20px; border-block: 1px solid #344054; padding: 18px 0; color: #b9c6d2; font-size: 13px; }.welcome-boundary strong { flex-shrink: 0; color: #a8decb; }
+.welcome-steps { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 48px; padding: 40px 0 16px; }.welcome-steps span { color: #99b4a9; font-size: 12px; letter-spacing: 1.5px; }.welcome-steps h2 { margin: 12px 0; font-size: 21px; }.welcome-steps p { color: #b3becd; font-size: 15px; }
+.nav-task { display: block; font-size: 12px; color: #abb4cb; font-weight: 400; margin-top: 2px; }
+.dashboard-help { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; padding: 14px 18px; margin-bottom: 18px; border: 1px solid #384355; border-radius: 10px; font-size: 14px; color: #b6c8d1; }
+.journey-session { color: #aeb9cc; font-size: 14px; max-width: 850px; margin: 12px 0 22px; }
+.journey-progress { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; margin-bottom: 24px; }.journey-progress li { display: flex; align-items: center; gap: 9px; padding: 14px 12px; color: #aeb9cc; border-bottom: 2px solid #35415b; font-size: 14px; }.journey-progress li[aria-current] { color: #bff2dc; border-color: #8cdbc0; background: #142a2c; border-radius: 8px 8px 0 0; }.journey-progress span { font-variant-numeric: tabular-nums; }
+.guided-desk { display: grid; grid-template-columns: minmax(0,1.65fr) minmax(0,1fr); gap: 24px; align-items: start; }.guided-task { min-width: 0; }
+.journey-editor,.journey-review,.journey-result { background: #141e30; border: 1px solid #354159; border-radius: 14px; margin-bottom: 20px; overflow: hidden; }
+.journey-editor .panel-heading { padding: 24px; }.journey-editor-body { padding: 0 24px 20px; }.journey-editor textarea { background: #0c1423; }
+.journey-actions { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; margin: 18px 0 8px; }.journey-actions a,.journey-link { display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; }
+.journey-ledger { padding: 24px; border: 1px solid #3d5554; border-radius: 14px; background: #14262b; position: sticky; top: 20px; min-width: 0; }.journey-ledger h2 { font-size: 23px; margin: 12px 0 6px; overflow-wrap: anywhere; }.journey-ledger p { color: #b3c6c5; font-size: 14px; }.journey-ledger dl { margin: 22px 0; }.journey-ledger dl>div { border-color: #35504e; }.journey-ledger dd { font-weight: 650; font-variant-numeric: tabular-nums; }.journey-ledger .journey-total { display: block; border: 0; }.journey-total dd { color: #b9f1d9; font-size: clamp(24px,2.3vw,36px); margin-top: 10px; }
+.journey-ledger summary { min-height: 44px; padding-block: 12px; }.journey-source { border-top: 1px solid #35504e; padding-block: 12px; }.journey-source pre { font-size: 14px; margin-top: 10px; }.journey-boundary { margin: 18px 0; padding-top: 18px; border-top: 1px solid #35504e; }.journey-boundary strong { color: #cbe6dc; font-size: 14px; }.journey-boundary p { margin-top: 8px; }
+.journey-review,.journey-result { padding: 24px; }.journey-review h2,.journey-result h2 { font-size: 26px; margin-block: 12px; }.journey-review>p,.journey-result>p { color: #bbc8d7; margin-block: 16px; }.journey-result>a.primary { display: inline-flex; align-items: center; padding: 12px 16px; min-height: 44px; border-radius: 10px; }
+@media (max-width:1000px) { .welcome-hero { gap: 28px; padding-top: 40px; }.guided-desk { grid-template-columns: 1fr; }.journey-ledger { position: static; }.welcome-steps { gap: 24px; } }
+@media (max-width:760px) { .welcome-header { padding: 16px 20px; }.welcome-resume { font-size: 13px; max-width: 160px; }.welcome-shell main { padding: 0 20px; }.welcome-hero { grid-template-columns: 1fr; padding-top: 22px; gap: 28px; }.welcome-message h1 { font-size: 39px; letter-spacing: -1.2px; margin-block: 16px; }.welcome-message .eyebrow { font-size: 11px; }.welcome-lead { font-size: 17px; }.welcome-preview { padding: 22px; }.welcome-boundary { display: block; }.welcome-boundary p { margin-top: 8px; }.welcome-steps { grid-template-columns: 1fr; gap: 26px; }.welcome-cta { margin-top: 20px; }.nav-task { font-size: 11px; }.journey-progress li { display: grid; gap: 4px; padding: 10px 6px; font-size: 12px; }.journey-editor .panel-heading,.journey-review,.journey-result,.journey-ledger { padding: 18px; }.journey-editor-body { padding: 0 18px 18px; } }
+@media (forced-colors:active) { .welcome-preview,.preview-decision,.journey-ledger,.journey-review,.journey-result { background: Canvas; color: CanvasText; border: 1px solid CanvasText; }.welcome-cta,.welcome-preview dd,.welcome-preview dt,.welcome-preview p,.welcome-preview small,.journey-total dd { color: CanvasText; background: Canvas; } }
+
 .workflow-guide, .resolution-form { padding: 1rem; margin-block: 1rem; border: 1px solid #536178; border-radius: .6rem; min-width: 0; }
 .resolution-form { display: grid; gap: .8rem; }
 .resolution-form label { display: grid; gap: .4rem; }
@@ -178,6 +222,7 @@ details summary { font-size: 14px; color: #d0cbef; padding-block: 5px; } .finger
 @media (max-width:1350px) { .stats { grid-template-columns: repeat(3,minmax(0,1fr)); } .app-shell { grid-template-columns: 210px minmax(0,1fr); } main,.topbar { padding-inline: 20px; } }
 @media (max-width:1100px) { .collections-desk { grid-template-columns: 1fr; } .case-list { display: grid; grid-template-columns: 1fr 1fr; } .case-row { grid-template-columns: 1fr; } .case-sources { grid-template-columns: repeat(2,minmax(0,1fr)); } .case-guidance { font-size: 16px; } }
 @media (max-width:760px) {
+  .sidebar nav>a:first-child,.nav-task { display: none; }
   .app-shell { display: block; } .sidebar { position: static; height: auto; padding: 16px; border-right: 0; border-bottom: 1px solid var(--line); }
   .brand { font-size: 20px; } .brand-mark { width: 34px; height: 36px; } .workspace-name,.nav-label,.sidebar-bottom { display: none; }
   nav { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; margin-top: 18px; } nav a { font-size: 16px; padding: 10px; gap: 8px; }

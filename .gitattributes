@@ -1,0 +1,7 @@
+* text=auto eol=lf
+
+# Preserve the exact committed bytes of retained evidence and frozen instruments.
+/evidence/** -text
+/evaluation/** -text
+/frontend/benchmarks/** -text
+/tests/fixtures/** -text

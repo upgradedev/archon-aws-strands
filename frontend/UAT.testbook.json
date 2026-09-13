@@ -1,4 +1,16 @@
 {
+  "guided_product_wave": {
+    "status": "SOURCE_CANDIDATE_REQUIRES_CI_AND_DEPLOYED_ACCEPTANCE",
+    "scope": "Public introduction renders without session access, guided invoice/payment/review/outcome, retained workspace return, supported text/file preview, offline correction preservation, explicit approval and recorded simulation.",
+    "automation": "product-journey.spec.ts: desktop Chromium, mobile Chromium and 375px WebKit against real HTTP. In AWS acceptance the same cases target the exact deployed CloudFront/API pair. Other existing suites retain their original browser matrix and assertions; dashboard regression cases now explicitly enter /#/dashboard.",
+    "human_uat": "NOT_RUN; ten-second comprehension requires an independent person, not screenshot or test counts.",
+    "frozen_evidence": "AR2, AR3 and X1 protocols, sources and historical results are unchanged. The pinned X1 launcher intentionally refuses this changed product; do not retarget the historical instrument or claim new performance results.",
+    "cases": [
+      { "id": "AR-UAT-29", "steps": ["Open root with no session", "Explain the product and start using the keyboard", "Review and post invoice and partial payment", "Prepare, inspect and explicitly approve the exact simulated draft", "Export evidence, reload and return via landing"], "expected": "No session write on landing. Actual outstanding 1260.00 EUR. One simulated receipt, unchanged debt, same retained session, no silent reset.", "automated_test": "landing paints before session access and the guided decision survives return and reload" },
+      { "id": "AR-UAT-30", "steps": ["Complete invoice and payment", "Post a forwarded duplicate with original transfer identity", "Follow the held source to correction"], "expected": "No additional money, no automatic resolution or approval. Refused source and original evidence retained.", "automated_test": "guided duplicate holds collection without adding money or automatically resolving evidence" },
+      { "id": "AR-UAT-31", "steps": ["Edit invoice", "Disconnect and reconnect", "Explicitly refresh", "Open an unavailable session via the landing", "Decline replacement"], "expected": "Input retained while disabled. Reconnection alone does not restore authority. Expired session is not zero; replacement requires explicit consent.", "automated_test": "guided source survives offline recovery and expired session never looks like empty books" }
+    ]
+  },
   "decision_desk_wave": {
     "milestone": "UX-AR-10S",
     "status": "SOURCE_CANDIDATE_REQUIRES_EXACT_SHA_CI",

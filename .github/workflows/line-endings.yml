@@ -1,0 +1,38 @@
+name: Windows checkout byte integrity
+on:
+  push:
+    branches: [main, "codex/**"]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  checkout-bytes:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Frozen inputs retain their committed bytes on Windows
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib
+          import pathlib
+          import subprocess
+
+          roots = ('evidence/', 'evaluation/', 'frontend/benchmarks/', 'tests/fixtures/')
+          paths = subprocess.check_output(['git', 'ls-files', '-z']).decode().split('\0')
+          checked = 0
+          for name in paths:
+              if name and name.startswith(roots):
+                  committed = subprocess.check_output(['git', 'show', f'HEAD:{name}'])
+                  actual = pathlib.Path(name).read_bytes()
+                  assert actual == committed, f'Checkout changed committed bytes: {name}'
+                  print(hashlib.sha256(actual).hexdigest(), name)
+                  checked += 1
+          assert checked > 0
+          print(f'{checked} files retain exact committed bytes; no rebaseline or rewrite.')
+          PY

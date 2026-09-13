@@ -10,6 +10,7 @@ export default defineConfig({
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 1050 } } },
     { name: 'mobile', use: { ...devices['iPhone 13'], defaultBrowserType: 'chromium' } },
+    { name: 'webkit', testMatch: 'product-journey.spec.ts', use: { ...devices['iPhone 13'], viewport: { width: 375, height: 812 } } },
   ],
   webServer: externalURL ? undefined : [
     { command: 'python -m uvicorn archon.web.api:app --host 127.0.0.1 --port 8000', url: 'http://127.0.0.1:8000/api/health', reuseExistingServer: false },

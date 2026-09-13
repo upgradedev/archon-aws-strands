@@ -5,7 +5,7 @@ import { DraftEvidence } from './DraftEvidence';
 import { draftState, workspaceLink } from './ledger';
 import { useClock } from './useClock';
 
-export function Approvals({ data, busy, mutate, mode = 'all', selectedInvoice, stale = false }: { data: Workspace; busy: boolean; mutate: Mutate; mode?: 'draft' | 'terms' | 'all'; selectedInvoice?: string; stale?: boolean }) {
+export function Approvals({ data, busy, mutate, mode = 'all', selectedInvoice, stale = false, onApproved }: { data: Workspace; busy: boolean; mutate: Mutate; mode?: 'draft' | 'terms' | 'all'; selectedInvoice?: string; stale?: boolean; onApproved?: () => void }) {
   const [consent, setConsent] = useState('');
   const [termsConsent, setTermsConsent] = useState('');
   const [invoice, setInvoice] = useState(selectedInvoice ?? '');
@@ -28,7 +28,7 @@ export function Approvals({ data, busy, mutate, mode = 'all', selectedInvoice, s
         <aside className="approval-box"><h3>Review before approving</h3><p>The public outbox is simulated. This records an approval and a simulated provider receipt. No message is sent to this address.</p>
           <p className="decision-binding">Ledger revision {data.revision} · Prepared {draft.at}</p>
           <label className="checkbox"><input type="checkbox" checked={checked && status === 'pending' && !stale} onChange={e => setConsent(e.target.checked ? binding : '')} disabled={busy || status !== 'pending' || stale} /><span>I reviewed this recipient, subject, body and balance. I authorize a simulated send only.</span></label>
-          <button className="primary" disabled={busy || !checked || status !== 'pending' || stale} onClick={async () => { const origin = location.hash; if (await mutate('/approve', { fingerprint: draft.fingerprint })) { setConsent(''); if (location.hash === origin) location.hash = '/history'; } }}>Approve exact draft · simulate</button>
+          <button className="primary" disabled={busy || !checked || status !== 'pending' || stale} onClick={async () => { const origin = location.hash; if (await mutate('/approve', { fingerprint: draft.fingerprint })) { setConsent(''); if (location.hash === origin) { if (onApproved) onApproved(); else location.hash = '/history'; } } }}>Approve exact draft · simulate</button>
           <p className="field-help">{receipt ? 'This exact draft already has a receipt. Read it in History.' : stale ? 'Refresh durable state and review again before approving.' : status === 'expired' ? 'This draft expired. Run the graph and review a newly prepared draft.' : status === 'unavailable' ? 'The draft time is unavailable. Refresh and prepare again.' : status === 'held' ? 'Unresolved evidence holds approval.' : busy ? 'An action is pending. Wait for durable state.' : checked ? 'Ready for your explicit simulated approval. No email will leave this application.' : 'Tick the review confirmation to enable approval.'}</p>
         </aside></div> : <Empty title="No draft awaiting approval">{data.holds.length ? 'Unresolved source evidence holds collections. Correct it in Records.' : <>Run the Strands graph from the <a href="#/workspace">action queue</a> to prepare a source-backed draft.</>}</Empty>}
     </section> : null}
