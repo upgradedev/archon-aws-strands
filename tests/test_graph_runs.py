@@ -72,6 +72,7 @@ def test_the_readers_were_given_their_own_duties(books):
     prompts = " ".join(model.prompts_seen)
     for reader in wiring.READERS:
         assert reader.duty in prompts, f"{reader.name} was not told what it reports on"
+        assert reader.system_prompt in model.prompts_seen  # Default prompts stay byte-for-byte.
 
 
 def test_the_composer_was_told_the_debt_and_the_no_numbers_rule(books):

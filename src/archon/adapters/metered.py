@@ -193,5 +193,5 @@ def model_for(client):
             return client
 
     return BedrockModel(
-        boto_session=Session(), model_id=MODEL_ID, max_tokens=1024, streaming=False
+        boto_session=Session(), model_id=MODEL_ID, max_tokens=2048, streaming=False
     )

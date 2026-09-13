@@ -11,7 +11,7 @@ from types import SimpleNamespace
 import pytest
 from fastapi.testclient import TestClient
 
-from archon.adapters.composition import COMPOSER_JSON_RULES, composer_lines
+from archon.adapters.composition import COMPOSER_JSON_RULES, READER_REPORT_RULES, composer_lines
 from archon.adapters.grounded_post import SourceFields, validate_reading
 from archon.adapters.inbound import UnreadablePost, read_email
 from archon.adapters.metered import (
@@ -280,6 +280,9 @@ def test_actual_strands_bedrock_adapter_routes_every_graph_turn_through_metered_
     metered = MeteredConverse(provider, Admission(journal), journal, "graph")
     workspace.reason(state, model=model_for(metered), model_label="Actual provider adapter")
     assert len(provider.calls) == 13  # Six tool requests + six tool responses + composer.
+    assert all(call["inferenceConfig"]["maxTokens"] == 2048 for call in provider.calls)
+    assert all(not part.get("text", "").endswith(READER_REPORT_RULES)
+               for call in provider.calls for part in call.get("system", []))
     assert state["graph"]["mode"] == "Actual provider adapter"
     assert len(state["graph"]["reports"]) == 6
     assert state["draft"]["fingerprint"] == workspace.draft_for(state).fingerprint()
@@ -312,7 +315,9 @@ def test_worker_structured_composer_keeps_all_readers_and_the_no_digit_gate(setu
     class Composer(Provider):
         def converse(self, **kwargs):
             result = super().converse(**kwargs)
-            if not kwargs.get("toolConfig", {}).get("tools"):
+            if kwargs.get("toolConfig", {}).get("tools"):
+                assert kwargs["system"][-1]["text"].endswith(READER_REPORT_RULES)
+            else:
                 assert kwargs["system"][-1]["text"].endswith(COMPOSER_JSON_RULES)
                 if unsafe:
                     result["output"]["message"]["content"] = [{"text": json.dumps({
@@ -337,6 +342,38 @@ def test_worker_structured_composer_keeps_all_readers_and_the_no_digit_gate(setu
         assert saved["draft"]["opening"] == workspace.OPENING
         assert saved["draft"]["fingerprint"] == workspace.draft_for(saved).fingerprint()
     assert saved["sends"] == {}
+
+
+def test_truncated_live_reader_withholds_composer_and_retains_paid_attempts(setup):
+    sessions, journal = setup
+    seed(sessions)
+    state, version = sessions.get(HANDLE)
+    state.update(graph=None, draft=None)
+    sessions.put(HANDLE, state, version)
+
+    class Truncated(Provider):
+        def converse(self, **kwargs):
+            result = super().converse(**kwargs)
+            tool = kwargs.get("toolConfig", {}).get("tools", [])
+            if (tool and tool[0]["toolSpec"]["name"] == "headline"
+                    and result["stopReason"] == "end_turn"):
+                result["stopReason"] = "max_tokens"
+                result["usage"].update(outputTokens=2048, totalTokens=2148)
+            return result
+
+    provider = Truncated()
+    queued = change(sessions, "reason")
+    live.run(sessions, journal, HANDLE, queued["live"]["job"]["id"],
+             client_factory=lambda: provider)
+    saved, _ = sessions.get(HANDLE)
+    assert saved["provider_job"]["status"] == "failed"
+    assert saved["draft"] is None and saved["graph"] is None
+    assert saved["sends"] == {}
+    assert len(provider.calls) == 12
+    assert all(call.get("toolConfig", {}).get("tools") for call in provider.calls)
+    assert len(saved["provider_job"]["calls"]) == 12
+    assert any(row["usage"]["outputTokens"] == 2048
+               for row in saved["provider_job"]["calls"])
 
 
 def test_pending_job_is_committed_before_dispatch_and_replay_does_not_create_new_job(setup):

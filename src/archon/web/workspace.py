@@ -227,7 +227,9 @@ def reason(state: dict, *, model=None, model_label: str | None = None,
            structured_composer: bool = False) -> None:
     if holds(state):
         raise ValueError("Correct every refused email first. Partial books cannot support a chase.")
-    from archon.adapters.composition import COMPOSER_JSON_RULES, composer_lines
+    from archon.adapters.composition import (
+        COMPOSER_JSON_RULES, READER_REPORT_RULES, composer_lines,
+    )
     from archon.adapters.ledger_script import LedgerScriptModel
     from archon.agents import wiring
     from archon.agents.graph import build
@@ -236,7 +238,8 @@ def reason(state: dict, *, model=None, model_label: str | None = None,
     books = books_for(state)
     if model is None:
         model = LedgerScriptModel(default=f"{OPENING}\n{CLOSING}")
-    options = {"composer_suffix": COMPOSER_JSON_RULES} if structured_composer else {}
+    options = {"composer_suffix": COMPOSER_JSON_RULES,
+               "reader_suffix": READER_REPORT_RULES} if structured_composer else {}
     result = build(books, AS_OF, date(2026, 7, 1), AS_OF, model=model, **options)(
         "Read each ledger domain and prepare an exact collection draft."
     )
