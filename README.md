@@ -95,7 +95,9 @@ React/API setup, configuration, static export and the separate operator live mod
 
 <img src="docs/architecture.svg" alt="Archon architecture: six Strands readers feed a composer with no tools; ledger checks and exact human approval govern a separate controlled email worker." width="100%">
 
-This is an architecture diagram, not a screenshot or deployment receipt. It also renders where
+[View architecture at full size](docs/architecture.svg).
+
+These are architecture diagrams, not screenshots or deployment receipts. They also render where
 there is no Mermaid support. [Architecture and infrastructure](docs/ARCHITECTURE.md) explains
 the deployed components and the separate optional AgentCore sketch.
 
@@ -103,6 +105,10 @@ Six Strands readers inspect suppliers, sales, payroll, trading, cash and metrics
 ledger. Each reports before the composer can run; the composer holds no tools. Bedrock supplies
 model interpretation and wording, while deterministic code selects the invoice and verifies
 amounts. Removing Strands prevents draft preparation.
+
+<img src="docs/infrastructure.svg" alt="Archon AWS infrastructure: CloudFront serves React from private S3 and routes through API Gateway to Lambda; conditional S3 sessions and a separate worker govern Bedrock and controlled SES. The dashed incoming webhook is not deployed." width="100%">
+
+[View infrastructure at full size](docs/infrastructure.svg). The dashed webhook extension is not deployed.
 
 CloudFront serves React from private S3 and routes `/api/*` through API Gateway to Lambda.
 The API saves jobs and dispatches a separate durable worker; its role cannot invoke Bedrock or
