@@ -27,6 +27,8 @@ export interface TermsDecision {
   original?: { invoice_id: string; body?: string; fingerprint: string };
 }
 export interface Workspace {
+  demo_seed?: string | null;
+  live_available?: boolean;
   live?: { model: boolean; mail: boolean; data: string; job: ProviderJob | null; history?: ProviderJob[] };
   revision: number; as_of: string; synthetic: true; reader: string; provider: string;
   business?: { name: string; email: string; source: string };

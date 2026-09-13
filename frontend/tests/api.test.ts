@@ -2,6 +2,33 @@ import { empty } from './fixtures';
 
 beforeEach(() => { vi.resetModules(); localStorage.clear(); });
 
+test('populated demo keeps the previous handle and restores its records without posting', async () => {
+  localStorage.setItem('archon.demo.session.v1', 'old');
+  const fetcher = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ session: 'demo', workspace: empty() })))
+    .mockResolvedValueOnce(new Response(JSON.stringify(empty())));
+  vi.stubGlobal('fetch', fetcher);
+  const api = await import('../src/api');
+  await api.openWorkspace(true, 'joinery');
+  expect(fetcher).toHaveBeenNthCalledWith(1, '/api/sessions', expect.objectContaining({ body: '{"seed":"joinery"}' }));
+  expect(api.hasPreviousWorkspace()).toBe(true);
+  expect(localStorage.getItem('archon.demo.previous.v1')).toBe('old');
+  vi.resetModules();
+  const reloaded = await import('../src/api');
+  expect((await reloaded.restorePreviousWorkspace()).session).toBe('old');
+  expect(fetcher).toHaveBeenLastCalledWith('/api/workspace', expect.objectContaining({ method: 'GET', headers: expect.objectContaining({ 'X-Archon-Session': 'old' }) }));
+  expect(localStorage.getItem('archon.demo.previous.v1')).toBe('demo');
+  expect(localStorage.getItem(api.SESSION_KEY)).toBe('old');
+});
+
+test('expired previous workspace does not replace the current handle', async () => {
+  localStorage.setItem('archon.demo.session.v1', 'current');
+  localStorage.setItem('archon.demo.previous.v1', 'expired');
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('{"detail":"Session expired"}', { status: 401 })));
+  const api = await import('../src/api');
+  await expect(api.restorePreviousWorkspace()).rejects.toThrow('expired');
+  expect(localStorage.getItem(api.SESSION_KEY)).toBe('current');
+});
+
 test('request sends a session header and structured payload', async () => {
   const fetcher = vi.fn().mockResolvedValue(new Response(JSON.stringify(empty())));
   vi.stubGlobal('fetch', fetcher);

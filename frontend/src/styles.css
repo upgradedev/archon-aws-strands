@@ -244,3 +244,8 @@ details summary { font-size: 14px; color: #d0cbef; padding-block: 5px; } .finger
 @media (max-width:360px) { .stats { grid-template-columns: 1fr; } .case-row { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion:reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
 @media (forced-colors:active) { .stat,.panel,.primary,.case-row,.source-choice,.source-badge { border: 1px solid CanvasText; background: Canvas; color: CanvasText; } .stat strong,.stat p,.stat small { color: CanvasText; } .sample-buttons::before { display: none; } [aria-current],.sample-buttons [aria-pressed="true"] { outline: 2px solid Highlight; } }
+.welcome-shell .welcome-cta.secondary { background: transparent; color: #bfe3d6; border: 1px solid #657e76; gap: 10px; }
+.welcome-shell main.demo-setup { max-width: 52rem; margin: 0 auto; padding: 2rem 1rem; }
+.demo-setup h1 { font-size: clamp(1.8rem, 5vw, 3rem); line-height: 1.15; margin: 1rem 0; }
+.demo-setup p, .demo-setup ul { margin: 1.25rem 0; line-height: 1.65; }
+.demo-setup ul { padding-left: 1.5rem; }
