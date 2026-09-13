@@ -51,7 +51,7 @@ class CounterRequest(ApprovalRequest):
 
 class SessionRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    mode: Literal["synthetic"] = "synthetic"
+    mode: Literal["synthetic", "live"] | None = None
 
 
 class ResolutionRequest(Mutation):
@@ -103,6 +103,15 @@ def load(handle: str):
 def mutate(handle: str, request: Mutation, operation: str, action):
     state, version = load(handle)
     payload = request.model_dump(exclude={"request_id", "revision"})
+    if state.get("provider_mode") == "live":
+        from archon.web import live
+
+        if operation in live.OPERATIONS:
+            return live.submit(store(), handle, state, version, operation, payload,
+                               request.request_id, request.revision)
+        job = state.get("provider_job")
+        if job and job["status"] in {"queued", "running"}:
+            raise Conflict("Wait for the durable provider job before changing these books.")
     signature = workspace.digest({"operation": operation, "payload": payload})
     previous = state["requests"].get(request.request_id)
     if previous:
@@ -138,6 +147,11 @@ def health():
 @app.post("/api/sessions", status_code=201)
 def create_session(request: SessionRequest):
     handle, state = secrets.token_hex(32), workspace.fresh()
+    from archon.web import live
+
+    if request.mode == "live" or (request.mode is None and live.enabled()):
+        config = live.configuration()
+        state.update(provider_mode="live", test_recipient=config["recipient"])
     store().put(handle, state, None)
     return {"session": handle, "workspace": workspace.snapshot(state)}
 
