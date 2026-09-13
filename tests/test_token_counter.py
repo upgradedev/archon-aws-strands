@@ -20,14 +20,16 @@ def conversation():
     return {"system": [{"text": "Read only."}], "messages": [
         {"role": "user", "content": [{"text": "State the ledger."}]},
         {"role": "assistant", "content": [
-            {"reasoningContent": {"reasoningText": {"text": "Inspect the source.", "signature": "sig"}}},
+            {"reasoningContent": {"reasoningText": {
+                "text": "Inspect the source.", "signature": "sig"}}},
             {"toolUse": {"toolUseId": "tool-1", "name": "sales", "input": {}}},
         ]},
         {"role": "user", "content": [{"toolResult": {
             "toolUseId": "tool-1", "status": "success", "content": [{"text": "1260.00 EUR"}],
         }}]},
     ], "toolConfig": {"tools": [{"toolSpec": {
-        "name": "sales", "description": "Ledger source", "inputSchema": {"json": {"type": "object"}},
+        "name": "sales", "description": "Ledger source",
+        "inputSchema": {"json": {"type": "object"}},
     }}], "toolChoice": {"auto": {}}}}
 
 

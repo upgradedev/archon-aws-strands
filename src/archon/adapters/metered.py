@@ -47,7 +47,9 @@ class Admission:
         return grant, version
 
     def reserve(self, call_id, *, input_tokens=0, output_tokens=0, mail=False):
-        for _ in range(5):
+        # Two workers can each fan out six readers. A five-conflict ceiling can
+        # refuse a healthy sixth reader; keep admission bounded above that fanout.
+        for _ in range(20):
             grant, version = self.grant()
             entries = grant.get("reservations", {})
             if call_id in entries:

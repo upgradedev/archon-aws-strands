@@ -183,6 +183,18 @@ def test_unknown_model_call_is_not_refunded_or_retried(setup):
     assert Decimal(journal.read("operating-grant")[0]["reserved_usd"]) > 0
 
 
+def test_admission_handles_two_workers_with_six_parallel_readers_each(setup):
+    _, journal = setup
+
+    def reserve(index):
+        return Admission(journal).reserve(str(index), input_tokens=100, output_tokens=1024)
+
+    with ThreadPoolExecutor(max_workers=12) as pool:
+        assert len(list(pool.map(reserve, range(12)))) == 12
+    grant, _ = journal.read("operating-grant")
+    assert len(grant["reservations"]) == 12
+
+
 def test_unsupported_native_token_count_stops_before_inference_or_budget_reservation(setup):
     _, journal = setup
 
