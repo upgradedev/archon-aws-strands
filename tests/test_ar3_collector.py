@@ -368,4 +368,8 @@ def test_manual_job_is_separate_and_source_job_cannot_activate():
     assert '"Action":"bedrock:*"' not in live
     assert "if: always()" in live and "retention-days: 90" in live
     assert "id-token:" not in source and "AR3_GRANT_JSON:" not in source
-    assert "ar3_collect prepare" in source and "ar3_collect collect" not in source
+    assert "'evaluation.ar3_collect', 'prepare'" in source
+    assert "collector.verify_source(candidate)" in source
+    assert "SOURCE_CHANGED_COLLECTION_DENIED" in source
+    assert "'evaluation.ar3_collect', 'collect'" not in source
+    assert "ar3_collect collect" not in source and "collector.live_client" not in source
