@@ -10,6 +10,7 @@ from datetime import UTC, datetime
 from archon.adapters.grounded_post import validate_reading
 from archon.adapters.metered import Admission, LiveRefused, MeteredConverse, model_for
 from archon.adapters.ses import live_outbox
+from archon.adapters.token_counter import CountingRuntime
 from archon.store.execution import DurableSendLog, Journal
 from archon.store.sessions import Conflict, S3Sessions, configured_store
 from archon.web import workspace
@@ -122,11 +123,13 @@ def run(store, journal, handle, job_id, *, client_factory=None, outbox_factory=l
                 from botocore.config import Config
 
                 def client_factory():
-                    return boto3.client(
+                    session = boto3.Session()
+                    runtime = session.client(
                         "bedrock-runtime", region_name="eu-west-1",
                         config=Config(connect_timeout=5, read_timeout=60,
                                       retries={"total_max_attempts": 1}),
                     )
+                    return CountingRuntime(runtime, session)
             metered = MeteredConverse(client_factory(), admission, journal, job_id)
             if job["operation"] == "intake":
                 workspace.intake(

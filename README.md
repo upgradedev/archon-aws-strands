@@ -24,12 +24,13 @@ actual AWS acceptance. The grant is never created or extended by an anonymous
 request. Reservations bound admitted provider usage under those price ceilings,
 not the whole AWS account bill; infrastructure costs are separate.
 
-**Known activation blockers:** native Bedrock `CountTokens` rejects
-`anthropic.claude-opus-5` in eu-west-1. The candidate deliberately stops before
-inference in that case; a compatible counter is still required. AWS documents
-the [Mantle token-count route](https://docs.aws.amazon.com/bedrock/latest/userguide/count-tokens.html)
-for affected models. The newest candidate also needs CI execution and end-to-end
-live acceptance; it is not ready to merge or deploy. Previously retained
+Native Bedrock `CountTokens` rejects `anthropic.claude-opus-5` in eu-west-1.
+The candidate therefore uses AWS's documented
+[Mantle token-count route](https://docs.aws.amazon.com/bedrock/latest/userguide/count-tokens.html)
+with SigV4 in eu-west-1, never a characters-to-token estimate. Unmapped content
+fails before inference. A count-only endpoint response is not model acceptance.
+The newest candidate still needs full CI and end-to-end live acceptance;
+it is not ready to merge or deploy. Previously retained
 synthetic results do not prove either real model judgment or email delivery.
 
 In controlled mode the business examples remain fictional, but provider calls
