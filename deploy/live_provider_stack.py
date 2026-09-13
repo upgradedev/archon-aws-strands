@@ -1,6 +1,9 @@
 """Separate bounded provider worker. Rendering does not deploy or enable the public API."""
 import json
+import pathlib
+import sys
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "infra"))
 from frontend_stack import attr, ref, sub
 
 

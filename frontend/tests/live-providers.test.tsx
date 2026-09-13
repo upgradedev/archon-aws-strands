@@ -63,7 +63,7 @@ test('history, guided result and operating pages use actual provider labels', ()
   const components = [
     <Activity key="history" data={value} />,
     <Journey key="journey" data={value} busy={false} stale={false} mutate={vi.fn()} route="/journey" reviewEpoch={0} loadEvidence={vi.fn()} />,
-    <Dashboard key="dashboard" data={value} />,
+    <Dashboard key="dashboard" data={value} stale={false} />,
     <ReconciliationStart key="start" data={value} />,
     <Reconciliation key="case" data={value} invoice="JN-4410" stale={false} />,
     <Documents key="post" data={value} busy={false} mutate={vi.fn()} route="/records?intake=open" />,

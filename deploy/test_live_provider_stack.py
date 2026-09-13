@@ -1,7 +1,7 @@
 """Source-only checks; no credential or provisioned resource is required."""
 import unittest
 
-from archon_api_stack import template as api_template
+from live_api_stack import template as api_template
 from live_provider_stack import template
 
 

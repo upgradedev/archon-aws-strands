@@ -7,10 +7,16 @@
 This branch prepares a real-provider path in the **same React application**:
 semantic intake, Strands reasoning, saved asynchronous jobs, explicit real-email
 approval and a separate durable SES outbox. The existing public deployment is
-still synthetic; source preparation is not a live acceptance claim.
+still synthetic: the joiner uses Records, a scripted model and simulated mail.
+The [public AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/) and the
+[evidence](#evidence-and-limits) / [disclosures](#pre-existing-work-disclosed)
+below describe that retained release, not live acceptance of this candidate.
 
-`infra/live_provider_stack.py` defines an isolated worker and retained failure
-queue. The public API keeps its direct Bedrock/SES denies; it can dispatch only
+`deploy/live_provider_stack.py` defines an isolated worker and retained failure
+queue; `deploy/live_api_stack.py` adds opt-in parameters to a separately rendered
+API template. Historical templates under `infra/` remain byte-identical, and
+their old measurement does not qualify this new deployment. The public API
+keeps its direct Bedrock/SES denies; it can dispatch only
 its own worker. `LiveEnabled` defaults to `false`. Activation also requires the
 exact verified sender/recipient, an operator-created private `operating-grant`
 journal record with a finite budget/expiry and verified price ceilings, and
