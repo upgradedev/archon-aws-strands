@@ -1,4 +1,12 @@
 {
+  "populated_demo_wave": {
+    "status": "SOURCE_CANDIDATE_REQUIRES_CI_AND_DEPLOYED_ACCEPTANCE",
+    "human_uat": "NOT_RUN",
+    "cases": [
+      { "id": "AR-UAT-35", "steps": ["Open Explore populated demo", "Confirm Load demo workspace", "Inspect Dashboard and Records", "Reload", "Return to previous workspace"], "expected": "Five fictional source emails; 1260.00 EUR owed by clients and 124.00 EUR owed to supplier; no model calls, graph, draft or email on load; previous books unchanged.", "automated_test": "populated demo survives reload and preserves the previous workspace without sending" },
+      { "id": "AR-UAT-36", "steps": ["Resume a saved synthetic workspace while live providers are enabled", "Read mode warning", "Open a separate populated demo", "Return to previous workspace"], "expected": "Old receipts remain simulated. New workspace uses current providers, without invoking them on load. Exact reviewed email consent remains required.", "automated_test": "test_populated_live_demo_has_no_provider_job_and_preserves_old_mode; legacy warning is based on actual workspace and provider availability" }
+    ]
+  },
   "product_closeout_wave": {
     "status": "SOURCE_CANDIDATE_REQUIRES_EXACT_PAIR_ACCEPTANCE",
     "human_uat": "NOT_RUN",

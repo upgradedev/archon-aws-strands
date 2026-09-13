@@ -2,6 +2,51 @@ import { empty } from './fixtures';
 
 beforeEach(() => { vi.resetModules(); localStorage.clear(); });
 
+test('populated demo keeps the previous handle and restores its records without posting', async () => {
+  localStorage.setItem('archon.demo.session.v1', 'old');
+  const fetcher = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ session: 'demo', workspace: { ...empty(), demo_seed: 'joinery-v1' } })))
+    .mockResolvedValueOnce(new Response(JSON.stringify(empty())));
+  vi.stubGlobal('fetch', fetcher);
+  const api = await import('../src/api');
+  await api.openWorkspace(true, 'joinery');
+  expect(fetcher).toHaveBeenNthCalledWith(1, '/api/sessions', expect.objectContaining({ body: '{"seed":"joinery"}' }));
+  expect(api.hasPreviousWorkspace()).toBe(true);
+  expect(localStorage.getItem('archon.demo.previous.v1')).toBe('old');
+  vi.resetModules();
+  const reloaded = await import('../src/api');
+  expect((await reloaded.restorePreviousWorkspace()).session).toBe('old');
+  expect(fetcher).toHaveBeenLastCalledWith('/api/workspace', expect.objectContaining({ method: 'GET', headers: expect.objectContaining({ 'X-Archon-Session': 'old' }) }));
+  expect(localStorage.getItem('archon.demo.previous.v1')).toBe('demo');
+  expect(localStorage.getItem(api.SESSION_KEY)).toBe('old');
+});
+
+test('expired previous workspace does not replace the current handle', async () => {
+  localStorage.setItem('archon.demo.session.v1', 'current');
+  localStorage.setItem('archon.demo.previous.v1', 'expired');
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('{"detail":"Session expired"}', { status: 401 })));
+  const api = await import('../src/api');
+  await expect(api.restorePreviousWorkspace()).rejects.toThrow('expired');
+  expect(localStorage.getItem(api.SESSION_KEY)).toBe('current');
+});
+
+test('an old API cannot silently replace the workspace with an unseeded result', async () => {
+  localStorage.setItem('archon.demo.session.v1', 'current');
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ session: 'unseeded', workspace: empty() }))));
+  const api = await import('../src/api');
+  await expect(api.openWorkspace(true, 'joinery')).rejects.toThrow('has not loaded');
+  expect(localStorage.getItem(api.SESSION_KEY)).toBe('current');
+});
+
+test('a pending empty creation cannot be mistaken for the requested populated demo', async () => {
+  let finish!: (response: Response) => void;
+  vi.stubGlobal('fetch', vi.fn(() => new Promise(resolve => { finish = resolve; })));
+  const api = await import('../src/api');
+  const pending = api.openWorkspace();
+  await expect(api.openWorkspace(true, 'joinery')).rejects.toThrow('finish opening');
+  finish(new Response(JSON.stringify({ session: 'empty', workspace: empty() })));
+  await pending;
+});
+
 test('request sends a session header and structured payload', async () => {
   const fetcher = vi.fn().mockResolvedValue(new Response(JSON.stringify(empty())));
   vi.stubGlobal('fetch', fetcher);

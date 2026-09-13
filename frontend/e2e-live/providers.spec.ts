@@ -27,6 +27,31 @@ test('real-provider approval is explicit, durable and not repeated after reload'
   await page.getByTestId('start-guided-example').click();
   const input = page.getByLabel('Email headers and plain-text body');
   await expect(input).toHaveValue(/Invoice JN-4410/);
+  const empty = await saved(page);
+  const seedPosts: string[] = [];
+  const trackSeed = (req: import('@playwright/test').Request) => {
+    if (req.method() === 'POST') seedPosts.push(new URL(req.url()).pathname);
+  };
+  page.on('request', trackSeed);
+  await page.getByRole('link', { name: 'Explore populated demo →' }).click();
+  await page.getByRole('button', { name: 'Load demo workspace' }).click();
+  await expect(page.getByRole('region', { name: 'Populated fictional demo' })).toBeVisible();
+  const demo = await saved(page);
+  expect(demo.data.sources).toHaveLength(5);
+  expect(demo.data.metrics.owed_by_clients).toBe('1260.00');
+  expect(demo.data.live?.job).toBeNull(); expect(demo.data.live?.history).toEqual([]);
+  expect(demo.data.graph).toBeNull(); expect(demo.data.receipts).toEqual([]);
+  await page.reload();
+  await expect(page.getByRole('region', { name: 'Populated fictional demo' })).toBeVisible();
+  expect((await saved(page)).data).toEqual(demo.data);
+  await page.getByRole('button', { name: 'Return to previous workspace' }).click();
+  await expect(page.getByRole('region', { name: 'Empty workspace help' })).toBeVisible();
+  expect((await saved(page))).toEqual(empty);
+  expect(seedPosts).toEqual(['/api/sessions']); page.off('request', trackSeed);
+  const guidedCheck = page.getByRole('link', { name: 'Guided check', exact: true });
+  await expect(guidedCheck).toBeVisible({ timeout: 10000 });
+  await guidedCheck.click({ timeout: 10000 });
+  await expect(input).toHaveValue(/Invoice JN-4410/);
   const offset = Number((Number((process.env.GITHUB_RUN_ID ?? '1').slice(-5)) / 100 +
     ['desktop', 'mobile', 'webkit'].indexOf(info.project.name) / 100).toFixed(2));
   const raw = await input.inputValue();

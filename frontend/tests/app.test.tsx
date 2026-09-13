@@ -14,6 +14,27 @@ async function route(path: string) {
   await act(async () => { location.hash = path; window.dispatchEvent(new HashChangeEvent('hashchange')); });
 }
 
+test('demo switching waits for old reads and keeps navigation actions locked while creating', async () => {
+  let finishRead!: (result: { session: string; workspace: ReturnType<typeof empty> }) => void;
+  let finishDemo!: (result: { session: string; workspace: ReturnType<typeof empty> }) => void;
+  vi.mocked(api.openWorkspace).mockReset()
+    .mockImplementationOnce(() => new Promise(resolve => { finishRead = resolve; }))
+    .mockImplementationOnce(() => new Promise(resolve => { finishDemo = resolve; }));
+  render(<App />);
+  await route('/demo');
+  expect(screen.getByRole('button', { name: 'Load demo workspace' })).toBeDisabled();
+  await act(async () => finishRead({ session: 'old', workspace: empty() }));
+  await userEvent.click(screen.getByRole('button', { name: 'Load demo workspace' }));
+  expect(api.openWorkspace).toHaveBeenCalledTimes(2);
+  await route('/dashboard');
+  expect(screen.getByRole('button', { name: 'Refresh' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'New workspace' })).toBeDisabled();
+  await act(async () => finishDemo({ session: 'demo', workspace: { ...empty(), demo_seed: 'joinery-v1' } }));
+  await waitFor(() => expect(screen.getByRole('button', { name: 'Refresh' })).toBeEnabled());
+  expect(screen.getByRole('region', { name: 'Populated fictional demo' })).toBeVisible();
+  expect(api.request).not.toHaveBeenCalled();
+});
+
 test('new workspace on History clears an existing evidence bundle at the same revision', async () => {
   location.hash = '/history';
   const state = empty();

@@ -71,6 +71,45 @@ def test_empty_session_is_isolated_and_has_no_seeded_outcome(client):
     assert read(client, second)["metrics"]["owed_by_clients"] == "0.00"
 
 
+def test_populated_demo_has_source_derived_balances_without_agent_or_send(client):
+    old = create(client)
+    before = posted(client, old)
+    response = client.post("/api/sessions", json={"mode": "synthetic", "seed": "joinery"})
+    assert response.status_code == 201, response.text
+    result = response.json()
+    data = result["workspace"]
+    assert result["session"] != old
+    assert data["demo_seed"] == "joinery-v1"
+    assert len(data["sources"]) == 5
+    assert all(s["status"] == "posted" and s["origin"] == "fictional-demo-template"
+               for s in data["sources"])
+    assert data["metrics"]["owed_by_clients"] == "1260.00"
+    assert data["metrics"]["owed_to_suppliers"] == "124.00"
+    assert data["metrics"]["bank"] == "2460.00"
+    assert data["trial_balance"] == "0.00"
+    assert data["holds"] == []
+    assert data["draft"] is None and data["graph"] is None and data["receipts"] == []
+    assert read(client, result["session"]) == data
+    assert read(client, old) == before
+    assert client.post("/api/sessions", json={"seed": "arbitrary"}).status_code == 422
+
+
+def test_demo_seeding_refuses_existing_state_and_leaves_it_unchanged():
+    state = workspace.fresh()
+    workspace.intake(state, workspace.SAMPLES["invoice"])
+    before = json.dumps(state, sort_keys=True)
+    with pytest.raises(ValueError, match="new workspace"):
+        workspace.seed_demo(state)
+    assert json.dumps(state, sort_keys=True) == before
+
+
+def test_demo_validation_failure_never_persists_partial_session(client, monkeypatch):
+    monkeypatch.setitem(workspace.SAMPLES, "supplier", "not an invoice")
+    response = client.post("/api/sessions", json={"mode": "synthetic", "seed": "joinery"})
+    assert response.status_code == 422
+    assert "No workspace was created" in response.json()["detail"]
+
+
 def test_evidence_is_session_scoped_redacted_and_tracks_corrections(client):
     session = create(client)
     change(client, session, "intake", body=workspace.SAMPLES["invoice"])

@@ -18,7 +18,8 @@ export function Welcome() {
         <div className="welcome-message"><p className="eyebrow">FOR SELF-EMPLOYED PEOPLE & SMALL BUSINESSES</p>
           <h1 id="welcome-title" tabIndex={-1}>Chase the balance.<br /><em>Not the customer who paid.</em></h1>
           <p className="welcome-lead">Turn invoice and payment emails into a clear answer: what is still owed, why, and what you can safely do next.</p>
-          <a className="primary welcome-cta" href="#/journey" data-testid="start-guided-example">Try the example <span aria-hidden="true">→</span></a>
+          <a className="primary welcome-cta" href="#/demo">Explore populated demo <span aria-hidden="true">→</span></a>
+          <a className="secondary welcome-cta" href="#/journey" data-testid="start-guided-example">Try the example step by step <span aria-hidden="true">→</span></a>
           <p className="welcome-small">{live === null ? 'Checking provider availability. No account needed; nothing sends automatically.' : live ? 'Real Bedrock AI · controlled real email · fictional business examples. You approve each email.' : 'Synthetic demo · scripted model · simulated email. No account needed. You approve each step.'}</p>
           <a className="welcome-text-link" href="#/records?intake=open">Have a different example? Add supported text →</a>
         </div>
@@ -27,7 +28,7 @@ export function Welcome() {
           <p>Alex's joinery · illustrative example</p><h2>A payment just arrived.</h2>
           <dl><div><dt>Invoice</dt><dd>1,860.00 EUR</dd></div><div><dt>Recorded payment</dt><dd>− 600.00 EUR</dd></div><div className="preview-total"><dt>Still owed</dt><dd>1,260.00 EUR</dd></div></dl>
           <div className="preview-decision"><span aria-hidden="true">↳</span><p>Review a reminder for the remaining balance.<strong>You decide whether to approve.</strong></p></div>
-          <small>Illustration only. Your workspace starts empty; the example is posted only when you submit it.</small>
+          <small>Illustration only. Load the populated demo to explore these balances, or post the source emails yourself in the guided check.</small>
         </aside>
       </section>
       <div className="welcome-boundary"><strong>You control the next action.</strong><p>{live === null ? 'Provider status has not been confirmed. Your workspace shows its exact mode before you act.' : live ? 'Invented examples, real Bedrock and Strands, deterministic ledger checks. A real SES email goes only to the verified test recipient after you review the exact draft. No bank connection or payment execution.' : 'Synthetic data only · real Strands orchestration with a scripted model · simulated mail. No real AI judgment, bank connection, email or payment.'}</p></div>

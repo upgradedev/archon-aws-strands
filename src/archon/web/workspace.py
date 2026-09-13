@@ -93,6 +93,27 @@ def books_for(state: dict) -> Books:
     return books
 
 
+def seed_demo(state: dict) -> None:
+    """Load fixed fictional evidence only into fresh books; no model or send."""
+    if state != {**fresh(), "created_at": state.get("created_at"),
+                 **{k: state[k] for k in ("provider_mode", "test_recipient") if k in state}}:
+        raise ValueError("Demo data can only be loaded into a new workspace.")
+    recipient = state.get("test_recipient", "accounts@buildco.example")
+    invoice = SAMPLES["invoice"].replace("accounts@buildco.example", recipient)
+    payment = SAMPLES["payment"].replace("accounts@buildco.example", recipient)
+    paid_invoice = invoice.replace("JN-4410", "JN-4411").replace("BuildCo Ltd", "Oak Studio Ltd")
+    paid_receipt = payment.replace("JN-4410", "JN-4411").replace("600.00", "1860.00").replace(
+        "DEMO-BANK-600-A", "DEMO-BANK-1860-B")
+    for body in (invoice, payment, SAMPLES["supplier"], paid_invoice, paid_receipt):
+        intake(state, body)
+        if state["sources"][-1]["status"] != "posted":
+            raise ValueError("Demo evidence could not be validated. No workspace was created.")
+        state["sources"][-1]["origin"] = "fictional-demo-template"
+    state["demo_seed"] = "joinery-v1"
+    event(state, "Fictional demo loaded", "Fixed example emails parsed with local rules. "
+          "Balances computed from posted evidence; no Bedrock call, AI report or email send.")
+
+
 def event(state: dict, title: str, detail: str) -> None:
     state["activity"].append(
         {"id": len(state["activity"]) + 1, "at": now(), "title": title, "detail": detail}
@@ -525,6 +546,8 @@ def agree(state: dict, fingerprint: str) -> None:
 
 
 def snapshot(state: dict) -> dict:
+    from archon.web.live import enabled
+
     books = books_for(state)
     queue = build_queue(books, AS_OF)
     draft = draft_for(state)
@@ -535,6 +558,8 @@ def snapshot(state: dict) -> dict:
         for key in ("revision", "sources", "arrangements", "proposal", "graph", "activity")
     }
     result.update(
+        demo_seed=state.get("demo_seed"),
+        live_available=enabled(),
         as_of=str(AS_OF),
         business={"name": BUSINESS_NAME, "email": BUSINESS_EMAIL,
                   "source": "Received post; explicit original headers for outbound/forwarded mail"},

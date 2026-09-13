@@ -56,6 +56,7 @@ class CounterRequest(ApprovalRequest):
 class SessionRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     mode: Literal["synthetic", "live"] | None = None
+    seed: Literal["joinery"] | None = None
 
 
 class ResolutionRequest(Mutation):
@@ -178,6 +179,8 @@ def create_session(request: SessionRequest):
     if request.mode == "live" or (request.mode is None and live.enabled()):
         config = live.configuration()
         state.update(provider_mode="live", test_recipient=config["recipient"])
+    if request.seed == "joinery":
+        workspace.seed_demo(state)
     store().put(handle, state, None)
     return {"session": handle, "workspace": workspace.snapshot(state)}
 

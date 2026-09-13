@@ -1,5 +1,32 @@
 import { test, expect, type Page } from '@playwright/test';
 
+test('populated demo survives reload and preserves the previous workspace without sending', async ({ page }) => {
+  await page.goto('/#/journey');
+  await expect(page.getByRole('heading', { name: 'No invoice posted yet' })).toBeVisible();
+  const old = await state(page);
+  const posts: string[] = [];
+  page.on('request', req => { if (req.method() === 'POST') posts.push(new URL(req.url()).pathname); });
+  await page.getByRole('link', { name: 'Explore populated demo →' }).click();
+  await page.getByRole('button', { name: 'Load demo workspace' }).click();
+  await expect(page.getByRole('region', { name: 'Populated fictional demo' })).toBeVisible();
+  const seeded = await state(page);
+  expect(seeded.session).not.toBe(old.session);
+  expect(seeded.data.sources).toHaveLength(5);
+  expect(seeded.data.metrics.owed_by_clients).toBe('1260.00');
+  expect(seeded.data.metrics.owed_to_suppliers).toBe('124.00');
+  expect(seeded.data.graph).toBeNull(); expect(seeded.data.receipts).toEqual([]);
+  expect(posts).toEqual(['/api/sessions']);
+  await page.reload();
+  await expect(page.getByRole('region', { name: 'Populated fictional demo' })).toBeVisible();
+  expect((await state(page)).data).toEqual(seeded.data);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.getByRole('button', { name: 'Return to previous workspace' }).click();
+  await expect(page.getByRole('region', { name: 'Empty workspace help' })).toBeVisible();
+  expect((await state(page)).session).toBe(old.session);
+  expect((await state(page)).data).toEqual(old.data);
+  expect(posts).toEqual(['/api/sessions']);
+});
+
 async function state(page: Page) {
   const session = await page.evaluate(() => localStorage.getItem('archon.demo.session.v1'));
   expect(session).toBeTruthy();
@@ -43,6 +70,7 @@ test('landing paints before session access and the guided decision survives retu
   expect(mutations).toEqual([]);
   expect(await page.evaluate(() => localStorage.getItem('archon.demo.session.v1'))).toBeNull();
   await page.screenshot({ path: info.outputPath('product-landing.png') });
+  await page.keyboard.press('Tab'); await expect(page.getByRole('link', { name: /Explore populated demo/ })).toBeFocused();
   await page.keyboard.press('Tab'); await expect(start).toBeFocused(); await page.keyboard.press('Enter');
   await expect(page.getByLabel('Email headers and plain-text body')).toHaveValue(/Invoice JN-4410/);
   const first = await state(page); expect(first.data.sources).toEqual([]);

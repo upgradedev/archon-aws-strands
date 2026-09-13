@@ -54,6 +54,29 @@ def setup(tmp_path, monkeypatch):
     return sessions, journal
 
 
+def test_populated_live_demo_has_no_provider_job_and_preserves_old_mode(setup, monkeypatch):
+    sessions, _ = setup
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("Loading a demo must not enqueue provider work")
+
+    monkeypatch.setattr(live, "enqueue", forbidden)
+    with TestClient(api.app) as client:
+        old = client.post("/api/sessions", json={"mode": "synthetic"}).json()
+        response = client.post("/api/sessions", json={"seed": "joinery"})
+        assert response.status_code == 201, response.text
+        data = response.json()["workspace"]
+        assert data["live"]["job"] is None and data["live"]["history"] == []
+        assert data["live_available"] is True
+        assert data["demo_seed"] == "joinery-v1"
+        assert data["metrics"]["owed_by_clients"] == "1260.00"
+        assert data["sales"][0]["contact"] == RECIPIENT
+        assert data["draft"] is None and data["graph"] is None and data["receipts"] == []
+        retained = client.get("/api/workspace", headers={"X-Archon-Session": old["session"]}).json()
+        assert "live" not in retained and retained["live_available"] is True
+        assert retained["sources"] == []
+
+
 class Provider:
     def __init__(self):
         self.meta = SimpleNamespace(region_name="eu-west-1")
