@@ -1,4 +1,14 @@
 {
+  "incoming_clarity_wave": {
+    "status": "SOURCE_CANDIDATE_REQUIRES_CI_AND_DEPLOYED_ACCEPTANCE",
+    "human_uat": "NOT_RUN",
+    "scope": "Fictional data is separate from real provider execution. Opt-in intake-only webhook; no connected mailbox or automatic email approval.",
+    "cases": [
+      { "id": "AR-UAT-37", "steps": ["Open a controlled-live workspace", "Compare Dashboard, Records, Workspace draft evidence and History mode labels", "Return to an older simulation workspace"], "expected": "Live session says Bedrock and controlled SES, not simulated delivery. Retained simulation stays scripted and simulated. A provider ID never claims independent delivery.", "automated_test": "frontend/tests/runtime-copy.test.tsx" },
+      { "id": "AR-UAT-38", "steps": ["Open Incoming", "Read scope and explicitly authorize metered fictional intake", "Enable the intake-only key", "Configure an external HTTP sender with the key in secret settings", "POST one fictional invoice with a unique event_id", "Observe status then inspect Records"], "expected": "Accepted event has a durable job and checked source. No draft or email is created automatically. Key is not a workspace-read or approval credential. Automatic arrival is not proof of correct extraction.", "automated_test": "tests/test_incoming_api.py; frontend/e2e-live/incoming.spec.ts (CI provider doubles only)" },
+      { "id": "AR-UAT-39", "steps": ["Retry identical event after a lost response", "Try changed text under the same event_id", "Revoke key", "Attempt a new incoming event with old key"], "expected": "Identical event reuses its saved job. Changed content is refused409. Revoked key is refused401; already accepted work may finish. No automatic send, new operating grant or budget reset.", "automated_test": "tests/test_incoming_api.py; frontend/tests/incoming.test.tsx" }
+    ]
+  },
   "populated_demo_wave": {
     "status": "SOURCE_CANDIDATE_REQUIRES_CI_AND_DEPLOYED_ACCEPTANCE",
     "human_uat": "NOT_RUN",
