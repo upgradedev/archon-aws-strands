@@ -26,6 +26,10 @@ def template():
         "AWSTemplateFormatVersion": "2010-09-09",
         "Description": "Archon Agents for Humans synthetic session API, independent of other Archon deployments.",
         "Parameters": {
+            "LiveEnabled": {"Type": "String", "AllowedValues": ["false", "true"], "Default": "false"},
+            "LiveWorkerArn": {"Type": "String", "Default": "", "AllowedPattern": "^$|arn:aws:lambda:eu-west-1:[0-9]{12}:function:archon-afh-providers"},
+            "LiveSender": {"Type": "String", "Default": ""},
+            "LiveRecipient": {"Type": "String", "Default": ""},
             "CodeBucket": {"Type": "String", "AllowedPattern": "archon-afh-deploy-[0-9]{12}-eu-west-1"},
             "CodeKey": {"Type": "String", "AllowedPattern": "releases/[0-9a-f]{40}/archon-api.zip"},
             "CommitSha": {"Type": "String", "AllowedPattern": "[0-9a-f]{40}"},
@@ -38,6 +42,7 @@ def template():
                     "LifecycleConfiguration": {"Rules": [
                         {"Id": "synthetic-session-retention", "Status": "Enabled", "Prefix": "sessions/", "ExpirationInDays": 90},
                         {"Id": "old-session-versions", "Status": "Enabled", "NoncurrentVersionExpirationInDays": 30},
+                        {"Id": "provider-journal-retention", "Status": "Enabled", "Prefix": "provider/", "ExpirationInDays": 90},
                     ]},
                     "Tags": [{"Key": "project", "Value": "archon-agentsforhumans"}],
                 },
@@ -83,6 +88,8 @@ def template():
                     "Code": {"S3Bucket": ref("CodeBucket"), "S3Key": ref("CodeKey")},
                     "Timeout": 28, "MemorySize": 1024, "ReservedConcurrentExecutions": 5,
                     "Environment": {"Variables": {
+                        "ARCHON_LIVE_ENABLED": ref("LiveEnabled"), "ARCHON_LIVE_WORKER_ARN": ref("LiveWorkerArn"),
+                        "ARCHON_LIVE_SENDER": ref("LiveSender"), "ARCHON_LIVE_RECIPIENT": ref("LiveRecipient"),
                         "ARCHON_STATE_BUCKET": ref("State"), "ARCHON_STATE_PREFIX": "sessions/",
                         "ARCHON_COMMIT_SHA": ref("CommitSha"),
                     }},

@@ -131,6 +131,17 @@ def mutate(handle: str, request: Mutation, operation: str, action):
 
 @app.get("/api/health")
 def health():
+    from archon.web import live
+
+    if live.enabled():
+        live.configuration()
+        return {
+            "status": "ok", "mode": "controlled-live", "live_send": True, "live_model": True,
+            "commit": os.environ.get("ARCHON_COMMIT_SHA", "local-unversioned"),
+            "reader": "source-checked-semantic", "model": "eu.anthropic.claude-opus-5",
+            "orchestration": "Strands", "provider": "SES-controlled-recipient",
+            "note": "Configuration, not proof of invocation or delivery; inspect job receipts.",
+        }
     return {
         "status": "ok",
         "mode": "synthetic",
@@ -144,11 +155,20 @@ def health():
     }
 
 
+@app.get("/api/providers")
+def providers():
+    from archon.web import live
+
+    return {"live": live.enabled(), "data": "fictional business examples"}
+
+
 @app.post("/api/sessions", status_code=201)
 def create_session(request: SessionRequest):
     handle, state = secrets.token_hex(32), workspace.fresh()
     from archon.web import live
 
+    if request.mode == "live" and not live.enabled():
+        raise ValueError("Live mode is not available in this deployment.")
     if request.mode == "live" or (request.mode is None and live.enabled()):
         config = live.configuration()
         state.update(provider_mode="live", test_recipient=config["recipient"])

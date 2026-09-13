@@ -114,17 +114,19 @@ def run(store, journal, handle, job_id, *, client_factory=None, outbox_factory=l
                 sender=config["sender"], controlled_recipient=config["recipient"],
                 authorized=True, log=log,
             )
+            outbox.clock = lambda: datetime.now(UTC)
             workspace.approve(state, **job["payload"], outbox=outbox)
         else:
             if client_factory is None:
                 import boto3
                 from botocore.config import Config
 
-                client_factory = lambda: boto3.client(
-                    "bedrock-runtime", region_name="eu-west-1",
-                    config=Config(connect_timeout=5, read_timeout=60,
-                                  retries={"total_max_attempts": 1}),
-                )
+                def client_factory():
+                    return boto3.client(
+                        "bedrock-runtime", region_name="eu-west-1",
+                        config=Config(connect_timeout=5, read_timeout=60,
+                                      retries={"total_max_attempts": 1}),
+                    )
             metered = MeteredConverse(client_factory(), admission, journal, job_id)
             if job["operation"] == "intake":
                 workspace.intake(
@@ -160,6 +162,7 @@ def run(store, journal, handle, job_id, *, client_factory=None, outbox_factory=l
 
                 state["sends"][saved.fingerprint] = asdict(saved)
     workspace.event(state, "Real-provider job " + job["status"], job["id"])
+    state.setdefault("provider_history", []).append(public_job(job))
     state["revision"] += 1
     store.put(handle, state, version)
 
@@ -174,9 +177,11 @@ def handler(event, context):
 def public_job(job):
     if not job:
         return None
-    safe = {k: v for k, v in job.items() if k not in {"payload", "sender", "recipient", "request_id"}}
+    hidden = {"payload", "sender", "recipient", "request_id"}
+    safe = {k: v for k, v in job.items() if k not in hidden}
     if job["status"] == "running":
         elapsed = (datetime.now(UTC) - datetime.fromisoformat(job["started_at"])).total_seconds()
         if elapsed > 900:
-            safe.update(status="unknown", error="Worker interrupted. Operator reconciliation required.")
+            safe.update(status="unknown",
+                        error="Worker interrupted. Operator reconciliation required.")
     return safe

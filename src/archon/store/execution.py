@@ -1,11 +1,16 @@
 """Durable provider journals; conditional writes happen before external effects."""
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import asdict
 
 from archon.store.sessions import Conflict, MissingSession
 from archon.store.sqlite import PROVIDER_ACCEPTED, SendRecord
-from archon.web.workspace import digest
+
+
+def digest(value):
+    return hashlib.sha256(json.dumps(value, sort_keys=True).encode()).hexdigest()
 
 
 class Journal:

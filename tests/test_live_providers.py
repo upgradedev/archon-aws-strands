@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
+from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
@@ -54,6 +55,7 @@ def setup(tmp_path, monkeypatch):
 
 class Provider:
     def __init__(self):
+        self.meta = SimpleNamespace(region_name="eu-west-1")
         self.calls = []
         self.counts = []
 
@@ -315,7 +317,8 @@ def test_ses_timeout_persists_unknown_outside_session_even_if_session_write_fail
 def test_live_session_selection_is_server_gated(setup, monkeypatch):
     with TestClient(api.app) as client:
         assert client.post("/api/sessions", json={}).json()["workspace"]["live"]["model"]
-        assert "live" not in client.post("/api/sessions", json={"mode": "synthetic"}).json()["workspace"]
+        synthetic = client.post("/api/sessions", json={"mode": "synthetic"}).json()["workspace"]
+        assert "live" not in synthetic
         monkeypatch.setenv("ARCHON_LIVE_ENABLED", "false")
-        assert client.post("/api/sessions", json={"mode": "live"}).status_code == 503
+        assert client.post("/api/sessions", json={"mode": "live"}).status_code == 422
         assert "live" not in client.post("/api/sessions", json={}).json()["workspace"]

@@ -572,7 +572,8 @@ def snapshot(state: dict) -> dict:
             reader="Amazon Bedrock semantic extraction; source checks before posting",
             provider="Amazon SES; restricted verified test recipient",
             live={"model": True, "mail": True, "data": "fictional business examples",
-                  "job": public_job(state.get("provider_job"))},
+                  "job": public_job(state.get("provider_job")),
+                  "history": state.get("provider_history", [])},
             samples={k: v.replace("accounts@buildco.example", state["test_recipient"])
                      for k, v in SAMPLES.items()},
         )

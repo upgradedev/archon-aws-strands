@@ -6,8 +6,8 @@ from datetime import UTC, datetime
 from decimal import ROUND_CEILING, Decimal
 from threading import Lock
 
+from archon.store.execution import digest
 from archon.store.sessions import Conflict
-from archon.web.workspace import digest
 
 MODEL_ID = "eu.anthropic.claude-opus-5"
 COUNT_MODEL_ID = "anthropic.claude-opus-5"
@@ -85,6 +85,7 @@ class MeteredConverse:
 
     def __init__(self, client, admission, journal, job_id, max_calls=20):
         self.client, self.admission, self.journal = client, admission, journal
+        self.meta = client.meta
         self.job_id, self.max_calls, self.calls = job_id, max_calls, 0
         self.lock = Lock()
 
@@ -145,7 +146,9 @@ class MeteredConverse:
             saved.update(status="unknown", error=type(exc).__name__,
                          finished_at=datetime.now(UTC).isoformat())
             self.journal.update(key, saved, version)
-            raise LiveRefused("Model execution failed or is uncertain. No automatic retry.") from exc
+            raise LiveRefused(
+                "Model execution failed or is uncertain. No automatic retry."
+            ) from exc
 
 
 def model_for(client):

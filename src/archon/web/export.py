@@ -159,6 +159,12 @@ def evidence_bundle(state: dict, commit: str) -> dict:
         "A hash identifies bytes, not truth, authenticity, bank settlement or compliance.",
         "SOURCE DECISIONS",
     ]
+    actual = state.get("provider_mode") == "live"
+    if actual:
+        lines[0] = "ARCHON / CONTROLLED REAL-PROVIDER SESSION / FICTIONAL BUSINESS DATA"
+        lines[2] = "Extraction: source-checked Bedrock. Reasoning: Strands with Bedrock."
+        lines[3] = "Provider: restricted SES; provider acceptance is not delivery proof."
+        lines.extend(["PROVIDER JOB HISTORY", safe(json.dumps(state.get("provider_history", [])))])
     for source in state["sources"]:
         lines += [
             f"{source['id']} / {source['status']} / {source['kind'] or 'unreadable'}",
@@ -191,7 +197,9 @@ def evidence_bundle(state: dict, commit: str) -> dict:
               "After timeout or conflict, refresh durable state before an explicit retry.",
               "Unknown delivery outcomes must not be retried automatically.",
               "LIMITS",
-              "Synthetic evidence; no connected mailbox, bank, live model or delivery proof.",
+              ("Fictional business data; no connected inbox or bank. Model advice may be wrong."
+               if actual else
+               "Synthetic evidence; no connected mailbox, bank, live model or delivery proof."),
               "Redaction is a best-effort filter; review the bundle before sharing.",
               "Human active time, money recovered and time saved: unknown; not measured."]
     return {"revision": state["revision"], "commit": commit, "text": "\n".join(lines)}
