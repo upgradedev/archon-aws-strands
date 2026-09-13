@@ -45,6 +45,19 @@ jobs:
           assert response["statusCode"] == 200, response
           body = json.loads(response["body"])
           assert os.environ["ARCHON_COMMIT_SHA"] in json.dumps(body), body
+          from archon.web import workspace
+          state = workspace.fresh()
+          for source in (workspace.SAMPLES["invoice"], workspace.SAMPLES["payment"]):
+              workspace.intake(state, source)
+          workspace.propose(state, "JN-4410", "2026-09-20: 1260.00 EUR")
+          original = dict(state["proposal"])
+          workspace.counter(state, original["fingerprint"], "2026-09-25: 1260.00 EUR")
+          view = workspace.snapshot(state)
+          assert view["sales"][0]["outstanding"] == "1260.00"
+          assert view["terms_history"][-1]["original"] == original
+          assert view["arrangements"] == [] and view["receipts"] == []
+          assert view["proposal"] is None and len(view["queue"]["ready"]) == 1
+          print("Packaged counterproposal: retained original; no payment, acceptance or send")
           from unittest.mock import patch
           from archon.adapters import bedrock
           from archon.adapters.ledger_script import LedgerScriptModel
