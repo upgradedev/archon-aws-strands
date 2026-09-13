@@ -504,3 +504,99 @@ def test_token_is_absent_from_ordinary_reads_and_export_before_and_after_executi
     inspect_reads()
     record, _ = harness.sessions.get(key)
     assert token not in json.dumps(record) and secret not in json.dumps(record)
+
+
+@pytest.mark.parametrize("previously_enabled", [False, True], ids=["no-record", "already-revoked"])
+def test_noop_disable_replay_cannot_revoke_a_subsequently_enabled_key(harness, previously_enabled):
+    key = incoming.connection_key(OWNER)
+    if previously_enabled:
+        enable(harness, request_id="initial-enable-0001")
+        initial = configure(harness, "disable", "initial-disable-0002")
+        assert initial.status_code == 200 and initial.json()["enabled"] is False
+    else:
+        with pytest.raises(MissingSession):
+            harness.sessions.get(key)
+    owner_before = harness.sessions.get(OWNER)
+    disabled = configure(harness, "disable", "noop-disable-request-D")
+    assert disabled.status_code == 200 and disabled.json()["enabled"] is False
+    assert "token" not in disabled.json()
+    disabled_record = harness.sessions.get(key)
+    repeated = configure(harness, "disable", "noop-disable-request-D")
+    assert repeated.status_code == 200 and repeated.json() == disabled.json()
+    assert harness.sessions.get(key) == disabled_record
+
+    token = enable(harness, request_id="subsequent-enable-E")
+    enabled_record = harness.sessions.get(key)
+    stale = configure(harness, "disable", "noop-disable-request-D")
+    assert stale.status_code == 409
+    assert "Connection changed" in stale.json()["detail"]
+    assert harness.sessions.get(key) == enabled_record
+    assert harness.sessions.get(OWNER) == owner_before
+    assert enable(harness, request_id="subsequent-enable-E") == token
+    assert harness.sessions.get(key) == enabled_record
+    status = harness.client.get("/api/incoming/connection", headers={"X-Archon-Session": OWNER})
+    assert status.status_code == 200 and status.json()["enabled"] is True
+    assert "token" not in status.json()
+    harness.dispatch.assert_not_called()
+
+    accepted = receive(harness, token)
+    assert accepted.status_code == 202, "The newer key must remain usable after stale disable"
+    harness.dispatch.assert_called_once_with(OWNER, accepted.json()["job_id"])
+    saved, _ = harness.sessions.get(OWNER)
+    assert saved["provider_job_count"] == 1 and len(saved["requests"]) == 1
+
+
+@pytest.mark.parametrize("completed", [False, True], ids=["queued-replay", "completed-replay"])
+def test_job_cap_rejects_new_event_but_preserves_same_event_replay(harness, completed):
+    token = enable(harness)
+    state, version = harness.sessions.get(OWNER)
+    # Seed prior usage, then exercise the twentieth admission through the public API.
+    state["provider_job_count"] = 19
+    harness.sessions.put(OWNER, state, version)
+    accepted = receive(harness, token)
+    assert accepted.status_code == 202
+    job_id = accepted.json()["job_id"]
+    provider = Reader()
+    if completed:
+        run_job(harness, job_id, provider)
+    before = harness.sessions.get(OWNER)
+    assert before[0]["provider_job_count"] == 20
+    connection = harness.sessions.get(incoming.connection_key(OWNER))
+    grant = harness.journal.read("operating-grant")
+    calls = len(provider.calls)
+    harness.dispatch.assert_called_once_with(OWNER, job_id)
+
+    refused = receive(harness, token, event_id="incoming-event-over-cap")
+    assert refused.status_code == 422, refused.text
+    detail = refused.json()["detail"].lower()
+    assert "twenty-job limit" in detail and "new workspace" in detail
+    assert harness.sessions.get(OWNER) == before
+    assert harness.sessions.get(incoming.connection_key(OWNER)) == connection
+    assert harness.journal.read("operating-grant") == grant
+    assert len(provider.calls) == calls
+    harness.dispatch.assert_called_once_with(OWNER, job_id)
+
+    replay = receive(harness, token)
+    assert replay.status_code == 202
+    assert replay.json() == {**accepted.json(), "status": "completed" if completed else "queued"}
+    assert harness.sessions.get(OWNER) == before
+    assert harness.sessions.get(incoming.connection_key(OWNER)) == connection
+    assert harness.journal.read("operating-grant") == grant
+    assert len(provider.calls) == calls
+    # A queued retry may reschedule only the same durable job, never a new execution.
+    assert harness.dispatch.call_count == (1 if completed else 2)
+    assert all(call.args == (OWNER, job_id) for call in harness.dispatch.call_args_list)
+    status = harness.client.get("/api/incoming/connection", headers={"X-Archon-Session": OWNER})
+    assert status.status_code == 200
+    assert [event["event_id"] for event in status.json()["events"]] == [EVENT]
+
+    run_job(harness, job_id, provider)
+    finished = harness.sessions.get(OWNER)
+    spent = harness.journal.read("operating-grant")
+    run_job(harness, job_id, provider)
+    assert harness.sessions.get(OWNER) == finished
+    assert harness.journal.read("operating-grant") == spent
+    assert len(provider.calls) == 1
+    assert finished[0]["provider_job_count"] == 20
+    assert len(finished[0]["requests"]) == len(finished[0]["provider_history"]) == 1
+    assert len(finished[0]["sources"]) == 1
