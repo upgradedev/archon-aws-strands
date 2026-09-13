@@ -27,6 +27,20 @@ class LiveWorkerContract(unittest.TestCase):
         self.assertEqual(resources["Failures"]["DeletionPolicy"], "Retain")
         self.assertTrue(resources["Failures"]["Properties"]["SqsManagedSseEnabled"])
 
+    def test_paid_capabilities_expire_at_the_operator_deadline(self):
+        stack = template()
+        self.assertNotIn("Default", stack["Parameters"]["ExpiresAt"])
+        policy = stack["Resources"]["Role"]["Properties"]["Policies"][0]["PolicyDocument"]["Statement"]
+        paid = {"bedrock:InvokeModel", "bedrock-mantle:CountTokens", "ses:SendEmail"}
+        checked = set()
+        for row in policy:
+            actions = set(row["Action"]) & paid
+            if actions:
+                self.assertEqual(row["Condition"]["DateLessThan"]["aws:CurrentTime"],
+                                 {"Ref": "ExpiresAt"})
+                checked |= actions
+        self.assertEqual(checked, paid)
+
     def test_api_stays_off_by_default_and_keeps_direct_provider_denies(self):
         api = api_template()
         self.assertEqual(api["Parameters"]["LiveEnabled"]["Default"], "false")

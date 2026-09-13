@@ -45,3 +45,27 @@ for (const scenario of ['current', 'missing', 'malformed', 'stale frontend', 'st
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
   });
 }
+
+for (const scenario of ['current', 'unmeasured model', 'invented delivery', 'wrong runtime']) {
+  test(`controlled-provider proof renderer: ${scenario}`, async ({ page }) => {
+    const record = { ...evidence, schema_version: 2, status: 'CONTROLLED_PROVIDER_JOURNEYS_PASSED',
+      mode: 'controlled-live', live_send: true, live_model: true,
+      counts: { total: 3, passed: 3, failed: 0, skipped: 0 },
+      limits: 'Fictional business data; actual Bedrock and controlled SES provider acceptance. No mailbox arrival, bank settlement, independent model superiority or human UAT proven.',
+      provider_checks: { model_calls: scenario === 'unmeasured model' ? 0 : 45, input_tokens: 5000,
+        output_tokens: 900, emails_accepted: 3, delivery_proven: scenario === 'invented delivery' } };
+    await page.route(url => url.pathname === '/', route => route.fulfill({ contentType: 'text/html',
+      body: `<html><head><meta name="application-commit" content="${front}"></head></html>` }));
+    await page.route('**/release.json', route => route.fulfill({ json: { commit: front } }));
+    await page.route('**/api/health', route => route.fulfill({ json: scenario === 'wrong runtime' ? health : {
+      ...health, mode: 'controlled-live', live_model: true, live_send: true,
+      model: 'eu.anthropic.claude-opus-5', provider: 'SES-controlled-recipient' } }));
+    await page.route('**/acceptance.json', route => route.fulfill({ json: record }));
+    await page.goto('/acceptance.html');
+    await expect(page.getByRole('status')).toHaveText(scenario === 'current'
+      ? 'Controlled real-provider journeys passed for this release pair'
+      : scenario === 'wrong runtime' ? 'Runtime scope does not match' : 'Current acceptance unavailable');
+    if (scenario === 'current') await expect(page.locator('#detail')).toContainText('Mailbox arrival and human signoff remain unproven');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
+  });
+}

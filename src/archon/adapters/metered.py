@@ -81,6 +81,20 @@ class Admission:
                 continue
         raise LiveRefused("Budget contention: no provider call was admitted.")
 
+    def pause(self, reason):
+        """Keep spent reservations, but stop admission after a provider contract violation."""
+        for _ in range(20):
+            grant, version = self.journal.read("operating-grant")
+            if not grant:
+                return
+            grant.update(enabled=False, pause_reason=reason)
+            try:
+                self.journal.update("operating-grant", grant, version)
+                return
+            except Conflict:
+                continue
+        raise LiveRefused("Could not persist the provider stop; operator intervention required.")
+
 
 class MeteredConverse:
     """The only inference entry point for intake AND every Strands tool turn."""
@@ -140,9 +154,15 @@ class MeteredConverse:
         try:
             response = self.client.converse(**request)
             usage = response.get("usage", {})
-            if not all(type(usage.get(k)) is int for k in ("inputTokens", "outputTokens")):
+            saved.update(response=response, usage=usage)
+            if not isinstance(usage, dict) or not all(
+                type(usage.get(k)) is int and usage[k] >= 0
+                for k in ("inputTokens", "outputTokens")
+            ):
+                self.admission.pause("Provider returned unusable usage evidence")
                 raise LiveRefused("The model response has no usable token-usage evidence.")
             if usage["inputTokens"] > counted or usage["outputTokens"] > output_limit:
+                self.admission.pause("Provider usage exceeded its reserved admission")
                 raise LiveRefused("Provider usage exceeded admission; operator review required.")
             saved.update(status="completed", response=response, usage=usage,
                          finished_at=datetime.now(UTC).isoformat())
@@ -153,6 +173,9 @@ class MeteredConverse:
             # not raw SDK text which can include private input or resource details.
             saved.update(status="unknown", error=type(exc).__name__,
                          finished_at=datetime.now(UTC).isoformat())
+            code = getattr(exc, "response", {}).get("Error", {}).get("Code")
+            if isinstance(code, str) and code.replace("-", "").replace("_", "").isalnum():
+                saved["provider_error_code"] = code[:80]
             self.journal.update(key, saved, version)
             raise LiveRefused(
                 "Model execution failed or is uncertain. No automatic retry."

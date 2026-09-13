@@ -183,6 +183,31 @@ def test_unknown_model_call_is_not_refunded_or_retried(setup):
     assert Decimal(journal.read("operating-grant")[0]["reserved_usd"]) > 0
 
 
+@pytest.mark.parametrize("usage", [None, {"inputTokens": 101, "outputTokens": 20},
+                                 {"inputTokens": 100, "outputTokens": 1025}])
+def test_unpriced_usage_pauses_admission_and_retains_the_received_response(setup, usage):
+    _, journal = setup
+
+    class Unexpected(Provider):
+        def converse(self, **kwargs):
+            result = super().converse(**kwargs)
+            result["usage"] = usage
+            return result
+
+    provider = Unexpected()
+    with pytest.raises(LiveRefused):
+        MeteredConverse(provider, Admission(journal), journal, "job").converse(**request())
+    grant, _ = journal.read("operating-grant")
+    assert grant["enabled"] is False
+    assert Decimal(grant["reserved_usd"]) > 0
+    row, _ = journal.read("call:job:1")
+    assert row["status"] == "unknown" and row["usage"] == usage
+    assert row["response"]["usage"] == usage
+    with pytest.raises(LiveRefused, match="paused"):
+        MeteredConverse(provider, Admission(journal), journal, "next").converse(**request())
+    assert len(provider.calls) == 1
+
+
 def test_admission_handles_two_workers_with_six_parallel_readers_each(setup):
     _, journal = setup
 
