@@ -2,6 +2,13 @@ name: Deploy AWS frontend
 on:
   push:
     branches: [main]
+    # Source and browser CI still run on every main push. Report-only maintenance
+    # must not republish the product and automatically repeat paid email journeys.
+    paths-ignore:
+      - deploy/release_acceptance.py
+      - tests/test_live_release.py
+      - .github/workflows/recover-acceptance.yml
+      - .github/workflows/frontend-deploy.yml
   workflow_dispatch:
 permissions:
   contents: read

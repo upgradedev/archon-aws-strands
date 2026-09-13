@@ -1,0 +1,116 @@
+name: Recover observed provider report
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - deploy/release_acceptance.py
+      - tests/test_live_release.py
+      - .github/workflows/recover-acceptance.yml
+  push:
+    branches: [main]
+    paths:
+      - deploy/release_acceptance.py
+      - tests/test_live_release.py
+      - .github/workflows/recover-acceptance.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  recover:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover already-observed evidence without AWS credentials or provider calls
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import hashlib, importlib.util, io, json, os, subprocess, tempfile, zipfile
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          repo = 'upgradedev/archon-aws-strands'
+          run_id, attempt, artifact_id = 34771491643, 1, 10321609465
+          sha = 'b7637d01fecefc01fac74216f8b0cb4d0569cca3'
+          digest = 'ab20a03d8e991972158dc28fadb262c0260de594071387913e1c3010cecb4c76'
+          def api(path, binary=False):
+              value = subprocess.check_output(['gh', 'api', f'repos/{repo}/{path}'], timeout=60)
+              return value if binary else json.loads(value)
+
+          source = api(f'actions/runs/{run_id}/attempts/{attempt}')
+          assert source['id'] == run_id and source['run_attempt'] == attempt
+          assert source['repository']['full_name'] == repo and source['head_sha'] == sha
+          assert source['head_branch'] == 'main' and source['status'] == 'completed'
+          assert source['path'] == '.github/workflows/aws-uat.yml'
+          assert source['event'] == 'workflow_dispatch' and source['conclusion'] == 'failure'
+          jobs = api(f'actions/runs/{run_id}/attempts/{attempt}/jobs?per_page=100')
+          assert jobs['total_count'] == len(jobs['jobs']) == 2
+          observed = [j for j in jobs['jobs'] if j['name'] == 'acceptance']
+          assert len(observed) == 1 and observed[0]['conclusion'] == 'failure'
+          steps = {s['name']: s for s in observed[0]['steps']}
+          gates = ['Verify real AWS release and explicit provider scope before any action',
+                   'Real CloudFront API and durable AWS workspace journeys',
+                   'Verify the tested release did not change during the journeys']
+          assert all(steps[name]['conclusion'] == 'success' for name in gates)
+          assert [s['name'] for s in observed[0]['steps'] if s['conclusion'] == 'failure'] == [
+              'Prepare sanitized observed acceptance summary']
+          metadata = api(f'actions/artifacts/{artifact_id}')
+          assert metadata['id'] == artifact_id and metadata['expired'] is False
+          assert metadata['name'] == f'aws-acceptance-{run_id}'
+          assert metadata['workflow_run']['id'] == run_id
+          assert metadata['workflow_run']['head_sha'] == sha
+          assert metadata['digest'] == 'sha256:' + digest
+          archive = api(f'actions/artifacts/{artifact_id}/zip', binary=True)
+          assert len(archive) == metadata['size_in_bytes'] < 25_000_000
+          assert hashlib.sha256(archive).hexdigest() == digest
+          spec = importlib.util.spec_from_file_location('release', 'deploy/release_acceptance.py')
+          release = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(release)
+          wanted = ['acceptance-preflight.json', 'acceptance-postflight.json',
+                    'frontend/artifacts/browser-junit.xml'] + [
+              f'frontend/artifacts/live-provider-{p}.json' for p in sorted(release.PROJECTS)]
+          with tempfile.TemporaryDirectory() as directory:
+              root = Path(directory)
+              with zipfile.ZipFile(io.BytesIO(archive)) as z:
+                  for name in wanted:
+                      assert z.namelist().count(name) == 1 and z.getinfo(name).file_size < 1_000_000
+                      target = root / name
+                      target.parent.mkdir(parents=True, exist_ok=True)
+                      target.write_bytes(z.read(name))
+              before = json.loads((root / wanted[0]).read_text())
+              after = json.loads((root / wanted[1]).read_text())
+              assert before['frontend_commit'] == before['backend_commit'] == sha
+              # This is the observed producer's verified metadata, not the recovery run's identity.
+              context = {'GITHUB_REPOSITORY': repo, 'GITHUB_REF': 'refs/heads/main',
+                         'GITHUB_SHA': sha, 'GITHUB_RUN_ID': str(run_id),
+                         'GITHUB_RUN_ATTEMPT': str(attempt),
+                         **dict.fromkeys(('PREFLIGHT', 'JOURNEYS', 'POSTFLIGHT'), 'success')}
+              receipt = release.receipt(before, after, root / wanted[2],
+                                        root / 'frontend/artifacts', context)
+              receipt['observed_at'] = steps[gates[-1]]['completed_at']
+              release.validate(receipt)
+          value = {'schema_version': 'archon.report-recovery.v1',
+                   'status': 'HISTORICAL_PROVIDER_JOURNEYS_RECOVERED',
+                   'source_run_conclusion': source['conclusion'],
+                   'source_artifact_id': artifact_id, 'source_archive_sha256': digest,
+                   'recovery_run_url': f"https://github.com/{repo}/actions/runs/{os.environ['GITHUB_RUN_ID']}",
+                   'recovery_commit': os.environ['GITHUB_SHA'],
+                   'recovered_at': datetime.now(timezone.utc).isoformat(),
+                   'observed': receipt,
+                   'limits': 'Historical report recovery only. Original workflow remains failed. '
+                             'No deployment, new provider calls, mailbox proof or human UAT. '
+                             'This artifact does not replace the public current-release receipt.'}
+          Path('recovered-acceptance.json').write_text(json.dumps(value, indent=2) + '\n')
+          print(json.dumps(value, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: recovered-provider-report-${{ github.run_id }}-${{ github.run_attempt }}
+          path: recovered-acceptance.json
+          if-no-files-found: error
+          retention-days: 90
