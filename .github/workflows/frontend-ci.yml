@@ -123,6 +123,17 @@ jobs:
           path: frontend/test-results/**/*.png
           retention-days: 90
           if-no-files-found: warn
+      - name: Compact closeout visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: closeout-visuals-${{ github.run_id }}
+          path: |
+            frontend/test-results/**/cold-main-paint.png
+            frontend/test-results/**/counterproposal-retained.png
+            frontend/test-results/**/reader-conflict-held.png
+          retention-days: 90
+          if-no-files-found: warn
       - name: Evidence and deployable static build
         if: always()
         uses: actions/upload-artifact@v4

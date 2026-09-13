@@ -156,6 +156,7 @@ test('cold landing records paint support and main visibility without a session r
   }));
   await info.attach('cold-paint.json', { contentType: 'application/json', body: JSON.stringify({ ...observation, browser: info.project.name, url: page.url(), source: process.env.GITHUB_SHA, expectedRelease: process.env.EXPECTED_RELEASE, scope: 'Cold browser context; CDN cache not purged. Main visibility is not FCP. Unsupported paint APIs are null, not zero. Not an X1 rerun.' }) });
   await page.screenshot({ path: info.outputPath('cold-main-paint.png') });
+  console.log('ARCHON_COLD_PAINT ' + JSON.stringify({ ...observation, project: info.project.name, url: page.url(), expectedRelease: process.env.EXPECTED_RELEASE, source: process.env.GITHUB_SHA }));
   expect(observation.session).toBeNull(); expect(observation.mainVisible).toBeLessThan(2500);
   if (observation.supported.includes('paint')) { expect(observation.fcp).not.toBeNull(); expect(observation.fcp!).toBeLessThan(2500); }
   if (observation.supported.includes('largest-contentful-paint')) { expect(observation.lcp).not.toBeNull(); expect(observation.lcp!).toBeLessThan(2500); }
