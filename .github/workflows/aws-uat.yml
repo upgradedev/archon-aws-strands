@@ -49,12 +49,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Verify real AWS release before any synthetic action
+      - name: Verify real AWS release and explicit provider scope before any action
         id: preflight
         run: |
           python -c 'import os,re; assert re.fullmatch("[0-9a-f]{40}", os.environ["EXPECTED_RELEASE"]), "Full release SHA required"'
           python infra/frontend_smoke.py --url "$ARCHON_UI_URL" --sha "$EXPECTED_RELEASE"
-          python infra/release_acceptance.py pair --sha "$EXPECTED_RELEASE" --backend "$EXPECTED_BACKEND" --output acceptance-preflight.json
+          python deploy/release_acceptance.py pair --sha "$EXPECTED_RELEASE" --backend "$EXPECTED_BACKEND" --output acceptance-preflight.json
+          python -c 'import json,os; p=json.load(open("acceptance-preflight.json")); print("ARCHON_LIVE_ACCEPTANCE="+str(p["mode"] == "controlled-live").lower(), file=open(os.environ["GITHUB_ENV"], "a"))'
       - name: Install browser tools on CI only
         working-directory: frontend
         run: |
@@ -71,7 +72,7 @@ jobs:
         if: always() && steps.journeys.outcome != 'skipped'
         run: |
           python infra/frontend_smoke.py --url "$ARCHON_UI_URL" --sha "$EXPECTED_RELEASE"
-          python infra/release_acceptance.py pair --sha "$EXPECTED_RELEASE" --backend "$EXPECTED_BACKEND" --output acceptance-postflight.json
+          python deploy/release_acceptance.py pair --sha "$EXPECTED_RELEASE" --backend "$EXPECTED_BACKEND" --output acceptance-postflight.json
       - name: Prepare sanitized observed acceptance summary
         id: receipt
         env:
@@ -79,7 +80,7 @@ jobs:
           JOURNEYS: ${{ steps.journeys.outcome }}
           POSTFLIGHT: ${{ steps.postflight.outcome }}
         run: |
-          python infra/release_acceptance.py receipt --output acceptance.json
+          python deploy/release_acceptance.py receipt --output acceptance.json
           echo "artifact=acceptance-summary-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
           echo "attempt=${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
       - name: Hand only aggregate evidence to separate publisher
@@ -107,6 +108,7 @@ jobs:
           path: |
             frontend/test-results/
             frontend/artifacts/browser-junit.xml
+            frontend/artifacts/live-provider-*.json
             frontend/playwright-report/
             frontend/UAT.testbook.*
             acceptance-preflight.json
@@ -145,4 +147,4 @@ jobs:
           role-to-assume: ${{ vars.FRONTEND_RELEASE_ROLE_ARN }}
           aws-region: eu-west-1
       - name: Publish sanitized receipt only for the still-served pair
-        run: python infra/release_acceptance.py publish --receipt acceptance-summary/acceptance.json
+        run: python deploy/release_acceptance.py publish --receipt acceptance-summary/acceptance.json

@@ -27,6 +27,7 @@ export interface TermsDecision {
   original?: { invoice_id: string; body?: string; fingerprint: string };
 }
 export interface Workspace {
+  live?: { model: boolean; mail: boolean; data: string; job: ProviderJob | null; history?: ProviderJob[] };
   revision: number; as_of: string; synthetic: true; reader: string; provider: string;
   business?: { name: string; email: string; source: string };
   resolutions?: { decision: string; note: string; at: string }[];
@@ -48,3 +49,10 @@ export interface Workspace {
   activity: { id: number; at: string; title: string; detail: string }[];
 }
 export type Mutate = (path: string, payload?: Record<string, unknown>) => Promise<boolean>;
+
+export interface ProviderJob {
+  id: string; operation: string; status: 'queued' | 'running' | 'completed' | 'failed' | 'unknown';
+  error?: string; created_at: string;
+  calls?: { call_id: string; status: string; model_id: string; reserved_usd: string;
+    usage?: { inputTokens: number; outputTokens: number } }[];
+}

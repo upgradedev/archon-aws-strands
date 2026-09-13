@@ -2,6 +2,52 @@
 
 **Archon helps a joiner reconcile inbox invoices and approve an exact collection draft with the source evidence beside it.**
 
+### Real AI with controlled email
+
+Archon implements a real-provider path in the **same React application**:
+semantic intake, Strands reasoning, saved asynchronous jobs, explicit real-email
+approval and a separate durable SES outbox. The joiner uses Records in either
+controlled-live mode or the retained synthetic mode with a scripted model and
+simulated mail. Read the runtime mode in the application and
+[API health](https://d2ssmv59q16d0b.cloudfront.net/api/health), then check
+[current release acceptance](https://d2ssmv59q16d0b.cloudfront.net/acceptance.html).
+The [public AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/) and
+[evidence](#evidence-and-limits) / [disclosures](#pre-existing-work-disclosed)
+distinguish the deployed pair from historical measurements. Source availability
+does not prove a particular provider is activated or accepted.
+
+`deploy/live_provider_stack.py` defines an isolated worker and retained failure
+queue; `deploy/live_api_stack.py` adds opt-in parameters to a separately rendered
+API template. Historical templates under `infra/` remain byte-identical, and
+their old measurement does not qualify this new deployment. The public API
+keeps its direct Bedrock/SES denies; it can dispatch only
+its own worker. `LiveEnabled` defaults to `false`. Activation also requires the
+exact verified sender/recipient, an operator-created private `operating-grant`
+journal record with a finite budget/expiry and verified price ceilings, and
+actual AWS acceptance. The grant is never created or extended by an anonymous
+request. Reservations bound admitted provider usage under those price ceilings,
+not the whole AWS account bill; infrastructure costs are separate.
+
+Native Bedrock `CountTokens` rejects `anthropic.claude-opus-5` in eu-west-1.
+The controlled runtime therefore uses AWS's documented
+[Mantle token-count route](https://docs.aws.amazon.com/bedrock/latest/userguide/count-tokens.html)
+with SigV4 in eu-west-1, never a characters-to-token estimate. Unmapped content
+fails before inference. A count-only endpoint response is not model acceptance.
+Source CI covers both the retained synthetic journeys and the new live-mode
+journey with explicitly labelled test providers. The isolated AWS worker has
+also read a controlled invoice and payment and completed the six-reader graph
+through the actual model, with recorded token usage. This is private worker
+evidence, not public UI acceptance; the release page separately reports the
+tested CloudFront/API/model/email journey. Previously retained synthetic results do
+not prove either real model judgment or email delivery.
+
+In controlled mode the business examples remain fictional, but provider calls
+and the approved email must be real. Provider IDs are not delivery proof.
+Unknown attempts never resend automatically; interrupted jobs require operator
+reconciliation. No inbox or bank connection is implied.
+The API and worker require explicit `real-email` consent bound to the exact
+fingerprinted draft. A cached client offering only simulated approval is refused.
+
 [Open the AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/) ·
 [Human UAT testbook](https://d2ssmv59q16d0b.cloudfront.net/UAT.testbook.html) ·
 [CI](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml) ·
@@ -18,10 +64,11 @@ within this demonstration. Time savings and recovered money have not been measur
 This source revision opens on a permanent introduction before accessing the session API.
 Choose **Try the example** for a step-by-step invoice → payment → review → outcome check,
 or **Continue my workspace** for the existing dashboard. Neither silently clears the books.
-You inspect editable plain-text sources and approve the exact simulated draft yourself;
+You inspect editable plain-text sources and approve the exact draft yourself;
 the example never auto-approves. Existing records resume in the same session. Use **New workspace**
-and its explicit confirmation only when you want empty books. No PDFs, OCR or general email
-understanding are claimed by this bounded reader. Current deployment is tracked below.
+and its explicit confirmation only when you want empty books. No PDFs or OCR are
+supported. Semantic extraction in controlled mode still needs explicit ISO dates,
+two-decimal EUR amounts and source-backed references. Current deployment is tracked below.
 
 The deeper reconciliation path remains available:
 From Dashboard, choose Start reconciliation and review the editable invoice. Post it, open
@@ -36,9 +83,11 @@ and record the duplicate resolution in Records before preparing a fresh draft. A
 requires correction with actual evidence. Original sources and earlier provider receipts stay retained.
 The changed decision is a supported workflow demonstration, not comparative AI or human superiority.
 
-The public path runs real HTTP requests and a real Strands graph with six ledger tools.
-The model is **scripted**, extraction uses bounded rules, and the outbox is **simulated**.
-No public live model call or real email occurs. Removing Strands prevents draft preparation:
+Both modes run real HTTP requests and a real Strands graph with six ledger tools.
+In retained synthetic mode the model is **scripted**, extraction uses bounded rules,
+and the outbox is **simulated**; that mode makes no real model call or email send.
+Controlled-live mode instead uses Bedrock and an isolated SES worker restricted to
+the verified test recipient. Removing Strands prevents draft preparation:
 the composer only runs after all six readers have reported, and holds no tools of its own.
 
 Current frontend SHA: [release.json](https://d2ssmv59q16d0b.cloudfront.net/release.json).
@@ -87,11 +136,16 @@ if the deployed backend's packaged source differs; deploy that reviewed backend 
 
 ## React workstation usage
 
-The public source now selects `PublicPostReader` (`bounded-post-v2`): explicit ISO dates or
+Synthetic mode selects `PublicPostReader` (`bounded-post-v2`): explicit ISO dates or
 full English month names, and two-decimal EUR amounts such as `2,400.00` or `2.400,00`.
 Net, VAT and gross must be stated and reconcile. Conflicting dates, totals or invoice references
 are refused, not resolved by taking the first match. Relative dates, OCR and general prose remain
 unsupported. Original text, invoice direction and transfer-identity guards remain authoritative.
+Controlled mode uses semantic Bedrock extraction followed by exact-source checks for
+ISO dates, decimal EUR values and invoice references. Its receipt-date instructions
+are separate from the historical reader; absent fields are not guessed. The live
+composer returns only JSON opening/closing fields, with the unchanged no-digit gate
+before the ledger adds verified figures. A malformed response releases no draft.
 The legacy `LocalReader` and the frozen AR3 baseline are unchanged. The new development regressions
 are not independent held-out evidence, a model result or a rerun of the historical comparison.
 
@@ -133,7 +187,9 @@ New workspace creates an empty session and does not delete the old records.
 
 Local API storage is SQLite through ARCHON_SESSION_DB. Lambda uses ARCHON_STATE_BUCKET and a
 private ARCHON_STATE_PREFIX. S3 errors never silently switch to temporary storage.
-The public runtime cannot enable SES or Bedrock. No visibility or secret changes are needed.
+An anonymous request cannot enable SES or Bedrock or change the operating grant.
+The API role cannot call these providers directly; only the configured separate
+worker can, with budget, expiry, exact recipient and explicit approval checks.
 
 ## Run it
 
@@ -173,11 +229,11 @@ Provider acceptance is not delivery; unknown outcomes never retry automatically.
 
 ## How it is put together
 
-<img src="docs/architecture.svg" alt="Archon architecture: six readers feed a toolless composer and a gate rechecks the approved draft; public extraction and delivery are simulated." width="100%">
+<img src="docs/architecture.svg" alt="Archon architecture: six readers feed a toolless composer and a gate rechecks the approved draft; retained operator illustration, not deployment evidence." width="100%">
 
 The SVG is retained as the operator architecture illustration; it is not evidence of a deployed
 mailbox or SES delivery. The image also works where a submission form renders no Mermaid.
-The deployed public path is:
+The retained synthetic mode is:
 
 ```mermaid
 flowchart LR
@@ -187,6 +243,19 @@ flowchart LR
   graph --> composer["Composer: scripted, no tools"]
   composer --> gate["Exact draft and human approval"]
   gate --> receipt["Simulated acceptance"]
+```
+
+The controlled-live path uses the same interface and ledger:
+
+```mermaid
+flowchart LR
+  ui["React source and exact consent"] --> api["API: durable session job"]
+  api --> worker["Private worker: finite grant and expiry"]
+  worker --> model["Bedrock intake and six-reader Strands graph"]
+  model --> ledger["Source checks, ledger claims, exact draft"]
+  ledger --> review["Human reviews recipient, body and fingerprint"]
+  review --> outbox["Durable reservation before controlled SES"]
+  outbox --> proof["Provider ID, usage and reload-safe history"]
 ```
 
 ```mermaid
@@ -202,7 +271,8 @@ their outputs; it does not guarantee source authenticity. The scripted model wal
 it does not judge. Ledger code selects the invoice and calculates amounts.
 
 The runtime package declares strands-agents>=1.53.0; exact resolved versions are recorded by CI.
-Live inference is optional operator behavior and has not been remeasured by this change.
+Live inference requires operator activation; historical evaluations below do not
+score the new controlled runtime or prove independent model superiority.
 AgentCore is not implemented; the [design note](docs/BEDROCK_AGENTCORE_ARCHITECTURE.md) is historical.
 
 ## Evidence and limits
@@ -359,7 +429,9 @@ measurement are NOT_RUN. General invoice extraction is not established by conven
 
 Archon is a product line and this build **shares a name and a domain** with earlier entries.
 The submission rules require prior work to be disclosed. This build's public route uses pasted
-synthetic inbox evidence and ends in simulated acceptance, not real email. Prior-work disclosure
+fictional inbox evidence. Retained synthetic mode ends in simulated acceptance;
+controlled mode can send an explicitly approved real email to the verified test recipient.
+Prior-work disclosure
 does not establish novelty or eligibility; that determination belongs to the organizers.
 
 Prior Archon repositories, from other hackathons:
@@ -381,7 +453,9 @@ Re-derive installed licences with python -m archon.evidence.licences.
 ## For whoever submits this
 
 [Description](docs/SUBMISSION-DESCRIPTION.md) · [Video script](docs/VIDEO-SCRIPT.md).
-Both use the public synthetic path and its actual limits. A script is not a recording.
+These retained drafts describe the earlier synthetic path, not the controlled-live
+release. They must be reconciled with the served release before submission or recording.
+A script is not a recording.
 
 ## Licence
 

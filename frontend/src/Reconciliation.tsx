@@ -27,8 +27,8 @@ export function ReconciliationStart({ data, stale = false }: { data: Workspace; 
       {decision.balance ? <><p className="eyebrow">{stale ? 'LAST KNOWN BALANCE' : 'CURRENT LEDGER BALANCE'}</p><h3>{decision.balance.counterparty} · {invoice}</h3><strong className="desk-balance">{money(decision.balance.outstanding)}</strong><p>{money(decision.balance.gross)} invoiced − {money(decision.balance.settled)} recorded receipts</p><a href={workspaceLink(invoice)}>Inspect invoice and receipt sources →</a></>
         : <><p className="eyebrow">{returning ? 'YOUR SAVED WORKSPACE' : 'YOUR FIRST DECISION'}</p><p>{returning ? 'Your sources and decisions are retained in this browser’s session. Resolve incomplete evidence before collecting.' : 'Your books start empty. Alex and every example are invented; nothing is posted until you submit it.'}</p><ol aria-label="Reconciliation steps"><li>Inspect the invoice and exact draft</li><li>Add a payment or check a duplicate</li><li>Review the changed decision and keep its evidence</li></ol></>}
     </div>
-    <p className="reconciliation-limit">Synthetic examples · real Strands graph with scripted model · simulated mail only. Retained post, no bank connection. No real email or payment.</p>
-    <details className="desk-details"><summary>How this demo works</summary><p>The bounded rule reader handles editable synthetic post. Alex is an invented persona. This session handle lasts seven days; records may be retained longer. No measured time or money savings are claimed.</p></details>
+    <p className="reconciliation-limit">{data.live ? 'Fictional examples · real Bedrock and Strands · controlled real SES mail after approval. No bank connection or payment execution.' : 'Synthetic examples · real Strands graph with scripted model · simulated mail only. Retained post, no bank connection. No real email or payment.'}</p>
+    <details className="desk-details"><summary>How this demo works</summary><p>{data.live ? 'Bedrock reads editable fictional examples; source and ledger checks can refuse them.' : 'The bounded rule reader handles editable synthetic post.'} Alex is an invented persona. This session handle lasts seven days; records may be retained longer. No measured time or money savings are claimed.</p></details>
   </section>;
 }
 
@@ -53,6 +53,6 @@ export function Reconciliation({ data, invoice, stale, view = 'draft' }: { data:
       <a href={intakeLink(invoice === 'JN-4410' && !decision.latest ? 'payment' : 'custom', invoice)}>Add payment evidence →</a>
       {decision.latest ? <a href={intakeLink('duplicate', invoice)}>Check a forwarded duplicate →</a> : null}
     </div><p>Use the original transfer reference for a duplicate. Only a genuinely distinct payment gets a distinct identity. Sample references represent invented events.</p></details> : null}
-    <p className="reconciliation-limit">Source-backed means retained post, not verified bank settlement. All approvals here record simulated mail; no actual email or payment occurs.</p>
+    <p className="reconciliation-limit">Source-backed means retained post, not verified bank settlement. {data.live ? 'Email approval can send real SES mail to the verified test recipient. No payment is executed.' : 'All approvals here record simulated mail; no actual email or payment occurs.'}</p>
   </section>;
 }

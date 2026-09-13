@@ -7,7 +7,7 @@ import { empty, filled, received, refusal } from './fixtures';
 import * as api from '../src/api';
 
 vi.mock('../src/api', async original => ({ ...await original<typeof api>(), openWorkspace: vi.fn(), request: vi.fn(), storageWarning: '' }));
-beforeEach(() => { location.hash = ''; Element.prototype.scrollIntoView = vi.fn(); vi.mocked(api.openWorkspace).mockReset().mockResolvedValue({ session: 'retained', workspace: filled() }); vi.mocked(api.request).mockReset(); });
+beforeEach(() => { location.hash = ''; Element.prototype.scrollIntoView = vi.fn(); vi.mocked(api.openWorkspace).mockReset().mockResolvedValue({ session: 'retained', workspace: filled() }); vi.mocked(api.request).mockReset().mockResolvedValue({ live: false }); });
 async function navigate(hash: string) { await act(async () => { location.hash = hash; window.dispatchEvent(new HashChangeEvent('hashchange')); }); }
 const evidence = async () => ({ revision: 3, commit: 'source', text: 'Retained source evidence' });
 function paid() {
@@ -25,7 +25,8 @@ test('root explains the product without opening, creating or resetting a session
   expect(screen.getByRole('heading', { name: /Chase the balance/ })).toHaveFocus();
   expect(screen.getByTestId('start-guided-example')).toHaveAttribute('href', '#/journey');
   expect(screen.getByRole('link', { name: /Continue my workspace/ })).toHaveAttribute('href', '#/dashboard');
-  expect(api.openWorkspace).not.toHaveBeenCalled(); expect(api.request).not.toHaveBeenCalled();
+  expect(api.openWorkspace).not.toHaveBeenCalled();
+  expect(api.request).toHaveBeenCalledExactlyOnceWith('/providers', null);
   await navigate('/journey'); await screen.findByRole('heading', { name: 'From invoice to a safe decision' });
   expect(api.openWorkspace).toHaveBeenCalledExactlyOnceWith(false);
   await navigate('/welcome'); await navigate('/dashboard');

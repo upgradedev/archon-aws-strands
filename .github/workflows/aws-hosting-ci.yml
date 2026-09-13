@@ -1,10 +1,10 @@
 name: AWS hosting contract
 on:
   pull_request:
-    paths: ["infra/**", ".github/workflows/aws-hosting-ci.yml", ".github/workflows/frontend-deploy.yml", ".github/workflows/aws-uat.yml", "infra/test_frontend_pipeline.py"]
+    paths: ["infra/**", "deploy/**", ".github/workflows/aws-hosting-ci.yml", ".github/workflows/frontend-deploy.yml", ".github/workflows/aws-uat.yml", "infra/test_frontend_pipeline.py"]
   push:
     branches: [main, "codex/**"]
-    paths: ["infra/**", ".github/workflows/aws-hosting-ci.yml", ".github/workflows/frontend-deploy.yml", ".github/workflows/aws-uat.yml", "infra/test_frontend_pipeline.py"]
+    paths: ["infra/**", "deploy/**", ".github/workflows/aws-hosting-ci.yml", ".github/workflows/frontend-deploy.yml", ".github/workflows/aws-uat.yml", "infra/test_frontend_pipeline.py"]
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,6 +23,7 @@ jobs:
         run: |
           python infra/test_frontend_hosting.py
           python infra/test_archon_api_stack.py
+          python deploy/test_live_provider_stack.py
           python infra/test_release_acceptance.py
       - name: Validate main release and Playwright workflow contracts
         run: |

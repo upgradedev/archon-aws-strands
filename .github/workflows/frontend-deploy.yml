@@ -53,7 +53,7 @@ jobs:
       - name: Require compatible deployed backend before publishing frontend
         id: backend
         run: |
-          python infra/release_acceptance.py pair --sha "${{ github.sha }}" --output release-pair.json
+          python deploy/release_acceptance.py pair --sha "${{ github.sha }}" --output release-pair.json
           python -c 'import json,os; p=json.load(open("release-pair.json")); print("sha="+p["backend_commit"], file=open(os.environ["GITHUB_OUTPUT"], "a"))'
       - uses: aws-actions/configure-aws-credentials@v4
         with:

@@ -126,7 +126,8 @@ def legacy_documents(state: dict) -> list[dict]:
             and s["document"]["doc_id"] not in state.get("transfer_attestations", {})]
 
 
-def intake(state: dict, body: str, replace_id: str | None = None) -> None:
+def intake(state: dict, body: str, replace_id: str | None = None, *, reader=None,
+           validate_reading=None) -> None:
     if len(state["sources"]) >= 50:
         raise ValueError("This demo holds at most 50 source emails. Start a new workspace.")
     previous = next((s for s in state["sources"] if s["id"] == replace_id), None)
@@ -157,9 +158,12 @@ def intake(state: dict, body: str, replace_id: str | None = None) -> None:
         if re.search(r"\b(?:USD|GBP|CHF|JPY|CAD|AUD)\b|[$£¥]", body, re.I):
             raise ValueError("Only EUR is supported. No exchange rate has been authorized.")
         reading = read_email(
-            body, source_id, client=PublicPostReader(), ours=BUSINESS_EMAIL,
+            body, source_id, client=reader if reader is not None else PublicPostReader(),
+            ours=BUSINESS_EMAIL,
             business_name=BUSINESS_NAME,
         )
+        if validate_reading is not None:
+            validate_reading(body, reading)
         source.update(kind=type(reading.document).__name__,
                       document=json.loads(_encode(reading.document)),
                       redactions=reading.redactions)
@@ -210,7 +214,8 @@ def draft_for(state: dict) -> ChaseDraft | None:
         invoice_id=worst.doc_id,
         client=worst.counterparty,
         to_address=worst.contact,
-        subject="Our outstanding invoice",
+        subject=("[Archon controlled test] Our outstanding invoice"
+                 if state.get("provider_mode") == "live" else "Our outstanding invoice"),
         opening=saved["opening"],
         closing=saved["closing"],
         claims=tuple(claims),
@@ -218,17 +223,21 @@ def draft_for(state: dict) -> ChaseDraft | None:
     )
 
 
-def reason(state: dict) -> None:
+def reason(state: dict, *, model=None, model_label: str | None = None,
+           structured_composer: bool = False) -> None:
     if holds(state):
         raise ValueError("Correct every refused email first. Partial books cannot support a chase.")
+    from archon.adapters.composition import COMPOSER_JSON_RULES, composer_lines
     from archon.adapters.ledger_script import LedgerScriptModel
     from archon.agents import wiring
     from archon.agents.graph import build
     from archon.demo import two_lines
 
     books = books_for(state)
-    model = LedgerScriptModel(default=f"{OPENING}\n{CLOSING}")
-    result = build(books, AS_OF, date(2026, 7, 1), AS_OF, model=model)(
+    if model is None:
+        model = LedgerScriptModel(default=f"{OPENING}\n{CLOSING}")
+    options = {"composer_suffix": COMPOSER_JSON_RULES} if structured_composer else {}
+    result = build(books, AS_OF, date(2026, 7, 1), AS_OF, model=model, **options)(
         "Read each ledger domain and prepare an exact collection draft."
     )
     reports = {}
@@ -239,11 +248,12 @@ def reason(state: dict) -> None:
         raise ValueError(
             "The Strands graph did not complete every required report. Nothing drafted."
         )
-    opening, closing = two_lines(reports.pop(wiring.COMPOSER))
+    parse = composer_lines if structured_composer else two_lines
+    opening, closing = parse(reports.pop(wiring.COMPOSER))
     state["graph"] = {
         "at": now(),
         "reports": reports,
-        "mode": "Real Strands graph · scripted model · no AI judgment",
+        "mode": model_label or "Real Strands graph · scripted model · no AI judgment",
     }
     state["draft"] = {"opening": opening, "closing": closing, "at": now()}
     draft = draft_for(state)
@@ -283,7 +293,7 @@ class SimulatedProvider:
         return {"MessageId": f"simulated-{self.fingerprint[:24]}"}
 
 
-def approve(state: dict, fingerprint: str) -> None:
+def approve(state: dict, fingerprint: str, *, outbox=None) -> None:
     draft = draft_for(state)
     if draft is None or draft.fingerprint() != fingerprint:
         raise Conflict("The draft or its evidence changed. Run the graph and review again.")
@@ -293,18 +303,24 @@ def approve(state: dict, fingerprint: str) -> None:
         raise Conflict("This draft is older than 30 minutes. Run the graph and review again.")
     approval = Approval(fingerprint, "demo visitor", moment)
     release = assess(books_for(state), draft, approval, AS_OF, now=moment)
-    outbox = Outbox(
+    real_provider = outbox is not None
+    outbox = outbox if real_provider else Outbox(
         SimulatedProvider(fingerprint),
         "books@archon.example",
         clock=lambda: moment,
         log=DocumentSendLog(state),
     )
     receipt = outbox.send(draft, release)
+    if real_provider:
+        state["sends"][fingerprint] = asdict(outbox.log.find(fingerprint))
     if not receipt.replayed:
         event(
             state,
+            "Exact draft approved · SES acceptance" if real_provider else
             "Exact draft approved · simulated acceptance",
-            f"{draft.invoice_id} · {receipt.message_id}. No email left this application.",
+            f"{draft.invoice_id} · {receipt.message_id}. " + (
+                "Provider accepted; delivery is not proven." if real_provider else
+                "No email left this application."),
         )
 
 
@@ -553,4 +569,18 @@ def snapshot(state: dict) -> dict:
             "at": state["draft"]["at"],
             "claims": [c.sentence() for c in draft.claims],
         }
+    if state.get("provider_mode") == "live":
+        from archon.web.live import public_job
+
+        result.update(
+            reader="Amazon Bedrock semantic extraction; source checks before posting",
+            provider="Amazon SES; restricted verified test recipient",
+            live={"model": True, "mail": True, "data": "fictional business examples",
+                  "job": public_job(state.get("provider_job")),
+                  "history": state.get("provider_history", [])},
+            samples={k: v.replace("accounts@buildco.example", state["test_recipient"])
+                     for k, v in SAMPLES.items()},
+        )
+        result["receipt_states"]["delivered"] = "Requires independent delivery evidence"
+        result["receipt_states"]["failed"] = "Confirmed rejection; operator review before resend"
     return plain(result)

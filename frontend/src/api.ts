@@ -41,7 +41,7 @@ export async function openWorkspace(fresh = false): Promise<{ session: string; w
   catch { storageWarning = 'Browser storage is blocked. This session handle lasts until this page closes.'; }
   const session = fresh ? null : memorySession ?? stored;
   if (session) return { session, workspace: await request<Workspace>('/workspace', session) };
-  opening = request<{ session: string; workspace: Workspace }>('/sessions', null, { mode: 'synthetic' }).then(created => {
+  opening = request<{ session: string; workspace: Workspace }>('/sessions', null, {}).then(created => {
     memorySession = created.session;
     try { localStorage.setItem(SESSION_KEY, created.session); }
     catch { storageWarning = 'Browser storage is blocked. This session handle lasts until this page closes.'; }

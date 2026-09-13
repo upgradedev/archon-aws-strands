@@ -40,6 +40,10 @@ class ApprovalRequest(Mutation):
     fingerprint: str = Field(pattern=r"^[a-f0-9]{64}$")
 
 
+class EmailApprovalRequest(ApprovalRequest):
+    live_send_consent: Literal["real-email"] | None = None
+
+
 class ProposalRequest(Mutation):
     invoice_id: str = Field(min_length=1, max_length=100)
     body: str = Field(min_length=1, max_length=4000)
@@ -51,7 +55,7 @@ class CounterRequest(ApprovalRequest):
 
 class SessionRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    mode: Literal["synthetic"] = "synthetic"
+    mode: Literal["synthetic", "live"] | None = None
 
 
 class ResolutionRequest(Mutation):
@@ -103,6 +107,17 @@ def load(handle: str):
 def mutate(handle: str, request: Mutation, operation: str, action):
     state, version = load(handle)
     payload = request.model_dump(exclude={"request_id", "revision"})
+    if operation == "approve" and state.get("provider_mode") != "live":
+        payload.pop("live_send_consent", None)
+    if state.get("provider_mode") == "live":
+        from archon.web import live
+
+        if operation in live.OPERATIONS:
+            return live.submit(store(), handle, state, version, operation, payload,
+                               request.request_id, request.revision)
+        job = state.get("provider_job")
+        if job and job["status"] in {"queued", "running"}:
+            raise Conflict("Wait for the durable provider job before changing these books.")
     signature = workspace.digest({"operation": operation, "payload": payload})
     previous = state["requests"].get(request.request_id)
     if previous:
@@ -122,6 +137,17 @@ def mutate(handle: str, request: Mutation, operation: str, action):
 
 @app.get("/api/health")
 def health():
+    from archon.web import live
+
+    if live.enabled():
+        live.configuration()
+        return {
+            "status": "ok", "mode": "controlled-live", "live_send": True, "live_model": True,
+            "commit": os.environ.get("ARCHON_COMMIT_SHA", "local-unversioned"),
+            "reader": "source-checked-semantic", "model": "eu.anthropic.claude-opus-5",
+            "orchestration": "Strands", "provider": "SES-controlled-recipient",
+            "note": "Configuration, not proof of invocation or delivery; inspect job receipts.",
+        }
     return {
         "status": "ok",
         "mode": "synthetic",
@@ -135,9 +161,23 @@ def health():
     }
 
 
+@app.get("/api/providers")
+def providers():
+    from archon.web import live
+
+    return {"live": live.enabled(), "data": "fictional business examples"}
+
+
 @app.post("/api/sessions", status_code=201)
 def create_session(request: SessionRequest):
     handle, state = secrets.token_hex(32), workspace.fresh()
+    from archon.web import live
+
+    if request.mode == "live" and not live.enabled():
+        raise ValueError("Live mode is not available in this deployment.")
+    if request.mode == "live" or (request.mode is None and live.enabled()):
+        config = live.configuration()
+        state.update(provider_mode="live", test_recipient=config["recipient"])
     store().put(handle, state, None)
     return {"session": handle, "workspace": workspace.snapshot(state)}
 
@@ -159,7 +199,7 @@ def reason(request: Mutation, handle: SESSION_HEADER):
 
 
 @app.post("/api/approve")
-def approve(request: ApprovalRequest, handle: SESSION_HEADER):
+def approve(request: EmailApprovalRequest, handle: SESSION_HEADER):
     return mutate(handle, request, "approve", workspace.approve)
 
 

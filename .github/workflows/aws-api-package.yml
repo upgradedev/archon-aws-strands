@@ -79,6 +79,10 @@ jobs:
           zip -qr ../archon-api.zip .
           cd ..
           sha256sum archon-api.zip > archon-api.zip.sha256
+      - name: Render separate real-provider deployment templates on the runner
+        run: |
+          python deploy/live_provider_stack.py > build/live-provider-stack.json
+          python deploy/live_api_stack.py > build/live-api-stack.json
       - uses: actions/upload-artifact@v4
         with:
           name: archon-aws-api
@@ -87,6 +91,8 @@ jobs:
             build/archon-api.zip.sha256
             build/requirements-resolved.txt
             build/commit.txt
+            build/live-provider-stack.json
+            build/live-api-stack.json
           retention-days: 90
 
   archive-previous-acceptance:

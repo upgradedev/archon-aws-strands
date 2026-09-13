@@ -111,6 +111,13 @@ jobs:
         run: |
           npx playwright install --with-deps chromium webkit
           npm run test:e2e
+      - name: Live-mode UI API worker contracts with CI-only provider doubles
+        if: always() && steps.build.outcome == 'success'
+        working-directory: frontend
+        env:
+          ARCHON_LIVE_ACCEPTANCE: "true"
+          ARCHON_FAKE_PROVIDERS: "true"
+        run: npm run test:e2e -- --forbid-only
       - name: Acceptance renderer contracts with synthetic HTTP, not live AWS evidence
         if: always() && steps.build.outcome == 'success'
         working-directory: frontend
@@ -145,6 +152,8 @@ jobs:
             frontend/coverage/
             frontend/playwright-report/
             frontend/test-results/
+            frontend/live-contract-results/
+            frontend/live-contract-report/
             frontend/proof-results/
             frontend/UAT.testbook.json
             frontend/UAT.testbook.html
