@@ -122,7 +122,8 @@ export function App() {
   }
 
   if (page === 'welcome') return <Welcome />;
-  if (page === 'demo') return <DemoSetup onOpened={adoptWorkspace} />;
+  if (page === 'demo') return <DemoSetup onOpened={adoptWorkspace} blocked={busy || providerPending}
+    onLoadingChange={loading => { inFlight.current = loading; setBusy(loading); }} />;
 
   return <div className="app-shell">
     <a className="skip-link" href="#main" onClick={e => { e.preventDefault(); document.getElementById('main')?.focus(); }}>Skip to workspace</a>
