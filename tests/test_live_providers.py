@@ -284,7 +284,8 @@ def test_actual_strands_bedrock_adapter_routes_every_graph_turn_through_metered_
 
 
 @pytest.mark.parametrize("text", [
-    '**Collection chase — JN-4410**\n**Opening line:**\nThank you.\n**Closing line:**\nPlease reply.',
+    '**Collection chase — JN-4410**\n**Opening line:**\nThank you.\n'
+    '**Closing line:**\nPlease reply.',
     '{"opening":"Hello","closing":"Thanks","invoice":"JN-4410"}',
     '{"opening":"Hello","opening":"Changed","closing":"Thanks"}',
     '{"opening":"Hello"}', '[]', 'null',
