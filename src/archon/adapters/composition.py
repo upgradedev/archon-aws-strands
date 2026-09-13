@@ -5,6 +5,14 @@ import json
 
 from archon.agents.draft import UnsafeDraft
 
+READER_REPORT_RULES = (
+    "Live workspace report contract: call your assigned ledger tool, then return "
+    "a concise report of at most 120 words for your own domain only. State the "
+    "relevant tool facts, one sentence of assessment, and the required verdict. "
+    "Do not draft an email or repeat other domains' reports. Do not infer missing "
+    "transactions or a customer's intentions. The composer alone writes email lines."
+)
+
 COMPOSER_JSON_RULES = (
     "Output contract for this application: return ONLY one JSON object with exactly "
     "two string keys, opening and closing. These are the two email lines requested "

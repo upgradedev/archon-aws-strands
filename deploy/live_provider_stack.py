@@ -52,7 +52,10 @@ def template():
                          "Condition": {"StringEquals": {"bedrock-mantle:Model": "anthropic.claude-opus-5"},
                                        "DateLessThan": {"aws:CurrentTime": ref("ExpiresAt")}}},
                         {"Effect": "Allow", "Action": ["ses:SendEmail"],
-                         "Resource": sub("arn:${AWS::Partition}:ses:eu-west-1:${AWS::AccountId}:identity/${Sender}"),
+                         "Resource": [
+                             sub("arn:${AWS::Partition}:ses:eu-west-1:${AWS::AccountId}:identity/${Sender}"),
+                             sub("arn:${AWS::Partition}:ses:eu-west-1:${AWS::AccountId}:identity/${Recipient}"),
+                         ],
                          "Condition": {"StringEquals": {"ses:FromAddress": ref("Sender")},
                                        "ForAllValues:StringEquals": {"ses:Recipients": [ref("Recipient")]},
                                        "DateLessThan": {"aws:CurrentTime": ref("ExpiresAt")}}},

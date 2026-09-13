@@ -34,7 +34,7 @@ COMPOSER = wiring.COMPOSER
 
 
 def _readers(
-    books: Books, as_of: date, frm: date, to: date, model: object | None
+    books: Books, as_of: date, frm: date, to: date, model: object | None, suffix: str = ""
 ) -> list[tuple[str, Agent]]:
     """One agent per question, each with exactly the tool it needs.
 
@@ -87,7 +87,7 @@ def _readers(
             Agent(
                 name=reader.name,
                 model=model,
-                system_prompt=reader.system_prompt,
+                system_prompt=reader.system_prompt + ("\n\n" + suffix if suffix else ""),
                 tools=[bound[reader.tool]],
                 # Silent. The SDK's default handler streams every reply to stdout,
                 # which makes this graph unusable inside anything that has its own
@@ -121,7 +121,7 @@ def _composer(books: Books, as_of: date, model: object | None, suffix: str = "")
 
 
 def build(books: Books, as_of: date, frm: date, to: date, model: object | None = None,
-          *, composer_suffix: str = ""):
+          *, composer_suffix: str = "", reader_suffix: str = ""):
     """Wire the graph. Construction only; nothing runs until it is called.
 
     ``model`` is injected rather than reached for. Passing ``None`` uses the
@@ -132,7 +132,7 @@ def build(books: Books, as_of: date, frm: date, to: date, model: object | None =
     if model is None:
         model = bedrock.bedrock_model()
     builder = GraphBuilder()
-    readers = _readers(books, as_of, frm, to, model)
+    readers = _readers(books, as_of, frm, to, model, reader_suffix)
     for name, agent in readers:
         builder.add_node(agent, name)
     builder.add_node(_composer(books, as_of, model, composer_suffix), COMPOSER)

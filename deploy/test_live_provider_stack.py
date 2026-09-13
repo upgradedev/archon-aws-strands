@@ -19,6 +19,21 @@ class LiveWorkerContract(unittest.TestCase):
         invocation = resources["ApiDispatchOnly"]["Properties"]["PolicyDocument"]["Statement"]
         self.assertEqual(invocation[0]["Action"], ["lambda:InvokeFunction"])
 
+    def test_ses_authorizes_only_both_controlled_identities_and_preserves_conditions(self):
+        role = template()["Resources"]["Role"]["Properties"]
+        statements = role["Policies"][0]["PolicyDocument"]["Statement"]
+        ses = next(row for row in statements if "ses:SendEmail" in row["Action"])
+        self.assertEqual(ses["Action"], ["ses:SendEmail"])
+        self.assertEqual(ses["Resource"], [
+            {"Fn::Sub": "arn:${AWS::Partition}:ses:eu-west-1:${AWS::AccountId}:identity/${Sender}"},
+            {"Fn::Sub": "arn:${AWS::Partition}:ses:eu-west-1:${AWS::AccountId}:identity/${Recipient}"},
+        ])
+        self.assertEqual(ses["Condition"], {
+            "StringEquals": {"ses:FromAddress": {"Ref": "Sender"}},
+            "ForAllValues:StringEquals": {"ses:Recipients": [{"Ref": "Recipient"}]},
+            "DateLessThan": {"aws:CurrentTime": {"Ref": "ExpiresAt"}},
+        })
+
     def test_no_retry_and_recoverable_failure_records(self):
         resources = template()["Resources"]
         self.assertEqual(resources["AsyncPolicy"]["Properties"]["MaximumRetryAttempts"], 0)
