@@ -47,10 +47,17 @@ def pair(frontend, expected_backend=None, request=old.get_json, command=old.git)
             "mode": "controlled-live", "live_model": True, "live_send": True}
 
 
+class NoDocumentType(ET.TreeBuilder):
+    """Permit reporter CDATA/comments, but reject DTDs before entity expansion."""
+
+    def doctype(self, name, pubid, system):
+        raise ValueError("document types are not permitted in live JUnit")
+
+
 def provider_counts(junit, proof_dir, before):
     data = Path(junit).read_bytes()
-    old.require(0 < len(data) < 1000000 and b"<!" not in data, "invalid live JUnit")
-    root = ET.fromstring(data)
+    old.require(0 < len(data) < 1000000, "invalid live JUnit")
+    root = ET.fromstring(data, parser=ET.XMLParser(target=NoDocumentType()))
     cases = list(root.iter("testcase"))
     old.require(len(cases) == 3 and int(root.attrib["tests"]) == 3, "three live viewports required")
     old.require(all(int(root.attrib.get(k, 0)) == 0 for k in ("failures", "errors", "skipped"))

@@ -46,6 +46,45 @@ def test_explicit_controlled_receipt_has_separate_scope_and_no_mailbox_claim(art
     assert "No mailbox arrival" in value["limits"]
 
 
+@pytest.mark.parametrize("encoding", ["utf-8", "utf-16"])
+def test_playwright_cdata_attachments_are_metadata_not_document_types(artifacts, encoding):
+    junit, directory = artifacts
+    xml = ('<testsuites tests="3" failures="0" errors="0" skipped="0">'
+           '<!-- Playwright attachment metadata -->'
+           '<testsuite><testcase><system-out><![CDATA['
+           '[[ATTACHMENT|../test-results/trace.zip]]\n<!DOCTYPE is just text here'
+           ']]></system-out></testcase><testcase/><testcase/></testsuite></testsuites>')
+    junit.write_bytes(xml.encode(encoding))
+    value = release.receipt(PAIR, PAIR, junit, directory, ENV)
+    release.validate(value)
+    assert value["counts"]["passed"] == 3
+    assert "ATTACHMENT" not in json.dumps(value)
+
+
+@pytest.mark.parametrize("encoding", ["utf-8", "utf-16"])
+@pytest.mark.parametrize("declaration", [
+    '<!DOCTYPE testsuites>',
+    '<!DOCTYPE testsuites SYSTEM "file:///etc/passwd">',
+    '<!DOCTYPE testsuites [<!ENTITY expanded "unexpected">]>',
+    '<!DOCTYPE testsuites [<!ENTITY external SYSTEM "https://invalid.example/data">]>',
+])
+def test_document_types_are_refused_independent_of_encoding(artifacts, encoding, declaration):
+    junit, directory = artifacts
+    junit.write_bytes((declaration + '<testsuites tests="3"><testsuite>'
+                       '<testcase/><testcase/><testcase/></testsuite></testsuites>').encode(encoding))
+    with pytest.raises(ValueError, match="document types"):
+        release.receipt(PAIR, PAIR, junit, directory, ENV)
+
+
+def test_cdata_does_not_hide_a_failed_browser_case(artifacts):
+    junit, directory = artifacts
+    junit.write_text('<testsuites tests="3"><testsuite><testcase>'
+                     '<system-out><![CDATA[attachment]]></system-out><failure/>'
+                     '</testcase><testcase/><testcase/></testsuite></testsuites>')
+    with pytest.raises((AssertionError, RuntimeError, ValueError)):
+        release.receipt(PAIR, PAIR, junit, directory, ENV)
+
+
 @pytest.mark.parametrize("bad", [
     {"scope": "ci_fakeproviders"}, {"origin": "http://127.0.0.1:4173"},
     {"frontend_commit": "3" * 40}, {"backend_commit": "3" * 40},
