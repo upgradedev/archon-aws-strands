@@ -105,9 +105,20 @@ test('counterproposal retains the client reply without inventing acceptance or r
   await page.getByLabel("Client's proposed terms").fill(counter);
   await page.getByRole('button', { name: 'Read proposed terms', exact: true }).click();
   await page.getByLabel(/I approve these exact/).check();
+  const approvalResponse = page.waitForResponse(response =>
+    new URL(response.url()).pathname === '/api/arrangements/approve' && response.request().method() === 'POST');
   await page.getByRole('button', { name: 'Approve arrangement', exact: true }).click();
+  expect((await approvalResponse).status()).toBe(200);
+  await expect(page.locator('main')).toHaveAttribute('aria-busy', 'false');
+  await expect(page.getByText('Agreed arrangements', { exact: true })).toBeVisible();
+  const committed = await state(page);
+  expect(committed.data.arrangements).toHaveLength(1);
+  // Reload verifies a confirmed decision; navigating during its POST cancels the request.
   await page.reload(); await expect(page.getByText('Agreed arrangements', { exact: true })).toBeVisible();
   const agreed = await state(page); expect(agreed.data.sales[0].outstanding).toBe('1260.00');
+  expect(agreed.session).toBe(committed.session);
+  expect(agreed.data.arrangements).toEqual(committed.data.arrangements);
+  expect(agreed.data.terms_history).toEqual(committed.data.terms_history);
   expect(agreed.data.queue.blocked).toHaveLength(1); expect(agreed.data.terms_history[1].original.body).toBe(original);
 });
 
