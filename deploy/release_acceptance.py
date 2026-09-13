@@ -66,7 +66,8 @@ def provider_counts(junit, proof_dir, before):
                         ("model_calls", "input_tokens", "output_tokens")) and p["model_calls"] >= 3,
                     "no actual model usage")
         old.require(p["email_accepted"] is True and p["replay_unchanged"] is True
-                    and p["reload_retained"] is True, "incomplete provider journey")
+                    and p["reload_retained"] is True
+                    and p.get("legacy_consent_refused") is True, "incomplete provider journey")
         old.require(isinstance(p["message_id"], str) and bool(p["message_id"])
                     and not p["message_id"].startswith(("simulated-", "ci-")),
                     "not an actual SES acceptance id")

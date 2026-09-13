@@ -40,6 +40,10 @@ class ApprovalRequest(Mutation):
     fingerprint: str = Field(pattern=r"^[a-f0-9]{64}$")
 
 
+class EmailApprovalRequest(ApprovalRequest):
+    live_send_consent: Literal["real-email"] | None = None
+
+
 class ProposalRequest(Mutation):
     invoice_id: str = Field(min_length=1, max_length=100)
     body: str = Field(min_length=1, max_length=4000)
@@ -103,6 +107,8 @@ def load(handle: str):
 def mutate(handle: str, request: Mutation, operation: str, action):
     state, version = load(handle)
     payload = request.model_dump(exclude={"request_id", "revision"})
+    if operation == "approve" and state.get("provider_mode") != "live":
+        payload.pop("live_send_consent", None)
     if state.get("provider_mode") == "live":
         from archon.web import live
 
@@ -193,7 +199,7 @@ def reason(request: Mutation, handle: SESSION_HEADER):
 
 
 @app.post("/api/approve")
-def approve(request: ApprovalRequest, handle: SESSION_HEADER):
+def approve(request: EmailApprovalRequest, handle: SESSION_HEADER):
     return mutate(handle, request, "approve", workspace.approve)
 
 

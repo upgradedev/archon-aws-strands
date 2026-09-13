@@ -52,6 +52,8 @@ def submit(store, handle, state, version, operation, payload, request_id, revisi
     config = configuration()
     if operation not in OPERATIONS or state.get("provider_mode") != "live":
         raise LiveRefused("This session does not support that live operation.")
+    if operation == "approve" and payload.get("live_send_consent") != "real-email":
+        raise ValueError("Explicit real-email consent is required. Refresh and review the live draft.")
     signature = workspace.digest({"operation": operation, "payload": payload})
     previous = state["requests"].get(request_id)
     if previous:
@@ -111,13 +113,15 @@ def run(store, journal, handle, job_id, *, client_factory=None, outbox_factory=l
     try:
         admission.grant()
         if job["operation"] == "approve":
+            if job["payload"].get("live_send_consent") != "real-email":
+                raise LiveRefused("The saved job has no explicit real-email consent.")
             admission.reserve(job_id + ":mail", mail=True)
             outbox = outbox_factory(
                 sender=config["sender"], controlled_recipient=config["recipient"],
                 authorized=True, log=log,
             )
             outbox.clock = lambda: datetime.now(UTC)
-            workspace.approve(state, **job["payload"], outbox=outbox)
+            workspace.approve(state, fingerprint=job["payload"]["fingerprint"], outbox=outbox)
         else:
             if client_factory is None:
                 import boto3

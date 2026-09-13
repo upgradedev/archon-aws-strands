@@ -44,6 +44,12 @@ test('real-provider approval is explicit, durable and not repeated after reload'
   await page.screenshot({ path: info.outputPath('live-review.png'), fullPage: true });
   const send = page.getByRole('button', { name: 'Approve exact draft · send real email', exact: true });
   await expect(send).toBeDisabled();
+  const legacy = await page.request.post('/api/approve', {
+    headers: { 'X-Archon-Session': draft.session },
+    data: { revision: draft.data.revision, request_id: 'legacy-simulated-approval', fingerprint: draft.data.draft!.fingerprint },
+  });
+  expect(legacy.status()).toBe(422);
+  expect((await saved(page)).data).toEqual(draft.data);
   const consent = page.getByRole('checkbox', { name: /I authorize this real email/ });
   await consent.check();
   let approval: { revision: number; request_id: string; fingerprint: string } | undefined;
@@ -84,6 +90,7 @@ test('real-provider approval is explicit, durable and not repeated after reload'
     input_tokens: calls.reduce((n, c) => n + c.usage!.inputTokens, 0),
     output_tokens: calls.reduce((n, c) => n + c.usage!.outputTokens, 0),
     email_accepted: true, message_id: receipt.message_id, replay_unchanged: true, reload_retained: true,
+    legacy_consent_refused: true,
     delivery_proven: false,
   };
   await mkdir('artifacts', { recursive: true });

@@ -31,7 +31,8 @@ def artifacts(tmp_path):
                  "project": name, "frontend_commit": FRONT, "backend_commit": BACK,
                  "model_calls": 15, "input_tokens": 1500, "output_tokens": 300,
                  "email_accepted": True, "message_id": "provider-" + name,
-                 "replay_unchanged": True, "reload_retained": True}
+                 "replay_unchanged": True, "reload_retained": True,
+                 "legacy_consent_refused": True}
         (tmp_path / f"live-provider-{name}.json").write_text(json.dumps(proof))
     return junit, tmp_path
 
@@ -51,6 +52,7 @@ def test_explicit_controlled_receipt_has_separate_scope_and_no_mailbox_claim(art
     {"model_calls": 0}, {"input_tokens": True}, {"output_tokens": 0},
     {"email_accepted": False}, {"message_id": "ci-receipt"},
     {"replay_unchanged": False}, {"reload_retained": False},
+    {"legacy_consent_refused": False}, {"legacy_consent_refused": None},
 ])
 def test_incomplete_fake_or_wrong_release_proof_never_passes(artifacts, bad):
     junit, directory = artifacts

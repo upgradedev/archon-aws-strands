@@ -55,7 +55,7 @@ test('real approval requires fresh exact consent and shows actual action', async
   expect(button).toBeEnabled();
   expect(screen.getByText('Ready for your explicit real-email approval.')).toBeInTheDocument();
   await userEvent.click(button);
-  expect(mutate).toHaveBeenCalledWith('/approve', { fingerprint: value.draft!.fingerprint });
+  expect(mutate).toHaveBeenCalledWith('/approve', { fingerprint: value.draft!.fingerprint, live_send_consent: 'real-email' });
 });
 
 test('history, guided result and operating pages use actual provider labels', () => {

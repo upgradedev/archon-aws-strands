@@ -104,6 +104,8 @@ def request():
 
 def change(sessions, operation, payload=None, request_id="request-0000000001", dispatch=None):
     state, version = sessions.get(HANDLE)
+    if operation == "approve":
+        payload = {"live_send_consent": "real-email", **(payload or {})}
     return live.submit(sessions, HANDLE, state, version, operation, payload or {},
                        request_id, state["revision"], dispatch=dispatch)
 
@@ -455,3 +457,39 @@ def test_live_session_selection_is_server_gated(setup, monkeypatch):
         monkeypatch.setenv("ARCHON_LIVE_ENABLED", "false")
         assert client.post("/api/sessions", json={"mode": "live"}).status_code == 422
         assert "live" not in client.post("/api/sessions", json={}).json()["workspace"]
+
+
+def test_old_simulation_client_cannot_create_a_live_send_job(setup):
+    sessions, journal = setup
+    seed(sessions)
+    before, version = sessions.get(HANDLE)
+    payload = {"revision": before["revision"], "request_id": "legacy-approval-request",
+               "fingerprint": before["draft"]["fingerprint"]}
+    with TestClient(api.app) as client:
+        refused = client.post("/api/approve", headers={"X-Archon-Session": HANDLE}, json=payload)
+        assert refused.status_code == 422 and "real-email consent" in refused.json()["detail"]
+        assert sessions.get(HANDLE) == (before, version)
+        assert journal.read("operating-grant")[0]["reserved_usd"] == "0"
+        accepted = client.post("/api/approve", headers={"X-Archon-Session": HANDLE},
+                               json={**payload, "live_send_consent": "real-email"})
+        assert accepted.status_code == 200
+        assert accepted.json()["live"]["job"]["status"] == "queued"
+    saved, _ = sessions.get(HANDLE)
+    assert saved["provider_job"]["payload"]["live_send_consent"] == "real-email"
+
+
+def test_worker_rechecks_saved_real_email_consent_before_reserving_or_sending(setup):
+    sessions, journal = setup
+    seed(sessions)
+    before, _ = sessions.get(HANDLE)
+    queued = change(sessions, "approve", {"fingerprint": before["draft"]["fingerprint"]})
+    state, version = sessions.get(HANDLE)
+    del state["provider_job"]["payload"]["live_send_consent"]
+    sessions.put(HANDLE, state, version)
+    live.run(sessions, journal, HANDLE, queued["live"]["job"]["id"],
+             outbox_factory=lambda **kwargs: pytest.fail("No sender may be created"))
+    saved, _ = sessions.get(HANDLE)
+    assert saved["provider_job"]["status"] == "failed"
+    assert "no explicit real-email consent" in saved["provider_job"]["error"]
+    assert saved["sends"] == {}
+    assert journal.read("operating-grant")[0]["reserved_usd"] == "0"
