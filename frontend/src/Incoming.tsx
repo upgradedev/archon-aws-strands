@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { errorText, request } from './api';
+import { ApiError, errorText, request } from './api';
 import { Badge, Heading } from './ui';
 import type { IncomingConnection } from './types';
 
@@ -36,7 +36,11 @@ export function Incoming({ session, live, revision, refreshKey = 0 }: { session:
       const { token: _secret, ...safe } = result;
       setConnection(safe); setConsent(false); intent.current = null;
       setMessage(action === 'enable' ? 'Intake key ready. Configure your external sender; no mailbox is connected yet.' : 'Intake key revoked. Previously accepted jobs may still finish.');
-    } catch (failure) { setError(`${errorText(failure)} Retry the same action to recover its saved result.`); }
+    } catch (failure) {
+      const definitive = failure instanceof ApiError && [400, 401, 409, 422].includes(failure.status);
+      if (definitive) { intent.current = null; setConsent(false); }
+      setError(`${errorText(failure)} ${definitive ? 'Refresh connection, review its status and authorize a new action.' : 'Retry the same action to recover its saved result.'}`);
+    }
     finally { inFlight.current = false; setBusy(false); }
   }
   async function copyKey() {

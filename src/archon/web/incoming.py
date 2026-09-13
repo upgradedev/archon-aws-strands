@@ -68,11 +68,11 @@ def configure(store, handle, state, action, request_id, consent=None):
         if record["last_request_id"] != request_id:
             raise Conflict("Connection changed. Refresh before issuing a new request.")
     else:
-        if action == "disable" and (not record or not record["enabled"]):
-            return status(store, handle, state)
         requests = dict(record["requests"]) if record else {}
         if len(requests) >= 50 and action == "enable":
             raise ValueError("This workspace reached its connection-change limit.")
+        if len(requests) >= 500 and action == "disable" and not record["enabled"]:
+            raise ValueError("The key is already revoked; connection request limit reached.")
         requests[request_id] = signature
         expiry = min(now() + timedelta(hours=24),
                      datetime.fromisoformat(state["created_at"]) + timedelta(days=7))
@@ -109,6 +109,9 @@ def receive(store, authorization, event_id, body, load_session):
     handle = record["target"]
     state, version = load_session(handle)
     request_id = "incoming_" + workspace.digest({"key": key, "event_id": event_id})
+    if state.get("provider_job_count", 0) >= 20 and request_id not in state["requests"]:
+        raise ValueError("This workspace reached its twenty-job limit. Start a new workspace; "
+                         "do not retry this new event against the exhausted workspace.")
     # The existing compare-and-swap transaction persists the event and job before
     # scheduling. Retrying an uncertain enqueue reuses that job, not another call.
     live.submit(store, handle, state, version, "intake", {"body": body}, request_id,

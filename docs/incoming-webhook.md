@@ -110,6 +110,7 @@ check. The token is distinct from the target session handle and authorizes intak
 | Completed or refused intake | Review the recorded result in Incoming/Records; transport acceptance alone is not a successful ledger post |
 | Worker failure or unknown outcome | Inspect durable state and request operator reconciliation; do not generate a new ID to repeat a possibly spent call |
 | Invalid, revoked or expired token | HTTP 401; have the owner inspect connection state, not retry with a workspace credential |
+| Twenty provider jobs already used | HTTP 422 for a new event; start a new workspace rather than retrying the exhausted one. Already accepted event replays remain readable through the same event request. |
 
 Generate an event ID once per source event and retain it across transport retries. Exact-event
 deduplication is separate from payment identity: submitting a new event ID cannot legitimize a
@@ -143,3 +144,9 @@ At the 2026-09-14 documentation review, route models and bounds were read from `
 configuration, token issuance and deduplication from `archon.web.incoming`; saved event metadata
 from `archon.web.live`. That source inspection made no provider calls and performed no mailbox
 setup or production acceptance. The current validation record belongs to the matching CI/release run.
+
+The separate manual `incoming-acceptance.yml` workflow runs a single actual-AWS intake through
+the deployed UI, API and worker, checks exact-event replay and reload, then revokes its capability.
+It creates no email and retains only sanitized result metadata, JUnit and a post-intake screenshot;
+no HTTP traces or keys. Its artifact is distinct from the three-viewport email acceptance receipt.
+The workflow needs an explicit authorized input, main and exact served frontend/backend identities.

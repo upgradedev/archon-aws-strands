@@ -115,12 +115,12 @@
     <rect x="116" y="1344" width="292" height="42" rx="8" class="card"/>
     <rect x="116" y="1400" width="292" height="42" rx="8" class="card"/>
     <rect x="116" y="1456" width="292" height="42" rx="8" class="card"/>
-    <text x="138" y="1204" class="body">Suppliers · amounts owed</text>
-    <text x="138" y="1260" class="body">Sales · open invoices</text>
-    <text x="138" y="1316" class="body">Payroll · payment state</text>
-    <text x="138" y="1372" class="body">Trading · profit and loss</text>
-    <text x="138" y="1428" class="body">Cash · recorded receipts</text>
-    <text x="138" y="1484" class="body">Metrics · headline position</text>
+    <text x="138" y="1204" class="body"><tspan>suppliers</tspan><tspan> · amounts owed</tspan></text>
+    <text x="138" y="1260" class="body"><tspan>sales</tspan><tspan> · open invoices</tspan></text>
+    <text x="138" y="1316" class="body"><tspan>payroll</tspan><tspan> · payment state</tspan></text>
+    <text x="138" y="1372" class="body"><tspan>trading</tspan><tspan> · profit and loss</tspan></text>
+    <text x="138" y="1428" class="body"><tspan>cash</tspan><tspan> · recorded receipts</tspan></text>
+    <text x="138" y="1484" class="body"><tspan>metrics</tspan><tspan> · headline position</tspan></text>
     <path d="M 408 1197 H 490" class="flow"/>
     <path d="M 408 1253 H 490" class="flow"/>
     <path d="M 408 1309 H 490" class="flow"/>
@@ -138,8 +138,9 @@
     <text x="784" y="1293" class="heading">Toolless composer</text>
     <text x="784" y="1328" class="body">Proposes opening + closing</text>
     <text x="784" y="1362" class="body">Ledger supplies the figures</text>
-    <text x="784" y="1396" class="small muted">Draft advice; cannot send</text>
+    <text x="784" y="1396" class="small muted">Composer holds no tools</text>
     <text x="552" y="1466" class="body amber-text">Missing report → no draft</text>
+    <text x="552" y="1502" class="small muted">Reports: URGENT · WATCH · FINE</text>
     <text x="68" y="1535" class="small muted">Each domain reads the fictional books. The cash reader is not a bank connection.</text>
   </g>
   <g aria-label="Human approval, durable outbox and controlled email">
@@ -152,6 +153,7 @@
     <text x="62" y="1815" class="body">Recheck ledger + expiry</text>
     <text x="62" y="1849" class="small amber-text">Any failed check holds the send</text>
     <path d="M 370 1768 H 428" class="flow"/>
+    <text x="399" y="1752" text-anchor="middle" font-size="14" fill="#08665f">released</text>
     <path d="M 430 1698 A 161 24 0 0 1 752 1698 V 1830 A 161 24 0 0 1 430 1830 Z" class="boundary"/>
     <ellipse cx="591" cy="1698" rx="161" ry="24" class="boundary"/>
     <text x="591" y="1748" class="heading" text-anchor="middle">Durable outbox</text>
@@ -169,8 +171,12 @@
     <text x="454" y="1940" class="heading">Accepted / failed / unknown retained</text>
     <text x="454" y="1973" class="body">Provider ID proves acceptance, not mailbox delivery.</text>
     <text x="454" y="2003" class="small">Unknown sends require reconciliation; no automatic resend.</text>
-    <text x="64" y="1938" class="body muted">Reload durable history</text>
-    <text x="64" y="1972" class="body muted">before any recovery action.</text>
+    <path d="M 205 1868 V 1902" class="hold-flow"/>
+    <text x="220" y="1894" class="small amber-text">held</text>
+    <rect x="40" y="1904" width="330" height="112" rx="14" class="control"/>
+    <text x="62" y="1940" class="small amber-text">Held — nothing is sent</text>
+    <text x="62" y="1973" class="small">Review current evidence.</text>
+    <text x="62" y="2003" class="small muted">No path to SES from this state.</text>
   </g>
   <g aria-label="Preserved synthetic mode">
     <rect x="40" y="2054" width="1120" height="142" rx="14" class="boundary"/>

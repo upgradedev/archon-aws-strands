@@ -106,6 +106,8 @@ Six Strands readers inspect suppliers, sales, payroll, trading, cash and metrics
 ledger. Each reports before the composer can run; the composer holds no tools. Bedrock supplies
 model interpretation and wording, while deterministic code selects the invoice and verifies
 amounts. Removing Strands prevents draft preparation.
+The controlled model is `eu.anthropic.claude-opus-5` in `eu-west-1`; its configured identity
+is not, by itself, invocation evidence.
 
 <img src="docs/infrastructure.svg" alt="Archon AWS infrastructure: CloudFront serves React from private S3 and routes through API Gateway to Lambda; conditional S3 sessions and a separate worker govern Bedrock and controlled SES. The dashed incoming webhook is an opt-in source extension; verify served identity and acceptance before use." width="100%">
 

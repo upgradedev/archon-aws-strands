@@ -73,6 +73,22 @@ test('rotation replaces the key and revoke clears it without cancelling accepted
   expect(screen.getByRole('status')).toHaveTextContent('Previously accepted jobs may still finish');
 });
 
+test('a superseded intent requires fresh consent and can recover with a new request ID', async () => {
+  show(); await screen.findByText('Not connected'); await authorize();
+  vi.mocked(api.request).mockRejectedValueOnce(new api.ApiError('Connection changed', 409));
+  await userEvent.click(screen.getByRole('button', { name: 'Enable incoming documents' }));
+  const refused = vi.mocked(api.request).mock.calls[1][2];
+  expect(screen.getByRole('checkbox')).not.toBeChecked();
+  expect(screen.getByRole('alert')).toHaveTextContent('authorize a new action');
+  vi.mocked(api.request).mockResolvedValueOnce(connected());
+  await userEvent.click(screen.getByRole('button', { name: 'Refresh connection' }));
+  await screen.findByText('Key active · sender setup required'); await authorize();
+  vi.mocked(api.request).mockResolvedValueOnce({ ...connected(), token: 'fresh-ci-key' });
+  await userEvent.click(screen.getByRole('button', { name: 'Rotate intake key' }));
+  expect(vi.mocked(api.request).mock.calls[3][2]).not.toEqual(refused);
+  expect(screen.getByLabelText('Intake-only key')).toHaveValue('fresh-ci-key');
+});
+
 test('clipboard failure offers a manual path, and leaving the page discards the secret', async () => {
   const user = userEvent.setup();
   const view = show(); await screen.findByText('Not connected'); await authorize();
