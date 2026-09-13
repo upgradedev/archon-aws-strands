@@ -1,55 +1,60 @@
 # Bedrock AgentCore: a design note, not a description of what runs
 
-For the joiner reconciling inbox invoices: [live AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/).
-Try Records → invoice → payment → Workspace → Run Strands → exact review → History.
-This document retains the synthetic-path context: bounded extraction, scripted model and
-simulated acceptance. Controlled-live mode is a separate runtime using the same interface;
-its current activation and acceptance are reported by the links below, not this historical text.
-The real Strands graph must finish all six reports before drafting.
-[Evidence and limits](../README.md#evidence-and-limits) ·
-[Required disclosures](../README.md#pre-existing-work-disclosed).
+**None of the AgentCore runtime described below is implemented.** This is an optional historical
+sketch, not deployment instructions or an API contract for the current product.
+No AgentCore runtime, Action Groups, hosted Guardrails or Aurora DSQL is deployed.
 
-> **Read this first.** **None of the AgentCore runtime described below is implemented.** This document
-> is a sketch of what Archon would look like deployed on Bedrock AgentCore, kept because the rules note
-> that AgentCore strengthens a Technical Implementation score and because the mapping is worth having
-> written down before anyone attempts it. It is a plan. Nothing in the repository calls an AgentCore
-> API, and `grep -ri agentcore src/` returns nothing.
->
-> It also predates parts of the product it describes, and two of its claims were simply wrong when read
-> today. Both are corrected below rather than left to be found by a judge:
->
-> - it called Archon a **dispute resolution** engine. Archon chases an unpaid invoice; it does not
->   arbitrate disputes. The current public API records bounded human resolutions; it is not a dispute engine.
-> - it named **Claude 3.5 Sonnet**. The operator model configuration is `eu.anthropic.claude-opus-5`; the public model is scripted, not a live
->   call, and `python -m archon.evidence.licences` prints what is actually installed.
->
-> **What of it does exist today**, and where:
->
-> | described here | in the repository | evidence |
-> |---|---|---|
-> | the pre-LLM redaction filter | **yes**, for operator document/reply reading; public reading makes no model call | `archon.security.sanitizer`, `archon.adapters.inbound`, `archon.agents.proposal` |
-> | the deterministic ledger with a balance invariant | **yes** | `archon.domain.ledger` |
-> | human-in-the-loop before the one write | **yes**, and bound to exact bytes rather than to a threshold | `archon.agents.gate` |
-> | session memory as an audit trail | **yes**, as documents replayed through the same validation | `archon.store.sqlite` |
-> | AgentCore runtime, Action Groups, Guardrails as a service | **no** | Strands SDK; public scripted model, operator-only Bedrock |
-> | API Gateway, Lambda, private S3 sessions | **yes** | public synthetic API; no cryptographic truth attestation |
-> | S3 audit seals, DynamoDB | **no** | not implemented |
->
-> The threshold in the mapping below, holding a draft when an amount exceeds €5,000, is **not** how the
-> gate works and never was. The gate holds on facts that stopped being true, on an approval that does
-> not match the bytes, and on an address that is not the one on the invoice. There is no amount at which
-> it stops caring.
+For the joiner reviewing inbox records in the [AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/),
+controlled-live mode uses Bedrock and restricted SES; retained simulation uses a scripted
+Strands model and simulated acceptance. Read [release.json](https://d2ssmv59q16d0b.cloudfront.net/release.json),
+[/api/health](https://d2ssmv59q16d0b.cloudfront.net/api/health), and
+[exact-pair acceptance](https://d2ssmv59q16d0b.cloudfront.net/acceptance.html).
+[Evidence](EVALUATION.md) and [disclosures](../README.md#pre-existing-work-disclosed) apply to both modes.
 
----
+## Corrections to the sketch
 
-HISTORICAL UNIMPLEMENTED SKETCH: no compliance, zero-hallucination or deployment claim below is current.
+The original text remains below so the proposal can be distinguished from the implementation.
+Its service names, API paths, thresholds and claims are not a specification of what Archon runs.
 
-Current deployment evidence is [frontend SHA](https://d2ssmv59q16d0b.cloudfront.net/release.json)
-and [backend SHA/modes](https://d2ssmv59q16d0b.cloudfront.net/api/health), not this sketch.
+- it called Archon a **dispute resolution** engine. The public API records bounded human resolutions; it is not a dispute engine.
+- it named **Claude 3.5 Sonnet**. The configured current model is `eu.anthropic.claude-opus-5`;
+  controlled-live mode uses Bedrock, while retained simulation uses a scripted model.
+  `python -m archon.evidence.licences` reports installed dependency versions, not model activation.
+- It proposed an inbox, autonomous journal adjustments and cryptographic truth seals. The current
+  public input is supplied fictional text and the write is an exact human-approved collection email.
+  Hashes bind bytes; they do not verify commercial truth, compliance or bank settlement.
+- The proposed Action Group YAML is unimplemented. Bedrock model invocation through Strands does
+  not deploy AgentCore or automatically create the services in this sketch.
 
-The rest of this document is the original sketch, kept as written apart from the corrections above, so that what was planned can be compared with what was built.
+| described here | in the repository | evidence |
+|---|---|---|
+| pre-LLM redaction filter | **yes**, with limited field masking; not a guarantee of anonymity | `archon.security.sanitizer`, `archon.adapters.inbound`, `archon.agents.proposal` |
+| deterministic ledger with a balance invariant | **yes** | `archon.domain.ledger` |
+| human approval before collection email | **yes**, bound to exact draft bytes, not an amount threshold | `archon.agents.gate` |
+| retained documents and decisions | **yes**, private conditional S3 sessions for the public API; SQLite for local/legacy surfaces | `archon.store.sessions`, `archon.store.sqlite` |
+| AgentCore runtime, Action Groups, hosted Guardrails | **no** | Strands SDK + Bedrock model calls are the actual implementation |
+| API Gateway, Lambda, private S3 sessions | **yes**, plus the separate controlled provider worker | `infra/`, `deploy/`, `archon.web.live` |
+| S3 truth seals, DynamoDB, Aurora DSQL | **no** | Session hashes are not authenticity certificates |
+| direct mailbox/bank integration | **no** | Incoming HTTP intake is separately provisional and not yet deployed |
 
----
+The threshold in the mapping below, holding a draft only above €5,000, is **not** how the gate works and never was.
+The gate checks facts, approval, exact text, recipient, revision and expiry. There is no amount at which
+those requirements stop applying.
+
+Source check: `rg -n -i agentcore src/` finds no AgentCore implementation in the supplied baseline.
+[Current architecture](ARCHITECTURE.md) describes CloudFront/private S3, API Gateway, Lambda,
+S3 compare-and-swap sessions, the durable worker, Bedrock and controlled SES.
+[Incoming webhook](incoming-webhook.md) is a separate intake-only proposal, not evidence that the
+original sketch's mailbox or Action Group topology exists.
+
+## Historical proposal, retained for comparison
+
+**HISTORICAL UNIMPLEMENTED SKETCH:** every architecture, OpenAPI path, compliance, zero-hallucination,
+automation and cloud-topology claim below belongs to an unimplemented proposal. It must not be
+copied into current product descriptions, infrastructure diagrams or acceptance evidence.
+
+<details>
+<summary>Original AgentCore sketch (not deployed; contains superseded assumptions)</summary>
 
 ## 1. Executive Summary
 
@@ -177,3 +182,5 @@ AWS Cloud
 │   └── Bedrock Action Group (Lambda Fulfillment -> DynamoDB / Aurora DSQL)
 └── Amazon S3 (Audit Seal Certificates & Cryptographic Receipts)
 ```
+
+</details>

@@ -1,13 +1,11 @@
 # Third-party components, and what each is used under
 
-For the joiner reconciling inbox invoices: [live AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/).
-Try Records → invoice → payment → Workspace → Run Strands → exact review → History.
-This document retains the synthetic-path context: bounded extraction, scripted model and
-simulated acceptance. Controlled-live mode is a separate runtime using the same interface;
-its current activation and acceptance are reported by the links below, not this historical text.
-The real Strands graph must finish all six reports before drafting.
-[Evidence and limits](../README.md#evidence-and-limits) ·
-[Required disclosures](../README.md#pre-existing-work-disclosed).
+For the joiner reviewing inbox records in the [AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/),
+controlled-live mode uses Bedrock and restricted SES; retained simulation uses a scripted
+Strands model and simulated acceptance. Read [release.json](https://d2ssmv59q16d0b.cloudfront.net/release.json),
+[/api/health](https://d2ssmv59q16d0b.cloudfront.net/api/health), and
+[exact-pair acceptance](https://d2ssmv59q16d0b.cloudfront.net/acceptance.html).
+[Evidence](EVALUATION.md) and [disclosures](../README.md#pre-existing-work-disclosed) apply to both modes.
 
 The submission rules require an entrant to be authorised to use every third-party
 integration in accordance with its terms, and they require an entry that uses
@@ -48,13 +46,15 @@ requiring the source of a derived work to be released under their terms.
 
 | service | terms it is used under |
 |---|---|
-| **Amazon Bedrock (operator-only live mode)** | the AWS Customer Agreement and the Bedrock service terms, on the entrant's own account. Model access for `eu.anthropic.claude-opus-5` depends on account and region; operators must check current eligibility before any call |
-| **Amazon SES** | the same agreement. Past observations recorded SES sandbox restrictions. Current operator authorization and recipient eligibility must be checked separately; the public provider is simulated |
-| **AWS hosting: CloudFront, private S3, API Gateway and Lambda** | the AWS Customer Agreement and applicable service terms; public synthetic frontend and session API |
+| **Amazon Bedrock (controlled-live worker and separate operator mode)** | the AWS Customer Agreement and the Bedrock service terms, on the entrant's own account. Model access for `eu.anthropic.claude-opus-5` depends on account and region; operators must check current eligibility before any call |
+| **Amazon SES** | the same agreement. Past observations recorded SES sandbox restrictions. Controlled-live sends are restricted to the configured verified test recipient after exact human consent; retained simulation uses no mail provider |
+| **AWS hosting: CloudFront, private S3, API Gateway and Lambda** | the AWS Customer Agreement and applicable service terms; public React frontend, session API and separate controlled provider worker |
 | **GitHub Actions** | the GitHub Terms of Service, on the entrant's own account; CI, not the public frontend host |
 
-The public runtime calls no paid model or mail API. AWS hosting incurs infrastructure costs;
-operator Bedrock/SES calls may incur usage costs. No third-party dataset is redistributed.
+Controlled-live calls use paid Bedrock/SES under a finite operating grant; AWS hosting costs are
+separate. Loading the deterministic demo seed and retained scripted/simulated mode make no paid
+model or mail calls. Account-wide cost is not established by the grant's reservations.
+No third-party dataset is redistributed.
 Existing licence notices remain authoritative; preserve transitive dependency notices when distributing.
 
 ## Frontend dependencies
@@ -81,8 +81,17 @@ Agents SDK, none of which the SDK provides:
   refused if it contains a digit.
 - **a release gate in plain code**, binding a human approval to a SHA-256 of the
   exact bytes and re-deriving every fact at send time.
-- **a redaction boundary before the model**, including local PDF text extraction,
-  because redaction cannot reach inside a file handed to a hosted model.
+- **a redaction boundary before the model**, with PDF text extraction only in the legacy operator reader. The public
+  intake is plain text; this does not claim public OCR or perfect removal of sensitive content.
 
-The SDK orchestrates agents. None of the above is orchestration, and all of it is
-in this repository.
+The SDK orchestrates agents. The earlier phrase “None of the above is orchestration” was too
+broad: the edge condition is graph orchestration. The ledger, source checks and exact release
+boundary are application controls beyond the SDK. They are implemented in this repository.
+
+
+## Additional disclosures
+
+[Prior work](PRIOR-WORK.md) retains the earlier product names and pattern/visual influences.
+[Graphics](GRAPHICS.md) labels supplied JPGs as concept art, not deployed capabilities.
+The proposed [incoming webhook](incoming-webhook.md) is not yet deployed and adds no direct
+mailbox service integration. This table does not authorize new accounts, providers or paid calls.
