@@ -75,7 +75,8 @@ class Provider:
             content = [{"text": workspace.OPENING + "\n" + workspace.CLOSING}]
             stop = "end_turn"
         return {"output": {"message": {"role": "assistant", "content": content}},
-                "stopReason": stop, "usage": {"inputTokens": 100, "outputTokens": 20},
+                "stopReason": stop,
+                "usage": {"inputTokens": 100, "outputTokens": 20, "totalTokens": 120},
                 "metrics": {"latencyMs": 1}}
 
 
@@ -88,7 +89,7 @@ class Reader(Provider):
             "net": "1500.00", "vat": "360.00", "gross": "1860.00",
         }
         return {"output": {"message": {"content": [{"text": json.dumps(response)}]}},
-                "usage": {"inputTokens": 100, "outputTokens": 20}}
+                "usage": {"inputTokens": 100, "outputTokens": 20, "totalTokens": 120}}
 
 
 def request():
@@ -180,6 +181,20 @@ def test_unknown_model_call_is_not_refunded_or_retried(setup):
     assert len(provider.calls) == 1
     assert journal.read("call:job:1")[0]["status"] == "unknown"
     assert Decimal(journal.read("operating-grant")[0]["reserved_usd"]) > 0
+
+
+def test_unsupported_native_token_count_stops_before_inference_or_budget_reservation(setup):
+    _, journal = setup
+
+    class UnsupportedCounter(Provider):
+        def count_tokens(self, **kwargs):
+            raise RuntimeError("The provided model does not support counting tokens")
+
+    provider = UnsupportedCounter()
+    with pytest.raises(LiveRefused, match="No inference was started"):
+        MeteredConverse(provider, Admission(journal), journal, "job").converse(**request())
+    assert provider.calls == []
+    assert journal.read("operating-grant")[0]["reserved_usd"] == "0"
 
 
 def test_source_validation_refuses_balanced_but_invented_values():

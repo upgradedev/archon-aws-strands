@@ -2,6 +2,35 @@
 
 **Archon helps a joiner reconcile inbox invoices and approve an exact collection draft with the source evidence beside it.**
 
+### Controlled real-provider integration candidate
+
+This branch prepares a real-provider path in the **same React application**:
+semantic intake, Strands reasoning, saved asynchronous jobs, explicit real-email
+approval and a separate durable SES outbox. The existing public deployment is
+still synthetic; source preparation is not a live acceptance claim.
+
+`infra/live_provider_stack.py` defines an isolated worker and retained failure
+queue. The public API keeps its direct Bedrock/SES denies; it can dispatch only
+its own worker. `LiveEnabled` defaults to `false`. Activation also requires the
+exact verified sender/recipient, an operator-created private `operating-grant`
+journal record with a finite budget/expiry and verified price ceilings, and
+actual AWS acceptance. The grant is never created or extended by an anonymous
+request. Reservations bound admitted provider usage under those price ceilings,
+not the whole AWS account bill; infrastructure costs are separate.
+
+**Known activation blockers:** native Bedrock `CountTokens` rejects
+`anthropic.claude-opus-5` in eu-west-1. The candidate deliberately stops before
+inference in that case; a compatible counter is still required. AWS documents
+the [Mantle token-count route](https://docs.aws.amazon.com/bedrock/latest/userguide/count-tokens.html)
+for affected models. The newest candidate also needs CI execution and end-to-end
+live acceptance; it is not ready to merge or deploy. Previously retained
+synthetic results do not prove either real model judgment or email delivery.
+
+In controlled mode the business examples remain fictional, but provider calls
+and the approved email must be real. Provider IDs are not delivery proof.
+Unknown attempts never resend automatically; interrupted jobs require operator
+reconciliation. No inbox or bank connection is implied.
+
 [Open the AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/) ·
 [Human UAT testbook](https://d2ssmv59q16d0b.cloudfront.net/UAT.testbook.html) ·
 [CI](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml) ·

@@ -109,9 +109,15 @@ class MeteredConverse:
         # counting fails closed; do not invent a chars-to-token budget guarantee.
         count_input = {k: request[k] for k in ("messages", "system", "toolConfig") if k in request}
         self.admission.grant()
-        counted = self.client.count_tokens(
-            modelId=COUNT_MODEL_ID, input={"converse": count_input}
-        )["inputTokens"]
+        try:
+            counted = self.client.count_tokens(
+                modelId=COUNT_MODEL_ID, input={"converse": count_input}
+            )["inputTokens"]
+        except Exception as exc:
+            raise LiveRefused(
+                "Token preflight is unavailable for this model. No inference was started. "
+                "The operator must verify a compatible token-count adapter before activation."
+            ) from exc
         if type(counted) is not int or type(output_limit) is not int:
             raise LiveRefused("The provider must return an exact integer input token count.")
         reserved = self.admission.reserve(
