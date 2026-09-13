@@ -93,8 +93,9 @@ Intake itself still writes its event metadata into the saved job and workspace h
 A new enable/disable request rotates the secret and records the action durably. Disabling revokes
 further intake. Retrying the most recent identical configuration request is idempotent and does
 not rotate again; changing its content or replaying it after a newer configuration returns 409.
-Refresh metadata before deciding on a new configuration request. The source caps a workspace
-at 50 distinct configuration changes. Renewal neither extends workspace life nor creates a grant.
+Refresh metadata before deciding on a new configuration request. After 50 distinct configuration
+requests, further enable/rotate actions are refused. Revocation of an active key remains available;
+repeated no-op disables have a separate bound. Renewal neither extends workspace life nor creates a grant.
 
 The stored record contains a nonce and secret digest; comparison uses a constant-time digest
 check. The token is distinct from the target session handle and authorizes intake only.
