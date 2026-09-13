@@ -53,7 +53,9 @@ def submit(store, handle, state, version, operation, payload, request_id, revisi
     if operation not in OPERATIONS or state.get("provider_mode") != "live":
         raise LiveRefused("This session does not support that live operation.")
     if operation == "approve" and payload.get("live_send_consent") != "real-email":
-        raise ValueError("Explicit real-email consent is required. Refresh and review the live draft.")
+        raise ValueError(
+            "Explicit real-email consent is required. Refresh and review the live draft."
+        )
     signature = workspace.digest({"operation": operation, "payload": payload})
     previous = state["requests"].get(request_id)
     if previous:
