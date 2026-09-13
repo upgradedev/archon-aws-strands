@@ -64,7 +64,11 @@ ASK = (
     "email is one or the other depending only on which side we are on, so decide "
     "it from the marking above and never from the tone of the writing.\n\n"
     "{body}\n\n"
-    "Answer with JSON only, using null where the email does not say:\n"
+    "Answer with JSON only, using null where the email does not say. "
+    "Field meanings: for an invoice, issued is its issue date. For a receipt, "
+    "issued is the explicitly stated payment date (paid, sent, received or "
+    "transferred on), not an invoice issue date. Never substitute today's date "
+    "or an invoice due date for a missing payment date.\n"
     '{{"kind": "purchase_invoice" | "sales_invoice" | "receipt" | null, '
     '"doc_id": string|null, "counterparty": string|null, "counterparty_email": string|null, '
     '"issued": "YYYY-MM-DD"|null, "due": "YYYY-MM-DD"|null, '

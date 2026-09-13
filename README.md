@@ -29,9 +29,12 @@ The candidate therefore uses AWS's documented
 [Mantle token-count route](https://docs.aws.amazon.com/bedrock/latest/userguide/count-tokens.html)
 with SigV4 in eu-west-1, never a characters-to-token estimate. Unmapped content
 fails before inference. A count-only endpoint response is not model acceptance.
-The newest candidate still needs full CI and end-to-end live acceptance;
-it is not ready to merge or deploy. Previously retained
-synthetic results do not prove either real model judgment or email delivery.
+Source CI covers both the retained synthetic journeys and the new live-mode
+journey with explicitly labelled test providers. The isolated AWS worker has
+also read a controlled invoice through the actual model with recorded token
+usage. This is not public UI acceptance: the full live release and controlled
+email journey remain to be verified. Previously retained synthetic results do
+not prove either real model judgment or email delivery.
 
 In controlled mode the business examples remain fictional, but provider calls
 and the approved email must be real. Provider IDs are not delivery proof.
