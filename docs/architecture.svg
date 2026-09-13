@@ -1,156 +1,193 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 660" width="1120" height="660"
-     font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
-     role="img" aria-labelledby="title desc">
-  <title id="title">Archon architecture</title>
-  <desc id="desc">An email arrives through Amazon SES, is redacted on the host before anything reads
-    it, is read for fields only by Amazon Bedrock, and is posted to a double-entry ledger. Six Strands
-    agents read one domain each and feed a composer that holds no tools. The composer writes only a
-    greeting and a sign-off; every figure comes from a claim the ledger confirmed. A gate re-derives
-    every fact and checks a human approval bound to the exact bytes before one email is sent back out
-    through SES.</desc>
-
-  <style>
-    .bg    { fill: #ffffff; }
-    .box   { fill: #f4f6f9; stroke: #c9d1dc; stroke-width: 1.5; rx: 8; }
-    .aws   { fill: #fff4e6; stroke: #e8a33d; stroke-width: 1.5; rx: 8; }
-    .code  { fill: #e8f2ec; stroke: #4a9d78; stroke-width: 1.5; rx: 8; }
-    .model { fill: #efe9fb; stroke: #8b6fc9; stroke-width: 1.5; rx: 8; }
-    .stop  { fill: #fdecec; stroke: #c0504d; stroke-width: 1.5; rx: 8; }
-    .h     { font-size: 14px; font-weight: 700; fill: #14171f; }
-    .t     { font-size: 12px; fill: #3d4451; }
-    .s     { font-size: 11px; fill: #5c6472; }
-    .lab   { font-size: 11px; fill: #5c6472; font-style: italic; }
-    .key   { font-size: 11px; fill: #3d4451; }
-    .arrow { stroke: #8b93a1; stroke-width: 1.6; fill: none; marker-end: url(#a); }
-    .band  { fill: none; stroke: #c9d1dc; stroke-width: 1.2; stroke-dasharray: 5 4; rx: 10; }
-  </style>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="2320" viewBox="0 0 1200 2320" role="img" aria-labelledby="architecture-title architecture-desc">
+  <title id="architecture-title">Archon application architecture: evidence, reasoning and exact human approval</title>
+  <desc id="architecture-desc">Read from top to bottom. A fresh or retained React workspace accepts manual fictional plain text. Controlled-live intake persists a job before the private worker calls Bedrock for semantic extraction. Deterministic source checks either hold the source for human correction or post it to the ledger. A user-requested Strands graph runs six readers, each with one read-only tool: suppliers, sales, payroll, trading, cash and metrics. All six reports must be present before the toolless composer proposes tone; the ledger supplies the figures. A human approves the exact recipient, subject and body, bound by a SHA-256 fingerprint and explicit real-email consent. The send gate rechecks ledger facts and approval expiry. A durable outbox reserves before controlled Amazon SES sending and retains accepted, failed or unknown outcomes. Provider acceptance does not prove delivery; unknown sends are not automatically retried. The separate dashed amber webhook lane is source-ready, not deployed: an opt-in session-scoped ingest-only HTTP capability for external mail or export systems joins the same API and worker. It is distinct from the workspace credential, and does not trigger drafting or sending. Retained synthetic sessions use local field rules, the same ledger and a scripted Strands graph with simulated acceptance. Fictional data is distinct from real providers. No direct mailbox or bank connector, Aurora or AgentCore deployment is represented.</desc>
+  <!-- Baseline inspected: 40c7ade. Sources: frontend/src/api.ts; src/archon/web/{workspace,live}.py;
+       src/archon/agents/{graph,wiring,gate,draft}.py; src/archon/store/{sessions,execution}.py;
+       src/archon/adapters/{grounded_post,ses}.py. Dashed ingress follows the supplied integration contract,
+       not an assertion that the baseline implements or deploys it. Visual verification: CI required. -->
   <defs>
-    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7"
-            orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8b93a1"/>
-    </marker>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; fill: #18344f; }
+      .title { font-size: 44px; font-weight: 700; }
+      .subtitle { font-size: 24px; fill: #425c72; }
+      .heading { font-size: 26px; font-weight: 700; }
+      .body { font-size: 22px; }
+      .small { font-size: 20px; }
+      .label { font-size: 20px; font-weight: 700; letter-spacing: 1px; }
+      .teal-text { fill: #08665f; }
+      .amber-text { fill: #805010; }
+      .muted { fill: #425c72; }
+      .card { fill: #ffffff; stroke: #7891a6; stroke-width: 2; }
+      .provider { fill: #e8f6f2; stroke: #16776c; stroke-width: 2; }
+      .control { fill: #fff4dc; stroke: #a66d19; stroke-width: 2; }
+      .boundary { fill: #f0f5fa; stroke: #7891a6; stroke-width: 2; }
+      .future { fill: #fffaf0; stroke: #a66d19; stroke-width: 2.5; stroke-dasharray: 9 7; }
+      .flow { fill: none; stroke: #31546f; stroke-width: 3; stroke-linejoin: round; marker-end: url(#arrow); }
+      .bus { fill: none; stroke: #31546f; stroke-width: 3; stroke-linejoin: round; }
+      .future-flow { fill: none; stroke: #956019; stroke-width: 3; stroke-dasharray: 9 7; stroke-linejoin: round; marker-end: url(#amber-arrow); }
+      .hold-flow { fill: none; stroke: #956019; stroke-width: 3; stroke-linejoin: round; marker-end: url(#amber-arrow); }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#31546f"/></marker>
+    <marker id="amber-arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#956019"/></marker>
   </defs>
-
-  <rect class="bg" width="1120" height="660"/>
-
-  <text x="28" y="34" class="h" font-size="17">Archon — the back office that lives in an inbox</text>
-  <text x="28" y="54" class="s">Every figure is computed by the ledger. The model is asked for
-    judgement and tone, never for a number, and never for permission.</text>
-
-  <!-- key -->
-  <g transform="translate(760,26)">
-    <rect class="aws" x="0" y="0" width="14" height="14"/><text x="20" y="11" class="key">AWS</text>
-    <rect class="model" x="70" y="0" width="14" height="14"/><text x="90" y="11" class="key">model</text>
-    <rect class="code" x="150" y="0" width="14" height="14"/><text x="170" y="11" class="key">plain code</text>
-    <rect class="stop" x="255" y="0" width="14" height="14"/><text x="275" y="11" class="key">refusal</text>
+  <rect width="1200" height="2320" fill="#ffffff"/>
+  <rect x="40" y="40" width="8" height="76" rx="4" fill="#16776c"/>
+  <text x="68" y="76" class="title">Archon · application architecture</text>
+  <text x="68" y="115" class="subtitle">Retained evidence → ledger facts → advice → an approved action</text>
+  <g aria-label="Data and runtime distinction">
+    <rect x="40" y="148" width="1120" height="88" rx="14" class="boundary"/>
+    <text x="64" y="183" class="heading">Fictional business data. Real providers in controlled-live mode.</text>
+    <text x="64" y="216" class="body muted">Manual intake is the baseline. Dashed webhook paths are source-ready, not deployed.</text>
   </g>
-
-  <!-- row 1: intake -->
-  <text x="28" y="94" class="lab">1 · the post arrives, and is made safe before anything reads it</text>
-
-  <rect class="aws" x="28" y="104" width="180" height="66"/>
-  <text x="44" y="128" class="h">Amazon SES</text>
-  <text x="44" y="147" class="t">an email, or a PDF</text>
-  <text x="44" y="162" class="s">attachment</text>
-
-  <rect class="code" x="248" y="104" width="200" height="66"/>
-  <text x="264" y="128" class="h">Redact, on this host</text>
-  <text x="264" y="147" class="t">IBAN · card · tax id · phone</text>
-  <text x="264" y="162" class="s">PDF text extracted locally</text>
-
-  <rect class="model" x="488" y="104" width="200" height="66"/>
-  <text x="504" y="128" class="h">Bedrock reads fields</text>
-  <text x="504" y="147" class="t">claude-opus-5</text>
-  <text x="504" y="162" class="s">extraction, never a decision</text>
-
-  <rect class="code" x="728" y="104" width="220" height="66"/>
-  <text x="744" y="128" class="h">Double-entry ledger</text>
-  <text x="744" y="147" class="t">Aurora DSQL · SQLite</text>
-  <text x="744" y="162" class="s">refuses what does not add up</text>
-
-  <path class="arrow" d="M 208 137 H 246"/>
-  <path class="arrow" d="M 448 137 H 486"/>
-  <path class="arrow" d="M 688 137 H 726"/>
-
-  <!-- row 2: the six -->
-  <text x="28" y="216" class="lab">2 · six Strands agents, one domain each, asked what only that domain can judge</text>
-  <rect class="band" x="20" y="226" width="700" height="112"/>
-
-  <g class="t">
-    <rect class="model" x="36" y="242" width="102" height="38"/>
-    <text x="50" y="266" class="t">suppliers</text>
-    <rect class="model" x="150" y="242" width="102" height="38"/>
-    <text x="164" y="266" class="t">sales</text>
-    <rect class="model" x="264" y="242" width="102" height="38"/>
-    <text x="278" y="266" class="t">payroll</text>
-    <rect class="model" x="378" y="242" width="102" height="38"/>
-    <text x="392" y="266" class="t">trading</text>
-    <rect class="model" x="492" y="242" width="102" height="38"/>
-    <text x="506" y="266" class="t">cash</text>
-    <rect class="model" x="606" y="242" width="98" height="38"/>
-    <text x="620" y="266" class="t">metrics</text>
+  <g aria-label="Workspace and input paths">
+    <rect x="40" y="294" width="330" height="164" rx="14" class="card"/>
+    <text x="64" y="330" class="heading">React workspace</text>
+    <text x="64" y="366" class="body">Fresh or retained session</text>
+    <text x="64" y="398" class="body">Restore previous records</text>
+    <text x="64" y="430" class="small muted">Opening does not call providers</text>
+    <path d="M 370 376 H 422" class="flow"/>
+    <rect x="424" y="294" width="320" height="164" rx="14" class="card"/>
+    <text x="448" y="330" class="heading">Manual text intake</text>
+    <text x="448" y="366" class="body">Paste fictional evidence</text>
+    <text x="448" y="398" class="body">English · EUR · ISO dates</text>
+    <text x="448" y="430" class="small muted">Explicit user action</text>
+    <rect x="802" y="272" width="358" height="242" rx="14" class="future"/>
+    <text x="824" y="306" class="label amber-text">SOURCE-READY</text>
+    <text x="824" y="344" class="heading">HTTP webhook</text>
+    <text x="824" y="376" class="body">POST /api/incoming</text>
+    <text x="824" y="410" class="body">External mail / export system</text>
+    <text x="824" y="442" class="small">Opt-in · one session · ingest only</text>
+    <text x="824" y="470" class="small">Bearer capability; separate from</text>
+    <text x="824" y="497" class="small">the workspace credential</text>
+    <path d="M 584 458 V 550" class="flow"/>
+    <path d="M 981 514 V 532 H 830 V 550" class="future-flow"/>
+    <rect x="274" y="552" width="652" height="112" rx="14" class="card"/>
+    <text x="298" y="592" class="heading">Shared API → private worker</text>
+    <text x="298" y="628" class="body">Durable event / request before async dispatch</text>
+    <text x="1050" y="564" class="small amber-text" text-anchor="middle">Webhook stops</text>
+    <text x="1050" y="592" class="small amber-text" text-anchor="middle">at intake;</text>
+    <text x="1050" y="620" class="small amber-text" text-anchor="middle">no draft or send</text>
   </g>
-  <text x="36" y="304" class="s">Each returns its reading and a view ending URGENT, WATCH or FINE. They disagree,
-    and the disagreement is the point.</text>
-  <text x="36" y="322" class="s">Every tool here is a read. No sequence of calls an agent invents can change the
-    books or reach a client.</text>
-
-  <path class="arrow" d="M 838 170 V 200 H 375 V 240"/>
-
-  <rect class="model" x="760" y="242" width="190" height="80"/>
-  <text x="776" y="266" class="h">Composer</text>
-  <text x="776" y="285" class="t">holds no tools at all</text>
-  <text x="776" y="303" class="s">every edge into it waits</text>
-  <text x="776" y="317" class="s">for all six reports</text>
-
-  <path class="arrow" d="M 706 261 H 758"/>
-
-  <!-- row 3: the draft -->
-  <text x="28" y="374" class="lab">3 · the draft, where the agent writes two lines and the ledger writes every figure</text>
-
-  <rect class="code" x="28" y="384" width="290" height="84"/>
-  <text x="44" y="408" class="h">Claims</text>
-  <text x="44" y="427" class="t">outstanding · days overdue</text>
-  <text x="44" y="443" class="t">part paid · wages due · statutory interest</text>
-  <text x="44" y="460" class="s">each verifies itself against the books</text>
-
-  <rect class="code" x="358" y="384" width="290" height="84"/>
-  <text x="374" y="408" class="h">Draft</text>
-  <text x="374" y="427" class="t">agent writes a greeting and a sign-off</text>
-  <text x="374" y="443" class="t">refused outright if either holds a digit</text>
-  <text x="374" y="460" class="s">fingerprinted, SHA-256 of the exact bytes</text>
-
-  <path class="arrow" d="M 855 322 V 350 H 500 V 382"/>
-  <path class="arrow" d="M 318 426 H 356"/>
-
-  <!-- row 4: the gate, which branches rather than chains -->
-  <text x="28" y="500" class="lab">4 · the gate, which is plain code, because safety that depends on a model behaving is not safety</text>
-
-  <rect class="code" x="28" y="510" width="330" height="112"/>
-  <text x="44" y="534" class="h">Gate</text>
-  <text x="44" y="553" class="t">re-derives every fact at send time</text>
-  <text x="44" y="570" class="t">matches the human approval, byte for byte</text>
-  <text x="44" y="587" class="t">approval expires in thirty minutes</text>
-  <text x="44" y="607" class="s">it decides; it never sends</text>
-
-  <rect class="aws" x="470" y="500" width="290" height="56"/>
-  <text x="486" y="522" class="h">Amazon SES — one email</text>
-  <text x="486" y="541" class="t">sent once, with a receipt, or not called sent</text>
-
-  <rect class="stop" x="470" y="576" width="290" height="56"/>
-  <text x="486" y="598" class="h">Held — nothing is sent</text>
-  <text x="486" y="617" class="t">paid at lunchtime · a word changed · wrong address</text>
-
-  <path class="arrow" d="M 358 552 H 410 V 528 H 468"/>
-  <path class="arrow" d="M 358 578 H 410 V 604 H 468"/>
-  <text x="372" y="522" class="s">released</text>
-  <text x="372" y="628" class="s">held</text>
-
-  <path class="arrow" d="M 500 468 V 490 H 193 V 508"/>
-
-  <text x="790" y="600" class="s">A sentence printed inside an</text>
-  <text x="790" y="616" class="s">invoice cannot reach a decision</text>
-  <text x="790" y="632" class="s">that no model makes.</text>
-
+  <g aria-label="Semantic intake, deterministic validation and ledger">
+    <path d="M 430 664 V 692 H 192 V 728" class="flow"/>
+    <rect x="40" y="730" width="304" height="152" rx="14" class="provider"/>
+    <text x="64" y="766" class="label teal-text">REAL PROVIDER</text>
+    <text x="64" y="804" class="heading">Bedrock intake</text>
+    <text x="64" y="838" class="body">Semantic field extraction</text>
+    <text x="64" y="868" class="small muted">Bounded, redacted input</text>
+    <path d="M 344 806 H 418" class="flow"/>
+    <polygon points="560,704 700,806 560,908 420,806" class="control"/>
+    <text x="560" y="788" class="heading" text-anchor="middle">Source checks</text>
+    <text x="560" y="821" class="body" text-anchor="middle">pass?</text>
+    <text x="560" y="851" class="small" text-anchor="middle">Facts + identity</text>
+    <path d="M 700 806 H 798" class="flow"/>
+    <text x="729" y="791" class="small teal-text">yes</text>
+    <path d="M 800 756 A 180 24 0 0 1 1160 756 V 860 A 180 24 0 0 1 800 860 Z" class="boundary"/>
+    <ellipse cx="980" cy="756" rx="180" ry="24" class="boundary"/>
+    <text x="980" y="802" class="heading" text-anchor="middle">Deterministic ledger</text>
+    <text x="980" y="836" class="body" text-anchor="middle">Post only validated evidence</text>
+    <text x="980" y="868" class="small" text-anchor="middle">Amounts, identities, balances</text>
+    <path d="M 560 908 V 969 H 482" class="hold-flow"/>
+    <text x="578" y="941" class="small amber-text">refuse</text>
+    <rect x="40" y="928" width="440" height="92" rx="14" class="control"/>
+    <text x="64" y="964" class="heading">Hold → human correction</text>
+    <text x="64" y="998" class="body">Retain source history; revalidate</text>
+    <text x="650" y="944" class="small muted">Checks do not establish</text>
+    <text x="650" y="974" class="small muted">authenticity or bank settlement.</text>
+    <path d="M 980 884 V 1038 H 24 V 1197 H 40" class="bus"/>
+    <text x="376" y="1067" class="small">Ingress ends at the ledger. Reasoning needs a separate user action.</text>
+  </g>
+  <g aria-label="Six-reader Strands graph with an all-reports gate">
+    <rect x="40" y="1090" width="1120" height="470" rx="18" class="boundary"/>
+    <text x="68" y="1129" class="heading">Live Amazon Bedrock via Strands</text>
+    <text x="68" y="1163" class="body muted">Six readers · one bounded, read-only ledger tool each</text>
+    <path d="M 40 1197 H 76 V 1477" class="bus"/>
+    <path d="M 76 1197 H 114" class="flow"/>
+    <path d="M 76 1253 H 114" class="flow"/>
+    <path d="M 76 1309 H 114" class="flow"/>
+    <path d="M 76 1365 H 114" class="flow"/>
+    <path d="M 76 1421 H 114" class="flow"/>
+    <path d="M 76 1477 H 114" class="flow"/>
+    <rect x="116" y="1176" width="292" height="42" rx="8" class="card"/>
+    <rect x="116" y="1232" width="292" height="42" rx="8" class="card"/>
+    <rect x="116" y="1288" width="292" height="42" rx="8" class="card"/>
+    <rect x="116" y="1344" width="292" height="42" rx="8" class="card"/>
+    <rect x="116" y="1400" width="292" height="42" rx="8" class="card"/>
+    <rect x="116" y="1456" width="292" height="42" rx="8" class="card"/>
+    <text x="138" y="1204" class="body">Suppliers · amounts owed</text>
+    <text x="138" y="1260" class="body">Sales · open invoices</text>
+    <text x="138" y="1316" class="body">Payroll · payment state</text>
+    <text x="138" y="1372" class="body">Trading · profit and loss</text>
+    <text x="138" y="1428" class="body">Cash · recorded receipts</text>
+    <text x="138" y="1484" class="body">Metrics · headline position</text>
+    <path d="M 408 1197 H 490" class="flow"/>
+    <path d="M 408 1253 H 490" class="flow"/>
+    <path d="M 408 1309 H 490" class="flow"/>
+    <path d="M 408 1365 H 490" class="flow"/>
+    <path d="M 408 1421 H 490" class="flow"/>
+    <path d="M 408 1477 H 490" class="flow"/>
+    <path d="M 490 1197 V 1477" class="bus"/>
+    <path d="M 490 1337 H 514" class="flow"/>
+    <polygon points="622,1257 728,1337 622,1417 516,1337" class="control"/>
+    <text x="622" y="1328" class="body" text-anchor="middle">All six</text>
+    <text x="622" y="1357" class="body" text-anchor="middle">reports?</text>
+    <path d="M 728 1337 H 758" class="flow"/>
+    <text x="730" y="1314" class="small teal-text">yes</text>
+    <rect x="760" y="1254" width="352" height="166" rx="14" class="provider"/>
+    <text x="784" y="1293" class="heading">Toolless composer</text>
+    <text x="784" y="1328" class="body">Proposes opening + closing</text>
+    <text x="784" y="1362" class="body">Ledger supplies the figures</text>
+    <text x="784" y="1396" class="small muted">Draft advice; cannot send</text>
+    <text x="552" y="1466" class="body amber-text">Missing report → no draft</text>
+    <text x="68" y="1535" class="small muted">Each domain reads the fictional books. The cash reader is not a bank connection.</text>
+  </g>
+  <g aria-label="Human approval, durable outbox and controlled email">
+    <path d="M 1112 1337 H 1180 V 1604 H 205 V 1666" class="flow"/>
+    <text x="378" y="1640" class="body">Review the exact draft; approval is a separate action</text>
+    <rect x="40" y="1668" width="330" height="200" rx="14" class="control"/>
+    <text x="62" y="1708" class="heading">Exact human approval</text>
+    <text x="62" y="1747" class="body">Recipient · subject · body</text>
+    <text x="62" y="1781" class="small">SHA-256 + real-email consent</text>
+    <text x="62" y="1815" class="body">Recheck ledger + expiry</text>
+    <text x="62" y="1849" class="small amber-text">Any failed check holds the send</text>
+    <path d="M 370 1768 H 428" class="flow"/>
+    <path d="M 430 1698 A 161 24 0 0 1 752 1698 V 1830 A 161 24 0 0 1 430 1830 Z" class="boundary"/>
+    <ellipse cx="591" cy="1698" rx="161" ry="24" class="boundary"/>
+    <text x="591" y="1748" class="heading" text-anchor="middle">Durable outbox</text>
+    <text x="591" y="1783" class="body" text-anchor="middle">Reserve before sending</text>
+    <text x="591" y="1817" class="body" text-anchor="middle">Atomic, fingerprint keyed</text>
+    <text x="591" y="1845" class="small" text-anchor="middle">Private S3 provider journal</text>
+    <path d="M 752 1768 H 848" class="flow"/>
+    <rect x="850" y="1680" width="310" height="174" rx="14" class="provider"/>
+    <text x="874" y="1716" class="label teal-text">REAL PROVIDER</text>
+    <text x="874" y="1755" class="heading">Controlled SES</text>
+    <text x="874" y="1790" class="body">Verified test recipient</text>
+    <text x="874" y="1824" class="body">Finite grant + expiry</text>
+    <path d="M 1005 1854 V 1902" class="flow"/>
+    <rect x="430" y="1904" width="730" height="112" rx="14" class="card"/>
+    <text x="454" y="1940" class="heading">Accepted / failed / unknown retained</text>
+    <text x="454" y="1973" class="body">Provider ID proves acceptance, not mailbox delivery.</text>
+    <text x="454" y="2003" class="small">Unknown sends require reconciliation; no automatic resend.</text>
+    <text x="64" y="1938" class="body muted">Reload durable history</text>
+    <text x="64" y="1972" class="body muted">before any recovery action.</text>
+  </g>
+  <g aria-label="Preserved synthetic mode">
+    <rect x="40" y="2054" width="1120" height="142" rx="14" class="boundary"/>
+    <text x="64" y="2093" class="heading">Preserved synthetic mode · a separate runtime path</text>
+    <text x="64" y="2129" class="body">Local field rules → same ledger → scripted Strands graph → simulated acceptance.</text>
+    <text x="64" y="2166" class="body">Retained sessions keep their mode and receipts. They do not become live activity.</text>
+  </g>
+  <g aria-label="Legend">
+    <text x="40" y="2243" class="label">LEGEND</text>
+    <path d="M 160 2236 H 204" class="flow"/>
+    <text x="218" y="2243" class="small">Baseline flow</text>
+    <rect x="416" y="2221" width="28" height="24" rx="5" class="provider"/>
+    <text x="458" y="2243" class="small">Real provider</text>
+    <polygon points="670,2221 685,2236 670,2251 655,2236" class="control"/>
+    <text x="700" y="2243" class="small">Required gate</text>
+    <path d="M 917 2236 H 963" class="future-flow"/>
+    <text x="977" y="2243" class="small">Source-ready</text>
+    <text x="40" y="2289" class="small muted">Cylinders: durable storage. No direct mailbox / bank feed, deployed Aurora or AgentCore.</text>
+  </g>
 </svg>

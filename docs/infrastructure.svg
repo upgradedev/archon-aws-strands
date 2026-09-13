@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="2420" viewBox="0 0 1200 2420" role="img" aria-labelledby="infrastructure-title infrastructure-desc">
+  <title id="infrastructure-title">Archon AWS infrastructure: public API, private provider worker and separate deployment boundary</title>
+  <desc id="infrastructure-desc">The browser uses HTTPS to CloudFront. CloudFront fetches the React static site from private S3 using Origin Access Control and routes uncached same-origin API requests through API Gateway to the API Lambda. The API persists session state and pending requests to private S3 before asynchronously invoking the private provider Lambda. The API IAM role explicitly denies direct Bedrock model invocation and all SES actions. Only the worker has bounded provider permissions: Bedrock through an EU inference profile and SES for the configured sender and verified recipient before grant expiry and after exact human approval. Both Lambdas access the sessions namespace; only the worker accesses the provider namespace containing operating grants, call journals and the durable outbox. Conditional S3 writes use ETag compare-and-swap. The worker's asynchronous failure destination is retained encrypted SQS, with no automatic resend and zero function-error retries. CloudWatch receives API and worker logs and monitors API errors and SQS backlog. Private means IAM-only invocation; no VPC or subnet deployment is asserted. The dashed amber extension is source-ready, not deployed: external mail or export systems POST to /api/incoming using a separate session-scoped ingest-only Bearer capability. The owner manages it with GET or POST /api/incoming/connection. Grant records share the sessions namespace with a distinct record_type and cannot be read through the workspace session API. No new IAM, storage or worker is required by this contract. Only real intake is enqueued: worker Bedrock semantic extraction, deterministic source checks, then ledger posting. Ingress cannot trigger a Strands reasoning graph, draft or send. Below the runtime boundary, GitHub Actions verifies and packages source; GitHub OIDC authorizes a main-scoped frontend release to S3 and CloudFront. Backend ZIP deployment remains a separate operator action. No deployed Aurora, AgentCore, mailbox connector or bank feed is represented.</desc>
+  <!-- Baseline inspected: 40c7ade. Sources: infra/{frontend_stack,archon_api_stack}.py;
+       deploy/{live_api_stack,live_provider_stack}.py; .github/workflows/{frontend-deploy,aws-api-package}.yml;
+       src/archon/web/live.py; src/archon/store/{sessions,execution}.py.
+       Future webhook endpoints and grant isolation follow the supplied integration contract, not a deployed claim.
+       Visual verification: CI required. -->
+  <defs>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; fill: #18344f; }
+      .title { font-size: 44px; font-weight: 700; }
+      .subtitle { font-size: 24px; fill: #425c72; }
+      .heading { font-size: 26px; font-weight: 700; }
+      .body { font-size: 22px; }
+      .small { font-size: 20px; }
+      .label { font-size: 20px; font-weight: 700; letter-spacing: 1px; }
+      .teal-text { fill: #08665f; }
+      .amber-text { fill: #805010; }
+      .muted { fill: #425c72; }
+      .card { fill: #ffffff; stroke: #7891a6; stroke-width: 2; }
+      .provider { fill: #e8f6f2; stroke: #16776c; stroke-width: 2; }
+      .control { fill: #fff4dc; stroke: #a66d19; stroke-width: 2; }
+      .storage { fill: #edf3f9; stroke: #7891a6; stroke-width: 2; }
+      .future { fill: #fffaf0; stroke: #a66d19; stroke-width: 2.5; stroke-dasharray: 9 7; }
+      .flow { fill: none; stroke: #31546f; stroke-width: 3; stroke-linejoin: round; marker-end: url(#arrow); }
+      .data-flow { fill: none; stroke: #31546f; stroke-width: 3; stroke-linejoin: round; marker-start: url(#back-arrow); marker-end: url(#arrow); }
+      .future-flow { fill: none; stroke: #956019; stroke-width: 3; stroke-dasharray: 9 7; stroke-linejoin: round; marker-end: url(#amber-arrow); }
+      .ops-flow { fill: none; stroke: #547083; stroke-width: 2.5; stroke-linejoin: round; marker-end: url(#arrow); }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#31546f"/></marker>
+    <marker id="back-arrow" markerWidth="10" markerHeight="10" refX="1" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 10 0 L 0 5 L 10 10 Z" fill="#31546f"/></marker>
+    <marker id="amber-arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#956019"/></marker>
+  </defs>
+  <rect width="1200" height="2420" fill="#ffffff"/>
+  <rect x="40" y="40" width="8" height="76" rx="4" fill="#16776c"/>
+  <text x="68" y="76" class="title">Archon · AWS infrastructure</text>
+  <text x="68" y="115" class="subtitle">Fictional business data · real, bounded Bedrock and SES access</text>
+  <g aria-label="External clients">
+    <rect x="86" y="178" width="390" height="128" rx="14" class="card"/>
+    <path d="M 86 214 H 476" stroke="#7891a6" stroke-width="2"/>
+    <circle cx="105" cy="196" r="4" fill="#7891a6"/>
+    <circle cx="122" cy="196" r="4" fill="#7891a6"/>
+    <circle cx="139" cy="196" r="4" fill="#7891a6"/>
+    <text x="110" y="250" class="heading">Browser · React workspace</text>
+    <text x="110" y="285" class="body">Session handle; no AWS keys</text>
+    <rect x="680" y="162" width="450" height="194" rx="14" class="future"/>
+    <text x="704" y="198" class="label amber-text">SOURCE-READY · NOT DEPLOYED</text>
+    <text x="704" y="238" class="heading">External mail / export system</text>
+    <text x="704" y="274" class="body">POST /api/incoming · ingest only</text>
+    <text x="704" y="307" class="body">Opt-in · session-scoped Bearer</text>
+    <text x="704" y="339" class="small">No direct Gmail / Outlook / IMAP connector</text>
+  </g>
+
+  <rect x="40" y="428" width="1120" height="1482" rx="20" fill="#f6f9fc" stroke="#7891a6" stroke-width="2"/>
+  <text x="636" y="470" class="label">AWS RUNTIME · EU-WEST-1</text>
+  <path d="M 281 306 V 508" class="flow"/>
+  <text x="300" y="390" class="body">HTTPS</text>
+  <path d="M 905 356 V 386 H 1140 V 774 H 478" class="future-flow"/>
+  <text x="628" y="738" class="body amber-text">Bearer capability ≠ workspace credential</text>
+  <text x="628" y="814" class="small amber-text">Owner: GET / POST /api/incoming/connection</text>
+  <text x="628" y="846" class="small amber-text">Ingress enqueues real intake only.</text>
+  <text x="628" y="878" class="small amber-text">No automatic reasoning, drafting or email.</text>
+
+  <g aria-label="CloudFront frontend and API routing">
+    <rect x="86" y="510" width="390" height="128" rx="14" class="card"/>
+    <text x="110" y="549" class="heading">Amazon CloudFront</text>
+    <text x="110" y="585" class="body">Static site + same-origin API</text>
+    <text x="110" y="617" class="small muted">TLS · restricted response headers</text>
+    <path d="M 476 564 H 762" class="flow"/>
+    <text x="508" y="543" class="small">OAC · signed origin fetch</text>
+    <path d="M 764 526 A 158 24 0 0 1 1080 526 V 624 A 158 24 0 0 1 764 624 Z" class="storage"/>
+    <ellipse cx="922" cy="526" rx="158" ry="24" class="storage"/>
+    <text x="922" y="574" class="heading" text-anchor="middle">Private S3 site</text>
+    <text x="922" y="609" class="body" text-anchor="middle">React HTML / JS / CSS</text>
+    <text x="922" y="638" class="small" text-anchor="middle">Public access blocked</text>
+    <path d="M 281 638 V 706" class="flow"/>
+    <text x="304" y="680" class="small">/api/* · uncached</text>
+    <rect x="86" y="708" width="390" height="132" rx="14" class="card"/>
+    <text x="110" y="749" class="heading">Amazon API Gateway</text>
+    <text x="110" y="785" class="body">HTTP API → Lambda integration</text>
+    <text x="110" y="817" class="small muted">Requests + durable-state responses</text>
+    <path d="M 281 840 V 938" class="flow"/>
+    <text x="304" y="902" class="small">Workspace operations</text>
+  </g>
+  <g aria-label="Separate API and provider identities">
+    <rect x="86" y="940" width="430" height="192" rx="14" class="card"/>
+    <text x="110" y="980" class="heading">API Lambda</text>
+    <text x="110" y="1018" class="body">Validate session / ingress capability</text>
+    <text x="110" y="1052" class="body">Persist job before worker dispatch</text>
+    <rect x="104" y="1071" width="394" height="43" rx="8" class="control"/>
+    <text x="301" y="1099" class="small amber-text" text-anchor="middle">IAM DENY: direct Bedrock + all SES</text>
+    <path d="M 516 1024 H 666" class="flow"/>
+    <text x="531" y="1003" class="small">Async Event</text>
+    <rect x="668" y="940" width="444" height="192" rx="14" class="provider"/>
+    <text x="692" y="980" class="heading">Private provider Lambda</text>
+    <text x="692" y="1018" class="body">Semantic intake; separate graph job</text>
+    <text x="692" y="1052" class="body">Bounded grant, budget and expiry</text>
+    <text x="692" y="1086" class="body">Send only after exact human approval</text>
+    <text x="692" y="1116" class="small teal-text">IAM invocation · no public function URL</text>
+    <path d="M 281 1134 V 1242" class="data-flow"/>
+    <path d="M 690 1134 V 1176 H 558 V 1394 H 518" class="data-flow"/>
+    <text x="308" y="1202" class="small">Conditional reads / writes</text>
+    <path d="M 768 1132 V 1246" class="flow"/>
+    <text x="785" y="1202" class="small">model</text>
+    <path d="M 1020 1132 V 1246" class="flow"/>
+    <text x="1037" y="1202" class="small">send</text>
+  </g>
+  <g aria-label="Private session and provider storage">
+    <path d="M 86 1266 A 215 24 0 0 1 516 1266 V 1564 A 215 24 0 0 1 86 1564 Z" class="storage"/>
+    <ellipse cx="301" cy="1266" rx="215" ry="24" class="storage"/>
+    <text x="112" y="1312" class="heading">Private S3 state</text>
+    <text x="112" y="1347" class="body">ETag compare-and-swap (CAS)</text>
+    <text x="112" y="1387" class="body" font-weight="700">sessions/* · API + worker</text>
+    <text x="112" y="1419" class="small">Ledger, sources, revisions, jobs</text>
+    <text x="112" y="1450" class="small amber-text">Source-ready webhook grant:</text>
+    <text x="112" y="1480" class="small amber-text">distinct record_type; no session read</text>
+    <text x="112" y="1520" class="body" font-weight="700">provider/* · worker only</text>
+    <text x="112" y="1552" class="small">Grant, call journals, durable outbox</text>
+  </g>
+  <g aria-label="Bounded real providers">
+    <rect x="668" y="1248" width="220" height="180" rx="14" class="provider"/>
+    <text x="688" y="1284" class="heading">Amazon</text>
+    <text x="688" y="1316" class="heading">Bedrock</text>
+    <text x="688" y="1354" class="body">EU profile</text>
+    <text x="688" y="1386" class="small">EU model regions</text>
+    <text x="688" y="1414" class="small">Metered calls</text>
+    <rect x="932" y="1248" width="180" height="180" rx="14" class="provider"/>
+    <text x="952" y="1284" class="heading">Amazon</text>
+    <text x="952" y="1316" class="heading">SES</text>
+    <text x="952" y="1354" class="body">Fixed sender</text>
+    <text x="952" y="1386" class="small">Verified test</text>
+    <text x="952" y="1414" class="small">recipient</text>
+    <text x="668" y="1470" class="small muted">Intake: semantic fields → source checks</text>
+    <text x="668" y="1502" class="small muted">→ ledger. Graph + approval remain separate.</text>
+    <text x="668" y="1540" class="small muted">SES acceptance ≠ mailbox delivery.</text>
+  </g>
+  <g aria-label="Failure retention and observability">
+    <path d="M 1112 1056 H 1136 V 1688 H 1096" class="ops-flow"/>
+    <text x="864" y="1587" class="small">OnFailure destination</text>
+    <rect x="680" y="1624" width="414" height="160" rx="14" class="control"/>
+    <text x="704" y="1663" class="heading">Retained failure SQS</text>
+    <text x="704" y="1699" class="body">Failed async invocations</text>
+    <text x="704" y="1732" class="body">Encrypted · 14-day retention</text>
+    <text x="704" y="1764" class="small amber-text">Function-error retries: 0 · no resend</text>
+    <path d="M 86 1050 H 64 V 1756 H 84" class="ops-flow"/>
+    <path d="M 1112 1092 H 1150 V 1850 H 301 V 1824" class="ops-flow"/>
+    <text x="872" y="1833" class="small muted">Worker logs</text>
+    <rect x="86" y="1690" width="430" height="132" rx="14" class="card"/>
+    <text x="110" y="1730" class="heading">Amazon CloudWatch</text>
+    <text x="110" y="1765" class="body">API + worker logs</text>
+    <text x="110" y="1798" class="body">API errors + SQS backlog alarms</text>
+    <path d="M 680 1756 H 518" class="ops-flow"/>
+    <text x="548" y="1736" class="small">Alarm</text>
+    <text x="80" y="1886" class="small muted">Private worker describes IAM access. No VPC, subnet or bank connectivity is asserted.</text>
+  </g>
+  <g aria-label="Deployment boundary, separate from request processing">
+    <rect x="40" y="1960" width="1120" height="300" rx="20" fill="#edf3f9" stroke="#7891a6" stroke-width="2"/>
+    <text x="68" y="2001" class="label">DEPLOYMENT BOUNDARY · GITHUB ACTIONS / OIDC · NOT RUNTIME</text>
+    <rect x="74" y="2040" width="310" height="128" rx="14" class="card"/>
+    <text x="96" y="2078" class="heading">GitHub Actions</text>
+    <text x="96" y="2114" class="body">Source checks + packages</text>
+    <text x="96" y="2146" class="small">Frontend build + API ZIP</text>
+    <path d="M 384 2104 H 466" class="flow"/>
+    <rect x="468" y="2040" width="304" height="128" rx="14" class="card"/>
+    <text x="490" y="2078" class="heading">GitHub OIDC</text>
+    <text x="490" y="2114" class="body">Main-scoped release role</text>
+    <text x="490" y="2146" class="small">Temporary AWS credentials</text>
+    <path d="M 772 2104 H 848" class="flow"/>
+    <rect x="850" y="2040" width="276" height="128" rx="14" class="card"/>
+    <text x="872" y="2078" class="body" font-weight="700">Frontend publication</text>
+    <text x="872" y="2114" class="body">S3 assets + HTML</text>
+    <text x="872" y="2146" class="small">CloudFront invalidation</text>
+    <text x="68" y="2210" class="body">API + worker: CI-built ZIP, then separate operator deployment.</text>
+    <text x="68" y="2242" class="small muted">Packaging does not deploy or activate providers. The webhook awaits a separate release.</text>
+  </g>
+  <g aria-label="Legend and excluded infrastructure">
+    <text x="40" y="2313" class="label">LEGEND</text>
+    <path d="M 166 2306 H 210" class="flow"/>
+    <text x="224" y="2313" class="small">Request / effect</text>
+    <path d="M 466 2306 H 510" class="data-flow"/>
+    <text x="524" y="2313" class="small">State read + write</text>
+    <path d="M 834 2306 H 878" class="future-flow"/>
+    <text x="892" y="2313" class="small">Source-ready only</text>
+    <text x="40" y="2354" class="small muted">Cylinders: private S3. Teal: bounded provider access. Amber: permission or failure boundary.</text>
+    <text x="40" y="2393" class="small muted">No deployed Aurora / AgentCore or bank feed. Ingress reuses IAM, storage, worker and failure queue.</text>
+  </g>
+</svg>
