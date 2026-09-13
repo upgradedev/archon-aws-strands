@@ -35,6 +35,7 @@ test('README and infrastructure diagrams render without broken local assets', as
     // Chromium's full-page screenshot can stall on a standalone SVG document.
     // Render the same inspected vector in an HTML document for the visual artifact.
     const vector = await page.locator('svg').evaluate(node => node.outerHTML);
+    await page.goto('about:blank');
     await page.setContent(`<!doctype html><html><head><meta charset="utf-8"><title>${name}</title></head><body style="margin:0;width:1200px">${vector}</body></html>`);
     await expect(page.locator('svg')).toBeVisible();
     await page.screenshot({ path: info.outputPath(`docs-${name}.png`), fullPage: true });
