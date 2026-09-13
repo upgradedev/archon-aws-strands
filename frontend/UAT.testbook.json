@@ -1,4 +1,16 @@
 {
+  "product_closeout_wave": {
+    "status": "SOURCE_CANDIDATE_REQUIRES_EXACT_PAIR_ACCEPTANCE",
+    "human_uat": "NOT_RUN",
+    "scope": "Public bounded-post-v2, owner counterproposal with retained original reply, no client-acceptance/payment/delivery claim; no frozen benchmark rebaseline.",
+    "cases": [
+      { "id": "AR-UAT-32", "steps": ["Post invoice and partial payment", "Read client terms", "Review and record different owner terms", "Reload and inspect the retained original", "Read a fresh client reply and explicitly approve it"], "expected": "Counterproposal leaves 1260.00 EUR outstanding, no arrangement hold and no provider receipt. Only approved client terms hold collection; all original replies remain.", "automated_test": "counterproposal retains the client reply without inventing acceptance or reducing debt" },
+      { "id": "AR-UAT-33", "steps": ["Paste explicit English dates and EUR comma-decimal invoice", "Record an identified payment", "Submit a separate invoice with conflicting totals"], "expected": "2976.00 less 900.00 equals 2076.00 EUR. Conflicting source retained and held, not posted. No real model or mail.", "automated_test": "human date and EUR notation posts explicit facts but conflicting totals stay held" },
+      { "id": "AR-UAT-34", "steps": ["Open a cold browser context at CloudFront root", "Observe main/CTA before any session mutation", "Retain supported paint entries and screenshot"], "expected": "Main visibility below 2500ms; FCP/LCP below 2500ms where the browser supports each API. Unsupported entries remain null, not zero; visibility is not FCP. CDN cache is not purged. Separate from frozen X1.", "automated_test": "cold landing records paint support and main visibility without a session request" }
+    ],
+    "matrix": "Desktop Chromium, 375px Chromium and 375px WebKit via product-journey.spec.ts; existing real-HTTP suites and assertions retained.",
+    "collector": "Changed product source is denied by the frozen AR3 collector. Positive prepare-only control remains pinned to d8194c0 with its own source imports. No model grant activated."
+  },
   "guided_product_wave": {
     "status": "SOURCE_CANDIDATE_REQUIRES_CI_AND_DEPLOYED_ACCEPTANCE",
     "scope": "Public introduction renders without session access, guided invoice/payment/review/outcome, retained workspace return, supported text/file preview, offline correction preservation, explicit approval and recorded simulation.",

@@ -8,6 +8,11 @@ must finish all six reports before drafting. [Evidence and limits](../README.md#
 
 ## The requirement
 
+Current served source identities and acceptance, not an assumed branch deployment:
+[frontend SHA](https://d2ssmv59q16d0b.cloudfront.net/release.json),
+[backend SHA and mode](https://d2ssmv59q16d0b.cloudfront.net/api/health),
+[exact-pair acceptance](https://d2ssmv59q16d0b.cloudfront.net/acceptance.html).
+
 A joiner needs to compare invoice and remittance evidence before collecting a client balance.
 This build implements that bounded workflow from retained sources to an exact approved draft.
 It does not establish superiority, novelty under competition rules, or eligibility.
@@ -28,6 +33,12 @@ Human resolution can link a duplicate, record an externally resolved dispute, or
 historical payment identities without changing old source bytes or journal entries. Conflicting
 legacy duplicates require operator accounting correction; this application does not reverse them.
 Fresh review is required after every resolution.
+
+The public source also reads explicit full English month names and US/EU two-decimal EUR
+notation, refusing conflicting values. This bounded format expansion is not general inbox AI.
+An owner can record a counterproposal while preserving the original client reply. It is not
+client acceptance, delivery or payment and does not create a collection hold. An agreed plan
+requires reading a client proposal and explicitly approving its current, exact terms.
 
 ## What is not established
 

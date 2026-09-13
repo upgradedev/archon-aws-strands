@@ -9,7 +9,8 @@ from dataclasses import asdict, replace
 from datetime import UTC, date, datetime
 from decimal import Decimal
 
-from archon.adapters.inbound import BUSINESS_EMAIL, BUSINESS_NAME, LocalReader, read_email
+from archon.adapters.bounded_post import PublicPostReader
+from archon.adapters.inbound import BUSINESS_EMAIL, BUSINESS_NAME, read_email
 from archon.adapters.ses import Outbox
 from archon.agents.claims import Outstanding, Overdue, PartPaid
 from archon.agents.draft import ChaseDraft
@@ -156,7 +157,7 @@ def intake(state: dict, body: str, replace_id: str | None = None) -> None:
         if re.search(r"\b(?:USD|GBP|CHF|JPY|CAD|AUD)\b|[$£¥]", body, re.I):
             raise ValueError("Only EUR is supported. No exchange rate has been authorized.")
         reading = read_email(
-            body, source_id, client=LocalReader(), ours=BUSINESS_EMAIL,
+            body, source_id, client=PublicPostReader(), ours=BUSINESS_EMAIL,
             business_name=BUSINESS_NAME,
         )
         source.update(kind=type(reading.document).__name__,
@@ -356,6 +357,7 @@ def propose(state: dict, invoice_id: str, body: str) -> None:
     }
     proposed["fingerprint"] = digest(proposed)
     state["proposal"] = proposed
+    state.setdefault("terms_history", []).append({"decision": "client-proposal", **proposed})
     state["draft"] = None
     # A dispute/ambiguous reply is material missing evidence, not a cosmetic warning.
     if reading.needs_a_person:
@@ -435,7 +437,7 @@ def resolve(state: dict, source_id: str, decision: str, note: str,
     event(state, "Human resolution recorded", f"{source_id}: {decision}; fresh review required.")
 
 
-def agree(state: dict, fingerprint: str) -> None:
+def checked_terms(state: dict, fingerprint: str) -> tuple[dict, Arrangement]:
     proposal = state["proposal"]
     if not proposal or not proposal["plan"] or proposal["fingerprint"] != fingerprint:
         raise Conflict("The proposed terms changed. Read and approve the exact terms again.")
@@ -460,6 +462,40 @@ def agree(state: dict, fingerprint: str) -> None:
     )
     if plain(asdict(plan)) != saved:
         raise Conflict("The balance changed after the proposal. Review the terms again.")
+    return proposal, plan
+
+
+def counter(state: dict, fingerprint: str, body: str) -> None:
+    """Record an owner-reviewed counteroffer, never client acceptance or a payment."""
+    original, plan = checked_terms(state, fingerprint)
+    reading = read_reply(body, AS_OF, client=BoundedReplyReader())
+    if reading.needs_a_person:
+        raise ValueError("A counterproposal requires explicit dated amounts, not a dispute.")
+    replacement = consider(
+        invoice_id=plan.invoice_id,
+        outstanding=sum((i.amount for i in plan.instalments), Decimal("0")),
+        instalments=reading.instalments, as_of=AS_OF, baseline=plan.baseline,
+        approved_by="demo visitor",
+    )
+    if replacement.instalments == plan.instalments:
+        raise ValueError("These are the original terms. Approve them or enter different dates.")
+    record = {"decision": "owner-counterproposal", "invoice_id": plan.invoice_id,
+              "at": now(), "body": body, "plan": plain(asdict(replacement)),
+              "original": original, "status": "pending-client-acceptance",
+              "revision": state["revision"], "approved_by": "demo visitor"}
+    record["fingerprint"] = digest(record)
+    state.setdefault("terms_history", []).append(record)
+    state["proposal"], state["draft"], state["graph"] = None, None, None
+    event(state, "Owner counterproposal recorded",
+          f"{plan.invoice_id}: awaiting client acceptance; "
+          "no message sent, no debt or hold changed.")
+
+
+def agree(state: dict, fingerprint: str) -> None:
+    proposal, plan = checked_terms(state, fingerprint)
+    saved = proposal["plan"]
+    state.setdefault("terms_history", []).append({"decision": "arrangement-approved",
+                                                  "at": now(), "original": proposal})
     state["arrangements"] = [
         a for a in state["arrangements"] if a["invoice_id"] != plan.invoice_id
     ] + [saved]
@@ -486,6 +522,7 @@ def snapshot(state: dict) -> dict:
         provider="Simulated outbox; no real email",
         holds=holds(state),
         resolutions=state.get("resolutions", []),
+        terms_history=state.get("terms_history", []),
         samples=SAMPLES,
         queue=asdict(queue),
         sales=[{**asdict(s), "outstanding": s.outstanding} for s in books.sales_settlements()],

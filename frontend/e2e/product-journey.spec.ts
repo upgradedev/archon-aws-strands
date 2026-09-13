@@ -79,6 +79,89 @@ test('landing paints before session access and the guided decision survives retu
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true); expect(errors).toEqual([]);
 });
 
+test('counterproposal retains the client reply without inventing acceptance or reducing debt', async ({ page }, info) => {
+  await invoiceAndPayment(page);
+  await page.goto('/#/workspace?invoice=JN-4410&view=terms');
+  const original = '2026-09-20: 1260.00 EUR';
+  const counter = '2026-09-25: 600.00 EUR\n2026-10-10: 660.00 EUR';
+  await page.getByLabel("Client's proposed terms").fill(original);
+  await page.getByRole('button', { name: 'Read proposed terms', exact: true }).click();
+  await page.getByText('Offer different payment dates', { exact: true }).click();
+  await page.getByLabel('Your counterproposal', { exact: true }).fill(counter);
+  const record = page.getByRole('button', { name: 'Record counterproposal · no send', exact: true });
+  await expect(record).toBeDisabled();
+  await page.getByRole('checkbox', { name: /I reviewed my counterproposal/ }).check();
+  await record.click();
+  const history = page.getByRole('region', { name: 'Terms decision history' });
+  await expect(history).toContainText('Counterproposal recorded · client acceptance not recorded');
+  await page.reload();
+  await history.getByText(/Counterproposal recorded · client acceptance not recorded/).click();
+  await expect(history).toContainText(original); await expect(history).toContainText(counter);
+  const saved = await state(page);
+  expect(saved.data.sales[0].outstanding).toBe('1260.00'); expect(saved.data.arrangements).toEqual([]);
+  expect(saved.data.receipts).toEqual([]); expect(saved.data.queue.ready).toHaveLength(1);
+  await page.screenshot({ path: info.outputPath('counterproposal-retained.png'), fullPage: true });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.getByLabel("Client's proposed terms").fill(counter);
+  await page.getByRole('button', { name: 'Read proposed terms', exact: true }).click();
+  await page.getByLabel(/I approve these exact/).check();
+  await page.getByRole('button', { name: 'Approve arrangement', exact: true }).click();
+  await page.reload(); await expect(page.getByText('Agreed arrangements', { exact: true })).toBeVisible();
+  const agreed = await state(page); expect(agreed.data.sales[0].outstanding).toBe('1260.00');
+  expect(agreed.data.queue.blocked).toHaveLength(1); expect(agreed.data.terms_history[1].original.body).toBe(original);
+});
+
+test('human date and EUR notation posts explicit facts but conflicting totals stay held', async ({ page }, info) => {
+  await page.goto('/#/journey');
+  const source = 'From: me@myjoinery.example\nTo: owner@maple.example\nOur invoice to Maple Workshop. Invoice MP-7201 dated 3 July 2026, due August 12, 2026. Net EUR 2.400,00 VAT EUR 576,00 total EUR 2.976,00.';
+  await page.getByLabel('Email headers and plain-text body').fill(source);
+  await post(page, 'Read & add invoice');
+  expect((await state(page)).data.sales[0].outstanding).toBe('2976.00');
+  await page.getByLabel('Email headers and plain-text body').fill('From: owner@maple.example\nPaid EUR 900,00 on 22 August 2026 against invoice MP-7201.\nTransfer ID: MAPLE-BANK-900');
+  await post(page, 'Record payment & check balance');
+  expect((await state(page)).data.sales[0].outstanding).toBe('2076.00');
+  await page.goto('/#/documents');
+  await page.getByLabel(/Email headers/).fill(source.replaceAll('MP-7201', 'MP-7202') + '\nGross EUR 2.977,00');
+  await page.getByRole('button', { name: 'Read & post email', exact: true }).click();
+  await expect(page.locator('main')).toContainText('Conflicting invoice totals');
+  const stopped = await state(page); expect(stopped.data.holds).toHaveLength(1);
+  expect(stopped.data.sales).toHaveLength(1); expect(stopped.data.receipts).toEqual([]);
+  await page.screenshot({ path: info.outputPath('reader-conflict-held.png'), fullPage: true });
+});
+
+test('cold landing records paint support and main visibility without a session request', async ({ page }, info) => {
+  await page.addInitScript(() => {
+    const observed = { lcp: null as number | null, mainVisible: null as number | null, supported: PerformanceObserver.supportedEntryTypes };
+    Object.assign(window, { archonPaintObservation: observed });
+    if (observed.supported.includes('largest-contentful-paint')) {
+      new PerformanceObserver(list => { for (const entry of list.getEntries()) observed.lcp = entry.startTime; }).observe({ type: 'largest-contentful-paint', buffered: true });
+    }
+    function visible() {
+      const heading = document.querySelector('main h1');
+      if (heading && heading.getBoundingClientRect().height > 0 && getComputedStyle(heading).visibility !== 'hidden') {
+        requestAnimationFrame(() => { observed.mainVisible = performance.now(); });
+      } else requestAnimationFrame(visible);
+    }
+    requestAnimationFrame(visible);
+  });
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: /Chase the balance/ })).toBeVisible();
+  await page.waitForFunction(() => (window as unknown as { archonPaintObservation: { mainVisible: number | null } }).archonPaintObservation.mainVisible !== null);
+  // Allow buffered paint delivery, not an API response or a warm second navigation.
+  await page.waitForTimeout(500);
+  const observation = await page.evaluate(() => ({
+    ...(window as unknown as { archonPaintObservation: { lcp: number | null; mainVisible: number; supported: string[] } }).archonPaintObservation,
+    fcp: performance.getEntriesByName('first-contentful-paint')[0]?.startTime ?? null,
+    session: localStorage.getItem('archon.demo.session.v1'),
+  }));
+  await info.attach('cold-paint.json', { contentType: 'application/json', body: JSON.stringify({ ...observation, browser: info.project.name, url: page.url(), source: process.env.GITHUB_SHA, expectedRelease: process.env.EXPECTED_RELEASE, scope: 'Cold browser context; CDN cache not purged. Main visibility is not FCP. Unsupported paint APIs are null, not zero. Not an X1 rerun.' }) });
+  await page.screenshot({ path: info.outputPath('cold-main-paint.png') });
+  console.log('ARCHON_COLD_PAINT ' + JSON.stringify({ ...observation, project: info.project.name, url: page.url(), expectedRelease: process.env.EXPECTED_RELEASE, source: process.env.GITHUB_SHA }));
+  expect(observation.session).toBeNull(); expect(observation.mainVisible).toBeLessThan(2500);
+  if (observation.supported.includes('paint')) { expect(observation.fcp).not.toBeNull(); expect(observation.fcp!).toBeLessThan(2500); }
+  if (observation.supported.includes('largest-contentful-paint')) { expect(observation.lcp).not.toBeNull(); expect(observation.lcp!).toBeLessThan(2500); }
+});
+
 test('guided duplicate holds collection without adding money or automatically resolving evidence', async ({ page }, info) => {
   await invoiceAndPayment(page);
   const paid = await state(page);

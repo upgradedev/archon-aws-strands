@@ -24,11 +24,11 @@ must finish all six reports before drafting. [Evidence and limits](../README.md#
 >
 > | described here | in the repository | evidence |
 > |---|---|---|
-> | the pre-LLM redaction filter | **yes**, and it is the only place untrusted text meets a model | `archon.security.sanitizer`, `archon.adapters.inbound` |
+> | the pre-LLM redaction filter | **yes**, for operator document/reply reading; public reading makes no model call | `archon.security.sanitizer`, `archon.adapters.inbound`, `archon.agents.proposal` |
 > | the deterministic ledger with a balance invariant | **yes** | `archon.domain.ledger` |
 > | human-in-the-loop before the one write | **yes**, and bound to exact bytes rather than to a threshold | `archon.agents.gate` |
 > | session memory as an audit trail | **yes**, as documents replayed through the same validation | `archon.store.sqlite` |
-> | AgentCore runtime, Action Groups, Guardrails as a service | **no** | nothing; the graph runs on the Strands SDK against `bedrock-runtime` |
+> | AgentCore runtime, Action Groups, Guardrails as a service | **no** | Strands SDK; public scripted model, operator-only Bedrock |
 > | API Gateway, Lambda, private S3 sessions | **yes** | public synthetic API; no cryptographic truth attestation |
 > | S3 audit seals, DynamoDB | **no** | not implemented |
 >
@@ -40,6 +40,9 @@ must finish all six reports before drafting. [Evidence and limits](../README.md#
 ---
 
 HISTORICAL UNIMPLEMENTED SKETCH: no compliance, zero-hallucination or deployment claim below is current.
+
+Current deployment evidence is [frontend SHA](https://d2ssmv59q16d0b.cloudfront.net/release.json)
+and [backend SHA/modes](https://d2ssmv59q16d0b.cloudfront.net/api/health), not this sketch.
 
 The rest of this document is the original sketch, kept as written apart from the corrections above, so that what was planned can be compared with what was built.
 

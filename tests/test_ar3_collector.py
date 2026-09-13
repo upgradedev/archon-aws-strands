@@ -3,6 +3,7 @@
 import base64
 import copy
 import json
+import os
 import subprocess
 import sys
 import time
@@ -277,11 +278,35 @@ def test_prepare_cli_is_inert_and_exact_source_bound(tmp_path, monkeypatch):
     output = tmp_path / "plan.json"
     monkeypatch.setattr(sys, "argv", ["collector", "prepare", "--candidate-sha",
                                     ar3.git("rev-parse", "HEAD"), "--output", str(output)])
-    assert collector.main() == 0
-    assert json.loads(output.read_text()) == collector.export_plan()
+    # The product has intentionally changed. The frozen collector MUST refuse
+    # it, including prepare: never repin an exposed instrument to manufacture green CI.
+    with pytest.raises(subprocess.CalledProcessError) as denied:
+        collector.main()
+    assert denied.value.returncode == 1 and collector.INSTRUMENT_SHA in denied.value.cmd
+    assert not output.exists()
     monkeypatch.setattr(sys, "argv", ["collector", "collect", "--candidate-sha", "b" * 40])
     with pytest.raises(collector.Denied, match="exact checked-out"):
         collector.main()
+
+
+def test_frozen_compatible_snapshot_still_prepares_the_identical_inert_requests(tmp_path):
+    # Positive control executes the historical collector and imports its own src.
+    # No frozen file is edited; the worktree is created only on the CI runner.
+    compatible = "d8194c0413d5414e3acf071f55efe2d820565af7"
+    checkout = tmp_path / "frozen-compatible"
+    output = tmp_path / "frozen-plan.json"
+    ar3.git("worktree", "add", "--detach", str(checkout), compatible)
+    try:
+        completed = subprocess.run(
+            [sys.executable, "-m", "evaluation.ar3_collect", "prepare", "--candidate-sha",
+             compatible, "--output", str(output)], cwd=checkout, check=True,
+            env={**os.environ, "GITHUB_ACTIONS": "true", "PYTHONPATH": str(checkout / "src")},
+            capture_output=True, text=True,
+        )
+        assert completed.returncode == 0
+        assert json.loads(output.read_text()) == collector.export_plan()
+    finally:
+        ar3.git("worktree", "remove", str(checkout))
 
 
 def test_process_kill_leaves_started_and_unrun_not_success(tmp_path, prepared):
@@ -343,4 +368,8 @@ def test_manual_job_is_separate_and_source_job_cannot_activate():
     assert '"Action":"bedrock:*"' not in live
     assert "if: always()" in live and "retention-days: 90" in live
     assert "id-token:" not in source and "AR3_GRANT_JSON:" not in source
-    assert "ar3_collect prepare" in source and "ar3_collect collect" not in source
+    assert "'evaluation.ar3_collect', 'prepare'" in source
+    assert "collector.verify_source(candidate)" in source
+    assert "SOURCE_CHANGED_COLLECTION_DENIED" in source
+    assert "'evaluation.ar3_collect', 'collect'" not in source
+    assert "ar3_collect collect" not in source and "collector.live_client" not in source

@@ -17,14 +17,18 @@ python -m archon.evidence.licences
 
 ## Runtime
 
+Current served identities: [frontend SHA](https://d2ssmv59q16d0b.cloudfront.net/release.json),
+[backend SHA and modes](https://d2ssmv59q16d0b.cloudfront.net/api/health).
+These live records, not the historical version table, identify the deployment.
+
 | package | version read | licence | what it does here |
 |---|---|---|---|
 | `strands-agents` | 1.53.0 | Apache-2.0 | the six-agent graph and the composer. The load-bearing dependency |
 | `boto3` | 1.43.4 | Apache-2.0 | Bedrock and SES clients |
-| `fastapi` | 0.115.6 | MIT | the screen |
+| `fastapi` | 0.115.6 | MIT | public JSON API and the legacy server-rendered screen |
 | `uvicorn` | 0.32.1 | BSD-3-Clause | serves it |
-| `python-multipart` | 0.0.31 | Apache-2.0 | the attachment upload |
-| `pypdf` | 6.15.0 | BSD-3-Clause | extracts PDF text **on the host**, so redaction still applies |
+| `python-multipart` | 0.0.31 | Apache-2.0 | legacy operator attachment upload; not the public text intake |
+| `pypdf` | 6.15.0 | BSD-3-Clause | legacy operator PDF text extraction before redaction; not public OCR |
 
 ## Development only, not shipped
 
@@ -43,7 +47,8 @@ requiring the source of a derived work to be released under their terms.
 |---|---|
 | **Amazon Bedrock (operator-only live mode)** | the AWS Customer Agreement and the Bedrock service terms, on the entrant's own account. Model access for `eu.anthropic.claude-opus-5` depends on account and region; operators must check current eligibility before any call |
 | **Amazon SES** | the same agreement. Past observations recorded SES sandbox restrictions. Current operator authorization and recipient eligibility must be checked separately; the public provider is simulated |
-| **GitHub Actions and Pages** | the GitHub Terms of Service, on the entrant's own account |
+| **AWS hosting: CloudFront, private S3, API Gateway and Lambda** | the AWS Customer Agreement and applicable service terms; public synthetic frontend and session API |
+| **GitHub Actions** | the GitHub Terms of Service, on the entrant's own account; CI, not the public frontend host |
 
 The public runtime calls no paid model or mail API. AWS hosting incurs infrastructure costs;
 operator Bedrock/SES calls may incur usage costs. No third-party dataset is redistributed.

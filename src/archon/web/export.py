@@ -173,6 +173,10 @@ def evidence_bundle(state: dict, commit: str) -> dict:
             lines.append(f"Human resolution: {resolution['decision']} / {safe(resolution['note'])}")
     for resolution in state.get("resolutions", []):
         lines.append(f"Human attestation: {safe(json.dumps(resolution))}")
+    lines += ["PAYMENT TERMS HISTORY",
+              "Owner counterproposals are not client acceptance, delivery or payment evidence."]
+    for record in state.get("terms_history", []):
+        lines.append(safe(json.dumps(record)))
     lines += ["GRAPH AND APPROVAL", safe(json.dumps(state.get("graph"))),
               "Current draft: " + safe(json.dumps(state.get("draft"))),
               "Recorded provider outcomes: " + safe(json.dumps(state["sends"]))]

@@ -87,6 +87,22 @@ if the deployed backend's packaged source differs; deploy that reviewed backend 
 
 ## React workstation usage
 
+The public source now selects `PublicPostReader` (`bounded-post-v2`): explicit ISO dates or
+full English month names, and two-decimal EUR amounts such as `2,400.00` or `2.400,00`.
+Net, VAT and gross must be stated and reconcile. Conflicting dates, totals or invoice references
+are refused, not resolved by taking the first match. Relative dates, OCR and general prose remain
+unsupported. Original text, invoice direction and transfer-identity guards remain authoritative.
+The legacy `LocalReader` and the frozen AR3 baseline are unchanged. The new development regressions
+are not independent held-out evidence, a model result or a rerun of the historical comparison.
+
+In Payment arrangement, read the client's dated terms and either approve that exact plan or
+choose **Offer different payment dates**. Review your counterproposal and explicitly record it.
+The original reply and counterproposal survive reload and appear in the readable evidence bundle.
+A counterproposal is pending client acceptance: it sends no message, changes no debt and creates
+no collection hold. Record a fresh client reply before approving an arrangement. New evidence,
+holds, expired proposals or stale revisions require review again. An arrangement changes chase
+timing, not the balance. The original reply is also retained when a client plan is approved.
+
 Navigation: Introduction → Guided check, or Dashboard → Workspace → Records → History.
 The persistent navigation explains each task: balances, review/approval, invoices/payments and
 decisions/receipts. Legacy bookmarks still resolve.
@@ -213,6 +229,12 @@ are unchanged. No CountTokens, tools, media, explicit cache creation, thinking o
 repair loop is added. Provider-default adaptive thinking may yield reasoning blocks rejected by the
 frozen response contract; preserve that outcome, do not strip blocks or retune the protocol.
 
+The new product source is no longer compatible with the frozen collector's whole-source pin.
+Current source CI must report `SOURCE_CHANGED_COLLECTION_DENIED`, not export an activation plan.
+It tests this refusal and retains a separate positive prepare-only check at compatible snapshot
+`d8194c0413d5414e3acf071f55efe2d820565af7`, with its own imports. No old pin, request or model is
+changed. A current-product model evaluation needs a separately preregistered instrument and grant.
+
 Reservations use `2 * canonical_serialized_request_UTF8_bytes + 4096` input tokens per request:
 the byte term deliberately overcounts visible text/JSON, with an additional multiplier and fixed
 template allowance. This is a **conditional conservative assumption**, not a tokenizer measurement
@@ -279,8 +301,9 @@ exit2 means incomplete correlation, not zero usage. Limits:1000 API rows,10000 e
 CI runs synthetic full-flow/negative controls without AWS/network. No new live runner or activation
 is wired. A future release must explicitly package `telemetry/` beside `archon/`, review/select
 `telemetry.lambda_entry.handler`, capture response headers and verify exact runtime identity/logs.
-Current infra, app source, frozen AR3 evaluator/collector/protocol and X1 benchmark are unchanged.
-This separation preserves their source pins. No IAM, environment or deployment changes are included.
+This telemetry-only component does not alter infra, the frozen AR3 evaluator/collector/protocol
+or X1 benchmark. Its source pins remain unchanged by the public product reader introduced above.
+The component adds no IAM, environment or deployment changes.
 Log delivery can fail; only text REPORT format is supported. Supplied exports/configured SHA labels
 are not cryptographic origin or deployment attestations. This is not full-service cost, model latency
 or user time saved. Runtime fields and REPORT units follow the
@@ -296,6 +319,9 @@ That zero was achieved by not acting. It is not evidence of accuracy or usefulne
 The prior evaluator did not enforce exact target invoice and nonempty correct recipient.
 Fresh synthetic contract tests now cover those fields and amount separately. No new benchmark
 score, held-out reuse, competitive superiority or live model measurement is claimed.
+The current classifier rejects a wrong invoice as `wrong-invoice`, and an empty recipient as
+`wrong-recipient` when earlier checks pass. Multiple simultaneous faults still fail: the retained
+taxonomy reports the first category, not every category. Relabeling a refusal is not a product fix.
 python -m archon.evidence.fair is an evaluator command, not evidence of current performance.
 
 Historical material: [first withdrawn set](evidence/RESULTS-2026-09-04.md),

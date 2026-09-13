@@ -45,6 +45,10 @@ class ProposalRequest(Mutation):
     body: str = Field(min_length=1, max_length=4000)
 
 
+class CounterRequest(ApprovalRequest):
+    body: str = Field(min_length=1, max_length=4000)
+
+
 class SessionRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     mode: Literal["synthetic"] = "synthetic"
@@ -167,6 +171,11 @@ def propose(request: ProposalRequest, handle: SESSION_HEADER):
 @app.post("/api/arrangements/approve")
 def agree(request: ApprovalRequest, handle: SESSION_HEADER):
     return mutate(handle, request, "agree", workspace.agree)
+
+
+@app.post("/api/arrangements/counter")
+def counter(request: CounterRequest, handle: SESSION_HEADER):
+    return mutate(handle, request, "counter", workspace.counter)
 
 
 @app.post("/api/resolve")

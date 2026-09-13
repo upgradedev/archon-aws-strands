@@ -298,7 +298,27 @@ jobs:
           python -m pytest tests/test_ar3_collector.py --basetemp=ar3-collector-fixtures --junitxml=ar3-collector-junit.xml
       - name: Export inert request sizes and conditional reference cost, no grant or AWS client
         if: always() && !cancelled()
-        run: python -m evaluation.ar3_collect prepare --candidate-sha "$CANDIDATE_SHA" --output ar3-collector-plan.json
+        run: |
+          python - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          from evaluation import ar3_collect as collector
+          candidate = os.environ['CANDIDATE_SHA']
+          try:
+              collector.verify_source(candidate)
+          except subprocess.CalledProcessError as refusal:
+              assert refusal.returncode == 1
+              assert refusal.cmd[:5] == ['git', 'diff', '--exit-code', collector.INSTRUMENT_SHA, 'HEAD']
+              result = {'status': 'SOURCE_CHANGED_COLLECTION_DENIED', 'candidate_sha': candidate,
+                        'instrument_sha': collector.INSTRUMENT_SHA, 'model_calls': 0,
+                        'note': 'Expected frozen-source refusal. Not a new plan, grant or model result.'}
+              with Path('ar3-collector-plan.json').open('x') as output:
+                  json.dump(result, output, indent=2)
+              print(json.dumps(result))
+          else:
+              subprocess.run(['python', '-m', 'evaluation.ar3_collect', 'prepare',
+                              '--candidate-sha', candidate, '--output', 'ar3-collector-plan.json'], check=True)
+          PY
       - name: Prepare baseline evidence and inert exact requests, never invoke a model
         if: always() && !cancelled()
         run: python -m evaluation.ar3 --candidate-sha "$CANDIDATE_SHA" --output ar3-output
