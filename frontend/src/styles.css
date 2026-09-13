@@ -236,6 +236,11 @@ details summary { font-size: 14px; color: #d0cbef; padding-block: 5px; } .finger
   .hold-list li { flex-wrap: wrap; } .source-list summary { padding-inline: 16px; } .source-content { padding-inline: 16px; }
 }
 @media (max-width:600px) { .sample-buttons { grid-template-columns: repeat(2,minmax(0,1fr)); grid-auto-rows: 1fr; } .sample-buttons::before { bottom: auto; width: calc((100% - 8px)/2); height: calc((100% - 8px)/2); transform: translate(calc(var(--sample-column) * 100%),calc(var(--sample-row) * 100%)); } }
+.counter-terms,.terms-history { padding: 20px; min-width: 0; }
+.counter-terms summary,.terms-history summary { min-height: 44px; cursor: pointer; line-height: 1.6; }
+.counter-terms textarea { width: 100%; box-sizing: border-box; }
+.counter-terms pre,.terms-history pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.counter-terms>p,.terms-history>p { color: var(--muted); margin-block: 12px; }
 @media (max-width:360px) { .stats { grid-template-columns: 1fr; } .case-row { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion:reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
 @media (forced-colors:active) { .stat,.panel,.primary,.case-row,.source-choice,.source-badge { border: 1px solid CanvasText; background: Canvas; color: CanvasText; } .stat strong,.stat p,.stat small { color: CanvasText; } .sample-buttons::before { display: none; } [aria-current],.sample-buttons [aria-pressed="true"] { outline: 2px solid Highlight; } }

@@ -21,10 +21,16 @@ export interface Receipt {
   fingerprint: string; state: string; to_address: string; invoice_id: string;
   amount: string; at: string; message_id: string | null; error: string | null;
 }
+export interface TermsDecision {
+  decision: string; at: string; invoice_id?: string; body?: string; fingerprint?: string;
+  status?: string; plan?: Arrangement | null;
+  original?: { invoice_id: string; body?: string; fingerprint: string };
+}
 export interface Workspace {
   revision: number; as_of: string; synthetic: true; reader: string; provider: string;
   business?: { name: string; email: string; source: string };
   resolutions?: { decision: string; note: string; at: string }[];
+  terms_history?: TermsDecision[];
   sources: Source[]; holds: Source[]; sales: Settlement[]; purchases: Settlement[];
   queue: { ready: QueueItem[]; blocked: QueueItem[]; currency: string };
   samples: Record<'invoice' | 'payment' | 'supplier' | 'refusal', string>;

@@ -4,6 +4,7 @@ import { Badge, Empty, Heading, money } from './ui';
 import { DraftEvidence } from './DraftEvidence';
 import { draftState, workspaceLink } from './ledger';
 import { useClock } from './useClock';
+import { CounterTerms, TermsHistory } from './CounterTerms';
 
 export function Approvals({ data, busy, mutate, mode = 'all', selectedInvoice, stale = false, onApproved }: { data: Workspace; busy: boolean; mutate: Mutate; mode?: 'draft' | 'terms' | 'all'; selectedInvoice?: string; stale?: boolean; onApproved?: () => void }) {
   const [consent, setConsent] = useState('');
@@ -44,5 +45,6 @@ export function Approvals({ data, busy, mutate, mode = 'all', selectedInvoice, s
       {data.arrangements.length ? <div className="agreed"><h3>Agreed arrangements</h3>{data.arrangements.map(a => <div key={a.invoice_id}><strong>{a.invoice_id}</strong><Badge tone="green">Agreed {a.agreed_on}</Badge><p>{a.instalments.map(i => `${i.due}: ${money(i.amount)}`).join(' · ')}</p><small>Approved by {a.approved_by}. Stored with the books; survives reload.</small></div>)}</div> : null}
     </section> : null}
     {data.graph && mode !== 'terms' ? <details className="panel reports-disclosure" open={mode === 'all'}><summary className="panel-heading">Six domain reports · inspect</summary><p className="section-note">{data.graph.mode}</p><div className="domain-reports">{Object.entries(data.graph.reports).map(([name, report]) => <details key={name}><summary>{name}</summary><pre>{report}</pre></details>)}</div></details> : null}
+    {mode !== 'draft' ? <>{proposalMatches ? <CounterTerms key={data.proposal?.fingerprint} data={data} disabled={busy || stale || termsExpired || !!data.holds.length} mutate={mutate} /> : null}<TermsHistory data={data} invoice={selectedInvoice} /></> : null}
   </>;
 }
