@@ -12,6 +12,13 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 README = (ROOT / "README.md").read_text(encoding="utf-8")
 
 
+def document(name):
+    """Detail moves to linked docs, not out of the contract or into hidden notes."""
+    path = "docs/" + name + ".md"
+    assert path in README, f"README must link {path}"
+    return (ROOT / path).read_text(encoding="utf-8")
+
+
 def test_the_headline_sentence_is_the_one_in_the_gate():
     """25 words, no em dash, mechanism plus consequence."""
     first = re.search(r"^\*\*(.+?)\*\*$", README, re.M).group(1)
@@ -40,12 +47,13 @@ def test_every_prior_archon_repo_is_disclosed():
         "archon-qwen-memoryagent",
         "archon-datahub",
     ):
-        assert repo in README, f"{repo} is not disclosed"
-    assert "No code from any of them is in this repository" in README
-    assert "lasttake-aws" in README, "the reused scaffolding shape is disclosed too"
+        assert repo in document("PRIOR-WORK"), f"{repo} is not disclosed"
+    assert "No code from any of them is in this repository" in document("PRIOR-WORK")
+    assert "lasttake-aws" in document("PRIOR-WORK"), "the reused scaffolding is disclosed too"
 
 
 def test_the_limitations_are_not_quietly_dropped():
+    detailed = README + document("OPERATIONS") + document("USER-GUIDE")
     for admission in (
         "SES sandbox",
         "entirely invented",
@@ -53,7 +61,7 @@ def test_the_limitations_are_not_quietly_dropped():
         "No mailbox is connected",
         "Nothing is submitted to any tax authority",
     ):
-        assert admission in README, f"missing admission: {admission}"
+        assert admission in detailed, f"missing admission: {admission}"
 
 
 def test_the_offline_mode_is_not_dressed_up_as_agentic():
@@ -62,16 +70,20 @@ def test_the_offline_mode_is_not_dressed_up_as_agentic():
 
 def test_the_commands_it_tells_a_judge_to_run_exist():
     for module in ("archon.evidence.fair", "archon.demo", "archon.web.app"):
-        assert module in README
+        assert module in README + document("OPERATIONS") + document("EVALUATION")
         __import__(module)
 
 
 def test_the_diagrams_are_present_and_renderable_by_github():
-    fences = re.findall(r"```mermaid\n(.*?)```", README, re.S)
-    assert len(fences) >= 2, "the rules ask for an architecture diagram; two are better"
-    for body in fences:
-        assert body.strip().startswith("flowchart")
-        assert body.count("[") == body.count("]")
+    # The product and infrastructure graphs now render as self-contained SVGs.
+    # A browser check additionally loads both images and checks clipped SVG text.
+    import xml.etree.ElementTree as ET
+
+    for name in ("architecture", "infrastructure"):
+        assert f'src="docs/{name}.svg"' in README
+        root = ET.fromstring((ROOT / f"docs/{name}.svg").read_text(encoding="utf-8"))
+        assert root.tag == "{http://www.w3.org/2000/svg}svg"
+        assert root.attrib["viewBox"]
 
 
 def test_no_market_size_is_invented():
@@ -189,25 +201,27 @@ def test_no_frozen_test_badge_or_new_benchmark_score_masquerades_as_current():
     for required in ("exact-SHA CI", "zero Archon chases", "achieved by not acting",
                      "earlier comparisons are withdrawn", "no current advantage",
                      "Fresh synthetic contract tests", "nonempty correct recipient"):
-        assert required in " ".join(README.split())
+        assert required in " ".join(document("EVALUATION").split())
 
 
 def test_runtime_and_evidence_claims_are_scoped_and_recoverable():
+    detailed = " ".join((README + document("USER-GUIDE") + document("EVALUATION")).split())
     for required in ("release.json", "/api/health", "not evidence that this SHA is deployed",
                      "seven days", "Refresh durable state", "unknown sends",
                      "model is **scripted**", "outbox is **simulated**",
                      "identity-attestation", "does not rewrite posted sources",
                      "Human active time", "Unknown", "Human UAT stays NOT_RUN",
                      "hash is not proof", "redacted", "operator accounting correction"):
-        assert required in " ".join(README.split()), required
+        assert required in detailed, required
 
 
 def test_operator_configuration_and_public_mode_are_separate():
     from archon.adapters.bedrock import MAX_TOKENS, MODEL_ID, REGION
-    assert all(str(value) in README for value in (MODEL_ID, REGION, MAX_TOKENS))
-    assert "separate 4000-token budget" in README
-    assert "ARCHON_BUSINESS_EMAIL" in README and "ARCHON_BUSINESS_NAME" in README
-    assert "strands-agents>=1.53.0" in README
+    operations = document("OPERATIONS")
+    assert all(str(value) in operations for value in (MODEL_ID, REGION, MAX_TOKENS))
+    assert "separate 4000-token budget" in operations
+    assert "ARCHON_BUSINESS_EMAIL" in operations and "ARCHON_BUSINESS_NAME" in operations
+    assert "strands-agents>=1.53.0" in operations
     assert "removing strands prevents draft preparation" in README.lower()
 
 
@@ -215,7 +229,7 @@ def test_prior_acceptance_and_full_history_retention_have_exact_provenance():
     for required in ("34357703424", "10106786411",
                      "519a1e7c11a995529113161344192240fd031459",
                      "SHA256 manifest", "fetch-depth: 0", "--log-opts=--all", "ninety days"):
-        assert required in README
+        assert required in document("EVALUATION")
     workflow = (ROOT / ".github/workflows/frontend-ci.yml").read_text(encoding="utf-8")
     assert "fetch-depth: 0" in workflow and "--log-opts=--all" in workflow
     assert "--log-opts=-1" not in workflow
