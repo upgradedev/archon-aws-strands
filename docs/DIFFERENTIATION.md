@@ -67,8 +67,8 @@ It is not direct Gmail/Outlook login, a bank connection, or automatic collection
 ## What is established
 
 The [dated product acceptance record](EVALUATION.md) binds actual Bedrock calls and controlled SES
-acceptances to frontend `3e89590` / backend `2e2b375` in
-[run 34822838436](https://github.com/upgradedev/archon-aws-strands/actions/runs/34822838436).
+acceptances to frontend/backend `b446e36` in
+[run 34863683977, attempt 2](https://github.com/upgradedev/archon-aws-strands/actions/runs/34863683977/attempts/2).
 Three provider journeys and six separate portfolio journeys passed. The latter used no model
 or mail operations. These checks do not measure model quality or accept future changes.
 The owner's six received messages are HUMAN-ATTESTED arrival; per-run correlation and the full

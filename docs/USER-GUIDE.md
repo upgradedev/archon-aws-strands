@@ -37,9 +37,8 @@ outcome is pending or uncertain, or the workspace snapshot is stale.
 
 Use **Close tour**, **Finish tour** or Escape to close it. The tour never loads demo data, changes
 sessions, enables Incoming, runs a model or approves/sends email. It is separate from the Guided
-check, where explicit actions can post evidence and prepare a draft. The tour accompanies this
-documentation update; the recorded `3e89590` acceptance snapshot predates it, so its release needs
-its own CI and acceptance. Reopening starts at the first stop; tour progress is not saved.
+check, where explicit actions can post evidence and prepare a draft. The tour is included in the
+accepted `b446e36` release. Reopening starts at the first stop; tour progress is not saved.
 
 ### The smaller example and your saved workspace
 

@@ -73,9 +73,9 @@ flowchart LR
 
 <img src="infrastructure.svg" alt="Archon AWS infrastructure: CloudFront and private S3 frontend, API Gateway, Lambda API, conditional S3 sessions and a separate Bedrock/SES worker." width="100%">
 
-The diagram describes component roles. The 2026-09-14 public snapshot is frontend `3e89590` /
-backend `2e2b375`, with successful provider and separate portfolio journeys in
-[run 34822838436](https://github.com/upgradedev/archon-aws-strands/actions/runs/34822838436).
+The diagram describes component roles. The 2026-09-14 public snapshot is frontend/backend
+`b446e36`, with successful provider and separate portfolio journeys in
+[run 34863683977, attempt 2](https://github.com/upgradedev/archon-aws-strands/actions/runs/34863683977/attempts/2).
 [Evaluation](EVALUATION.md) records their distinct scopes; neither accepts newer changes.
 
 | Component | Source | Boundary |

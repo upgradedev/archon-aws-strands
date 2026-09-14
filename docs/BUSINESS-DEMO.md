@@ -69,9 +69,9 @@ extract them. Unsupported mail must still be refused. Refunds, unallocated cash,
 stock valuation, multi-currency accounting and bank execution are outside this extension.
 
 The larger fixture is not an independent benchmark, scale certification or demonstrated customer
-benefit. [AWS run 34822838436](https://github.com/upgradedev/archon-aws-strands/actions/runs/34822838436)
-passed six separate portfolio browser journeys against frontend `3e89590` / backend `2e2b375`,
-with no model or mail operations (`gh run view 34822838436 --repo upgradedev/archon-aws-strands --log`).
+benefit. [AWS run 34863683977, attempt 2](https://github.com/upgradedev/archon-aws-strands/actions/runs/34863683977/attempts/2)
+passed six separate portfolio browser journeys against frontend/backend `b446e36`,
+with no model or mail operations (`gh run view 34863683977 --repo upgradedev/archon-aws-strands --attempt 2 --log`).
 The same run's three provider journeys are a different check, not AI extraction of this bundle.
 See [evaluation limitations](EVALUATION.md). New source CI does not establish deployment:
 compare served frontend/backend identities and exact-release acceptance before reporting it live.

@@ -95,8 +95,8 @@ inherit every legacy environment override.
 
 ## Controlled runtime and budget
 
-The 2026-09-14 snapshot is frontend `3e89590` / backend `2e2b375`; [Evaluation](EVALUATION.md)
-records run `34822838436`, its three actual provider journeys and six separate portfolio journeys.
+The 2026-09-14 snapshot is frontend/backend `b446e36`; [Evaluation](EVALUATION.md)
+records run `34863683977`, attempt 2, its three actual provider journeys and six separate portfolio journeys.
 The public `acceptance.json` describes provider acceptance, not every test or incoming producer setup.
 The deployment templates describe the runtime; rendering them is not activation or acceptance.
 

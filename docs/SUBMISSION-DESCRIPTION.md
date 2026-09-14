@@ -7,8 +7,9 @@ and the AWS Builder/dev.to articles linked from the README are public. This file
 it is not a substitute for Devpost's submission record.
 [Evidence and limits](EVALUATION.md) · [Required disclosures](../README.md#pre-existing-work-disclosed)
 
-Archon helps a joiner reconcile inbox invoices and approve an exact collection draft with the
-source evidence beside it.
+Archon prevents a partial payment from becoming a false collection demand. It reconciles invoice
+and payment evidence, establishes the remaining balance and lets the joiner approve only the exact
+source-backed collection message shown on the current ledger revision.
 
 [Try the AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/).
 Choose **Explore populated demo → Load business portfolio** to inspect 240 fictional typed
@@ -51,9 +52,9 @@ and ledger revisions, runtime mode and recovery limits. A hash identifies bytes,
 bank settlement or compliance. Dashboard outcomes count recorded actions in the session;
 human active time, money recovered and time saved are unknown.
 
-The [2026-09-14 AWS run 34822838436](https://github.com/upgradedev/archon-aws-strands/actions/runs/34822838436)
-records three actual provider browser cases, 45 model calls and three SES acceptances for frontend
-`3e89590` / backend `2e2b375`. Six separate portfolio journeys passed without model or mail operations.
+The [2026-09-14 AWS run 34863683977, attempt 2](https://github.com/upgradedev/archon-aws-strands/actions/runs/34863683977/attempts/2)
+records three actual provider browser cases, 45 model calls and three SES acceptances for
+frontend/backend `b446e36`. Six separate portfolio journeys passed without model or mail operations.
 These are that release's observations, not a new model-quality benchmark. [Evaluation](EVALUATION.md)
 links the run-scoped receipt and commands; future releases need their own evidence.
 Separately, the owner reported six earlier received messages and supplied a screenshot: HUMAN-ATTESTED arrival.
