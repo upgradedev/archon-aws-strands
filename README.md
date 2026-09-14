@@ -38,6 +38,11 @@ reference cannot credit the same payment again. Missing or conflicting evidence 
 **Demo data and execution mode are separate choices.** The examples are entirely invented in
 both modes. A loaded sample workspace is ready to inspect, but it is not an AI result.
 
+Want more than the guided example? Choose **Load business portfolio** for **240 fictional
+records across six document types**, 16 clients and 10 suppliers. Explore invoices, credit notes,
+cash movements and source-linked dashboard charts. The same ledger validates every posting;
+loading the portfolio calls no model and sends no email. [Dataset and limits](docs/BUSINESS-DEMO.md).
+
 | Path | What actually happens | Email boundary |
 |---|---|---|
 | Load populated demo | Deterministic seed, no model call or draft | No email |
@@ -159,6 +164,7 @@ For this revision's validation, inspect exact-SHA CI and matching release accept
 | Strands graph, storage and actual AWS infrastructure | [Architecture](docs/ARCHITECTURE.md) |
 | CI quickstart, configuration and controlled provider operations | [Operations](docs/OPERATIONS.md) |
 | Incoming automation and its deployment boundary | [Incoming webhook](docs/incoming-webhook.md) |
+| Richer books, six document types and dataset provenance | [Business portfolio](docs/BUSINESS-DEMO.md) |
 | Historical measurements and frozen evaluation instruments | [Evaluation and evidence](docs/EVALUATION.md) |
 | What the workflow demonstrates and does not measure | [Workflow and limits](docs/DIFFERENTIATION.md) |
 | Prior work and dependency notices | [Prior work](docs/PRIOR-WORK.md) · [Third-party components](docs/THIRD-PARTY.md) |

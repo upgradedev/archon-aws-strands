@@ -18,6 +18,10 @@ records. **Return to previous workspace** restores the most recently used sessio
 without overwriting its books; access still expires after seven days. A retained
 simulation displays a warning when live providers are available and offers a separate
 current-provider demo. Simulated receipts are never converted into real sends.
+For more volume choose **Load business portfolio**: a separate 240-record, six-type fictional
+quarter with invoices, both credit-note directions, receipts and supplier payments. See
+[Business portfolio](BUSINESS-DEMO.md) for counts, navigation and limits. These are typed fixtures
+validated by the ledger, not AI-extracted mail. Cash and credits remain separate.
 Choose **Try the example** for a step-by-step invoice → payment → review → outcome check,
 or **Continue my workspace** for the existing dashboard. Neither silently clears the books.
 You inspect editable plain-text sources and approve the exact draft yourself;
@@ -95,6 +99,8 @@ invoice, largest on a tie, can be prepared; inspecting another invoice does not 
 Dashboard balances derive from retained posted documents using exact cents. Observed session
 outcomes count posts, refusals, corrections, resolutions and approval records. Human active time,
 time saved, revenue and recovery benefits remain Unknown. Quarter reports are labelled separately.
+The richer dashboard shows recorded trading activity, not a claim of revenue recovered by Archon.
+Credit-note and supplier-payment fixture support does not extend the public mail reader's formats.
 
 Records also previews UTF-8 `.txt` and plain-text `.eml` files up to 32 KB. Choose a file, inspect
 its literal text, then Use file text in editor. Only Read & post email submits it to the reader.

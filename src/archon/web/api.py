@@ -56,7 +56,7 @@ class CounterRequest(ApprovalRequest):
 class SessionRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     mode: Literal["synthetic", "live"] | None = None
-    seed: Literal["joinery"] | None = None
+    seed: Literal["joinery", "business"] | None = None
 
 
 class ResolutionRequest(Mutation):
@@ -196,6 +196,10 @@ def create_session(request: SessionRequest):
         state.update(provider_mode="live", test_recipient=config["recipient"])
     if request.seed == "joinery":
         workspace.seed_demo(state)
+    elif request.seed == "business":
+        from archon.web.business_demo import seed
+
+        seed(state)
     store().put(handle, state, None)
     return {"session": handle, "workspace": workspace.snapshot(state)}
 
