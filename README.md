@@ -2,18 +2,24 @@
 
 ![Archon: source-backed books, a Strands review, and an email only after your exact approval. Editorial banner, not a product screenshot.](docs/banner.svg)
 
+**Archon helps independent joiners reconcile inbox invoices, check the remaining balance and approve an exact collection email.**
+
+[Open the AWS app](https://d2ssmv59q16d0b.cloudfront.net/) · [Judge walkthrough](#judge-walkthrough) ·
+[Evidence](#evidence-and-limits) · [Disclosures](#pre-existing-work-disclosed)
+
+Fictional records; real Bedrock and Strands Agents in controlled-live sessions. Retained
+simulation instead uses a scripted model and simulated mail. Loading demo data calls neither.
+
 [![Backend CI](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml)
 [![Frontend CI](https://github.com/upgradedev/archon-aws-strands/actions/workflows/frontend-ci.yml/badge.svg?branch=main)](https://github.com/upgradedev/archon-aws-strands/actions/workflows/frontend-ci.yml)
 [![AWS release](https://github.com/upgradedev/archon-aws-strands/actions/workflows/frontend-deploy.yml/badge.svg?branch=main)](https://github.com/upgradedev/archon-aws-strands/actions/workflows/frontend-deploy.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-459A80)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![React 19](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white)](frontend/package.json)
 [![TypeScript 5.9](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](frontend/package.json)
 [![Tailwind CSS 4.1](https://img.shields.io/badge/Tailwind%20CSS-4.1-0891B2?logo=tailwindcss&logoColor=white)](frontend/package.json)
 [![Strands Agents SDK 1.53+](https://img.shields.io/badge/Strands%20Agents-SDK%201.53%2B-8B6DDB)](src/archon/agents/graph.py)
 [![Amazon Bedrock](https://img.shields.io/badge/Amazon%20Bedrock-controlled%20live-5270A8)](docs/ARCHITECTURE.md)
-
-**Archon helps an independent joiner check what is still owed before approving a collection email.**
 
 For a joiner doing client collections alone, an invoice and a remittance can tell different stories.
 Archon brings those records together so the owner can see what remains owed, why collection is
@@ -87,49 +93,39 @@ are supplied evidence, not proof of authenticity. Real customer data is outside 
 ### Automated input: opt-in extension
 
 A session-scoped HTTP webhook accepts input from external mail/export systems.
-The per-workspace key starts disabled; producer setup is required. The user explicitly enables
-the connection and supplies the external system with a separate intake-only
-bearer token, never the workspace credential. Its lifetime is at most 24 hours and ends no later
-than workspace expiry. It deduplicates exact event IDs durably and uses live Bedrock intake under
-the existing budget and job limits.
-It cannot approve a draft or send an email. This is not direct Gmail or Outlook login.
-See the [incoming-webhook contract](docs/incoming-webhook.md). Check served identities and
-matching acceptance before using the extension; source availability alone does not establish activation.
+The connection starts disabled and requires your own producer setup. Its separate, expiring
+intake-only key cannot approve a draft or send mail. This is not direct Gmail or Outlook login.
+[Setup, replay protection and limits](docs/incoming-webhook.md).
 
 ## Run it
 
-The browser walkthrough above is the shortest reproducible path and needs no installation.
-For a source demonstration, use Python 3.11+ in an isolated CI runner with this repository checked
-out. These are the offline commands exercised by the existing CI workflow; dependency installation,
-builds and tests for this workspace run in CI only.
+The live walkthrough needs no installation. For development, use Python 3.11+ and Node 22.12+.
+On this project's workstation, installs/builds/tests are CI-only. In an isolated runner, start
+the API and, in a second terminal, the React app:
 
 ```bash
 pip install -e ".[dev]"
-python -m archon.demo
-python -m uvicorn archon.web.app:app --port 8000
+python -m uvicorn archon.web.api:app --host 127.0.0.1 --port 8000
 ```
 
-The console demo and server at `http://localhost:8000` are legacy regression surfaces with
-scripted tone and simulated acceptance. They are separate from the React workstation.
-There is no tenancy in the legacy one-firm store. See [Operations](docs/OPERATIONS.md) for
-React/API setup, configuration, static export and the separate operator live modes.
+Then follow the [React runner setup](docs/OPERATIONS.md#react-workstation-and-public-api)
+and open the Vite URL. Without live configuration, this development path uses a scripted
+model and simulated mail. Operations also covers tests, configuration, deployment and the
+separate legacy console/static surfaces. These commands do not enable AWS providers.
 
 ## How it is put together
 
 <img src="docs/architecture.svg" alt="Archon architecture: six Strands readers feed a composer with no tools; ledger checks and exact human approval govern a separate controlled email worker." width="100%">
 
-[View architecture at full size](docs/architecture.svg).
-
-These are architecture diagrams, not screenshots or deployment receipts. They also render where
-there is no Mermaid support. [Architecture and infrastructure](docs/ARCHITECTURE.md) explains
-the deployed components and the separate optional AgentCore sketch.
+[View architecture at full size](docs/architecture.svg) · [Architecture details](docs/ARCHITECTURE.md).
 
 Six Strands readers inspect suppliers, sales, payroll, trading, cash and metrics from the retained
 ledger. Each reports before the composer can run; the composer holds no tools. Bedrock supplies
 model interpretation and wording, while deterministic code selects the invoice and verifies
 amounts. Removing Strands prevents draft preparation.
-The controlled model is `eu.anthropic.claude-opus-5` in `eu-west-1`; its configured identity
-is not, by itself, invocation evidence.
+
+The configured model default is `eu.anthropic.claude-opus-5`; check the exact worker
+configuration and observed invocation evidence, not the badge, for a particular release.
 
 <img src="docs/infrastructure.svg" alt="Archon AWS infrastructure: CloudFront serves React from private S3 and routes through API Gateway to Lambda; conditional S3 sessions and a separate worker govern Bedrock and controlled SES. The dashed incoming webhook is an opt-in source extension; verify served identity and acceptance before use." width="100%">
 
@@ -138,13 +134,11 @@ is not, by itself, invocation evidence.
 CloudFront serves React from private S3 and routes `/api/*` through API Gateway to Lambda.
 The API saves jobs and dispatches a separate durable worker; its role cannot invoke Bedrock or
 SES directly. Private S3 sessions use compare-and-swap writes to reject stale changes.
-The worker reserves finite provider budget before calling Bedrock or the controlled SES outbox.
-AgentCore and Aurora are not deployed.
+The worker reserves finite provider budget before calling Bedrock or controlled SES.
+AgentCore and Aurora are not deployed. These diagrams explain the design, not invocation evidence.
 
-An exact draft fingerprint binds human consent. New evidence, changed ledger revisions, holds
-or expiry require fresh review. A hash is not proof that an invoice is true.
-Session access expires after seven days; storage retention is separate. Refresh durable state
-after an uncertain action. Never retry unknown sends automatically.
+New evidence, changed revisions, holds or expiry require fresh review of the exact draft.
+Refresh after an uncertain action; never retry unknown sends automatically.
 
 ## Evidence and limits
 
@@ -154,20 +148,11 @@ exact tested frontend/backend pair, observed model calls and SES acceptances. Th
 also retains separate real-AWS portfolio browser results. These execute the application, not slides.
 Check the served identities against the receipt; a green source build alone does not prove deployment.
 
-The owner subsequently reported six received messages and provided a screenshot: **HUMAN-ATTESTED**
-mailbox arrival. Their per-run Message-ID correlation and full approved-body comparison are unknown.
-That does not replace the machine receipt's `delivery_proven=false`.
-Human UAT stays NOT_RUN until a person completes the full
-[UAT testbook](https://d2ssmv59q16d0b.cloudfront.net/UAT.testbook.html).
-
-Both earlier comparisons are withdrawn. The retained evaluation reported zero Archon chases,
-achieved by not acting; it establishes no useful accuracy. The historical injection transcript
-establishes no current advantage. New synthetic regressions are not independent held-out evidence.
-Human active time, time saved and recovered money remain Unknown.
-
-[Evaluation and evidence](docs/EVALUATION.md) retains original result links, withdrawn comparisons,
-frozen protocols, failure categories, and the boundary between product acceptance and model benefit.
-For this revision's validation, inspect exact-SHA CI and matching release acceptance.
+Independent AI accuracy, time saved and money recovered are unmeasured. Earlier comparison
+claims are withdrawn. Human UAT remains **NOT_RUN**; prior owner-reported mailbox arrival does
+not establish delivery for every later attempt. The [evidence register](docs/EVALUATION.md)
+retains the original results, limitations and frozen protocols. The [UAT testbook](https://d2ssmv59q16d0b.cloudfront.net/UAT.testbook.html)
+separates automated checks from human acceptance.
 
 ## Built with
 

@@ -37,7 +37,7 @@ export function ProductTour({ page, live, blocked, links, onClose }: {
     <div className="tour-controls">
       <div className="flex flex-wrap gap-2">
         <button className="secondary small" disabled={index === 0} onClick={() => setIndex(current => Math.max(0, current - 1))}>Previous stop</button>
-        {index < stops.length - 1 ? <button className="primary small" onClick={() => setIndex(current => Math.min(stops.length - 1, current + 1)))}>Next stop</button> : <button className="primary small" onClick={onClose}>Finish tour</button>}
+        {index < stops.length - 1 ? <button className="primary small" onClick={() => setIndex(current => Math.min(stops.length - 1, current + 1))}>Next stop</button> : <button className="primary small" onClick={onClose}>Finish tour</button>}
         <button className="ghost small" onClick={onClose}>Close tour</button>
       </div>
       {page === stop.page ? <p className="tour-location">You are on {stop.label}. Explore the page below.</p>
