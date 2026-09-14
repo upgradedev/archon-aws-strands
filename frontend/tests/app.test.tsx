@@ -83,7 +83,7 @@ test('a refused full portfolio load leaves the previous small books visible and 
 
 test.each(['queued', 'running', 'unknown'] as const)('full dashboard switching is blocked by a %s provider job', async status => {
   location.hash = '/dashboard';
-  const workspace = { ...filled(), demo_seed: 'joinery-v1', live: { model: true, mail: true,
+  const workspace = { ...filled(), demo_seed: 'joinery-v1', live: { model: true, mail: true, data: 'fictional business examples',
     job: { id: 'pending-job', operation: 'reason', status, created_at: new Date().toISOString() } } };
   vi.mocked(api.openWorkspace).mockResolvedValueOnce({ session: 'small', workspace });
   render(<App />);
