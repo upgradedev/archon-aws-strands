@@ -43,7 +43,7 @@ No account or installation is required. Start with the books, then choose whethe
 
 | Step | What to do | What you can verify |
 |---|---|---|
-| 1. Open real books | [Open the demo setup](https://d2ssmv59q16d0b.cloudfront.net/#/demo) → **Load business portfolio** | 240 fictional records: sales, purchases, both credit types, receipts and supplier payments. No AI or email operation on load. |
+| 1. Open the books | [Open the demo setup](https://d2ssmv59q16d0b.cloudfront.net/#/demo) → **Load business portfolio** | 240 fictional records: sales, purchases, both credit types, receipts and supplier payments. No AI or email operation on load. |
 | 2. Follow the evidence | Dashboard → a financial widget → Records | Real retained documents, filters and linked sources, not a static mockup. Credits and cash are distinct. |
 | 3. Ask the agent | Workspace → **Run Strands & prepare draft** | In a controlled-live session, actual Bedrock execution through the Strands graph, followed by a checked draft. This is a metered action, not part of loading the demo. |
 | 4. Keep control | Inspect the recipient, balance and exact draft | Sending needs explicit consent and approval. Skip sending if you only want to inspect the application. |
