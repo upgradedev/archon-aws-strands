@@ -10,25 +10,56 @@ Strands model and simulated acceptance. Read [release.json](https://d2ssmv59q16d
 ## Start with fictional records
 
 The application shows its introduction before accessing the session API.
-Choose **Explore populated demo**, then **Load demo workspace**, for five fictional
-source emails: a partially paid customer invoice, a fully paid one, their payments,
-and a supplier invoice. Loading uses deterministic parsing and ledger checks, not
-Bedrock, and creates no AI report, draft or email. Metrics are computed from those
-records. **Return to previous workspace** restores the most recently used session
-without overwriting its books; access still expires after seven days. A retained
-simulation displays a warning when live providers are available and offers a separate
-current-provider demo. Simulated receipts are never converted into real sends.
-For more volume choose **Load business portfolio**: a separate 240-record, six-type fictional
-quarter with invoices, both credit-note directions, receipts and supplier payments. See
-[Business portfolio](BUSINESS-DEMO.md) for counts, navigation and limits. These are typed fixtures
-validated by the ledger, not AI-extracted mail. Cash and credits remain separate.
-Choose **Try the example** for a step-by-step invoice → payment → review → outcome check,
-or **Continue my workspace** for the existing dashboard. Neither silently clears the books.
-You inspect editable plain-text sources and approve the exact draft yourself;
-the example never auto-approves. Existing records resume in the same session. Use **New workspace**
-and its explicit confirmation only when you want empty books. No PDFs or OCR are
-supported. Semantic extraction in controlled mode still needs explicit ISO dates,
-two-decimal EUR amounts and source-backed references. Use the deployment links above to check mode.
+
+1. Choose **Explore populated demo → Load business portfolio**, the recommended first option.
+   It opens a separate fictional quarter with 240 typed records across six document types.
+2. Inspect Dashboard's net sales, net purchases, credits and cash movements. Follow a widget to
+   Records, then open a document's retained source and linked invoice. Credits reduce debt;
+   they do not record cash received or paid.
+3. Use the six document views, search and date filters to explore the books. Check the dataset
+   label above the dashboard: it distinguishes the full portfolio from a small or empty workspace.
+4. Open Workspace or Guided check to inspect the collection priority. **Run Strands & prepare
+   draft** is a separate, explicit action. In controlled-live mode it uses Bedrock; sending needs
+   another exact review and real-email consent.
+
+Loading the portfolio posts typed fixtures through deterministic ledger checks. It creates no AI
+report, draft, approval or email. Zero activity counters mean those actions have not happened.
+See [Business portfolio](BUSINESS-DEMO.md) for the record mix, financial dates and limits.
+An existing small or empty Dashboard also offers **Load full dashboard · 240 records**.
+
+### Optional product tour
+
+The **Take a tour** header button becomes available once a workspace is loaded. Its six stops explain
+Dashboard → Records → Incoming → Workspace → Guided check → History. **Next stop** and
+**Previous stop** change the explanation only. **Open [page]** is an optional navigation link;
+finish any unsaved input first. Page navigation is paused while an operation is busy, a provider
+outcome is pending or uncertain, or the workspace snapshot is stale.
+
+Use **Close tour**, **Finish tour** or Escape to close it. The tour never loads demo data, changes
+sessions, enables Incoming, runs a model or approves/sends email. It is separate from the Guided
+check, where explicit actions can post evidence and prepare a draft. The tour accompanies this
+documentation update; the recorded `3e89590` acceptance snapshot predates it, so its release needs
+its own CI and acceptance. Reopening starts at the first stop; tour progress is not saved.
+
+### The smaller example and your saved workspace
+
+**Demo data → Load demo workspace** is the optional five-source tutorial: two customer invoices,
+their client receipts, and a supplier invoice. Its sources are fictional email templates parsed
+with local rules. It has no credits or supplier payments, so their widgets show zero.
+Neither demo load calls Bedrock or sends mail, even when the workspace mode says live.
+
+**Return to previous workspace** restores the immediately previous session without rewriting its
+books. The browser retains the current and one previous handle, not a list of every workspace;
+session access still expires after seven days. If browser storage is blocked, handles last only
+until the page closes. A retained simulation warns when live providers are available and offers
+a separate demo with current providers. Its simulated receipts never become real sends.
+
+Choose **Try the example step by step** for invoice → payment → review → outcome, or
+**Continue my workspace** for the current dashboard. The guided check uses the current session;
+it is not an empty sandbox after loading a portfolio. Use **New workspace** and its explicit
+confirmation to start empty books. You inspect sources and approve the exact draft yourself.
+
+### Check how an invoice changes
 
 To reproduce the deeper reconciliation path from scratch, use a separate empty workspace:
 From Dashboard, choose Start reconciliation and review the editable invoice. Post it, open
@@ -67,7 +98,23 @@ The changed decision is a supported workflow demonstration, not comparative AI o
   require an operator accounting correction, not a fabricated second reference. The legacy
   one-firm SQLite surface has no attestation UI; hand its evidence to an operator.
 
-## React workstation usage
+## Supported input and execution mode
+
+The Records editor, file-text preview and opt-in Incoming webhook share the public reader's
+three document types. The button **Sample payment** supplies a client receipt, not a supplier payment.
+
+| Input | Public raw-mail reader | Full portfolio |
+|---|---|---|
+| Sales invoice (`SalesInvoice`) | Supported within the format limits below | Typed fixture |
+| Purchase invoice (`PurchaseInvoice`) | Supported within the format limits below | Typed fixture |
+| Client remittance (`Receipt`) | Must settle a posted sales invoice and carry a Transfer ID | Typed fixture |
+| Supplier payment (`Payment`) | Unsupported | Typed fixture only |
+| Sales or purchase credit note | Unsupported | Typed fixture only |
+
+This boundary comes from [Documents.tsx](../frontend/src/Documents.tsx) and the
+[reader's document constructors](../src/archon/adapters/inbound.py); richer ledger support does
+not extend extraction. Use invented English plain text. PDFs, scans, images and OCR are unsupported
+in the public workstation.
 
 Synthetic mode selects `PublicPostReader` (`bounded-post-v2`): explicit ISO dates or
 full English month names, and two-decimal EUR amounts such as `2,400.00` or `2.400,00`.
@@ -82,6 +129,8 @@ before the ledger adds verified figures. A malformed response releases no draft.
 The legacy `LocalReader` and the frozen AR3 baseline are unchanged. The new development regressions
 are not independent held-out evidence, a model result or a rerun of the historical comparison.
 
+## Review, arrangements and evidence
+
 In Payment arrangement, read the client's dated terms and either approve that exact plan or
 choose **Offer different payment dates**. Review your counterproposal and explicitly record it.
 The original reply and counterproposal survive reload and appear in the readable evidence bundle.
@@ -90,9 +139,9 @@ no collection hold. Record a fresh client reply before approving an arrangement.
 holds, expired proposals or stale revisions require review again. An arrangement changes chase
 timing, not the balance. The original reply is also retained when a client plan is approved.
 
-Navigation: Introduction → Guided check, or Dashboard → Workspace → Records → History.
-The persistent navigation explains each task: balances, review/approval, invoices/payments and
-decisions/receipts. Legacy bookmarks still resolve.
+Navigation includes Guided check, Dashboard, Workspace, Records, Incoming and History.
+These cover step-by-step review, balances, exact approval, documents, opt-in intake and retained
+outcomes. Legacy bookmarks still resolve.
 Invoice and source selection survives navigation and reload. Only the backend's oldest overdue
 invoice, largest on a tie, can be prepared; inspecting another invoice does not retarget it.
 
@@ -129,7 +178,7 @@ worker can, with budget, expiry, exact recipient and explicit approval checks.
 
 ## Input automation
 
-This source revision includes an opt-in incoming HTTP webhook. The per-workspace key starts disabled;
+The incoming HTTP webhook is opt-in. The per-workspace key starts disabled;
 the owner enables it and configures the external producer. Check served identities and matching
 acceptance before using it. It accepts intake only, not mailbox login or automatic collection.
 See [incoming-webhook.md](incoming-webhook.md) for setup, scope, expiry and retry behavior.

@@ -13,8 +13,10 @@ Use an isolated runner, Python 3.11+ and a checkout of this repository. The work
 machine must not install dependencies, build the app or run tests. The following commands are
 documentation for CI execution, not a claim that they ran during this edit.
 
-The login-free AWS URL is the short path. These development commands run in CI for this
-workspace; dependency installation, builds and tests are not run on the workstation.
+The login-free AWS URL is the short path: **Explore populated demo → Load business portfolio**.
+The optional five-source tutorial is **Load demo workspace**. Both load fictional data with
+deterministic checks and no model or mail calls. The data choice does not change the provider
+mode of an existing workspace; new workspaces use the currently configured providers.
 
 Offline demonstration, with synthetic documents, scripted tone and simulated acceptance:
 
@@ -93,7 +95,9 @@ inherit every legacy environment override.
 
 ## Controlled runtime and budget
 
-The last supplied actual acceptance is the dated pair in [Evaluation](EVALUATION.md).
+The 2026-09-14 snapshot is frontend `3e89590` / backend `2e2b375`; [Evaluation](EVALUATION.md)
+records run `34822838436`, its three actual provider journeys and six separate portfolio journeys.
+The public `acceptance.json` describes provider acceptance, not every test or incoming producer setup.
 The deployment templates describe the runtime; rendering them is not activation or acceptance.
 
 `deploy/live_provider_stack.py` defines the isolated worker and retained failure queue;
@@ -107,6 +111,11 @@ Reservations bound admitted provider usage under those ceilings, not the whole A
 Infrastructure costs are separate. The session's twenty-job limit and pending-job exclusion still
 apply. Creating another session does not create another global provider budget.
 Unknown attempts consume reservations and do not trigger automatic resend or refund.
+
+The twenty-job boundary counts submitted intake, reasoning and approval jobs, not individual
+model calls. A Strands graph can make multiple calls within one job. The global operating grant
+separately bounds all reservations, including mail; a displayed call allowance is not extra mail
+authority or a reason to reset old reservations.
 
 The controlled adapter uses the [Mantle token-count route](https://docs.aws.amazon.com/bedrock/latest/userguide/count-tokens.html)
 with SigV4 in eu-west-1. This follows the retained native CountTokens rejection for

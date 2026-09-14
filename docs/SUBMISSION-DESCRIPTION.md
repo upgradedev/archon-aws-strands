@@ -1,25 +1,30 @@
 # Description draft: controlled-live workflow
 
-Draft only: refreshed against the supplied release record, not submitted.
+Draft only: documentation alignment against the 2026-09-14 snapshot, not submitted or published.
+Submission production remains deferred; this file does not attest a submitted entry.
 [Evidence and limits](EVALUATION.md) · [Required disclosures](../README.md#pre-existing-work-disclosed)
 
 Archon helps a joiner reconcile inbox invoices and approve an exact collection draft with the
 source evidence beside it.
 
 [Try the AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/).
-Choose Explore populated demo → Load demo workspace, inspect Records, then follow the example
-or run Strands and review its exact draft. Loading the five fictional sources is deterministic:
-no model call, AI report, draft or email is created by the seed.
+Choose **Explore populated demo → Load business portfolio** to inspect 240 fictional typed
+documents across sales, purchases, both credit-note directions, client receipts and supplier
+payments. Financial widgets derive from those books; credits and cash remain distinct.
+Loading uses deterministic ledger checks, not AI extraction, and creates no model call, AI report,
+draft, approval or email. **Load demo workspace** remains an optional five-email tutorial.
 
 The joiner works alone, comparing invoice and remittance emails before chasing a client.
 Archon brings those records together with the amount still outstanding and the reason collection
 is ready or held. Text is supplied in this demonstration; no mailbox is connected.
-The example invoice is 1,860.00 EUR and its remittance is 600.00 EUR: 1,260.00 EUR remains.
+The smaller example's invoice is 1,860.00 EUR and its remittance is 600.00 EUR: 1,260.00 EUR remains.
 
 In controlled-live mode, semantic intake and reasoning use real Amazon Bedrock through a separate
 durable worker. The Strands Agents SDK graph requires six ledger readers to finish before a
 composer with no tools prepares wording. Ledger code selects the invoice and verifies amounts;
 model advice does not replace deterministic checks. Removing Strands prevents draft preparation.
+All six reports must be present; agreement among them is not a release condition.
+Raw intake is a separate source-checked Bedrock reader, not a run of that graph.
 The configured model is eu.anthropic.claude-opus-5 in eu-west-1; that is not the public scripted mode.
 
 Retained simulation uses the same interface and real graph with a scripted model and simulated
@@ -43,10 +48,12 @@ and ledger revisions, runtime mode and recovery limits. A hash identifies bytes,
 bank settlement or compliance. Dashboard outcomes count recorded actions in the session;
 human active time, money recovered and time saved are unknown.
 
-The supplied [AWS run 34778777702](https://github.com/upgradedev/archon-aws-strands/actions/runs/34778777702)
-records three actual browser cases, 45 model calls and three SES acceptances for frontend
-40c7ade / backend 2bb3db3. These are that release's observations, not a new model-quality benchmark.
-The owner later reported six received messages and supplied a screenshot: HUMAN-ATTESTED arrival.
+The [2026-09-14 AWS run 34822838436](https://github.com/upgradedev/archon-aws-strands/actions/runs/34822838436)
+records three actual provider browser cases, 45 model calls and three SES acceptances for frontend
+`3e89590` / backend `2e2b375`. Six separate portfolio journeys passed without model or mail operations.
+These are that release's observations, not a new model-quality benchmark. [Evaluation](EVALUATION.md)
+links the run-scoped receipt and commands; future releases need their own evidence.
+Separately, the owner reported six earlier received messages and supplied a screenshot: HUMAN-ATTESTED arrival.
 Exact per-run Message-ID correlation and full approved-body comparison remain unknown.
 The machine delivery flag stays false, and full human UAT is NOT_RUN.
 
@@ -57,7 +64,9 @@ or held-out reuse is claimed. The withdrawn injection result establishes no curr
 
 The firm and records are invented. Public input is bounded English plain text, ISO dates and EUR;
 there is no bank feed, payment execution, OCR, payroll provider, deployed AgentCore or Aurora.
-A session-scoped incoming HTTP webhook is an opt-in extension in this source revision.
+Raw intake supports sales invoices, purchase invoices and client receipts only. Supplier payments
+and credits in the portfolio are typed fixtures, not AI-extracted messages.
+A session-scoped incoming HTTP webhook is available for opt-in intake.
 Its per-workspace key starts disabled and producer setup is required; check served identities and
 matching acceptance before use. Its contract allows external mail/export intake with a separate token,
 maximum 24-hour expiry within the seven-day workspace, durable deduplication and no automatic send.
@@ -76,4 +85,5 @@ Ten earlier Archon repositories are named in [PRIOR-WORK.md](PRIOR-WORK.md).
 No code from any of them is in this repository. Pre-existing package/CI patterns and visual design
 direction are disclosed there; [THIRD-PARTY.md](THIRD-PARTY.md) retains dependency notices.
 This build is [MIT-licensed](../LICENSE). Eligibility remains the organizer's decision.
-The supplied graphics are [concept art](GRAPHICS.md), not product screenshots or current topology.
+The supplied JPGs are [concept art](GRAPHICS.md), not product screenshots or current topology.
+The vector brand banner is editorial artwork; actual financial metrics appear in the live UI.

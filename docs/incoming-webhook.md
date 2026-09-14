@@ -1,6 +1,6 @@
 # Incoming HTTP webhook: opt-in source extension
 
-This contract describes the opt-in incoming extension in this source revision.
+This contract describes Archon's opt-in incoming HTTP intake.
 The per-workspace key starts disabled, and producer setup is required. Check served identities
 and matching release acceptance before using it; source availability alone does not establish activation.
 
@@ -21,6 +21,9 @@ OAuth, IMAP, a hosted mailbox, a bank connector, or an automatic collection work
 The producer is configured and operated by the owner outside Archon. Enabling the connection
 does not install a mail rule, subscribe to a mailbox, fetch old messages, or arrange forwarding.
 Use only fictional document text within the public intake's supported format.
+Supported raw types are sales invoices, purchase invoices and client remittances (`Receipt`).
+A remittance must settle a posted sales invoice. Supplier payments (`Payment`) and credit notes
+are typed portfolio fixtures only; Incoming does not add extraction support for them.
 The [user guide](USER-GUIDE.md) documents ISO dates, decimal EUR values and source references.
 
 ## Interface
@@ -136,15 +139,22 @@ This contract does not promise cancellation or reversal of a provider call alrea
 
 ## Verification boundary
 
-The [2026-09-13 baseline](EVALUATION.md#recorded-product-acceptance-not-a-new-result), frontend
-`40c7ade` / backend `2bb3db3`, predates this extension. Its acceptance does not cover Incoming.
-Check the frontend/backend identities actually served, the extension's exact-SHA CI and matching
-release acceptance before configuring a producer. A configured mode is not proof of a successful intake.
+The [current release snapshot](EVALUATION.md#recorded-product-acceptance-not-a-new-result) is
+frontend `3e89590` / backend `2e2b375`, checked on 2026-09-14. Its three-case provider acceptance
+does not exercise this external producer endpoint.
 
-At the 2026-09-14 documentation review, route models and bounds were read from `archon.web.api`;
-configuration, token issuance and deduplication from `archon.web.incoming`; saved event metadata
-from `archon.web.live`. That source inspection made no provider calls and performed no mailbox
-setup or production acceptance. The current validation record belongs to the matching CI/release run.
+[Actual incoming run 34788618140](https://github.com/upgradedev/archon-aws-strands/actions/runs/34788618140)
+passed one deployed UI → API → worker intake, replay, reload and key-revocation journey against
+the earlier frontend `4c67363` / backend `bad8453`. Read its result with
+`gh run view 34788618140 --repo upgradedev/archon-aws-strands --log`.
+It sent no email. This is historical validation of the extension, not a fresh run against the
+current pair or proof that an owner's mail/export system has been configured.
+
+The still earlier `40c7ade` / `2bb3db3` release predates Incoming and remains historical in
+[Evaluation](EVALUATION.md). Check served identities, exact-SHA CI and the scope of each receipt
+before configuring a producer. A configured mode is not proof of successful intake.
+The 2026-09-14 documentation review read source and existing receipts only; it created no key,
+provider job or mailbox connection.
 
 The separate manual `incoming-acceptance.yml` workflow runs a single actual-AWS intake through
 the deployed UI, API and worker, checks exact-event replay and reload, then revokes its capability.

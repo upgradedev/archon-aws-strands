@@ -56,8 +56,9 @@ requiring the source of a derived work to be released under their terms.
 | **GitHub Actions** | the GitHub Terms of Service, on the entrant's own account; CI, not the public frontend host |
 
 Controlled-live calls use paid Bedrock/SES under a finite operating grant; AWS hosting costs are
-separate. Loading the deterministic demo seed and retained scripted/simulated mode make no paid
-model or mail calls. Account-wide cost is not established by the grant's reservations.
+separate. Loading either the recommended typed business portfolio or the optional five-email
+tutorial makes no model or mail calls. Retained scripted/simulated mode also makes no such calls.
+Account-wide cost is not established by the grant's reservations.
 No third-party dataset is redistributed.
 Existing licence notices remain authoritative; preserve transitive dependency notices when distributing.
 
@@ -71,17 +72,19 @@ do not replace any Python licence disclosure above.
 ## What this adds to the open source it builds on
 
 The rules ask an entrant using open source to create something that **enhances
-and builds upon** it rather than wrapping it. What Archon adds to the Strands
-Agents SDK, none of which the SDK provides:
+and builds upon** it rather than wrapping it. Archon uses the Strands
+Agents SDK to implement the following application controls:
 
 - **an edge condition that makes six readers a requirement rather than a
   suggestion.** The Python graph fires a node under OR semantics, so six edges
   into a composer let it start on one report. Archon conditions every edge on all
   six having reported, and fails closed on an unrecognised state shape.
-- **a composer that holds no tools at all**, so its whole view arrives along
-  those edges and cannot be short-circuited by a lookup.
-- **a claim layer between the model and the reader.** No figure reaches a client
-  except through a claim the ledger confirmed, and the agent's own free text is
+  This is a completion requirement, not a vote or proof that the reports agree.
+- **a composer that holds no tools at all.** It receives the six reports plus the
+  ledger-selected candidate in its system brief; it cannot make its own tool lookup.
+  [Graph construction](../src/archon/agents/graph.py) keeps those inputs explicit.
+- **a claim layer between the model and the reader.** Numeric collection figures
+  come from ledger-confirmed claims, and the composer's own free text is
   refused if it contains a digit.
 - **a release gate in plain code**, binding a human approval to a SHA-256 of the
   exact bytes and re-deriving every fact at send time.
@@ -97,7 +100,7 @@ boundary are application controls beyond the SDK. They are implemented in this r
 
 [Prior work](PRIOR-WORK.md) retains the earlier product names and pattern/visual influences.
 [Graphics](GRAPHICS.md) labels supplied JPGs as concept art, not deployed capabilities.
-The opt-in [incoming webhook](incoming-webhook.md) in this source revision adds no direct mailbox
+The opt-in [incoming webhook](incoming-webhook.md) adds no direct mailbox
 service integration. Its per-workspace key starts disabled and producer setup is required;
 check served identities and matching acceptance before use. This table does not authorize new
 accounts, providers or paid calls.

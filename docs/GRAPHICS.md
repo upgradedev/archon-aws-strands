@@ -1,6 +1,7 @@
-# Graphics: concept art only
+# Graphics: brand artwork and retained concepts
 
-**CONCEPT ART — NOT PRODUCT SCREENSHOTS. These images do not describe current infrastructure.**
+**The four supplied JPGs are CONCEPT ART — NOT PRODUCT SCREENSHOTS.** They do not describe current
+infrastructure. The vector brand banner and architecture diagrams have separate roles below.
 
 For the joiner reviewing inbox records in the [AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/),
 controlled-live mode uses Bedrock and restricted SES; retained simulation uses a scripted
@@ -9,7 +10,19 @@ Strands model and simulated acceptance. Read [release.json](https://d2ssmv59q16d
 [exact-pair acceptance](https://d2ssmv59q16d0b.cloudfront.net/acceptance.html).
 [Evidence](EVALUATION.md) and [disclosures](../README.md#pre-existing-work-disclosed) apply to both modes.
 
-## Supplied files
+## Brand banner and architecture diagrams
+
+`docs/banner.svg`, added alongside this documentation update, is a vector editorial brand banner.
+It introduces source-backed books, Strands review and exact human approval. It is not a product
+screenshot, a measured result or evidence of a completed submission/video. Actual financial metrics
+come from posted records in the [live UI](https://d2ssmv59q16d0b.cloudfront.net/).
+
+[architecture.svg](architecture.svg) and [infrastructure.svg](infrastructure.svg) explain component
+roles and boundaries. They are diagrams, not screen captures or proof of deployment.
+[Architecture](ARCHITECTURE.md) links their source basis; [Evaluation](EVALUATION.md) identifies
+the accepted release. Neither a banner nor a diagram establishes a newer release's acceptance.
+
+## Four supplied JPGs
 
 These owner-supplied JPGs are preserved unchanged under `graphics/`. They were inspected visually
 for this disclosure. Their filenames indicate possible uses, not a completed video, a submission,
@@ -29,20 +42,21 @@ deployed. CloudFront/private S3, API Gateway, Lambda, a separate durable worker,
 and controlled-recipient SES are the described runtime. Use
 [the architecture documentation](ARCHITECTURE.md) and served identity/acceptance links above.
 
-Invoices and payment references come from supplied fictional text. No bank connection verifies
+Records come from fictional typed portfolio documents or supported supplied fictional text.
+No bank connection verifies
 a deposit or matches a transaction. Public intake uses bounded EUR amounts; it does not establish
 GBP support. Photographed receipts, fuel tickets, PDFs and OCR are not public input capabilities.
 The real action is exact human review of a collection email, with controlled SES sending only
 after explicit consent. It is not bank execution or general one-tap invoice approval.
 
-The opt-in incoming HTTP webhook in this source revision starts with a disabled per-workspace key
+The opt-in incoming HTTP webhook starts with a disabled per-workspace key
 and requires producer setup plus served-identity/acceptance checks before use. Its
 [contract](incoming-webhook.md) allows intake only; it does not turn these bank/mailbox claims true.
 There is no Gmail/Outlook login or automatic outbound email.
 
 ## Presentation boundary
 
-Do not use these files as the README hero, product screenshots, current architecture evidence,
+Do not use the four JPGs as the README hero, product screenshots, current architecture evidence,
 or proof of a recorded walkthrough. If displayed elsewhere, keep the CONCEPT ART / NOT PRODUCT
 SCREENSHOTS label and these limitations next to them. Brand artwork and plausible accounting
 arithmetic are not evidence that any illustrated connector or screen exists.
