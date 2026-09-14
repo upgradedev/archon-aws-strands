@@ -180,3 +180,19 @@ def test_evidence_export_discloses_fixture_origin_and_retains_every_source():
     result = evidence_bundle(state, "test-source")
     assert "240 fictional typed fixtures, not model-extracted mail" in result["text"]
     assert "demo:001" in result["text"] and "demo:240" in result["text"]
+
+
+@pytest.mark.parametrize("label", ["Credit note", "credit-note", "CREDIT MEMO", "Refund"])
+def test_invoice_shaped_credit_mail_is_held_before_reader(label):
+    class MustNotRead:
+        def converse(self, **kwargs):
+            raise AssertionError("Unsupported credit mail must not reach a model")
+
+    state = new_state()
+    books = workspace.books_for(state)
+    balance = books.ledger.trial_balance()
+    workspace.intake(state, workspace.SAMPLES["invoice"] + "\n" + label, reader=MustNotRead())
+    assert state["sources"][-1]["status"] == "refused"
+    assert "not supported by mail intake" in state["sources"][-1]["error"]
+    assert len(workspace.books_for(state).sales) == 80
+    assert workspace.books_for(state).ledger.trial_balance() == balance
