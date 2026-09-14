@@ -63,6 +63,15 @@ The larger fixture is not an independent benchmark, scale certification or demon
 benefit. See [evaluation limitations](EVALUATION.md). New source CI does not establish deployment:
 compare served frontend/backend identities and exact-release acceptance before reporting it live.
 
+### Operator recovery
+
+`ARCHON_BUSINESS_DEMO_DISABLED=true` refuses creation of new business portfolios while preserving
+existing sessions and the smaller demo. It is an operator setting, never a caller-controlled field.
+After any credit-note session has been created, **do not roll the API or worker back to a binary
+that cannot decode credit notes**. Retain the compatible domain/codec and pause new bundles, or
+roll forward with a reviewed correction. A frontend rollback alone does not remove stored records.
+No existing session is migrated, deleted or rewritten when this extension is installed.
+
 ## Dataset provenance
 
 All bundled identities, amounts and documents are freshly authored deterministic examples under

@@ -108,6 +108,17 @@ def test_live_seed_does_not_invoke_any_provider(monkeypatch):
     assert state["sends"] == {} and state["requests"] == {}
 
 
+def test_operator_can_pause_new_bundles_without_losing_existing_books(client, monkeypatch):
+    saved = client.post("/api/sessions", json={"mode": "synthetic", "seed": "business"}).json()
+    monkeypatch.setenv("ARCHON_BUSINESS_DEMO_DISABLED", "true")
+    stopped = client.post("/api/sessions", json={"mode": "synthetic", "seed": "business"})
+    assert stopped.status_code == 422 and "paused" in stopped.text
+    assert client.get("/api/workspace", headers={"X-Archon-Session": saved["session"]}).json() == (
+        saved["workspace"]
+    )
+    assert client.post("/api/sessions", json={"mode": "synthetic", "seed": "joinery"}).status_code == 201
+
+
 def test_seed_is_atomic_and_cannot_replace_user_records(monkeypatch):
     state = new_state()
     before = copy.deepcopy(state)

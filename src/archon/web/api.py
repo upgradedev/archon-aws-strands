@@ -199,6 +199,8 @@ def create_session(request: SessionRequest):
     elif request.seed == "business":
         from archon.web.business_demo import seed
 
+        if os.environ.get("ARCHON_BUSINESS_DEMO_DISABLED") == "true":
+            raise ValueError("New business portfolios are paused. Existing books remain available.")
         seed(state)
     store().put(handle, state, None)
     return {"session": handle, "workspace": workspace.snapshot(state)}
