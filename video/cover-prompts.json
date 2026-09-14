@@ -1,0 +1,14 @@
+{
+  "generator": "Built-in image generation",
+  "purpose": "Editorial cover illustrations, not application screenshots",
+  "prompts": [
+    {
+      "key": "archon-youtube-cover",
+      "prompt": "Use case: ads-marketing. Create a premium editorial 16:9 YouTube thumbnail for ARCHON, an actual AWS Strands application helping independent joiners reconcile supplied invoice and remittance evidence before approving an exact collection email. This is an illustrative cover, NOT a screenshot or fabricated application UI. Dark midnight navy and muted plum background with luminous mint accents, clean white geometric typography, sophisticated restrained 3D paper geometry and thin evidence-connection lines, generous negative space, exceptional mobile readability. Large exact text \"ARCHON\". Secondary exact text on two lines \"CHECK THE BALANCE.\" and \"APPROVE THE EMAIL.\" Small supporting exact text \"Strands Agents · Amazon Bedrock\". One legible central visual metaphor: two paper cards reading \"INVOICE €1,860\" and \"PAYMENT €600\", leading to a simple outlined envelope with the text \"€1,260 REMAINING\"; beside envelope a human-approval check icon. These figures are a fictional product example and not evidence of actual money recovered. No phone, no fake interface screenshot, no bank icon or bank matched label, no Aurora, no database logos, no invoice approval, no automated-send implication, no currencies other than EUR, no awards or superiority assertions. Keep all title text inset 7%, leave bottom-right corner quiet for YouTube duration badge. Polished professional cover, not a busy infographic."
+    },
+    {
+      "key": "archon-devpost-cover",
+      "prompt": "Use case: ads-marketing. Create a premium wide landscape Devpost project cover for ARCHON, clearly editorial illustration, not an application screenshot. Sophisticated midnight navy, soft plum and mint palette that matches a modern financial review workspace; luminous but restrained, clear hierarchy and generous negative space. Main exact text \"ARCHON\". Supporting exact headline \"Source-backed books.\" followed by \"Human-approved collection emails.\" Small exact footer \"Built with Strands Agents on AWS\". Central illustration: elegant three-stage arrangement of physical invoice and payment paper fragments, a thin translucent evidence review frame, and a closed envelope behind a human decision check. Modern precision editorial 3D with subtle paper texture and soft studio illumination. No invented application widgets or charts, no cash moving, no bank building, no bank-feed or bank-matched claims, no Aurora, no OAuth/ERP logos, no legal-lawyer implications, no autonomous sending, no other currencies, no hand holding an imaginary mobile app. Keep all text easily legible and all essential elements within central 80% for crop safety. Professional accurate product cover, original composition, not a screenshot, no extra text."
+    }
+  ]
+}

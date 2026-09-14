@@ -1,0 +1,110 @@
+name: Archon submission film
+on:
+  push:
+    branches: [codex/archon-video-20260914]
+    paths: [video/**, graphics/*-cover-v2.png, .github/workflows/archon-film.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: write
+concurrency:
+  group: archon-film-production-v1
+  cancel-in-progress: false
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install verification tools on CI only
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+          python -m pip install playwright==1.55.0 Pillow==11.3.0
+          python -m playwright install --with-deps chromium
+      - name: Test synchronization including deliberately broken inputs
+        run: python -m unittest discover -s video -p 'test_*.py' -v
+      - name: Render storyboards for visual review, no provider call
+        run: python video/render.py --root "${{ runner.temp }}/storyboard" --only posters
+      - uses: actions/upload-artifact@v4
+        with:
+          name: archon-storyboard-${{ github.run_id }}
+          path: ${{ runner.temp }}/storyboard/review/
+          if-no-files-found: error
+  film:
+    needs: verify
+    if: github.ref == 'refs/heads/codex/archon-video-20260914' && vars.ARCHON_FILM_TTS_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      FILM_ROOT: ${{ runner.temp }}/archon-film
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install media tools on the runner only
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+          python -m pip install playwright==1.55.0 Pillow==11.3.0
+          python -m playwright install --with-deps chromium
+      - name: Prove sync gates reject malformed media before paid calls
+        run: python -m unittest discover -s video -p 'test_*.py' -v
+      - uses: actions/cache/restore@v4
+        id: media-cache
+        with:
+          path: ${{ env.FILM_ROOT }}
+          key: archon-film-v1-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: archon-film-v1-
+      - name: Measure ElevenLabs narration, with exact-content cache and credit guard
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: python video/media.py narrate --root "$FILM_ROOT" --spec video/story.json
+      - name: Render animated introduction, infrastructure and closing scenes
+        run: python video/render.py --root "$FILM_ROOT" --only slides
+      - name: Capture the frozen real AWS application once
+        env:
+          ARCHON_VIDEO_LIVE_CAPTURE: approved
+          ARCHON_VIDEO_RECIPIENT: ${{ secrets.ARCHON_VIDEO_RECIPIENT }}
+        run: python video/capture.py --root "$FILM_ROOT"
+      - name: Compose real footage with disclosed wait edits
+        run: python video/render.py --root "$FILM_ROOT" --only demo
+      - name: Assemble and check frame-accurate audio, pictures and subtitles
+        run: |
+          python video/media.py assemble --root "$FILM_ROOT" --spec video/story.json --check-frames
+          python video/media.py verify --root "$FILM_ROOT" --spec video/story.json
+      - name: Preserve billed-attempt history and reusable footage even on failure
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.FILM_ROOT }}
+          key: archon-film-v1-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Upload final film and English subtitles
+        uses: actions/upload-artifact@v4
+        with:
+          name: archon-film-${{ github.run_id }}
+          path: |
+            ${{ env.FILM_ROOT }}/archon-demo.mp4
+            ${{ env.FILM_ROOT }}/archon-demo.en.srt
+            ${{ env.FILM_ROOT }}/receipt.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload visual review and original project-media screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: archon-film-review-${{ github.run_id }}
+          path: |
+            ${{ env.FILM_ROOT }}/review/
+            ${{ env.FILM_ROOT }}/screenshots/
+            ${{ env.FILM_ROOT }}/timing.json
+            ${{ env.FILM_ROOT }}/captions.json
+            ${{ env.FILM_ROOT }}/capture/manifest.json
+            ${{ env.FILM_ROOT }}/capture/attempt.json
+            ${{ env.FILM_ROOT }}/capture/provider-started.json
+          retention-days: 30
