@@ -2,7 +2,7 @@
 
 ![Archon: source-backed books, a Strands review, and an email only after your exact approval. Editorial banner, not a product screenshot.](docs/banner.svg)
 
-**Archon prevents a partial payment from becoming a false collection demand.**
+**Archon helps independent joiners reconcile inbox evidence and approve the exact unpaid balance, preventing a partial payment from becoming a false collection demand.**
 
 It turns scattered invoice and payment evidence into one source-backed decision. In the flagship
 case, a **1,860.00 EUR** invoice and a **600.00 EUR** payment establish **1,260.00 EUR** outstanding.
@@ -12,7 +12,8 @@ every amount, and any change to the evidence expires the previous human approval
 [Open the working AWS app](https://d2ssmv59q16d0b.cloudfront.net/) ·
 [Watch the 4:51 demo](https://youtu.be/gpf1Dt8uYgY) ·
 [Follow the judge walkthrough](#judge-walkthrough) ·
-[View the Devpost submission](https://devpost.com/software/archon-dpgbe8)
+[View the Devpost submission](https://devpost.com/software/archon-dpgbe8) ·
+[Read the disclosures](#pre-existing-work-disclosed)
 
 | What the public release demonstrates | Proof path |
 |---|---|
