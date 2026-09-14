@@ -10,25 +10,25 @@ Strands model and simulated acceptance. Read [release.json](https://d2ssmv59q16d
 ## Recorded product acceptance, not a new result
 
 [PRIMARY, read-only check 2026-09-14] The public identity and acceptance endpoints returned HTTP 200
-and agreed on frontend `3e89590053fb278847652ed6dec1f97966d99447` and backend/worker
-`2e2b3757f9d2bb8e95e2338fdc5ae40c6a35c3a4`. The configured mode was `controlled-live`.
-[AWS run 34822838436, attempt 1](https://github.com/upgradedev/archon-aws-strands/actions/runs/34822838436/attempts/1)
-completed successfully. Its [retained provider receipt](https://d2ssmv59q16d0b.cloudfront.net/acceptance/runs/34822838436-1.json)
+and agreed on frontend/backend/worker `b446e36ec555fc0f1c2f9cded8249cc51f11f281`.
+The configured mode was `controlled-live`.
+[AWS run 34863683977, attempt 2](https://github.com/upgradedev/archon-aws-strands/actions/runs/34863683977/attempts/2)
+completed successfully. Its [retained provider receipt](https://d2ssmv59q16d0b.cloudfront.net/acceptance/runs/34863683977-2.json)
 records the observations below; reading that receipt is not a new invocation.
 
 | Check | Recorded result | Boundary |
 |---|---|---|
 | Actual provider journeys | 3/3 passed: desktop, mobile Chromium and WebKit | Real CloudFront/API/worker path, exact consent, reload and replay |
-| Bedrock usage in those journeys | 45 model calls; 36,533 input and 5,686 output tokens | Observed provider usage for this run, not an accuracy score or billing statement |
+| Bedrock usage in those journeys | 45 model calls; 36,724 input and 5,438 output tokens | Observed provider usage for this run, not an accuracy score or billing statement |
 | SES outcome | 3 provider acceptances; `delivery_proven=false` | No new mailbox arrival established |
 | Separate AWS portfolio journeys | 6/6 passed | Typed 240-record portfolio, linked views and retained books; no model or mail operations |
-| Source CI in the same run | 1,111 Python tests, 90.44% Python coverage; 75 HTTP browser cases, 5 CI provider-double cases, 32 renderer cases | Source checks and doubles are separate from actual provider evidence |
+| Source CI in the same run | 1,112 Python tests, 90.44% Python coverage; 226 frontend unit tests, 75 HTTP browser cases, 5 CI provider-double cases and 32 renderer cases | Source checks and doubles are separate from actual provider evidence |
 | Human UAT and independent benefit | `NOT_RUN` | No measured time saving, money recovered or comparative superiority |
 
 The read used `Invoke-WebRequest -UseBasicParsing -Uri <url>` against the three public JSON links
 below and the retained provider receipt. `curl -fsS <url>` is an equivalent read-only retrieval.
 The separate portfolio count and source CI summaries come from
-`gh run view 34822838436 --repo upgradedev/archon-aws-strands --log`.
+`gh run view 34863683977 --repo upgradedev/archon-aws-strands --attempt 2 --log`.
 The portfolio job is **not** included in the provider receipt's three-case total. Neither suite
 is an independent evaluation over 240 AI-extracted documents. New source changes require their
 own exact-SHA CI and matching release acceptance.
@@ -86,7 +86,7 @@ is not current acceptance. A branch CI pass is not evidence that this SHA is dep
 Incoming has a separate actual intake check:
 [run 34788618140](https://github.com/upgradedev/archon-aws-strands/actions/runs/34788618140)
 passed one intake/replay/revocation journey against the earlier `4c67363` / `bad8453` release.
-That is historical extension evidence, not a rerun against `3e89590` / `2e2b375` and not part of
+That is historical extension evidence, not a rerun against `b446e36` and not part of
 the three-case provider receipt. See the [webhook verification boundary](incoming-webhook.md#verification-boundary).
 
 ## Frozen evaluation instruments

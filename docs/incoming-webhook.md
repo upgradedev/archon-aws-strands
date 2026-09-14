@@ -140,7 +140,7 @@ This contract does not promise cancellation or reversal of a provider call alrea
 ## Verification boundary
 
 The [current release snapshot](EVALUATION.md#recorded-product-acceptance-not-a-new-result) is
-frontend `3e89590` / backend `2e2b375`, checked on 2026-09-14. Its three-case provider acceptance
+frontend/backend `b446e36`, checked on 2026-09-14. Its three-case provider acceptance
 does not exercise this external producer endpoint.
 
 [Actual incoming run 34788618140](https://github.com/upgradedev/archon-aws-strands/actions/runs/34788618140)

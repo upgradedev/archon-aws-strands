@@ -2,18 +2,33 @@
 
 ![Archon: source-backed books, a Strands review, and an email only after your exact approval. Editorial banner, not a product screenshot.](docs/banner.svg)
 
-**Archon helps independent joiners reconcile inbox invoices, check the remaining balance and approve an exact collection email.**
+**Archon prevents a partial payment from becoming a false collection demand.**
 
-[Open the AWS app](https://d2ssmv59q16d0b.cloudfront.net/) · [Judge walkthrough](#judge-walkthrough) ·
-[Evidence](#evidence-and-limits) · [Disclosures](#pre-existing-work-disclosed)
+It turns scattered invoice and payment evidence into one source-backed decision. In the flagship
+case, a **1,860.00 EUR** invoice and a **600.00 EUR** payment establish **1,260.00 EUR** outstanding.
+Six Strands readers and Amazon Bedrock prepare the context and wording; deterministic books own
+every amount, and any change to the evidence expires the previous human approval.
 
-[Watch the 4:51 working demo](https://youtu.be/gpf1Dt8uYgY) ·
-[Devpost submission](https://devpost.com/software/archon-dpgbe8) ·
-[AWS Builder article](https://builder.aws.com/content/3JK1DF6ZxMYeyD1Ry5Kp07gmqET/agents-for-humans-archon-checks-the-balance-before-the-collection-email) ·
-[Engineering article on dev.to](https://dev.to/efousekis/archon-keeping-financial-facts-outside-the-llm-with-strands-agents-hah)
+[Open the working AWS app](https://d2ssmv59q16d0b.cloudfront.net/) ·
+[Watch the 4:51 demo](https://youtu.be/gpf1Dt8uYgY) ·
+[Follow the judge walkthrough](#judge-walkthrough) ·
+[View the Devpost submission](https://devpost.com/software/archon-dpgbe8)
 
-Fictional records; real Bedrock and Strands Agents in controlled-live sessions. Retained
-simulation instead uses a scripted model and simulated mail. Loading demo data calls neither.
+| What the public release demonstrates | Proof path |
+|---|---|
+| A complete financial workspace | 240 records across invoices, credits, receipts and payments, with dashboard-to-source drill-down |
+| Load-bearing agent orchestration | Six **Strands Agents** readers must complete before the Bedrock composer can prepare a draft |
+| Return of control | Approval binds the exact recipient, message, balance, fingerprint and ledger revision |
+| Evidence-aware invalidation | A new payment or conflicting source discards stale approval and requires fresh review |
+| Durable controlled action | Restricted Amazon SES acceptance is recorded and remains visible after reload |
+
+Built for **AWS Agents for Humans · Professional Agents**.
+
+Read the three-part AWS Builder series:
+[product walkthrough](https://builder.aws.com/content/3JK1DF6ZxMYeyD1Ry5Kp07gmqET/agents-for-humans-archon-checks-the-balance-before-the-collection-email) ·
+[architecture](https://builder.aws.com/content/3JKAVqAOxjyERWhlmTSQxeKLXGN/agents-for-humans-why-archon-keeps-financial-facts-outside-the-llm) ·
+[evidence-changing approval](https://builder.aws.com/content/3JKApwSwb8vi9AFAKj1zYlVOXsl/agents-for-humans-an-approval-should-expire-when-the-evidence-changes) ·
+[engineering article on dev.to](https://dev.to/efousekis/archon-keeping-financial-facts-outside-the-llm-with-strands-agents-hah)
 
 [![Backend CI](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/upgradedev/archon-aws-strands/actions/workflows/ci.yml)
 [![Frontend CI](https://github.com/upgradedev/archon-aws-strands/actions/workflows/frontend-ci.yml/badge.svg?branch=main)](https://github.com/upgradedev/archon-aws-strands/actions/workflows/frontend-ci.yml)
@@ -26,18 +41,9 @@ simulation instead uses a scripted model and simulated mail. Loading demo data c
 [![Strands Agents SDK 1.53+](https://img.shields.io/badge/Strands%20Agents-SDK%201.53%2B-8B6DDB)](src/archon/agents/graph.py)
 [![Amazon Bedrock](https://img.shields.io/badge/Amazon%20Bedrock-controlled%20live-5270A8)](docs/ARCHITECTURE.md)
 
-For a joiner doing client collections alone, an invoice and a remittance can tell different stories.
-Archon brings those records together so the owner can see what remains owed, why collection is
-ready or held, and exactly what a proposed email would say.
-
-[Open the live AWS app](https://d2ssmv59q16d0b.cloudfront.net/) ·
-[Judge walkthrough](#judge-walkthrough) · [How Strands is used](#how-it-is-put-together) ·
-[Built with](#built-with) · [Docs](#documentation)
-
-Built for **AWS Agents for Humans · Professional Agents**.
-
-> Fictional business data; real Amazon Bedrock and Strands Agents in controlled-live sessions.
-> Email requires separate approval and goes only to the configured test recipient. No money moves.
+> **Evidence boundary:** records are fictional. Controlled-live sessions use real Amazon Bedrock,
+> Strands Agents and restricted SES; the separately labelled retained simulation never sends.
+> SES acceptance is not proof of delivery, and Archon never moves money.
 
 <a id="react-workstation-usage"></a>
 <a id="try-it"></a>
@@ -48,11 +54,12 @@ No account or installation is required. Start with the books, then choose whethe
 
 | Step | What to do | What you can verify |
 |---|---|---|
-| 1. Open the books | [Open the demo setup](https://d2ssmv59q16d0b.cloudfront.net/#/demo) → **Load business portfolio** | 240 fictional records: sales, purchases, both credit types, receipts and supplier payments. No AI or email operation on load. |
-| 2. Follow the evidence | Dashboard → a financial widget → Records | Real retained documents, filters and linked sources, not a static mockup. Credits and cash are distinct. |
-| 3. Ask the agent | Workspace → **Run Strands & prepare draft** | In a controlled-live session, actual Bedrock execution through the Strands graph, followed by a checked draft. This is a metered action, not part of loading the demo. |
+| 1. Open the books | [Open the demo setup](https://d2ssmv59q16d0b.cloudfront.net/#/demo) → **Load business portfolio** | 240 records across sales, purchases, both credit types, receipts and supplier payments populate every financial view. |
+| 2. Follow the evidence | Dashboard → a financial widget → Records | Retained documents, filters and linked sources make every total inspectable. Credits and cash remain distinct. |
+| 3. Ask the agent | Workspace → **Run Strands & prepare draft** | Actual Bedrock execution through the six-reader Strands graph produces a checked draft in controlled-live mode. |
 | 4. Keep control | Inspect the recipient, balance and exact draft | Sending needs explicit consent and approval. Skip sending if you only want to inspect the application. |
-| 5. Read the outcome | History → recorded attempt → reload | The durable outcome survives reload. SES acceptance is not independent proof of inbox delivery. |
+| 5. Change the evidence | Record the partial payment or conflicting duplicate | The balance changes, stale approval expires and unsupported collection is held. |
+| 6. Read the outcome | History → recorded attempt → reload | The durable provider acceptance and approved fingerprint survive reload. |
 
 Use **Take a tour** in the workspace header for six short explanations. Next/Previous only change
 the guide; opening a page is optional. The tour never seeds books, runs AI, enables Incoming or
@@ -149,7 +156,9 @@ Refresh after an uncertain action; never retry unknown sends automatically.
 ## Evidence and limits
 
 The [live release receipt](https://d2ssmv59q16d0b.cloudfront.net/acceptance.html) identifies the
-exact tested frontend/backend pair, observed model calls and SES acceptances. The
+exact tested frontend/backend pair. Release `b446e36` passed three controlled provider journeys
+that recorded 45 Bedrock calls and three restricted SES acceptances, plus separate real-AWS
+portfolio journeys. The
 [AWS deployment workflow](https://github.com/upgradedev/archon-aws-strands/actions/workflows/frontend-deploy.yml)
 also retains separate real-AWS portfolio browser results. These execute the application, not slides.
 Check the served identities against the receipt; a green source build alone does not prove deployment.
