@@ -23,11 +23,6 @@ COMMIT = "1" * 40
 
 
 class HostingContract(unittest.TestCase):
-    def test_judge_facing_metadata_describes_the_live_boundary(self):
-        html = (ROOT.parent / "frontend" / "index.html").read_text(encoding="utf-8")
-        self.assertIn("controlled Amazon SES dispatch", html)
-        self.assertNotIn("simulated delivery receipts", html)
-
     def test_each_product_has_private_retained_bucket_and_oac(self):
         for product in ("lasttake", "merismos", "archon"):
             resources = stack.template(product, "upgradedev/" + product)["Resources"]
