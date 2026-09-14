@@ -61,7 +61,7 @@ jobs:
           path: ${{ env.FILM_ROOT }}
           key: archon-film-v1-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: archon-film-v1-
-      - name: Measure ElevenLabs narration, with exact-content cache and credit guard
+      - name: Measure ElevenLabs narration with exact-content cache
         env:
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
         run: python video/media.py narrate --root "$FILM_ROOT" --spec video/story.json

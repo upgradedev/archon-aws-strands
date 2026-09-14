@@ -191,7 +191,6 @@ def narrate(root, spec):
 def narrate_locked(root, spec):
     key = os.environ.get("ELEVENLABS_API_KEY", "").strip()
     require(key, "ELEVENLABS_API_KEY is required")
-    subscription = eleven(key, "user/subscription")  # Authenticate before any billed request.
     directory = root / "narration"
     directory.mkdir(parents=True, exist_ok=True)
     jobs = [(s, audio_path(root, s, spec["voice"])) for s in spec["scenes"]]
@@ -201,8 +200,6 @@ def narrate_locked(root, spec):
     require(all(type(n) is int and 0 < n <= CHAR_CAP for n in attempts), "invalid attempt ledger")
     spent = sum(attempts)
     require(spent + new_chars <= CHAR_CAP, "12,000 cumulative new-character cap exceeded")
-    require(new_chars <= subscription["character_limit"] - subscription["character_count"],
-            "insufficient subscription characters; no overage or paid retry")
     for scene, path in missing:
         with path.with_suffix(".attempt.json").open("xb") as attempt:
             attempt.write(canonical(dict(characters=len(scene["speech"]))))

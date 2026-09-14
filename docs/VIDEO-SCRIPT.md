@@ -88,7 +88,8 @@ New media commits are not represented as a new deployed runtime.
 before it can generate speech. Local installations, builds and rendering are not needed.
 
 1. `video/media.py narrate` uses ElevenLabs with exact-content caching, character-aligned
-   captions, a cumulative 12,000-character attempt ceiling and a subscription-credit check.
+   captions and a cumulative 12,000-character attempt ceiling against runaway regeneration.
+   It requires text-to-speech access only, not account/subscription read permissions.
 2. Each visual window is measured speech plus a tail, rounded to a 25 fps frame boundary,
    or the planned scene minimum if longer. There is no whole-film time stretch.
 3. `video/render.py` animates the original introduction, problem and architecture slides.

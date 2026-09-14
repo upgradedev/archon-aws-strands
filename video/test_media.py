@@ -111,51 +111,47 @@ class PureTests(unittest.TestCase):
             opener.return_value.open.side_effect = urllib.error.HTTPError(
                 "https://redacted.invalid", 401, "sensitive detail", {}, io.BytesIO(b"secret"))
             with self.assertRaises(media.MediaError) as error:
-                media.eleven("secret", "user/subscription")
+                media.eleven("secret", "text-to-speech/voice/with-timestamps", {"text": "Hello"})
             self.assertEqual(str(error.exception), "ElevenLabs HTTP 401")
             self.assertEqual(opener.return_value.open.call_count, 1)
 
     def test_no_automatic_billed_retry_even_on_next_invocation(self):
-        responses = [dict(character_count=0, character_limit=50000), media.MediaError("HTTP 503")]
+        responses = [media.MediaError("HTTP 503")]
         with patch.dict(os.environ, {"ELEVENLABS_API_KEY": "offline"}), \
                 patch.object(media, "eleven", side_effect=responses) as api:
             with self.assertRaisesRegex(media.MediaError, "503"):
                 media.narrate(self.root, self.spec)
-            self.assertEqual(api.call_count, 2)
+            self.assertEqual(api.call_count, 1)
         with patch.dict(os.environ, {"ELEVENLABS_API_KEY": "offline"}), \
-                patch.object(media, "eleven", return_value=responses[0]) as api:
+                patch.object(media, "eleven") as api:
             with self.assertRaisesRegex(media.MediaError, "unresolved billed"):
                 media.narrate(self.root, self.spec)
-            self.assertEqual(api.call_count, 1)  # Subscription only.
+            api.assert_not_called()
 
-    def test_cumulative_character_cap_and_subscription_preflight(self):
+    def test_cumulative_character_cap_precedes_any_request(self):
         (self.root / "narration").mkdir()
         media.save(self.root / "narration" / "old.attempt.json", dict(characters=11999))
-        for available, message in ((50000, "12,000"), (0, "subscription")):
-            if available == 0:
-                media.save(self.root / "narration" / "old.attempt.json", dict(characters=1))
-            with patch.dict(os.environ, {"ELEVENLABS_API_KEY": "offline"}), \
-                    patch.object(media, "eleven", return_value=dict(
-                        character_count=0, character_limit=available)) as api:
-                with self.assertRaisesRegex(media.MediaError, message):
-                    media.narrate(self.root, self.spec)
-                self.assertEqual(api.call_count, 1)
+        with patch.dict(os.environ, {"ELEVENLABS_API_KEY": "offline"}), \
+                patch.object(media, "eleven") as api:
+            with self.assertRaisesRegex(media.MediaError, "12,000"):
+                media.narrate(self.root, self.spec)
+            api.assert_not_called()
 
     def test_narration_cache_resume_and_retained_out_of_target_timing(self):
         result = dict(audio_base64=base64.b64encode(b"offline audio").decode(), alignment=None)
-        subscription = dict(character_count=0, character_limit=50000)
         with patch.dict(os.environ, {"ELEVENLABS_API_KEY": "offline"}), \
-                patch.object(media, "eleven", side_effect=[subscription, result, result]) as api, \
+                patch.object(media, "eleven", side_effect=[result, result]) as api, \
                 patch.object(media, "speech_seconds", return_value=2):
             self.assertEqual(media.narrate(self.root, self.spec)["newCharacters"], 24)
-            self.assertEqual(api.call_args_list[0].args[1], "user/subscription")
+            self.assertEqual(api.call_count, 2)
+            self.assertTrue(all(call.args[1].startswith("text-to-speech/") for call in api.call_args_list))
         self.spec["scenes"][0]["minSeconds"] = 160
         with patch.dict(os.environ, {"ELEVENLABS_API_KEY": "offline"}), \
-                patch.object(media, "eleven", return_value=subscription) as api, \
+                patch.object(media, "eleven") as api, \
                 patch.object(media, "speech_seconds", return_value=2):
             with self.assertRaisesRegex(media.MediaError, "adjust scene"):
                 media.narrate(self.root, self.spec)
-            self.assertEqual(api.call_count, 1)
+            api.assert_not_called()
             self.assertEqual(media.read(self.root / "timing.json")["totalSeconds"], 305)
 
     def test_real_character_alignment_and_scene_fallback(self):
