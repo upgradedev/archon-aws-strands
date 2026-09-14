@@ -115,10 +115,16 @@ def assess(
                 f"but the draft would send to {draft.to_address}"
             )
         if invoice.is_settled:
-            refusals.append(
-                f"{draft.invoice_id} has been settled since the draft was written. "
-                "Chasing a client who has paid is the expensive mistake here."
-            )
+            if invoice.credited:
+                refusals.append(
+                    f"{draft.invoice_id} has no outstanding balance after cash and credit notes. "
+                    "No collection is due."
+                )
+            else:
+                refusals.append(
+                    f"{draft.invoice_id} has been settled since the draft was written. "
+                    "Chasing a client who has paid is the expensive mistake here."
+                )
         elif not invoice.is_overdue(as_of):
             refusals.append(f"{draft.invoice_id} is not overdue on {as_of}")
 

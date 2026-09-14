@@ -20,10 +20,13 @@ def supplier_position(books: Books) -> str:
     """1. What suppliers have billed, and which of it is still owed."""
     owed = books.owed_to_suppliers()
     if not owed:
+        if books.purchase_credits:
+            return "No supplier balance remains outstanding; credit notes reduced the amount due."
         return "Every supplier invoice on file has been paid."
     lines = [f"{len(owed)} supplier invoice(s) still open:"]
     lines += [
         f"  {s.doc_id} {s.counterparty}: {fmt(s.outstanding)} of {fmt(s.gross)}, due {s.due}"
+        + (f", {fmt(s.credited)} credited" if s.credited else "")
         for s in owed
     ]
     return "\n".join(lines)
@@ -33,13 +36,17 @@ def sales_position(books: Books, as_of: date) -> str:
     """3 and 4. What was invoiced, and what has actually come in."""
     open_items = books.uncollected()
     if not open_items:
+        if books.sales_credits:
+            return "No sales balance remains outstanding; credit notes reduced the amount due."
         return "Every sales invoice on file has been collected."
     lines = [f"{len(open_items)} sales invoice(s) still open:"]
     for s in open_items:
         state = f"{s.days_overdue(as_of)} days overdue" if s.is_overdue(as_of) else f"due {s.due}"
         received = f", {fmt(s.settled)} received so far" if s.settled else ""
+        credited = f", {fmt(s.credited)} credited" if s.credited else ""
         lines.append(
-            f"  {s.doc_id} {s.counterparty}: {fmt(s.outstanding)} outstanding, {state}{received}"
+            f"  {s.doc_id} {s.counterparty}: {fmt(s.outstanding)} outstanding, "
+            f"{state}{received}{credited}"
         )
     return "\n".join(lines)
 
@@ -98,8 +105,9 @@ def chase_candidate(books: Books, as_of: date) -> str:
     worst = books.worst_overdue(as_of)
     if worst is None:
         return "Nothing is overdue. There is no chase to write."
+    credited = f" {fmt(worst.credited)} credited by credit note." if worst.credited else ""
     return (
         f"{worst.doc_id} to {worst.counterparty}: {fmt(worst.outstanding)} outstanding "
         f"of {fmt(worst.gross)}, {worst.days_overdue(as_of)} days overdue, "
-        f"{fmt(worst.settled)} received so far."
+        f"{fmt(worst.settled)} received so far.{credited}"
     )

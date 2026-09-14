@@ -1,15 +1,15 @@
 """The six questions the owner asked, answered off one ledger.
 
     1. what invoices have my suppliers sent me   -> purchases_owed / purchases_all
-    2. which of them have I paid                 -> Settlement.is_settled
+    2. which of them have I paid                 -> Settlement.is_paid
     3. what sales have I made                    -> sales_all
-    4. which of those have I collected            -> Settlement.is_settled
+    4. which of those have I collected            -> Settlement.is_paid
     5. have I paid my staff                       -> payroll_unpaid
     6. P&L, cashflow, metrics                     -> archon.domain.reports
 
 Every answer is derived, never stored twice. A stored "paid" flag and a ledger
 that disagrees with it is the classic way books start lying, so the flag does
-not exist: settlement is computed from the payments that reference an invoice.
+not exist: cash and credits are computed separately from their invoice references.
 """
 
 from __future__ import annotations
@@ -21,8 +21,10 @@ from decimal import Decimal
 from .documents import (
     Payment,
     PayrollRun,
+    PurchaseCreditNote,
     PurchaseInvoice,
     Receipt,
+    SalesCreditNote,
     SalesInvoice,
     transfer_identity,
 )
@@ -31,12 +33,12 @@ from .money import ZERO, money
 
 
 class SettlementError(ValueError):
-    """A payment that points nowhere, or pays more than is owed."""
+    """Cash or a credit that cannot be applied to its referenced invoice."""
 
 
 @dataclass(frozen=True, slots=True)
 class Settlement:
-    """How much of one invoice has actually been cleared."""
+    """Cash settled and credit granted against an invoice, kept distinct."""
 
     doc_id: str
     counterparty: str
@@ -44,13 +46,20 @@ class Settlement:
     gross: Decimal
     settled: Decimal
     due: date
+    credited: Decimal = ZERO
 
     @property
     def outstanding(self) -> Decimal:
-        return money(self.gross - self.settled)
+        return money(self.gross - self.settled - self.credited)
+
+    @property
+    def is_paid(self) -> bool:
+        """True only when cash covers the original invoice in full."""
+        return self.settled >= self.gross
 
     @property
     def is_settled(self) -> bool:
+        """Nothing remains due, whether cleared by cash, credit, or both."""
         return self.outstanding <= ZERO
 
     def is_overdue(self, as_of: date) -> bool:
@@ -75,6 +84,8 @@ class Books:
     #: arrangement changes when a chase fires, never what is owed.
     arrangements: dict = field(default_factory=dict)
     legacy_payment_holds: list[str] = field(default_factory=list)
+    sales_credits: list[SalesCreditNote] = field(default_factory=list)
+    purchase_credits: list[PurchaseCreditNote] = field(default_factory=list)
 
     # ---- taking documents in -------------------------------------------------
 
@@ -96,22 +107,63 @@ class Books:
             Payment: self.payments,
             Receipt: self.receipts,
             PayrollRun: self.payroll,
+            SalesCreditNote: self.sales_credits,
+            PurchaseCreditNote: self.purchase_credits,
         }.get(type(document))
         if bucket is None:
             raise TypeError(f"Archon has no posting rule for {type(document).__name__}")
 
-        self._check_settles(document, replay_legacy=replay_legacy)
-
-        entries = list(document.entries())  # type: ignore[attr-defined]
-        posted = []
+        entry_count = len(self.ledger.entries)
+        hold_count = len(self.legacy_payment_holds)
         try:
+            self._check_credit(document)
+            self._check_settles(document, replay_legacy=replay_legacy)
+            entries = list(document.entries())  # type: ignore[attr-defined]
             for entry in entries:
-                posted.append(self.ledger.post(entry))
+                self.ledger.post(entry)
         except Exception:
-            for entry in posted:
-                self.ledger.entries.remove(entry)
+            del self.ledger.entries[entry_count:]
+            del self.legacy_payment_holds[hold_count:]
             raise
         bucket.append(document)  # type: ignore[arg-type]
+
+    def _check_credit(self, document: object) -> None:
+        """Bound each credit by original net/VAT and the balance after cash."""
+        if isinstance(document, SalesCreditNote):
+            invoices, credits = self.sales, self.sales_credits
+            settlements = self.sales_settlements()
+            noun = "sales invoice"
+        elif isinstance(document, PurchaseCreditNote):
+            invoices, credits = self.purchases, self.purchase_credits
+            settlements = self.purchase_settlements()
+            noun = "purchase invoice"
+        else:
+            return
+        invoice = next((inv for inv in invoices if inv.doc_id == document.settles), None)
+        if invoice is None:
+            raise SettlementError(
+                f"{document.doc_id} credits {document.settles}, which is not a {noun} "
+                "in these books."
+            )
+        if document.issued < invoice.issued:
+            raise SettlementError(
+                f"{document.doc_id}: credit issue {document.issued} precedes "
+                f"invoice issue {invoice.issued}"
+            )
+        previous = [credit for credit in credits if credit.settles == invoice.doc_id]
+        for name in ("net", "vat"):
+            credited = sum((getattr(credit, name) for credit in previous), ZERO)
+            if credited + getattr(document, name) > getattr(invoice, name):
+                raise SettlementError(
+                    f"{document.doc_id}: cumulative {name} credit exceeds "
+                    f"{invoice.doc_id}'s original {name} of {getattr(invoice, name)}"
+                )
+        outstanding = next(s.outstanding for s in settlements if s.doc_id == invoice.doc_id)
+        if document.gross > outstanding:
+            raise SettlementError(
+                f"{document.doc_id} credits {document.gross} against {invoice.doc_id}, "
+                f"which has only {outstanding} outstanding after cash and credits."
+            )
 
     def _check_settles(self, document: object, *, replay_legacy: bool = False) -> None:
         """A payment must point at a real invoice and must not overpay it.
@@ -175,6 +227,9 @@ class Books:
         paid: dict[str, Decimal] = {}
         for payment in self.payments:
             paid[payment.settles] = paid.get(payment.settles, ZERO) + payment.amount
+        credited: dict[str, Decimal] = {}
+        for credit in self.purchase_credits:
+            credited[credit.settles] = credited.get(credit.settles, ZERO) + credit.gross
         return [
             Settlement(
                 doc_id=inv.doc_id,
@@ -183,6 +238,7 @@ class Books:
                 gross=inv.gross,
                 settled=money(paid.get(inv.doc_id, ZERO)),
                 due=inv.due,
+                credited=money(credited.get(inv.doc_id, ZERO)),
             )
             for inv in self.purchases
         ]
@@ -200,6 +256,9 @@ class Books:
         received: dict[str, Decimal] = {}
         for receipt in self.receipts:
             received[receipt.settles] = received.get(receipt.settles, ZERO) + receipt.amount
+        credited: dict[str, Decimal] = {}
+        for credit in self.sales_credits:
+            credited[credit.settles] = credited.get(credit.settles, ZERO) + credit.gross
         return [
             Settlement(
                 doc_id=inv.doc_id,
@@ -208,6 +267,7 @@ class Books:
                 gross=inv.gross,
                 settled=money(received.get(inv.doc_id, ZERO)),
                 due=inv.due,
+                credited=money(credited.get(inv.doc_id, ZERO)),
             )
             for inv in self.sales
         ]
@@ -238,7 +298,7 @@ class Books:
             return False
         # Everything received against this invoice, ever. The arrangement
         # subtracts what had already arrived when it was agreed.
-        received = settlement.gross - settlement.outstanding
+        received = settlement.settled
         if arrangement.is_broken(as_of, received):
             return False
         return not arrangement.is_finished(as_of)

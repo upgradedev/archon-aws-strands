@@ -147,10 +147,16 @@ def legacy_documents(state: dict) -> list[dict]:
             and s["document"]["doc_id"] not in state.get("transfer_attestations", {})]
 
 
+def require_source_capacity(state: dict) -> None:
+    from archon.web.business_demo import INTERACTIVE_LIMIT, interactive_count
+
+    if interactive_count(state) >= INTERACTIVE_LIMIT:
+        raise ValueError("This demo holds at most 50 source emails. Start a new workspace.")
+
+
 def intake(state: dict, body: str, replace_id: str | None = None, *, reader=None,
            validate_reading=None) -> None:
-    if len(state["sources"]) >= 50:
-        raise ValueError("This demo holds at most 50 source emails. Start a new workspace.")
+    require_source_capacity(state)
     previous = next((s for s in state["sources"] if s["id"] == replace_id), None)
     if replace_id and (previous is None or previous["status"] != "refused"):
         raise ValueError("Only a refused source can be corrected. Posted evidence is immutable.")
@@ -175,6 +181,13 @@ def intake(state: dict, body: str, replace_id: str | None = None, *, reader=None
         "redactions": 0,
     }
     try:
+        # Native fixture credits do not widen the mail reader's schema. An
+        # invoice-shaped credit must never be booked as new positive debt.
+        if re.search(r"\b(?:credit[\s-]+(?:note|memo)|refund)\b", body, re.I):
+            raise ValueError(
+                "Credit notes and refunds are not supported by mail intake. "
+                "The business portfolio contains explicit validated credit fixtures only."
+            )
         # Mixed/unsupported currencies cannot silently become euro debt.
         if re.search(r"\b(?:USD|GBP|CHF|JPY|CAD|AUD)\b|[$£¥]", body, re.I):
             raise ValueError("Only EUR is supported. No exchange rate has been authorized.")
@@ -379,6 +392,8 @@ def propose(state: dict, invoice_id: str, body: str) -> None:
     if settlement is None:
         raise ValueError("Choose an outstanding sales invoice.")
     reading = read_reply(body, AS_OF, client=BoundedReplyReader())
+    if reading.needs_a_person:
+        require_source_capacity(state)
     plan = None
     if not reading.needs_a_person:
         plan = consider(

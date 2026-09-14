@@ -44,6 +44,11 @@ both modes. A loaded sample workspace is ready to inspect, but it is not an AI r
 | Controlled-live session | Source-checked Bedrock intake; real Strands six-reader graph and composer | Exact human approval; SES restricted to a verified test recipient |
 | Retained simulation | Real Strands graph; model is **scripted**, outbox is **simulated** | No real email; the script walks the graph, it does not judge |
 
+Want more than the guided example? Choose **Load business portfolio** for **240 fictional
+records across six document types**, 16 clients and 10 suppliers. Explore invoices, credit notes,
+cash movements and source-linked dashboard charts. The same ledger validates every posting;
+loading the portfolio calls no model and sends no email. [Dataset and limits](docs/BUSINESS-DEMO.md).
+
 Check [frontend identity](https://d2ssmv59q16d0b.cloudfront.net/release.json),
 [backend identity and mode](https://d2ssmv59q16d0b.cloudfront.net/api/health), and
 [release acceptance](https://d2ssmv59q16d0b.cloudfront.net/acceptance.html) together.
@@ -159,6 +164,7 @@ For this revision's validation, inspect exact-SHA CI and matching release accept
 | Strands graph, storage and actual AWS infrastructure | [Architecture](docs/ARCHITECTURE.md) |
 | CI quickstart, configuration and controlled provider operations | [Operations](docs/OPERATIONS.md) |
 | Incoming automation and its deployment boundary | [Incoming webhook](docs/incoming-webhook.md) |
+| Richer books, six document types and dataset provenance | [Business portfolio](docs/BUSINESS-DEMO.md) |
 | Historical measurements and frozen evaluation instruments | [Evaluation and evidence](docs/EVALUATION.md) |
 | What the workflow demonstrates and does not measure | [Workflow and limits](docs/DIFFERENTIATION.md) |
 | Prior work and dependency notices | [Prior work](docs/PRIOR-WORK.md) · [Third-party components](docs/THIRD-PARTY.md) |

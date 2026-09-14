@@ -1,4 +1,51 @@
 {
+  "business_portfolio_wave": {
+    "status": "SOURCE_CANDIDATE_REQUIRES_EXACT_SHA_CI",
+    "human_uat": "NOT_RUN",
+    "scope": "240 fictional typed source documents, six record views, 25-row pagination, quarter widgets through 2026-09-09. Native demo fixtures are not AI mail extraction evidence. Credits reduce outstanding separately from cash.",
+    "automation": "frontend/e2e/business-portfolio.spec.ts: separate zero-provider-call real-HTTP cases on desktop Chromium, mobile Chromium and 375px WebKit. Existing 45-call actual-provider suite unchanged. All builds, unit coverage and browser execution in CI only.",
+    "cases": [
+      {
+        "id": "AR-UAT-40",
+        "steps": [
+          "Open five-source joinery demo and retain its session",
+          "Choose Load business portfolio",
+          "Inspect 240-record and six-type disclosure",
+          "Reload new books",
+          "Return to previous workspace"
+        ],
+        "expected": "Exactly business-v1. Old five-source books and revision unchanged. Loading makes one sessions POST, no intake/reason/approval or provider job. Graph, draft and outbound receipts stay empty. Wrong seed versions preserve browser access.",
+        "automated_test": "business portfolio preserves previous books with zero AI or send requests and six paged views; frontend/tests/api.test.ts; frontend/tests/demo-setup.test.tsx",
+        "human_signoff": "NOT_RUN"
+      },
+      {
+        "id": "AR-UAT-41",
+        "steps": [
+          "Open all six document views",
+          "Check counts 80 sales invoices, 50 purchase invoices, 20 sales credits, 10 purchase credits, 50 client receipts, 30 supplier payments",
+          "Use Next page and reload",
+          "Search a reference and set inclusive dates",
+          "Open retained source and linked invoice"
+        ],
+        "expected": "At most 25 rows per view. URL filters persist; changing filters resets pagination. Late source links open their containing page. Five existing aliases remain. Supplier payment links inspect evidence, never execute payments. No page-level horizontal overflow at 375px.",
+        "automated_test": "frontend/e2e/business-portfolio.spec.ts; frontend/tests/business-records.test.tsx",
+        "human_signoff": "NOT_RUN"
+      },
+      {
+        "id": "AR-UAT-42",
+        "steps": [
+          "Compare net sales and purchases with separate credits",
+          "Inspect July, August and partial September cash",
+          "Follow cash, aging, top-party and document-mix links",
+          "Inspect credited invoice in Workspace and draft evidence"
+        ],
+        "expected": "Only posted typed financial dates through 2026-09-09 contribute. Receipt/Payment documents are recorded cash; credits appear separately and server outstanding is not reduced twice. Native origin is a fictional typed fixture, not an AI-ingested email. Missing values stay Unknown. No forecast or complete net-profit claim; payroll is absent from this seed.",
+        "automated_test": "business credits retain source origin and invoice links while filters and cash drilldowns survive reload; frontend/tests/portfolio.test.ts; frontend/tests/business-records.test.tsx",
+        "human_signoff": "NOT_RUN"
+      }
+    ],
+    "evidence": "PENDING_CI: retain browser JUnit, traces and business-dashboard.png, business-credit-evidence.png, business-filtered-records.png from exact integrated source run. No local execution or deployment acceptance claimed."
+  },
   "incoming_clarity_wave": {
     "status": "SOURCE_CANDIDATE_REQUIRES_CI_AND_DEPLOYED_ACCEPTANCE",
     "human_uat": "NOT_RUN",

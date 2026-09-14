@@ -37,6 +37,37 @@ test('an old API cannot silently replace the workspace with an unseeded result',
   expect(localStorage.getItem(api.SESSION_KEY)).toBe('current');
 });
 
+test.each(['joinery-v1', 'business-v2', undefined])('business selection refuses wrong exact seed version %s and preserves current books', async demo_seed => {
+  localStorage.setItem('archon.demo.session.v1', 'previous');
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ session: 'wrong', workspace: { ...empty(), demo_seed } }))));
+  const api = await import('../src/api');
+  await expect(api.openWorkspace(true, 'business')).rejects.toThrow('has not loaded');
+  expect(localStorage.getItem(api.SESSION_KEY)).toBe('previous');
+  expect(localStorage.getItem('archon.demo.previous.v1')).toBeNull();
+});
+
+test('business-v1 opens only with explicit seed and preserves the old session', async () => {
+  localStorage.setItem('archon.demo.session.v1', 'previous');
+  const fetcher = vi.fn().mockResolvedValue(new Response(JSON.stringify({ session: 'business', workspace: { ...empty(), demo_seed: 'business-v1' } })));
+  vi.stubGlobal('fetch', fetcher);
+  const api = await import('../src/api');
+  await api.openWorkspace(true, 'business');
+  expect(fetcher).toHaveBeenCalledExactlyOnceWith('/api/sessions', expect.objectContaining({ body: '{"seed":"business"}' }));
+  expect(localStorage.getItem('archon.demo.previous.v1')).toBe('previous');
+});
+
+test('simultaneous seed choices cannot adopt each other’s workspace', async () => {
+  let finish!: (response: Response) => void;
+  const fetcher = vi.fn(() => new Promise(resolve => { finish = resolve; }));
+  vi.stubGlobal('fetch', fetcher);
+  const api = await import('../src/api');
+  const pending = api.openWorkspace(true, 'business');
+  await expect(api.openWorkspace(true, 'joinery')).rejects.toThrow('finish opening');
+  const same = api.openWorkspace(true, 'business');
+  finish(new Response(JSON.stringify({ session: 'business', workspace: { ...empty(), demo_seed: 'business-v1' } })));
+  expect(await pending).toEqual(await same); expect(fetcher).toHaveBeenCalledTimes(1);
+});
+
 test('a pending empty creation cannot be mistaken for the requested populated demo', async () => {
   let finish!: (response: Response) => void;
   vi.stubGlobal('fetch', vi.fn(() => new Promise(resolve => { finish = resolve; })));

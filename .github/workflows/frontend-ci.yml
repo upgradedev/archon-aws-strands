@@ -141,6 +141,14 @@ jobs:
           path: frontend/proof-results/**/docs-*.png
           retention-days: 90
           if-no-files-found: error
+      - name: Compact business portfolio screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: business-visuals-${{ github.run_id }}
+          path: frontend/test-results/**/business-*.png
+          retention-days: 90
+          if-no-files-found: error
       - name: Compact closeout visual evidence
         if: always()
         uses: actions/upload-artifact@v4

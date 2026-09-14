@@ -85,10 +85,9 @@ class Arrangement:
     def paid_under_this(self, received_in_total: Decimal) -> Decimal:
         """Of everything received, how much arrived after this was agreed.
 
-        Never negative. A credit note or a correction that reduces total receipts
-        below the baseline would otherwise produce a negative payment, which is
-        not a thing, and the arrangement should be reviewed by a person rather
-        than quietly re-scored.
+        Credits never count as receipts. A correction that reduces cash receipts
+        below the baseline must not produce a negative payment; a person should
+        review the arrangement instead.
         """
         return max(ZERO, money(received_in_total - self.baseline))
 

@@ -14,7 +14,7 @@ export default defineConfig({
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 1050 } } },
     { name: 'mobile', use: { ...devices['iPhone 13'], defaultBrowserType: 'chromium' } },
-    { name: 'webkit', testMatch: liveLane ? 'providers.spec.ts' : 'product-journey.spec.ts', use: { ...devices['iPhone 13'], viewport: { width: 375, height: 812 } } },
+    { name: 'webkit', testMatch: liveLane ? 'providers.spec.ts' : ['product-journey.spec.ts', 'business-portfolio.spec.ts'], use: { ...devices['iPhone 13'], viewport: { width: 375, height: 812 } } },
   ],
   webServer: externalURL ? undefined : [
     { command: fakeLive ? 'python -m uvicorn live_browser_server:app --app-dir ../tests --host 127.0.0.1 --port 8000' : 'python -m uvicorn archon.web.api:app --host 127.0.0.1 --port 8000', url: 'http://127.0.0.1:8000/api/health', reuseExistingServer: false },

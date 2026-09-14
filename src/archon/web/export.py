@@ -165,6 +165,10 @@ def evidence_bundle(state: dict, commit: str) -> dict:
         lines[2] = "Extraction: source-checked Bedrock. Reasoning: Strands with Bedrock."
         lines[3] = "Provider: restricted SES; provider acceptance is not delivery proof."
         lines.extend(["PROVIDER JOB HISTORY", safe(json.dumps(state.get("provider_history", [])))])
+    if state.get("demo_seed") == "business-v1":
+        lines += ["BUSINESS PORTFOLIO: 240 fictional typed fixtures, not model-extracted mail.",
+                  "Loading generated no AI report, email or bank event. "
+                  "Credits reduce debt but are not cash receipts or payments."]
     for source in state["sources"]:
         lines += [
             f"{source['id']} / {source['status']} / {source['kind'] or 'unreadable'}",

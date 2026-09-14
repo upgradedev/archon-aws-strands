@@ -1,4 +1,4 @@
-"""The six things that arrive, and the entries each one causes.
+"""The documents on the books, and the entries each one causes.
 
 Every document knows how to become balanced journal entries and nothing else.
 Keeping the posting rules next to the document they belong to is what stops the
@@ -114,6 +114,80 @@ class SalesInvoice:
                 entry_id=f"{self.doc_id}:booked",
                 on=self.issued,
                 narrative=f"Invoice to {self.client}",
+                postings=tuple(postings),
+                source_ref=self.source_ref,
+            ),
+        )
+
+
+def _checked_credit(document) -> None:
+    """Credits use positive magnitudes and never silently round a correction."""
+    amounts = _checked(document.net, document.vat, document.gross, document.doc_id)
+    for name, amount in zip(("net", "vat", "gross"), amounts, strict=True):
+        if Decimal(getattr(document, name)) != amount:
+            raise DocumentError(f"{document.doc_id}: {name} must be exact to the cent")
+        object.__setattr__(document, name, amount)
+    if not document.doc_id.strip() or not document.settles.strip():
+        raise DocumentError("a credit note needs its own id and the original invoice reference")
+    if not document.source_ref.strip():
+        raise DocumentError(f"{document.doc_id}: a credit note needs a source")
+
+
+@dataclass(frozen=True, slots=True)
+class SalesCreditNote:
+    """Reduce a client's invoice, reversing sales and VAT without receiving cash."""
+
+    doc_id: str
+    settles: str
+    issued: date
+    net: Decimal
+    vat: Decimal
+    gross: Decimal
+    source_ref: str
+
+    def __post_init__(self) -> None:
+        _checked_credit(self)
+
+    def entries(self) -> tuple[JournalEntry, ...]:
+        postings = [Posting(Account.SALES, self.net)]
+        if self.vat > ZERO:
+            postings.append(Posting(Account.VAT_OUTPUT, self.vat))
+        postings.append(Posting(Account.RECEIVABLES, -self.gross))
+        return (
+            JournalEntry(
+                entry_id=f"{self.doc_id}:booked",
+                on=self.issued,
+                narrative=f"Sales credit note against {self.settles}",
+                postings=tuple(postings),
+                source_ref=self.source_ref,
+            ),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class PurchaseCreditNote:
+    """Reduce a supplier's invoice, reversing purchases and VAT without paying cash."""
+
+    doc_id: str
+    settles: str
+    issued: date
+    net: Decimal
+    vat: Decimal
+    gross: Decimal
+    source_ref: str
+
+    def __post_init__(self) -> None:
+        _checked_credit(self)
+
+    def entries(self) -> tuple[JournalEntry, ...]:
+        postings = [Posting(Account.PAYABLES, self.gross), Posting(Account.PURCHASES, -self.net)]
+        if self.vat > ZERO:
+            postings.append(Posting(Account.VAT_INPUT, -self.vat))
+        return (
+            JournalEntry(
+                entry_id=f"{self.doc_id}:booked",
+                on=self.issued,
+                narrative=f"Purchase credit note against {self.settles}",
                 postings=tuple(postings),
                 source_ref=self.source_ref,
             ),

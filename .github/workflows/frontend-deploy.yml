@@ -82,3 +82,12 @@ jobs:
     with:
       release_sha: ${{ github.sha }}
       backend_sha: ${{ needs.release.outputs.backend_sha }}
+  portfolio:
+    name: Business portfolio on real AWS
+    needs: release
+    permissions:
+      contents: read
+    uses: ./.github/workflows/aws-business-portfolio.yml
+    with:
+      release_sha: ${{ github.sha }}
+      backend_sha: ${{ needs.release.outputs.backend_sha }}

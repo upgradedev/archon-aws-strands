@@ -1,0 +1,65 @@
+name: Live AWS business portfolio
+on:
+  workflow_call:
+    inputs:
+      release_sha:
+        required: true
+        type: string
+      backend_sha:
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  portfolio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      ARCHON_UI_URL: https://d2ssmv59q16d0b.cloudfront.net/
+      EXPECTED_RELEASE: ${{ inputs.release_sha }}
+      EXPECTED_BACKEND: ${{ inputs.backend_sha }}
+      # Select the zero-provider test directory only. AWS runtime stays controlled-live.
+      ARCHON_LIVE_ACCEPTANCE: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.18.0'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify exact live pair before creating isolated demo sessions
+        run: |
+          python infra/frontend_smoke.py --url "$ARCHON_UI_URL" --sha "$EXPECTED_RELEASE"
+          python deploy/release_acceptance.py pair --sha "$EXPECTED_RELEASE" --backend "$EXPECTED_BACKEND" --output portfolio-preflight.json
+      - name: Browser tools only on CI
+        working-directory: frontend
+        run: |
+          npm install --global npm@11.19.1 --ignore-scripts
+          npm ci
+          npm audit --omit=dev --audit-level=low
+          npx playwright install --with-deps chromium webkit
+      - name: Six real AWS portfolio journeys with no model or email operations
+        id: journeys
+        working-directory: frontend
+        run: npm run test:e2e -- business-portfolio.spec.ts --forbid-only
+      - name: Verify unchanged live pair after browser journeys
+        if: always() && steps.journeys.outcome != 'skipped'
+        run: |
+          python infra/frontend_smoke.py --url "$ARCHON_UI_URL" --sha "$EXPECTED_RELEASE"
+          python deploy/release_acceptance.py pair --sha "$EXPECTED_RELEASE" --backend "$EXPECTED_BACKEND" --output portfolio-postflight.json
+      - name: Retain separate portfolio evidence, never provider acceptance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aws-business-portfolio-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            frontend/test-results/
+            frontend/artifacts/browser-junit.xml
+            frontend/playwright-report/
+            portfolio-preflight.json
+            portfolio-postflight.json
+          retention-days: 90
+          if-no-files-found: error

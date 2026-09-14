@@ -16,7 +16,8 @@ test('demo loading is explicit and double clicks create only one workspace', asy
   await userEvent.dblClick(screen.getByRole('button', { name: 'Load demo workspace' }));
   expect(api.openWorkspace).toHaveBeenCalledExactlyOnceWith(true, 'joinery');
   expect(loading).toHaveBeenCalledExactlyOnceWith(true);
-  expect(screen.getByRole('button')).toBeDisabled();
+  expect(screen.getAllByRole('button')).toHaveLength(2);
+  for (const button of screen.getAllByRole('button')) expect(button).toBeDisabled();
   const result = { session: 'demo', workspace: empty() };
   await act(async () => finish(result));
   expect(opened).toHaveBeenCalledExactlyOnceWith(result);
@@ -39,7 +40,8 @@ test('failed demo load retains a retry and does not claim success', async () => 
   await userEvent.click(screen.getByRole('button', { name: 'Load demo workspace' }));
   expect(screen.getByRole('alert')).toHaveTextContent('Unavailable');
   expect(opened).not.toHaveBeenCalled();
-  expect(screen.getByRole('button')).toBeEnabled();
+  expect(screen.getByRole('button', { name: 'Load demo workspace' })).toBeEnabled();
+  expect(screen.getByRole('button', { name: 'Load business portfolio' })).toBeEnabled();
 });
 
 test('legacy warning is based on actual workspace and provider availability', () => {
@@ -50,4 +52,15 @@ test('legacy warning is based on actual workspace and provider availability', ()
   expect(screen.queryByRole('region')).not.toBeInTheDocument();
   rerender(<WorkspaceMode live={false} available={false} />);
   expect(screen.queryByRole('region')).not.toBeInTheDocument();
+});
+
+test('business portfolio is an explicit separate choice with typed-source boundaries', async () => {
+  const workspace = { ...empty(), demo_seed: 'business-v1' };
+  vi.mocked(api.openWorkspace).mockResolvedValue({ session: 'business', workspace });
+  const opened = vi.fn(); render(<DemoSetup onOpened={opened} />);
+  expect(screen.getByRole('heading', { name: 'Explore a quarter · 240 records, six types' })).toBeVisible();
+  expect(screen.getByText(/raw-mail reader does not yet support credit notes/)).toBeVisible();
+  await userEvent.click(screen.getByRole('button', { name: 'Load business portfolio' }));
+  expect(api.openWorkspace).toHaveBeenCalledExactlyOnceWith(true, 'business');
+  expect(opened).toHaveBeenCalledExactlyOnceWith({ session: 'business', workspace });
 });
