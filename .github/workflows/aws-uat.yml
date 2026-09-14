@@ -64,6 +64,7 @@ jobs:
           npm audit --omit=dev --audit-level=low
           npx playwright install --with-deps chromium webkit
       - name: Real AWS business portfolio without model or mail operations
+        id: portfolio
         working-directory: frontend
         env:
           # Select only the six business browser cases, not the synthetic provider journeys.
@@ -71,6 +72,7 @@ jobs:
           ARCHON_LIVE_ACCEPTANCE: 'false'
         run: npm run test:e2e -- business-portfolio.spec.ts --forbid-only
       - name: Preserve business portfolio evidence separately from provider acceptance
+        id: portfolio_evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -119,6 +121,7 @@ jobs:
           printf 'Frontend commit: %s\n\nPreflight: %s | Playwright: %s | Postflight: %s\n\n' "$EXPECTED_RELEASE" "$PREFLIGHT" "$JOURNEYS" "$POSTFLIGHT" >> "$GITHUB_STEP_SUMMARY"
           printf 'Backend commit: %s\n\nEvidence: aws-acceptance-%s (HTML report, JUnit, traces, screenshots, testbook).\n\nHuman UAT: NOT_RUN. Backend compatibility and identity are checked before/after acceptance.\n' "$EXPECTED_BACKEND" "$GITHUB_RUN_ID" >> "$GITHUB_STEP_SUMMARY"
       - name: Keep observed results separate from human acceptance
+        id: provider_evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:

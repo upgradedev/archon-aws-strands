@@ -51,13 +51,26 @@ def validate(deploy, uat):
     assert steps.index(indexed["preflight"]) < steps.index(indexed["journeys"])
     assert steps.index(indexed["postflight"]) > steps.index(indexed["journeys"])
     assert not any("configure-aws-credentials" in step.get("uses", "") for step in steps)
-    artifact = next((step for step in steps if step.get("uses", "").startswith("actions/upload-artifact@") and step.get("if") == "always()"), None)
+    artifact = indexed.get("provider_evidence")
     assert artifact is not None
+    assert artifact["uses"].startswith("actions/upload-artifact@")
+    assert artifact["with"]["name"] == "aws-acceptance-${{ github.run_id }}"
     assert artifact["if"] == "always()"
     assert artifact["with"]["retention-days"] == "90"
     for path in ("frontend/test-results/", "frontend/artifacts/browser-junit.xml",
                  "frontend/playwright-report/", "frontend/UAT.testbook.*"):
         assert path in artifact["with"]["path"].splitlines()
+    portfolio = indexed["portfolio"]
+    assert portfolio["run"] == "npm run test:e2e -- business-portfolio.spec.ts --forbid-only"
+    assert portfolio["env"] == {"ARCHON_LIVE_ACCEPTANCE": "false"}
+    assert "continue-on-error" not in portfolio and "if" not in portfolio
+    assert steps.index(indexed["preflight"]) < steps.index(portfolio) < steps.index(indexed["journeys"])
+    evidence = indexed["portfolio_evidence"]
+    assert evidence["uses"].startswith("actions/upload-artifact@") and evidence["if"] == "always()"
+    assert evidence["with"]["name"] == "aws-business-portfolio-${{ github.run_id }}-${{ github.run_attempt }}"
+    assert steps.index(portfolio) < steps.index(evidence) < steps.index(indexed["journeys"])
+    for path in ("frontend/test-results/", "frontend/artifacts/browser-junit.xml", "frontend/playwright-report/"):
+        assert path in evidence["with"]["path"].splitlines()
     for stage in ("preflight", "postflight"):
         assert 'release_acceptance.py pair' in indexed[stage]["run"]
         assert '--backend "$EXPECTED_BACKEND"' in indexed[stage]["run"]
@@ -92,6 +105,22 @@ class MainAcceptanceContract(unittest.TestCase):
         self.deploy["on"]["push"]["branches"] = ["dev"]
         with self.assertRaises(AssertionError):
             validate(self.deploy, self.uat)
+
+    def test_portfolio_artifact_cannot_replace_provider_evidence(self):
+        for step in self.uat["jobs"]["acceptance"]["steps"]:
+            if step.get("id") == "provider_evidence":
+                step["with"]["path"] = "frontend/test-results/"
+        with self.assertRaises(AssertionError):
+            validate(self.deploy, self.uat)
+
+    def test_portfolio_must_run_without_ignored_failure_before_providers(self):
+        for bad_key, bad_value in (("continue-on-error", "true"), ("if", "false"),
+                                   ("env", {"ARCHON_LIVE_ACCEPTANCE": "true"})):
+            uat = copy.deepcopy(self.uat)
+            step = next(s for s in uat["jobs"]["acceptance"]["steps"] if s.get("id") == "portfolio")
+            step[bad_key] = bad_value
+            with self.subTest(bad_key=bad_key), self.assertRaises(AssertionError):
+                validate(self.deploy, uat)
 
     def test_test_before_deployment_is_rejected(self):
         self.deploy["jobs"]["acceptance"]["needs"] = "verify"
