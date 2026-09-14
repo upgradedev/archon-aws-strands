@@ -6,7 +6,6 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
-  actions: write
 concurrency:
   group: archon-film-production-v1
   cancel-in-progress: false
