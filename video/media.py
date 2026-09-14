@@ -189,7 +189,7 @@ def narrate(root, spec):
 
 
 def narrate_locked(root, spec):
-    key = os.environ.get("ELEVENLABS_API_KEY")
+    key = os.environ.get("ELEVENLABS_API_KEY", "").strip()
     require(key, "ELEVENLABS_API_KEY is required")
     subscription = eleven(key, "user/subscription")  # Authenticate before any billed request.
     directory = root / "narration"
