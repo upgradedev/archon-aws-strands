@@ -1,8 +1,8 @@
 """The hero claim, asserted without the SDK.
 
-J4 says the email is not allowed out until six domains agree. That sentence is
-only true if the composer cannot answer without them, so the property under test
-is a negative one: **the composer holds no tools.**
+J4 says the composer must receive all six domain reports before it can draft.
+That statement is only true if the composer cannot answer without them, so the
+property under test is a negative one: **the composer holds no tools.**
 
 An earlier version of the graph gave it a ``candidate()`` lookup. It constructed
 fine, CI would have passed, and the six readers would have been decoration. A

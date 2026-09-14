@@ -43,7 +43,7 @@ def test_script_does_not_treat_an_unavailable_api_as_permission_to_simulate_succ
     assert "there is no ses fallback shot" in said(SCRIPT)
     assert "refresh durable state before any retry" in said(SCRIPT)
     assert "provider acceptance does not prove arrival" in said(SCRIPT)
-    assert "script, not a completed video" in said(SCRIPT)
+    assert "script and evidence boundaries of the completed video" in said(SCRIPT)
 
 
 def test_the_script_forbids_the_things_that_would_overclaim():

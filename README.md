@@ -8,6 +8,7 @@
 [Evidence](#evidence-and-limits) · [Disclosures](#pre-existing-work-disclosed)
 
 [Watch the 4:51 working demo](https://youtu.be/gpf1Dt8uYgY) ·
+[Devpost submission](https://devpost.com/software/archon-dpgbe8) ·
 [AWS Builder article](https://builder.aws.com/content/3JK1DF6ZxMYeyD1Ry5Kp07gmqET/agents-for-humans-archon-checks-the-balance-before-the-collection-email) ·
 [Engineering article on dev.to](https://dev.to/efousekis/archon-keeping-financial-facts-outside-the-llm-with-strands-agents-hah)
 

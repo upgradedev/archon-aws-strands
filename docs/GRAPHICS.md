@@ -24,7 +24,7 @@ the accepted release. Neither a banner nor a diagram establishes a newer release
 
 ## Approved replacement covers
 
-Two new editorial covers are staged for the product film and project listing:
+Two new editorial covers were produced for the product film and project listing:
 
 | Asset | Intended use |
 |---|---|
@@ -33,8 +33,8 @@ Two new editorial covers are staged for the product film and project listing:
 
 These are AI-generated editorial illustrations, not captured UI. They do not assert bank
 matching, GBP support or Aurora deployment. The [prompt record](../video/cover-prompts.json)
-retains the generation instructions. Real, unaltered application screenshots are captured
-separately by the [video pipeline](VIDEO-SCRIPT.md); no completed capture is claimed here.
+retains the generation instructions. Real, unaltered application screenshots were captured
+separately by the completed [video pipeline](VIDEO-SCRIPT.md).
 
 ## Retained original JPGs
 

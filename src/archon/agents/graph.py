@@ -1,4 +1,4 @@
-"""The Strands graph: six domains that have to agree before a chase is drafted.
+"""The Strands graph: six domain readers that must finish before a chase is drafted.
 
 This is the only module in Archon that imports the SDK, and it is where the
 SDK either earns its place or does not. Six readers run over the same books, one

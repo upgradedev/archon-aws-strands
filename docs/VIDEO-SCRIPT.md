@@ -1,8 +1,8 @@
 # Archon film: source-backed books, human-approved email
 
-**This document is the script, not a completed video.** The executable narration
-and scene order live in [video/story.json](../video/story.json). This page explains the cut,
-its evidence boundaries and how to reproduce it.
+**This document records the script and evidence boundaries of the completed video.**
+The executable narration and scene order live in [video/story.json](../video/story.json).
+This page explains the cut and how to reproduce it.
 
 The first complete cut was produced by the [successful media run](https://github.com/upgradedev/archon-aws-strands/actions/runs/34847819316):
 **290.96 seconds, 1920 × 1080, 25 fps**, with English ElevenLabs narration and subtitles.
@@ -147,5 +147,5 @@ The video must show the product actually working, explain the problem and soluti
 **Strands Agents** and its load-bearing role. Design is demonstrated by the coherent user journey;
 impact is the specific collection decision, not an invented economic result. Technical implementation
 is supported by the real execution and architecture. Creativity is the separation of model wording,
-source-grounded money and human authorization. Public hosting, final playback review and upload
-remain separate completion gates.
+source-grounded money and human authorization. Public hosting and upload are complete; independent
+full-playback review remains a separate acceptance gate.

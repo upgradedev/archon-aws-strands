@@ -10,8 +10,8 @@ otherwise ask.
 
 **The composer has no tools of its own.** Its entire view of the business arrives
 along the six edges. Give it a shortcut tool and the readers become decoration,
-the graph becomes a diagram, and the sentence about six domains agreeing stops
-being true.
+the graph becomes a diagram, and the statement that all six reports are required
+stops being true.
 
 **Each reader is asked for a judgement, not a restatement.** An earlier version
 told them to report what their tool returned and nothing else, which is a model
