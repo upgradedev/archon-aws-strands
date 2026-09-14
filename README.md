@@ -15,6 +15,10 @@ every amount, and any change to the evidence expires the previous human approval
 [View the Devpost submission](https://devpost.com/software/archon-dpgbe8) ·
 [Read the disclosures](#pre-existing-work-disclosed)
 
+> **Evidence boundary:** records are fictional. Controlled-live sessions use real Amazon Bedrock,
+> Strands Agents and restricted SES; the separately labelled retained simulation uses a scripted
+> model and never sends. SES acceptance is not proof of delivery, and Archon never moves money.
+
 | What the public release demonstrates | Proof path |
 |---|---|
 | A complete financial workspace | 240 records across invoices, credits, receipts and payments, with dashboard-to-source drill-down |
@@ -41,10 +45,6 @@ Read the three-part AWS Builder series:
 [![Tailwind CSS 4.1](https://img.shields.io/badge/Tailwind%20CSS-4.1-0891B2?logo=tailwindcss&logoColor=white)](frontend/package.json)
 [![Strands Agents SDK 1.53+](https://img.shields.io/badge/Strands%20Agents-SDK%201.53%2B-8B6DDB)](src/archon/agents/graph.py)
 [![Amazon Bedrock](https://img.shields.io/badge/Amazon%20Bedrock-controlled%20live-5270A8)](docs/ARCHITECTURE.md)
-
-> **Evidence boundary:** records are fictional. Controlled-live sessions use real Amazon Bedrock,
-> Strands Agents and restricted SES; the separately labelled retained simulation never sends.
-> SES acceptance is not proof of delivery, and Archon never moves money.
 
 <a id="react-workstation-usage"></a>
 <a id="try-it"></a>
