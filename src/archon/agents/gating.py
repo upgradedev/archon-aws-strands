@@ -6,10 +6,11 @@ feeding a composer therefore does not mean the composer waits for six. It means
 it starts as soon as the first one finishes, with one report in hand and five
 still running.
 
-That is not a style problem. J4 claims the email is not allowed out until six
-domains agree, and under OR semantics that sentence was false in the graph as
-well as in the prompt. Putting the requirement in the composer's system prompt
-does not fix it either: a prompt is a request, and the node has already started.
+That is not a style problem. J4 requires all six domain readers to finish before
+the composer can draft, and under OR semantics that requirement was false in the
+graph even though it appeared in the prompt. Putting the requirement in the
+composer's system prompt does not fix it either: a prompt is a request, and the
+node has already started.
 
 So every edge into the composer carries the same condition, and the condition is
 satisfied only when all six readers have reported. Under OR semantics, no single

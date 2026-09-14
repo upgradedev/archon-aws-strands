@@ -1,0 +1,144 @@
+{
+  "fps": 25,
+  "width": 1920,
+  "height": 1080,
+  "frontend": "2932fdc6fc90d2a3c965c31316c1c945c0b380c6",
+  "backend": "2e2b3757f9d2bb8e95e2338fdc5ae40c6a35c3a4",
+  "targetSeconds": 290,
+  "origin": "https://d2ssmv59q16d0b.cloudfront.net",
+  "rules": {
+    "url": "https://agentsforhumans.devpost.com/rules",
+    "checked": "2026-09-14",
+    "maximumSeconds": 300
+  },
+  "voice": {
+    "voiceId": "pNInz6obpgDQGcFmaJgB",
+    "modelId": "eleven_multilingual_v2",
+    "settings": {
+      "stability": 0.5,
+      "similarity_boost": 0.8,
+      "use_speaker_boost": true
+    }
+  },
+  "scenes": [
+    {
+      "id": "intro",
+      "kind": "slide",
+      "minSeconds": 8,
+      "title": "ARCHON",
+      "speech": "Archon uses Strands Agents to prepare source-backed collection emails, with a person approving the exact message."
+    },
+    {
+      "id": "problem",
+      "kind": "slide",
+      "minSeconds": 12,
+      "title": "A payment arrives. The reminder is wrong.",
+      "speech": "Meet Alex. He runs a small joinery. An invoice is partly paid, but the payment and the invoice live in separate emails. Chasing the full amount risks a customer relationship."
+    },
+    {
+      "id": "promise",
+      "kind": "slide",
+      "minSeconds": 8,
+      "title": "Check the balance. Then decide.",
+      "speech": "Archon connects the evidence, calculates what remains, and prepares the next step. Sending stays a human decision."
+    },
+    {
+      "id": "entry",
+      "kind": "demo",
+      "minSeconds": 15,
+      "title": "A working product, not a mockup",
+      "speech": "This is the deployed application on AWS. No account is needed for the fictional examples. The welcome page explains the decision, and the full portfolio opens a working business dashboard."
+    },
+    {
+      "id": "dashboard",
+      "kind": "demo",
+      "minSeconds": 20,
+      "title": "The business, in one view",
+      "speech": "Here are two hundred and forty fictional records across three months. Sales, purchases, credit notes, receipts and supplier payments contribute to the dashboard. These totals come from posted books, not an AI estimate. Loading this example does not call the model or send email."
+    },
+    {
+      "id": "records",
+      "kind": "demo",
+      "minSeconds": 20,
+      "title": "Follow the money back to a document",
+      "speech": "Open the records and inspect the invoices behind the totals. Credits reduce a balance without pretending to be cash. Receipts and supplier payments have their own views. This portfolio demonstrates working books, not AI extraction of two hundred and forty documents."
+    },
+    {
+      "id": "case",
+      "kind": "demo",
+      "minSeconds": 22,
+      "title": "One case. Two sources. One balance.",
+      "speech": "Switch to the small joinery example, in a separate saved workspace. The invoice is eighteen hundred and sixty euros. A recorded payment accounts for six hundred. Twelve hundred and sixty euros remain. The original invoice and payment stay beside the decision, so Alex can check the number."
+    },
+    {
+      "id": "architecture",
+      "kind": "slide",
+      "minSeconds": 20,
+      "title": "Inside the deployed AWS application",
+      "speech": "S3 and CloudFront serve the React application. API Gateway connects to a Lambda API. A separate worker runs provider operations, with workspace and job records in S3. Bedrock supplies the model. SES sends only an approved email to the verified test recipient."
+    },
+    {
+      "id": "strands",
+      "kind": "slide",
+      "minSeconds": 16,
+      "title": "Strands reads. The ledger checks. You approve.",
+      "speech": "Strands Agents is central to the live drafting path. Six domain readers report before a tool-less composer prepares the wording. Code, not the language model, checks monetary claims and collection eligibility. The model cannot authorize a send."
+    },
+    {
+      "id": "run",
+      "kind": "demo",
+      "minSeconds": 21,
+      "title": "Run the real Strands graph",
+      "speech": "Run Strands and prepare a draft. This invokes the real Bedrock model; it does not send mail. The saved job exposes execution state and model usage. Shortened processing waits are labelled. We show the actual resulting draft, not a prewritten response."
+    },
+    {
+      "id": "draft",
+      "kind": "demo",
+      "minSeconds": 23,
+      "title": "Read the words and their evidence",
+      "speech": "Read the generated email: recipient, subject and body. It acknowledges the recorded payment and asks about the remaining balance. Linked ledger evidence lets Alex inspect the figures. Domain reports are available below. A fluent email is not enough: its money claims must agree with the current books."
+    },
+    {
+      "id": "review",
+      "kind": "demo",
+      "minSeconds": 21,
+      "title": "Approval binds to this exact draft",
+      "speech": "The send control starts disabled. Alex must confirm this exact recipient, content and balance. A fingerprint binds the decision to the draft, and approval checks the ledger again. New evidence invalidates old review. A payment arrangement is separate: a promise never counts as money received."
+    },
+    {
+      "id": "send",
+      "kind": "demo",
+      "minSeconds": 20,
+      "title": "A real, controlled email",
+      "speech": "The recipient is our verified test mailbox. After explicit confirmation, approve the exact draft once. This makes a real Amazon SES attempt. The result records acceptance and a message identifier. Acceptance does not prove delivery, and sending a reminder does not reduce the debt."
+    },
+    {
+      "id": "receipt",
+      "kind": "demo",
+      "minSeconds": 20,
+      "title": "The decision survives the page",
+      "speech": "Open History and reload the application. The saved receipt remains, without sending again. The invoice, approved fingerprint and provider result are inspectable. If a provider outcome is uncertain, the system does not automatically resend. Alex can distinguish what happened from what still needs to be checked."
+    },
+    {
+      "id": "tour",
+      "kind": "demo",
+      "minSeconds": 14,
+      "title": "A path for a first-time user",
+      "speech": "The optional tour explains where to start, how to inspect records, and where approval belongs. It never runs AI or sends a message. The guided check follows invoice, payment, review and outcome."
+    },
+    {
+      "id": "limits",
+      "kind": "slide",
+      "minSeconds": 10,
+      "title": "A precise scope, with visible limits",
+      "speech": "Today's demo uses fictional business data with real Bedrock and controlled SES. There is no bank connection or payment execution. Mailbox delivery needs separate evidence."
+    },
+    {
+      "id": "close",
+      "kind": "slide",
+      "minSeconds": 10,
+      "title": "Chase the balance. Not the customer who paid.",
+      "speech": "Archon. Source-backed books, human-approved collection emails. Built with Strands Agents on AWS. Inspect the evidence. Make the decision yourself."
+    }
+  ]
+}
