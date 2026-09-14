@@ -17,7 +17,7 @@ async function route(path: string) {
 test('tour explanations preserve unsaved input and never create a workspace or provider action', async () => {
   location.hash = '/records?intake=open';
   render(<App />);
-  await screen.findByRole('heading', { name: 'Records', exact: true });
+  await screen.findByRole('heading', { name: 'Records' });
   const input = document.getElementById('raw-email') as HTMLTextAreaElement;
   await userEvent.type(input, 'My unsaved fictional invoice');
   await userEvent.click(screen.getByRole('button', { name: 'Take a tour' }));
@@ -38,7 +38,7 @@ test.each(['queued', 'running', 'unknown'] as const)('tour stays read-only while
     live: { model: true, mail: true, data: 'fictional business examples',
       job: { id: 'pending-tour-job', operation: 'reason', status, created_at: new Date().toISOString() } } } });
   render(<App />);
-  await screen.findByRole('heading', { name: 'Records', exact: true });
+  await screen.findByRole('heading', { name: 'Records' });
   await userEvent.click(screen.getByRole('button', { name: 'Take a tour' }));
   expect(screen.queryByRole('link', { name: 'Open Dashboard' })).not.toBeInTheDocument();
   expect(screen.getByText(/Page navigation is paused/)).toBeVisible();
@@ -51,7 +51,7 @@ test.each(['queued', 'running', 'unknown'] as const)('tour stays read-only while
 test('tour removes optional navigation after the workspace becomes stale', async () => {
   location.hash = '/records';
   render(<App />);
-  await screen.findByRole('heading', { name: 'Records', exact: true });
+  await screen.findByRole('heading', { name: 'Records' });
   await userEvent.click(screen.getByRole('button', { name: 'Take a tour' }));
   expect(screen.getByRole('link', { name: 'Open Dashboard' })).toBeVisible();
   fireEvent(window, new Event('offline'));

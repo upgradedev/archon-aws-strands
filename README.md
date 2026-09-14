@@ -118,6 +118,7 @@ separate legacy console/static surfaces. These commands do not enable AWS provid
 <img src="docs/architecture.svg" alt="Archon architecture: six Strands readers feed a composer with no tools; ledger checks and exact human approval govern a separate controlled email worker." width="100%">
 
 [View architecture at full size](docs/architecture.svg) · [Architecture details](docs/ARCHITECTURE.md).
+Both diagrams below are self-contained SVG images; no Mermaid renderer is required to read them.
 
 Six Strands readers inspect suppliers, sales, payroll, trading, cash and metrics from the retained
 ledger. Each reports before the composer can run; the composer holds no tools. Bedrock supplies
@@ -182,7 +183,7 @@ separates automated checks from human acceptance.
 | What the workflow demonstrates and does not measure | [Workflow and limits](docs/DIFFERENTIATION.md) |
 | Prior work and dependency notices | [Prior work](docs/PRIOR-WORK.md) · [Third-party components](docs/THIRD-PARTY.md) |
 | Optional, unimplemented AgentCore design | [Historical design note](docs/BEDROCK_AGENTCORE_ARCHITECTURE.md) |
-| Image disclosures | [Graphics: concept art only](docs/GRAPHICS.md) |
+| Image disclosures | [Brand artwork and concept-image limits](docs/GRAPHICS.md) |
 | Unsubmitted description and unrecorded script | [Description draft](docs/SUBMISSION-DESCRIPTION.md) · [Video script](docs/VIDEO-SCRIPT.md) |
 
 ## Pre-existing work, disclosed
