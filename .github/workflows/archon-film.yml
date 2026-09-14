@@ -2,7 +2,7 @@ name: Archon submission film
 on:
   push:
     branches: [codex/archon-video-20260914]
-    paths: [video/**, graphics/*-cover-v2.png, .github/workflows/archon-film.yml]
+    paths: [video/**, graphics/*-cover-v2.png, docs/VIDEO-SCRIPT.md, docs/GRAPHICS.md, .github/workflows/archon-film.yml]
   workflow_dispatch:
 permissions:
   contents: read

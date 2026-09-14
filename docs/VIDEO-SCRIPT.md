@@ -1,8 +1,13 @@
 # Archon film: source-backed books, human-approved email
 
-**In production, not yet a finished or publicly uploaded video.** The executable narration
+**Production script, not a completed video.** The executable narration
 and scene order live in [video/story.json](../video/story.json). This page explains the cut,
 its evidence boundaries and how to reproduce it.
+
+For a joiner inspecting Records in the [AWS app](https://d2ssmv59q16d0b.cloudfront.net/),
+controlled-live uses real Bedrock and six Strands readers. Retained simulation uses a scripted
+model and simulated acceptance, with no real email. [Evidence](EVALUATION.md) and
+[disclosures](../README.md#pre-existing-work-disclosed) distinguish these modes.
 
 ## The story
 
@@ -33,6 +38,37 @@ measured final duration. The real app starts at approximately 28 seconds.
 | Product tour | 15 | Optional explanatory navigation |
 | Limits | 10 | Fictional data, controlled recipient, no bank feed |
 | Closing | 10 | Product promise and Strands on AWS |
+
+The seventeen beats form seven editorial chapters. These planned windows sum to the same
+290-second target; the final gate measures the generated media, not this table.
+
+### 1. Problem and promise — 28 seconds
+
+Introduction, problem and solution.
+
+### 2. The working books — 84 seconds
+
+Enter the app, dashboard, records and the small case.
+
+### 3. AWS and Strands — 36 seconds
+
+Deployed infrastructure and the six-reader orchestration.
+
+### 4. Actual execution — 22 seconds
+
+Run the live graph and inspect model usage.
+
+### 5. Draft and review — 45 seconds
+
+Read the generated email and review its exact binding.
+
+### 6. Consequence and recovery — 40 seconds
+
+One controlled send and durable readback.
+
+### 7. User guidance and closing — 35 seconds
+
+Tour, explicit limits and closing.
 
 ## Recording identity
 
@@ -68,6 +104,11 @@ Reuse the narration and capture cache when editing. An incomplete provider take 
 automatic replay and needs reconciliation; creating a new CI run is not authorization for
 another send. An incomplete billed speech attempt also stops instead of being silently charged again.
 
+If the API is unavailable, refresh durable state before any retry. There is no SES fallback shot.
+Provider acceptance does not prove arrival. A hash identifies bytes, not truth. The earlier
+comparisons are withdrawn; the retained evaluation had zero Archon chases, achieved by not
+acting. Human UAT and independent benefit measurement remain NOT_RUN. None is claimed as a win.
+
 ## Claims and limits
 
 - The 240-record portfolio is typed fictional data, **not** a 240-document AI extraction test.
@@ -80,6 +121,15 @@ another send. An incomplete billed speech attempt also stops instead of being si
 - No deployed Aurora, AgentCore, Gmail/Outlook connection, bank feed, OCR or payment execution is claimed.
 - No measured time-saving, independent benchmark win, legal compliance or competitive rank is claimed.
 - [Cover artwork](GRAPHICS.md) is editorial, not a screenshot or evidence of a connector.
+
+## What must not be said
+
+- Do not call the offline run agentic reasoning; its scripted model walks the graph.
+- Do not claim a live mailbox, bank connection, OCR, AgentCore or Aurora deployment.
+- Do not claim real email delivery from an SES identifier.
+- Do not present a withdrawn or circular benchmark as current evidence.
+- Do not claim compliance, competitive superiority, measured time savings or collected money.
+- Do not narrate a scripted decision as a live model result or the seed as AI extraction.
 
 The video must show the product actually working, explain the problem and solution, and name
 **Strands Agents** and its load-bearing role. Design is demonstrated by the coherent user journey;
