@@ -17,7 +17,8 @@ every amount, and any change to the evidence expires the previous human approval
 
 > **Evidence boundary:** records are fictional. Controlled-live sessions use real Amazon Bedrock,
 > Strands Agents and restricted SES; the separately labelled retained simulation uses a scripted
-> model and never sends. SES acceptance is not proof of delivery, and Archon never moves money.
+> model and simulated mail; it never sends. SES acceptance is not proof of delivery, and Archon
+> never moves money.
 
 | What the public release demonstrates | Proof path |
 |---|---|
