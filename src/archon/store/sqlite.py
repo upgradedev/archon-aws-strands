@@ -35,8 +35,10 @@ from archon.domain.books import Books
 from archon.domain.documents import (
     Payment,
     PayrollRun,
+    PurchaseCreditNote,
     PurchaseInvoice,
     Receipt,
+    SalesCreditNote,
     SalesInvoice,
 )
 
@@ -108,10 +110,12 @@ CREATE TABLE IF NOT EXISTS sends (
 );
 """
 
-#: The order documents are replayed in. Invoices before the payments that settle
-#: them, because `Books.record` refuses a payment whose invoice it has not seen,
-#: and that refusal is the point rather than an obstacle.
-REPLAY_ORDER = ("PurchaseInvoice", "SalesInvoice", "PayrollRun", "Payment", "Receipt")
+#: Invoices first, then cash, then credits. Credits must respect cash already
+#: received/paid; their cumulative bounds are independent of row counts/order.
+REPLAY_ORDER = (
+    "PurchaseInvoice", "SalesInvoice", "PayrollRun", "Payment", "Receipt",
+    "PurchaseCreditNote", "SalesCreditNote",
+)
 
 KINDS = {
     "PurchaseInvoice": PurchaseInvoice,
@@ -119,6 +123,8 @@ KINDS = {
     "Payment": Payment,
     "Receipt": Receipt,
     "PayrollRun": PayrollRun,
+    "PurchaseCreditNote": PurchaseCreditNote,
+    "SalesCreditNote": SalesCreditNote,
 }
 
 _DATE_FIELDS = {"issued", "due", "paid_on", "received_on", "run_on"}
@@ -149,7 +155,33 @@ def _decode(kind: str, body: str) -> object:
 
 
 def _documents(books: Books) -> list[object]:
-    return [*books.purchases, *books.sales, *books.payroll, *books.payments, *books.receipts]
+    return [
+        *books.purchases, *books.sales, *books.payroll, *books.payments, *books.receipts,
+        *books.purchase_credits, *books.sales_credits,
+    ]
+
+
+def _replay(rows: list[tuple[str, str, str]]) -> Books:
+    books = Books()
+    by_kind: dict[str, list[tuple[str, str]]] = {kind: [] for kind in REPLAY_ORDER}
+    for kind, doc_id, body in rows:
+        if kind not in by_kind:
+            raise StoreError(f"{doc_id}: stored as a {kind!r}, which nothing here can post")
+        by_kind[kind].append((doc_id, body))
+
+    for kind in REPLAY_ORDER:
+        for doc_id, body in by_kind[kind]:
+            try:
+                document = _decode(kind, body)
+                if document.doc_id != doc_id:
+                    raise ValueError("stored row id disagrees with the document id")
+                books.record(document, replay_legacy=True)
+            except Exception as broken:
+                raise StoreError(
+                    f"{doc_id} ({kind}) will not post: {broken}. The store is not opened "
+                    "rather than opened wrong."
+                ) from broken
+    return books
 
 
 @contextlib.contextmanager
@@ -186,6 +218,15 @@ def save(books: Books, path: str | pathlib.Path) -> int:
             "INSERT OR REPLACE INTO documents (doc_id, kind, received, body) VALUES (?, ?, ?, ?)",
             rows,
         )
+        # Public Books lists can be changed without record(), and an existing
+        # store may contain credits absent from this caller's snapshot. Validate
+        # the resulting persisted set inside this transaction before committing.
+        # Preserve the existing no-credit save path and legacy replay semantics.
+        stored = db.execute(
+            "SELECT kind, doc_id, body FROM documents ORDER BY received"
+        ).fetchall()
+        if any(kind in {"PurchaseCreditNote", "SalesCreditNote"} for kind, _, _ in stored):
+            _replay(stored)
         db.execute("DELETE FROM arrangements")
         db.executemany(
             "INSERT INTO arrangements "
@@ -218,9 +259,8 @@ def load(path: str | pathlib.Path) -> Books:
     subtly wrong. A store that can produce an unbalanced ledger is worse than one
     that will not open.
     """
-    books = Books()
     if not pathlib.Path(path).exists():
-        return books
+        return Books()
 
     with _connect(path) as db:
         db.executescript(SCHEMA)
@@ -230,21 +270,7 @@ def load(path: str | pathlib.Path) -> Books:
             "FROM arrangements"
         ).fetchall()
 
-    by_kind: dict[str, list[tuple[str, str]]] = {kind: [] for kind in REPLAY_ORDER}
-    for kind, doc_id, body in rows:
-        if kind not in by_kind:
-            raise StoreError(f"{doc_id}: stored as a {kind!r}, which nothing here can post")
-        by_kind[kind].append((doc_id, body))
-
-    for kind in REPLAY_ORDER:
-        for doc_id, body in by_kind[kind]:
-            try:
-                books.record(_decode(kind, body), replay_legacy=True)
-            except Exception as broken:
-                raise StoreError(
-                    f"{doc_id} ({kind}) will not post: {broken}. The store is not opened "
-                    "rather than opened wrong."
-                ) from broken
+    books = _replay(rows)
 
     # Arrangements last, because they are about documents that must already be
     # there. They post nothing, so replaying them cannot move the ledger.
