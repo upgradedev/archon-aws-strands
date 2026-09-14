@@ -197,3 +197,21 @@ def test_invoice_shaped_credit_mail_is_held_before_reader(label):
     assert "not supported by mail intake" in state["sources"][-1]["error"]
     assert len(workspace.books_for(state).sales) == 80
     assert workspace.books_for(state).ledger.trial_balance() == balance
+
+
+def test_large_books_use_existing_strands_decision_and_exact_approval():
+    state = new_state()
+    workspace.reason(state)
+    shown = workspace.snapshot(state)
+    assert len(shown["graph"]["reports"]) == 6
+    assert shown["draft"]["invoice_id"] == "SV-0001"
+    assert "111.60 EUR" in shown["draft"]["body"]
+    assert "credited" not in shown["draft"]["body"]
+    assert not any(q["invoice_id"] == "SV-0051" for q in shown["queue"]["ready"])
+    workspace.approve(state, shown["draft"]["fingerprint"])
+    workspace.approve(state, shown["draft"]["fingerprint"])
+    after = workspace.snapshot(state)
+    assert len(after["receipts"]) == 1
+    assert after["receipts"][0]["message_id"].startswith("simulated-")
+    assert after["metrics"] == shown["metrics"]
+    assert after["sources"] == shown["sources"]
