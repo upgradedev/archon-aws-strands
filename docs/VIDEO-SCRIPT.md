@@ -16,57 +16,58 @@ Archon prepares a collection email for the remaining 1,260.00 EUR after checking
 A person approves the exact recipient and content before the controlled SES attempt.
 
 The [official rules](https://agentsforhumans.devpost.com/rules), checked on 2026-09-14,
-cap the video at **five minutes**. The planned cut is 290 seconds; this is a target, not a
-measured final duration. The real app starts at approximately 28 seconds.
+cap the video at **five minutes**. The measured narration and current scene holds imply a
+290.96-second cut. Final encoded duration remains a separate verification gate.
+The real app starts at 29.88 seconds.
 
-| Scene | Planned seconds | What is shown |
+| Scene | Narration-derived seconds | What is shown |
 |---|---:|---|
-| Introduction | 8 | Archon and its mechanism |
-| Problem | 12 | Invoice, payment, remaining balance |
-| Solution | 8 | Evidence, ledger checks, human approval |
+| Introduction | 8.24 | Archon and its mechanism |
+| Problem | 13.60 | Invoice, payment, remaining balance |
+| Solution | 8.04 | Evidence, ledger checks, human approval |
 | Enter the app | 15 | Actual public welcome and demo setup |
-| Dashboard | 23 | 240 fictional records and populated financial widgets |
-| Records | 23 | Sales, credits and supplier payments |
-| One case | 23 | Separate five-source tutorial and linked payment |
-| AWS infrastructure | 20 | CloudFront/S3, API Gateway, Lambda API/worker, S3 persistence, Bedrock and SES |
-| Strands orchestration | 16 | Suppliers, sales, payroll, trading, cash and metrics readers; tool-less composer |
-| Real model execution | 22 | Actual saved job and Bedrock usage |
-| Draft and evidence | 23 | Actual generated wording and linked figures |
-| Exact review | 22 | Disabled send, review binding and fingerprint |
-| Controlled send | 20 | One explicitly approved SES attempt |
-| Durable outcome | 20 | Receipt survives reload; acceptance is not delivery |
-| Product tour | 15 | Optional explanatory navigation |
-| Limits | 10 | Fictional data, controlled recipient, no bank feed |
-| Closing | 10 | Product promise and Strands on AWS |
+| Dashboard | 20 | 240 fictional records and populated financial widgets |
+| Records | 20 | Sales, credits and supplier payments |
+| One case | 22 | Separate five-source tutorial and linked payment |
+| AWS infrastructure | 20.68 | CloudFront/S3, API Gateway, Lambda API/worker, S3 persistence, Bedrock and SES |
+| Strands orchestration | 19.08 | Suppliers, sales, payroll, trading, cash and metrics readers; tool-less composer |
+| Real model execution | 21 | Actual saved job and Bedrock usage |
+| Draft and evidence | 23.40 | Actual generated wording and linked figures |
+| Exact review | 21 | Disabled send, review binding and fingerprint |
+| Controlled send | 20.68 | One explicitly approved SES attempt |
+| Durable outcome | 21.36 | Receipt survives reload; acceptance is not delivery |
+| Product tour | 14 | Optional explanatory navigation |
+| Limits | 12 | Fictional data, controlled recipient, no bank feed |
+| Closing | 10.88 | Product promise and Strands on AWS |
 
-The seventeen beats form seven editorial chapters. These planned windows sum to the same
-290-second target; the final gate measures the generated media, not this table.
+The seventeen beats form seven editorial chapters, rounded below to whole seconds.
+The final gate measures the generated media, not these rounded chapter headings.
 
-### 1. Problem and promise — 28 seconds
+### 1. Problem and promise — 30 seconds
 
 Introduction, problem and solution.
 
-### 2. The working books — 84 seconds
+### 2. The working books — 77 seconds
 
 Enter the app, dashboard, records and the small case.
 
-### 3. AWS and Strands — 36 seconds
+### 3. AWS and Strands — 40 seconds
 
 Deployed infrastructure and the six-reader orchestration.
 
-### 4. Actual execution — 22 seconds
+### 4. Actual execution — 21 seconds
 
 Run the live graph and inspect model usage.
 
-### 5. Draft and review — 45 seconds
+### 5. Draft and review — 44 seconds
 
 Read the generated email and review its exact binding.
 
-### 6. Consequence and recovery — 40 seconds
+### 6. Consequence and recovery — 42 seconds
 
 One controlled send and durable readback.
 
-### 7. User guidance and closing — 35 seconds
+### 7. User guidance and closing — 37 seconds
 
 Tour, explicit limits and closing.
 

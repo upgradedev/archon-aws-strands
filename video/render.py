@@ -30,7 +30,6 @@ def cursor(events, t):
         if t < event["t0"]:
             break
         weight = min(1, (t - event["t0"]) / max(.001, event["t1"] - event["t0"]))
-        weight = weight * weight * (3 - 2 * weight)
         position = tuple(a + (b - a) * weight for a, b in zip(event["from"], event["to"]))
     return position
 

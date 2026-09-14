@@ -52,21 +52,21 @@
     {
       "id": "dashboard",
       "kind": "demo",
-      "minSeconds": 23,
+      "minSeconds": 20,
       "title": "The business, in one view",
       "speech": "Here are two hundred and forty fictional records across three months. Sales, purchases, credit notes, receipts and supplier payments contribute to the dashboard. These totals come from posted books, not an AI estimate. Loading this example does not call the model or send email."
     },
     {
       "id": "records",
       "kind": "demo",
-      "minSeconds": 23,
+      "minSeconds": 20,
       "title": "Follow the money back to a document",
       "speech": "Open the records and inspect the invoices behind the totals. Credits reduce a balance without pretending to be cash. Receipts and supplier payments have their own views. This portfolio demonstrates working books, not AI extraction of two hundred and forty documents."
     },
     {
       "id": "case",
       "kind": "demo",
-      "minSeconds": 23,
+      "minSeconds": 22,
       "title": "One case. Two sources. One balance.",
       "speech": "Switch to the small joinery example, in a separate saved workspace. The invoice is eighteen hundred and sixty euros. A recorded payment accounts for six hundred. Twelve hundred and sixty euros remain. The original invoice and payment stay beside the decision, so Alex can check the number."
     },
@@ -87,7 +87,7 @@
     {
       "id": "run",
       "kind": "demo",
-      "minSeconds": 22,
+      "minSeconds": 21,
       "title": "Run the real Strands graph",
       "speech": "Run Strands and prepare a draft. This invokes the real Bedrock model; it does not send mail. The saved job exposes execution state and model usage. Shortened processing waits are labelled. We show the actual resulting draft, not a prewritten response."
     },
@@ -101,7 +101,7 @@
     {
       "id": "review",
       "kind": "demo",
-      "minSeconds": 22,
+      "minSeconds": 21,
       "title": "Approval binds to this exact draft",
       "speech": "The send control starts disabled. Alex must confirm this exact recipient, content and balance. A fingerprint binds the decision to the draft, and approval checks the ledger again. New evidence invalidates old review. A payment arrangement is separate: a promise never counts as money received."
     },
@@ -122,7 +122,7 @@
     {
       "id": "tour",
       "kind": "demo",
-      "minSeconds": 15,
+      "minSeconds": 14,
       "title": "A path for a first-time user",
       "speech": "The optional tour explains where to start, how to inspect records, and where approval belongs. It never runs AI or sends a message. The guided check follows invoice, payment, review and outcome."
     },

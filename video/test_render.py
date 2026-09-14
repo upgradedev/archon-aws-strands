@@ -13,6 +13,7 @@ class TimelineTests(unittest.TestCase):
     def test_pointer_never_jumps_before_actual_action(self):
         events=[{"kind":"move","t0":20,"t1":22,"from":[60,60],"to":[100,200]}]
         self.assertEqual(cursor(events,19),(60,60))
+        self.assertEqual(cursor(events,20.5),(70,95))
         self.assertEqual(cursor(events,21),(80,130))
         self.assertEqual(cursor(events,25),(100,200))
 

@@ -30,7 +30,9 @@ class Director:
                       "maxWidth": 1600, "maxHeight": 900, "everyNthFrame": 1})
 
     def frame(self, event):
-        now = time.time()
+        # CDP uses Unix-epoch seconds, as do the action events. Callback arrival
+        # can lag the captured pixels while synchronous browser work is busy.
+        now = float(event["metadata"]["timestamp"])
         name = f"frames/{len(self.frames):06d}.jpg"
         (self.root / name).write_bytes(base64.b64decode(event["data"]))
         self.frames.append({"t": now, "path": name})
@@ -50,10 +52,10 @@ class Director:
         target = (box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
         start = time.time()
         self.page.mouse.move(*target, steps=24)
-        self.pause(.6)
         self.events.append({"kind": "move", "t0": start, "t1": time.time(),
                             "from": self.pointer, "to": target})
         self.pointer = target
+        self.pause(.6)
 
     def click(self, locator):
         self.move(locator)
@@ -103,7 +105,7 @@ def journey(d, page, recipient):
     d.begin("entry")
     d.shot("01-welcome")
     d.pause(5)
-    d.click(role("link", name="Explore populated demo →", exact=True))
+    d.click(role("link", name="Explore populated demo", exact=True))
     d.click(role("button", name="Load business portfolio", exact=True))
     expect(role("region", name="Current demo dataset")).to_contain_text("240 source records")
     d.end()
