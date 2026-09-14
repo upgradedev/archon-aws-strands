@@ -32,6 +32,8 @@ test('business portfolio preserves previous books with zero AI or send requests 
   page.on('request', req => { if (req.method() === 'POST') posts.push(new URL(req.url()).pathname); });
   await expect(page.getByRole('region', { name: 'Full dashboard demo available' })).toBeVisible();
   await page.getByRole('button', { name: 'Load full dashboard · 240 records' }).click();
+  // The Dashboard heading already exists: wait for the new dataset, not navigation.
+  await expect(page.getByRole('region', { name: 'Current demo dataset' })).toContainText('240 source records');
   await expect(page.getByRole('heading', { name: 'Dashboard', exact: true })).toBeVisible();
   const seeded = await state(page);
   expect(seeded.session).not.toBe(previous.session);
