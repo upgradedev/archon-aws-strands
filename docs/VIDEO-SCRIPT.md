@@ -9,8 +9,10 @@ The first complete cut was produced by the [successful media run](https://github
 Its captured session contains thirteen real Bedrock calls and one controlled SES acceptance,
 retained after reload. The video SHA-256 is
 `9e88923ef01bddac41b29aa073ab3f289cce72a85c2a6486583ec2b7449b3da3`.
-Technical media checks and representative-frame review passed; owner full-playback review
-and public YouTube upload remain pending. This artifact is not a new application deployment.
+Technical media checks and representative-frame review passed. The owner uploaded the
+[public YouTube video](https://youtu.be/gpf1Dt8uYgY); YouTube Studio confirms public visibility,
+HD processing and a displayed duration of 4:51. Full-playback UAT is not independently attested.
+This artifact is not a new application deployment.
 
 For a joiner inspecting Records in the [AWS app](https://d2ssmv59q16d0b.cloudfront.net/),
 controlled-live uses real Bedrock and six Strands readers. Retained simulation uses a scripted

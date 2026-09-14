@@ -1,7 +1,9 @@
 # Description draft: controlled-live workflow
 
-Draft only: documentation alignment against the 2026-09-14 snapshot, not submitted or published.
-Submission production remains deferred; this file does not attest a submitted entry.
+Submission context as of 2026-09-14: the [Archon Devpost draft](https://devpost.com/software/archon-dpgbe8)
+has its story, media and judging fields saved. Final terms acceptance and Submit remain owner actions;
+this file does not attest a submitted entry. The [4:51 working video](https://youtu.be/gpf1Dt8uYgY)
+and the AWS Builder/dev.to articles linked from the README are public.
 [Evidence and limits](EVALUATION.md) · [Required disclosures](../README.md#pre-existing-work-disclosed)
 
 Archon helps a joiner reconcile inbox invoices and approve an exact collection draft with the

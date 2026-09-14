@@ -7,6 +7,10 @@
 [Open the AWS app](https://d2ssmv59q16d0b.cloudfront.net/) · [Judge walkthrough](#judge-walkthrough) ·
 [Evidence](#evidence-and-limits) · [Disclosures](#pre-existing-work-disclosed)
 
+[Watch the 4:51 working demo](https://youtu.be/gpf1Dt8uYgY) ·
+[AWS Builder article](https://builder.aws.com/content/3JK1DF6ZxMYeyD1Ry5Kp07gmqET/agents-for-humans-archon-checks-the-balance-before-the-collection-email) ·
+[Engineering article on dev.to](https://dev.to/efousekis/archon-keeping-financial-facts-outside-the-llm-with-strands-agents-hah)
+
 Fictional records; real Bedrock and Strands Agents in controlled-live sessions. Retained
 simulation instead uses a scripted model and simulated mail. Loading demo data calls neither.
 
@@ -184,7 +188,7 @@ separates automated checks from human acceptance.
 | Prior work and dependency notices | [Prior work](docs/PRIOR-WORK.md) · [Third-party components](docs/THIRD-PARTY.md) |
 | Optional, unimplemented AgentCore design | [Historical design note](docs/BEDROCK_AGENTCORE_ARCHITECTURE.md) |
 | Image disclosures | [Brand artwork and concept-image limits](docs/GRAPHICS.md) |
-| Unsubmitted description and unrecorded script | [Description draft](docs/SUBMISSION-DESCRIPTION.md) · [Video script](docs/VIDEO-SCRIPT.md) |
+| Submission context and recorded demo | [Description and scope](docs/SUBMISSION-DESCRIPTION.md) · [Video script and recording evidence](docs/VIDEO-SCRIPT.md) |
 
 ## Pre-existing work, disclosed
 
