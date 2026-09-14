@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 55
     env:
-      FILM_ROOT: ${{ runner.temp }}/archon-film
+      FILM_ROOT: /tmp/archon-film
       CI: 'true'
     steps:
       - uses: actions/checkout@v4
