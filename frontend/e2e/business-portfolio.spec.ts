@@ -98,6 +98,32 @@ test('business credits retain source origin and invoice links while filters and 
   await page.getByRole('button', { name: 'Load business portfolio' }).click();
   await expect(page.getByRole('heading', { name: 'Dashboard', exact: true })).toBeVisible();
   const snapshot = await state(page);
+  await page.getByRole('button', { name: 'Take a tour', exact: true }).click();
+  const tour = page.getByRole('region', { name: 'Product tour' });
+  await expect(tour).toContainText('STEP 1 OF 6');
+  await expect(tour.getByRole('heading')).toBeFocused();
+  await page.screenshot({ path: info.outputPath('business-product-tour.png'), fullPage: true });
+  for (const [label, route] of [['Records', 'records'], ['Incoming', 'incoming'], ['Workspace', 'workspace'], ['Guided check', 'journey'], ['History', 'history']]) {
+    const before = page.url();
+    await tour.getByRole('button', { name: 'Next stop' }).click();
+    expect(page.url()).toBe(before); // explanation never silently leaves a form
+    await tour.getByRole('link', { name: `Open ${label}`, exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/#/${route}(?:\\?|$)`));
+    await expect(tour).toContainText(`You are on ${label}`);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+  await tour.getByRole('button', { name: 'Finish tour' }).click();
+  await expect(tour).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Take a tour', exact: true })).toBeFocused();
+  expect(await state(page)).toEqual(snapshot);
+  expect(posts).toEqual(['/api/sessions']);
+  await page.goto('/#/dashboard');
+  await page.getByRole('button', { name: 'Take a tour', exact: true }).click();
+  await page.keyboard.press('Escape');
+  await expect(tour).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Dashboard', exact: true })).toBeVisible();
+  await expect(tour).toHaveCount(0); // restart remains an explicit choice
   const credit = snapshot.data.sources.find(s => s.kind === 'SalesCreditNote')!;
   const invoice = credit.document!.settles!;
   const balance = snapshot.data.sales.find(s => s.doc_id === invoice)!;

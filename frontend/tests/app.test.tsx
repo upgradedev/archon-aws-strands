@@ -14,6 +14,24 @@ async function route(path: string) {
   await act(async () => { location.hash = path; window.dispatchEvent(new HashChangeEvent('hashchange')); });
 }
 
+test('tour explanations preserve unsaved input and never create a workspace or provider action', async () => {
+  location.hash = '/records?intake=open';
+  render(<App />);
+  await screen.findByRole('heading', { name: 'Records', exact: true });
+  const input = document.getElementById('raw-email') as HTMLTextAreaElement;
+  await userEvent.type(input, 'My unsaved fictional invoice');
+  await userEvent.click(screen.getByRole('button', { name: 'Take a tour' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Next stop' }));
+  expect(input).toHaveValue('My unsaved fictional invoice');
+  expect(location.hash).toBe('#/records?intake=open');
+  expect(api.openWorkspace).toHaveBeenCalledExactlyOnceWith(false);
+  expect(api.request).not.toHaveBeenCalled();
+  await userEvent.keyboard('{Escape}');
+  expect(screen.queryByRole('region', { name: 'Product tour' })).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Take a tour' })).toHaveFocus();
+  expect(input).toHaveValue('My unsaved fictional invoice');
+});
+
 test('demo switching waits for old reads and keeps navigation actions locked while creating', async () => {
   let finishRead!: (result: { session: string; workspace: ReturnType<typeof empty> }) => void;
   let finishDemo!: (result: { session: string; workspace: ReturnType<typeof empty> }) => void;
