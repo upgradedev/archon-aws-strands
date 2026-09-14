@@ -63,6 +63,24 @@ jobs:
           npm ci
           npm audit --omit=dev --audit-level=low
           npx playwright install --with-deps chromium webkit
+      - name: Real AWS business portfolio without model or mail operations
+        working-directory: frontend
+        env:
+          # Select only the six business browser cases, not the synthetic provider journeys.
+          # This selects a test directory; the deployed AWS API remains controlled-live.
+          ARCHON_LIVE_ACCEPTANCE: 'false'
+        run: npm run test:e2e -- business-portfolio.spec.ts --forbid-only
+      - name: Preserve business portfolio evidence separately from provider acceptance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aws-business-portfolio-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            frontend/test-results/
+            frontend/artifacts/browser-junit.xml
+            frontend/playwright-report/
+          retention-days: 90
+          if-no-files-found: error
       - name: Real CloudFront API and durable AWS workspace journeys
         id: journeys
         working-directory: frontend

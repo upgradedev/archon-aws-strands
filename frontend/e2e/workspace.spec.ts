@@ -325,9 +325,10 @@ test('Dashboard metrics drill into actual records and selected workspace screens
   await expect(page.getByTestId('metric-holds').locator('strong')).toHaveText('0');
   for (const metric of ['outstanding', 'overdue']) {
     await page.getByTestId(`metric-${metric}`).click();
-    await expect(page.getByRole('table')).toContainText('JN-4410');
-    await expect(page.getByRole('table')).toContainText('1,260.00 EUR');
-    await page.reload(); await expect(page.getByRole('table')).toContainText('JN-4410');
+    const balances = page.getByRole('table', { name: 'Client balances', exact: true });
+    await expect(balances).toContainText('JN-4410');
+    await expect(balances).toContainText('1,260.00 EUR');
+    await page.reload(); await expect(balances).toContainText('JN-4410');
     await go(page, 'Dashboard');
   }
   await page.getByTestId('metric-payments').click();
