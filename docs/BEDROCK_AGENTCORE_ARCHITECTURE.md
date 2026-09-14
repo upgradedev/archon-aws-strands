@@ -21,7 +21,9 @@ Its service names, API paths, thresholds and claims are not a specification of w
   controlled-live mode uses Bedrock, while retained simulation uses a scripted model.
   `python -m archon.evidence.licences` reports installed dependency versions, not model activation.
 - It proposed an inbox, autonomous journal adjustments and cryptographic truth seals. The current
-  public input is supplied fictional text and the write is an exact human-approved collection email.
+  public input is typed fictional portfolio data or supported fictional text; the outbound write
+  is an exact human-approved collection email. The portfolio's credits and supplier payments
+  are typed fixtures, not raw-mail extraction or bank execution.
   Hashes bind bytes; they do not verify commercial truth, compliance or bank settlement.
 - The proposed Action Group YAML is unimplemented. Bedrock model invocation through Strands does
   not deploy AgentCore or automatically create the services in this sketch.
@@ -44,7 +46,7 @@ those requirements stop applying.
 Source check: `rg -n -i agentcore src/` finds no AgentCore implementation in the supplied baseline.
 [Current architecture](ARCHITECTURE.md) describes CloudFront/private S3, API Gateway, Lambda,
 S3 compare-and-swap sessions, the durable worker, Bedrock and controlled SES.
-[Incoming webhook](incoming-webhook.md) is a separate intake-only source extension. Check its
+[Incoming webhook](incoming-webhook.md) is a separate opt-in intake route. Check its
 served identities and acceptance before use; it does not implement the original sketch's mailbox
 or Action Group topology.
 

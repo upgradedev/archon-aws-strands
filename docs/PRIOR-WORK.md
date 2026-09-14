@@ -10,8 +10,9 @@ Strands model and simulated acceptance. Read [release.json](https://d2ssmv59q16d
 ## Pre-existing work, disclosed
 
 Archon is a product line and this build **shares a name and a domain** with earlier entries.
-The submission rules require prior work to be disclosed. This build's public route uses pasted
-fictional inbox evidence. Retained synthetic mode ends in simulated acceptance;
+The submission rules require prior work to be disclosed. This build's public route uses a
+fictional typed business portfolio, optional locally parsed email templates, or supplied fictional
+plain-text inbox evidence. Retained synthetic mode ends in simulated acceptance;
 controlled mode can send an explicitly approved real email to the verified test recipient.
 Prior-work disclosure
 does not establish novelty or eligibility; that determination belongs to the organizers.
@@ -33,6 +34,11 @@ metric values were reused. This disclosure is retained; it is not a source for n
 The named repositories and pattern/visual influences are author disclosures retained from the
 original README. This documentation refresh did not audit every historical repository.
 The source disclosure is not a legal determination of novelty, ownership or eligibility.
+
+The 240-record portfolio is freshly authored deterministic fixture data, not imported historical
+customer records or AI extraction. [Business portfolio](BUSINESS-DEMO.md) describes its provenance.
+The editorial banner and tour add presentation and guidance, not another data source or an
+independent benefit result. They do not replace any earlier disclosure in this file.
 
 The product code is MIT-licensed under [LICENSE](../LICENSE).
 [Third-party components](THIRD-PARTY.md) records dependency notices and historical version observations.

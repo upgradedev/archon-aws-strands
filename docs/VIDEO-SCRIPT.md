@@ -1,6 +1,7 @@
 # Video script: sample records to an exact reviewed email
 
 **Draft script, not a completed video. No recording or submission is represented by this file.**
+Recording and publication remain deferred. These corrections align a retained draft with the product.
 
 For a joiner reconciling invoice and remittance emails alone, open
 [the AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/) and inspect Records.
@@ -10,7 +11,9 @@ retained simulation uses a scripted model and simulated acceptance, with no real
 
 Before recording, inspect [release.json](https://d2ssmv59q16d0b.cloudfront.net/release.json),
 [/api/health](https://d2ssmv59q16d0b.cloudfront.net/api/health) and matching acceptance.
-Record those identities with the footage. The supplied prior accepted pair is 40c7ade / 2bb3db3;
+Record those identities with the footage. The 2026-09-14 accepted snapshot is `3e89590` / `2e2b375`;
+its [AWS run 34822838436](https://github.com/upgradedev/archon-aws-strands/actions/runs/34822838436)
+is recorded in [Evaluation](EVALUATION.md). This script is not footage of that run;
 new source changes require their own acceptance before being presented as shipped.
 The seven planned segments total 175 seconds. Actual video duration is unmeasured.
 Use only fictional inputs; a recording plan is not new permission for provider calls or email.
@@ -23,9 +26,11 @@ No customer time saving or recovered-money figure has been measured.
 
 ## 2. Load and inspect evidence — 25 seconds
 
-Choose Explore populated demo, then Load demo workspace. Show the five sources in Records.
-Say explicitly: loading sample records uses deterministic parsing and ledger checks, with no
-AI report, Bedrock call, draft or email. Inspect the original invoice and payment reference.
+Choose **Explore populated demo → Load business portfolio**. Show the populated dashboard and
+six Records views. Explain that its 240 records are typed fictional fixtures, not AI-extracted mail.
+For the remaining collection example, use **Demo data → Load demo workspace**, the optional
+five-source tutorial. Loading either demo uses deterministic ledger checks, with no AI report,
+Bedrock call, draft or email. Inspect the smaller example's invoice and client payment reference.
 For the partially paid invoice show 1,860.00 EUR minus 600.00 EUR equals 1,260.00 EUR remaining.
 These are supplied source figures, not bank-verified transactions.
 
@@ -64,6 +69,7 @@ There is no SES fallback shot. Provider acceptance does not prove arrival.
 
 Show readable evidence and the dated acceptance record. A hash identifies bytes, not truth.
 The prior actual AWS run recorded three cases, 45 model calls and three SES acceptances.
+Its six separate portfolio journeys made no model or mail calls; they are not 240-document AI evidence.
 The owner's six received messages are separately HUMAN-ATTESTED; ID correlation remains unknown.
 Earlier comparisons are withdrawn; the retained evaluation had zero Archon chases, achieved by
 not acting. Full human UAT and benefit measurement remain NOT_RUN. End on the AWS URL and repository.
@@ -76,5 +82,6 @@ not acting. Full human UAT and benefit measurement remain NOT_RUN. End on the AW
 - Do not present a withdrawn or circular benchmark as current evidence.
 - Do not claim compliance, competitive superiority, measured time savings or collected money.
 - Do not narrate a scripted decision as a live model result or the deterministic seed as AI extraction.
+- Do not imply raw-mail support for supplier payments or credits; public intake supports sales invoices, purchase invoices and client receipts only.
 - Do not show [concept art](GRAPHICS.md) as product screenshots, GBP support or connected banks.
 - Before demonstrating the [incoming webhook](incoming-webhook.md), check served identities and matching acceptance; explain the disabled initial key and required producer setup.

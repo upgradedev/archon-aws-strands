@@ -14,6 +14,7 @@ import { ProviderStatus } from './ProviderStatus';
 import { DemoSetup } from './DemoSetup';
 import { WorkspaceMode } from './WorkspaceMode';
 import { Incoming } from './Incoming';
+import { ProductTour } from './ProductTour';
 
 const navigation = [
   ['dashboard', 'Dashboard', 'See what is owed'], ['workspace', 'Workspace', 'Review & approve'], ['records', 'Records', 'Invoices & payments'], ['incoming', 'Incoming', 'Automated document intake'], ['history', 'History', 'Decisions & receipts'],
@@ -33,9 +34,10 @@ export function App() {
   const [newSession, setNewSession] = useState(false);
   const [stale, setStale] = useState(false);
   const [reviewEpoch, setReviewEpoch] = useState(0);
+  const [tourOpen, setTourOpen] = useState(false);
   function adoptWorkspace(result: { session: string; workspace: Workspace }) {
     session.current = result.session; setData(result.workspace); opened.current = true;
-    intent.current = null; setStale(false); setError(''); setNewSession(false);
+    intent.current = null; setStale(false); setError(''); setNewSession(false); setTourOpen(false);
     setReviewEpoch(e => e + 1); location.hash = '/dashboard';
   }
   async function restore() {
@@ -145,8 +147,11 @@ export function App() {
       <p className="nav-label">YOUR BUSINESS</p><nav aria-label="Workspace"><a href="#/journey" aria-current={page === 'journey' ? 'page' : undefined}><Icon name="approvals" /><span>Guided check</span></a>{navigation.map(([key, label, task]) => <a key={key} href={navLink(key)} aria-label={label} aria-current={page === key ? 'page' : undefined}><Icon name={key} /><span>{label}<small className="nav-task">{task}</small></span>{key === 'workspace' && data && data.queue.ready.length ? <span className="nav-count" aria-hidden="true">{data.queue.ready.length}</span> : null}</a>)}</nav>
       <div className="sidebar-bottom"><div className="provider-dot" /><strong>Bounded by your approval</strong><p>{data?.live ? 'Real Bedrock · real Strands · controlled SES' : 'Local rule reader · real Strands · scripted model · simulated outbox'}</p><a href={navLink('history')}>Understand the receipt states ↗</a></div>
     </aside>
-    <div className="workspace-shell"><header className="topbar"><div><span className="demo-pill">{data?.live ? 'LIVE AI · TEST DATA' : 'SYNTHETIC DEMO'}</span><span className="asof">As of {data?.as_of ?? 'Unknown'}{stale ? ' · Last known snapshot' : ''}</span></div><div className="flex flex-wrap gap-2"><a className="secondary small" href="#/demo">Demo data</a><button id="refresh-workspace" className="ghost" disabled={busy} onClick={() => void refresh()}>Refresh</button><button className="secondary small" disabled={busy} onClick={() => setNewSession(true)}>New workspace</button></div></header>
+    <div className="workspace-shell"><header className="topbar"><div><span className="demo-pill">{data?.live ? 'LIVE AI · TEST DATA' : 'SYNTHETIC DEMO'}</span><span className="asof">As of {data?.as_of ?? 'Unknown'}{stale ? ' · Last known snapshot' : ''}</span></div><div className="flex flex-wrap gap-2"><button id="start-product-tour" className="secondary small" disabled={!data} aria-expanded={tourOpen} aria-controls={tourOpen ? 'product-tour' : undefined} onClick={() => setTourOpen(true)}>Take a tour</button><a className="secondary small" href="#/demo">Demo data</a><button id="refresh-workspace" className="ghost" disabled={busy} onClick={() => void refresh()}>Refresh</button><button className="secondary small" disabled={busy} onClick={() => setNewSession(true)}>New workspace</button></div></header>
       <main id="main" tabIndex={-1} aria-busy={busy || providerPending}>
+        {tourOpen && data ? <ProductTour page={page} live={!!data.live} blocked={busy || providerPending || stale}
+          links={Object.fromEntries(['dashboard', 'records', 'incoming', 'workspace', 'journey', 'history'].map(key => [key, navLink(key)]))}
+          onClose={() => { setTourOpen(false); document.getElementById('start-product-tour')?.focus(); }} /> : null}
         {storageWarning ? <p className="notice warning">{storageWarning}</p> : null}
         {data ? <WorkspaceMode live={!!data.live} available={data.live_available} /> : null}
         {data?.demo_seed === 'business-v1' ? <section className="notice" aria-label="Current demo dataset"><strong>Full business portfolio · {data.sources.length} source records</strong><p>Financial widgets use these posted books. Zero draft, approval or email counts mean those actions have not happened; loading data never fabricates activity.</p></section>

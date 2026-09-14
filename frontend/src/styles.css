@@ -293,3 +293,10 @@ details summary { font-size: 14px; color: #d0cbef; padding-block: 5px; } .finger
   .cash-key, .mix-track { border: 1px solid CanvasText; } .mix-track>span { background: Highlight; }
   .source-origin { color: CanvasText; }
 }
+.product-tour { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 1.5rem; padding: 1.25rem; margin-bottom: 1.25rem; border: 1px solid #a99bef; border-radius: 1rem; background: #1b2038; }
+.product-tour h2 { margin: .35rem 0 .65rem; font-size: 1.25rem; line-height: 1.4; }
+.product-tour p { line-height: 1.6; }
+.tour-copy, .tour-controls { min-width: 0; }
+.tour-controls { display: flex; flex-direction: column; align-items: flex-start; gap: .75rem; }
+.tour-location { color: #9ce6cf; }
+@media (max-width: 760px) { .product-tour { grid-template-columns: minmax(0, 1fr); gap: 1rem; } }

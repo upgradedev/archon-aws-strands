@@ -11,7 +11,11 @@ Strands model and simulated acceptance. Read [release.json](https://d2ssmv59q16d
 
 The public application helps one joiner reconcile supplied invoice/remittance records and review
 an exact collection draft. Its controlled-live mode uses real Strands and Bedrock with a separate
-SES worker. Loading the populated demo only seeds deterministic records: no model call or email.
+SES worker. The recommended **Load business portfolio** creates 240 typed fictional records;
+the optional **Load demo workspace** locally parses five fictional email templates. Both use
+deterministic ledger checks, with no model call, draft or email on load.
+Typed credits and supplier payments belong to the portfolio. Public raw-mail intake constructs
+only sales invoices, purchase invoices and client receipts. See [input boundaries](USER-GUIDE.md#supported-input-and-execution-mode).
 
 <img src="architecture.svg" alt="Archon architecture: six ledger readers, a composer with no tools, deterministic release checks and exact human approval." width="100%">
 
@@ -30,12 +34,14 @@ SES worker. Loading the populated demo only seeds deterministic records: no mode
 
 These tools read the application's ledger. Their names do not mean a bank, payroll or external
 accounting system is connected. Missing business evidence remains missing.
-Each reader produces a report ending in URGENT, WATCH or FINE. In controlled-live mode Bedrock
+Each reader is instructed to end its report with URGENT, WATCH or FINE. In controlled-live mode Bedrock
 interprets these views; synthetic mode uses a scripted model that traverses the same SDK graph.
 
 [Graph execution](../src/archon/agents/graph.py) and the
 [edge condition](../src/archon/agents/gating.py) require all six reports before the composer runs.
-The composer holds no tools. It supplies opening/closing text, while
+The gate requires completion, not agreement among the reports or independent verification of them.
+The composer holds no tools. Its system brief also receives the ledger-selected debt candidate;
+the six reports do not choose the invoice. It supplies opening/closing text, while
 [claims](../src/archon/agents/claims.py) and [draft construction](../src/archon/agents/draft.py)
 derive verified figures from the ledger and refuse digits in model-authored free text.
 The controlled path requires a bounded JSON response; malformed output releases no draft.
@@ -67,8 +73,10 @@ flowchart LR
 
 <img src="infrastructure.svg" alt="Archon AWS infrastructure: CloudFront and private S3 frontend, API Gateway, Lambda API, conditional S3 sessions and a separate Bedrock/SES worker." width="100%">
 
-The diagram describes component roles. The last supplied accepted frontend/backend pair is
-recorded in [Evaluation](EVALUATION.md); it does not establish acceptance of newer changes.
+The diagram describes component roles. The 2026-09-14 public snapshot is frontend `3e89590` /
+backend `2e2b375`, with successful provider and separate portfolio journeys in
+[run 34822838436](https://github.com/upgradedev/archon-aws-strands/actions/runs/34822838436).
+[Evaluation](EVALUATION.md) records their distinct scopes; neither accepts newer changes.
 
 | Component | Source | Boundary |
 |---|---|---|
@@ -78,7 +86,7 @@ recorded in [Evaluation](EVALUATION.md); it does not establish acceptance of new
 | Separate provider Lambda | [Worker stack](../deploy/live_provider_stack.py), [worker](../src/archon/web/live.py) | Only configured model/region, sender/recipient and finite grant |
 | Durable provider journal/outbox | [Execution store](../src/archon/store/execution.py), [metering](../src/archon/adapters/metered.py), [SES](../src/archon/adapters/ses.py) | Reserve before provider calls; record outcomes; unknown sends never retry automatically |
 | Retained failure queue and alarm | [Worker stack](../deploy/live_provider_stack.py) | SQS holds async failure records; operator reconciliation, not an automatic resend pipeline |
-| Opt-in incoming HTTP webhook | [Source contract](incoming-webhook.md) | Per-workspace key starts disabled; producer setup and served-identity/acceptance checks required; intake only |
+| Opt-in incoming HTTP webhook | [Source contract and recorded check](incoming-webhook.md) | Deployed intake route; per-workspace key starts disabled and producer setup is required; no drafting or outbound authority |
 
 A public session holds one JSON document in private S3. The browser holds an opaque session handle,
 not a database credential. Session access expires after seven days, independently of bucket lifecycle
@@ -95,6 +103,8 @@ A configured mode or provider response does not prove mailbox delivery.
 The configured Bedrock profile is `eu.anthropic.claude-opus-5` in `eu-west-1`.
 The controlled worker uses metered non-streaming Strands with a 2048-token output limit;
 semantic extraction has a separate 4000-token budget and literal source-field checks.
+Intake calls the metered Bedrock Converse reader directly. It does not run the six-reader
+Strands graph; that graph runs when the user explicitly requests draft preparation.
 The legacy operator model factory defaults to 1024 tokens and has separate overrides.
 [Operations](OPERATIONS.md) records those distinctions and the token-count route.
 

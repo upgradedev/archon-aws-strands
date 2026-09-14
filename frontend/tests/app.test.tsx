@@ -14,6 +14,52 @@ async function route(path: string) {
   await act(async () => { location.hash = path; window.dispatchEvent(new HashChangeEvent('hashchange')); });
 }
 
+test('tour explanations preserve unsaved input and never create a workspace or provider action', async () => {
+  location.hash = '/records?intake=open';
+  render(<App />);
+  await screen.findByRole('heading', { name: 'Records' });
+  const input = document.getElementById('raw-email') as HTMLTextAreaElement;
+  await userEvent.type(input, 'My unsaved fictional invoice');
+  await userEvent.click(screen.getByRole('button', { name: 'Take a tour' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Next stop' }));
+  expect(document.getElementById('raw-email')).toHaveValue('My unsaved fictional invoice');
+  expect(location.hash).toBe('#/records?intake=open');
+  expect(api.openWorkspace).toHaveBeenCalledExactlyOnceWith(false);
+  expect(api.request).not.toHaveBeenCalled();
+  await userEvent.keyboard('{Escape}');
+  expect(screen.queryByRole('region', { name: 'Product tour' })).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Take a tour' })).toHaveFocus();
+  expect(document.getElementById('raw-email')).toHaveValue('My unsaved fictional invoice');
+});
+
+test.each(['queued', 'running', 'unknown'] as const)('tour stays read-only while a provider job is %s', async status => {
+  location.hash = '/records';
+  vi.mocked(api.openWorkspace).mockResolvedValueOnce({ session: 'handle', workspace: { ...filled(),
+    live: { model: true, mail: true, data: 'fictional business examples',
+      job: { id: 'pending-tour-job', operation: 'reason', status, created_at: new Date().toISOString() } } } });
+  render(<App />);
+  await screen.findByRole('heading', { name: 'Records' });
+  await userEvent.click(screen.getByRole('button', { name: 'Take a tour' }));
+  expect(screen.queryByRole('link', { name: 'Open Dashboard' })).not.toBeInTheDocument();
+  expect(screen.getByText(/Page navigation is paused/)).toBeVisible();
+  await userEvent.click(screen.getByRole('button', { name: 'Next stop' }));
+  expect(screen.getByText(/You are on Records/)).toBeVisible();
+  expect(location.hash).toBe('#/records');
+  expect(api.request).not.toHaveBeenCalled();
+});
+
+test('tour removes optional navigation after the workspace becomes stale', async () => {
+  location.hash = '/records';
+  render(<App />);
+  await screen.findByRole('heading', { name: 'Records' });
+  await userEvent.click(screen.getByRole('button', { name: 'Take a tour' }));
+  expect(screen.getByRole('link', { name: 'Open Dashboard' })).toBeVisible();
+  fireEvent(window, new Event('offline'));
+  expect(screen.queryByRole('link', { name: 'Open Dashboard' })).not.toBeInTheDocument();
+  expect(screen.getByText(/Page navigation is paused/)).toBeVisible();
+  expect(api.request).not.toHaveBeenCalled();
+});
+
 test('demo switching waits for old reads and keeps navigation actions locked while creating', async () => {
   let finishRead!: (result: { session: string; workspace: ReturnType<typeof empty> }) => void;
   let finishDemo!: (result: { session: string; workspace: ReturnType<typeof empty> }) => void;

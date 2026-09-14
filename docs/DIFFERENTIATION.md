@@ -14,15 +14,18 @@ client for money. Archon brings the retained records, remaining balance and prop
 email into one review. The product currently works from supplied fictional text, not a connected
 mailbox. It replaces a manual comparison within this demonstration; time savings have not been measured.
 
-Start with **Explore populated demo** → **Load demo workspace**, then inspect Records.
-Five fictional sources are parsed and posted deterministically, with no model call, report, draft
-or email. The example walkthrough shows an invoice of 1,860.00 EUR, a payment of 600.00 EUR and
+Start with **Explore populated demo → Load business portfolio**. Its 240 typed fictional records
+populate six document views and the financial dashboard. They are posted through ledger checks,
+not AI-extracted emails; loading creates no model call, report, draft or email.
+The optional **Load demo workspace** provides five locally parsed email templates for a smaller
+case. That walkthrough shows an invoice of 1,860.00 EUR, a client receipt of 600.00 EUR and
 1,260.00 EUR remaining. These are source figures, not bank-verified settlement.
 
 ## What Strands contributes
 
 The real Strands SDK graph runs six ledger readers before a composer with no tools.
 The edge condition enforces all six reports; removing Strands prevents draft preparation.
+It checks that reports are present, not that six agents agree or have independently verified them.
 In controlled-live mode, Bedrock interprets the domain reports and supplies bounded opening/closing
 text. Ledger code selects the invoice and adds the verified figures.
 In retained simulation, a scripted model traverses the graph; it does not perform live inference.
@@ -45,6 +48,8 @@ duplicates need an operator accounting correction. Fresh review follows a resolu
 
 Synthetic `PublicPostReader` supports explicit full English month names and US/EU decimal EUR
 notation; controlled extraction requires ISO dates and literal source-backed values.
+Both readers construct only sales invoices, purchase invoices and client receipts. Supplier
+payments and credits are supported as typed portfolio fixtures, not raw-mail extraction.
 That bounded support does not establish general invoice extraction or OCR.
 A recorded counterproposal preserves the client's original reply. It is pending client acceptance,
 sends no message, changes no debt and creates no collection hold. An agreed plan changes collection
@@ -52,7 +57,7 @@ timing, not the outstanding balance.
 
 ## Opt-in automated input
 
-This source revision includes the [incoming HTTP webhook](incoming-webhook.md).
+The [incoming HTTP webhook](incoming-webhook.md) is available for opt-in intake.
 Its per-workspace key starts disabled and the owner must configure an external producer.
 Check served identities and matching acceptance before use. The intake path uses a separate scoped
 token, maximum 24-hour lifetime within workspace expiry and durable event-ID deduplication.
@@ -61,8 +66,11 @@ It is not direct Gmail/Outlook login, a bank connection, or automatic collection
 
 ## What is established
 
-The [dated product acceptance record](EVALUATION.md) reports actual Bedrock calls and controlled SES
-acceptances for frontend `40c7ade` / backend `2bb3db3`, not a result for later changes.
+The [dated product acceptance record](EVALUATION.md) binds actual Bedrock calls and controlled SES
+acceptances to frontend `3e89590` / backend `2e2b375` in
+[run 34822838436](https://github.com/upgradedev/archon-aws-strands/actions/runs/34822838436).
+Three provider journeys and six separate portfolio journeys passed. The latter used no model
+or mail operations. These checks do not measure model quality or accept future changes.
 The owner's six received messages are HUMAN-ATTESTED arrival; per-run correlation and the full
 approved-body comparison remain unknown. Full human UAT is NOT_RUN.
 

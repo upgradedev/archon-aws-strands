@@ -14,12 +14,14 @@ test('README and infrastructure diagrams render without broken local assets', as
   await page.route(url => url.origin !== 'http://127.0.0.1:4173', route => route.abort());
   await page.goto('/docs-review/README.html');
   await expect(page.locator('h1')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Judge walkthrough', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Built with', exact: true })).toBeVisible();
   const localImages = page.locator('img[src^="docs/"]');
   expect(await localImages.count()).toBeGreaterThanOrEqual(2);
   for (const image of await localImages.all()) expect(await image.evaluate((node: HTMLImageElement) => node.complete && node.naturalWidth > 0)).toBe(true);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: info.outputPath('docs-readme.png'), fullPage: true });
-  for (const name of ['architecture', 'infrastructure']) {
+  for (const name of ['architecture', 'infrastructure', 'banner']) {
     await page.goto(`/docs-review/docs/${name}.svg`);
     await expect(page.locator('svg')).toBeVisible();
     expect(await page.locator('svg title').textContent()).toBeTruthy();

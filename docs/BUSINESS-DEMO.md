@@ -1,6 +1,6 @@
 # Business portfolio
 
-An opt-in fictional quarter for exploring the [Archon workstation](https://d2ssmv59q16d0b.cloudfront.net/).
+The recommended fictional quarter for exploring the [Archon workstation](https://d2ssmv59q16d0b.cloudfront.net/).
 Controlled-live mode uses Bedrock and restricted SES; retained simulation uses a scripted model
 and simulated acceptance. Verify [release.json](https://d2ssmv59q16d0b.cloudfront.net/release.json),
 [/api/health](https://d2ssmv59q16d0b.cloudfront.net/api/health) and
@@ -8,10 +8,11 @@ and simulated acceptance. Verify [release.json](https://d2ssmv59q16d0b.cloudfron
 [Evaluation](EVALUATION.md) and [disclosures](../README.md#pre-existing-work-disclosed) apply.
 Choose **Explore populated demo → Load business portfolio**, the first and recommended option.
 An existing small or empty Dashboard also offers **Load full dashboard · 240 records** directly.
-The **Demo data** link is always available in the header; the current dataset is labelled above
+The **Demo data** link is available in the workspace header; the current dataset is labelled above
 the dashboard. The small five-source guided example
 remains available through **Load demo workspace**. Both create a separate workspace and retain
-access to the previous one; neither silently adds records to your existing books.
+the immediately previous handle in this browser. There is no workspace archive picker, and access
+expires after seven days. Neither silently adds records to your existing books.
 
 ## What is in the bundle
 
@@ -68,7 +69,11 @@ extract them. Unsupported mail must still be refused. Refunds, unallocated cash,
 stock valuation, multi-currency accounting and bank execution are outside this extension.
 
 The larger fixture is not an independent benchmark, scale certification or demonstrated customer
-benefit. See [evaluation limitations](EVALUATION.md). New source CI does not establish deployment:
+benefit. [AWS run 34822838436](https://github.com/upgradedev/archon-aws-strands/actions/runs/34822838436)
+passed six separate portfolio browser journeys against frontend `3e89590` / backend `2e2b375`,
+with no model or mail operations (`gh run view 34822838436 --repo upgradedev/archon-aws-strands --log`).
+The same run's three provider journeys are a different check, not AI extraction of this bundle.
+See [evaluation limitations](EVALUATION.md). New source CI does not establish deployment:
 compare served frontend/backend identities and exact-release acceptance before reporting it live.
 
 ### Operator recovery
