@@ -116,7 +116,8 @@ def test_operator_can_pause_new_bundles_without_losing_existing_books(client, mo
     assert client.get("/api/workspace", headers={"X-Archon-Session": saved["session"]}).json() == (
         saved["workspace"]
     )
-    assert client.post("/api/sessions", json={"mode": "synthetic", "seed": "joinery"}).status_code == 201
+    small = client.post("/api/sessions", json={"mode": "synthetic", "seed": "joinery"})
+    assert small.status_code == 201
 
 
 def test_seed_is_atomic_and_cannot_replace_user_records(monkeypatch):
