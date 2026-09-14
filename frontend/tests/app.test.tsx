@@ -46,6 +46,69 @@ test('business demo notice never claims five emails or AI ingestion', async () =
   expect(api.request).not.toHaveBeenCalled();
 });
 
+test('small dashboard offers one explicit full portfolio load and never triggers a model or mail request', async () => {
+  location.hash = '/dashboard';
+  let finish!: (result: { session: string; workspace: ReturnType<typeof empty> }) => void;
+  vi.mocked(api.openWorkspace).mockReset()
+    .mockResolvedValueOnce({ session: 'small', workspace: { ...filled(), demo_seed: 'joinery-v1' } })
+    .mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+  render(<App />);
+  const upgrade = await screen.findByRole('button', { name: 'Load full dashboard · 240 records' });
+  expect(api.openWorkspace).toHaveBeenCalledTimes(1);
+  expect(screen.getByRole('region', { name: 'Full dashboard demo available' })).toHaveTextContent('current books stay available');
+  await userEvent.dblClick(upgrade);
+  expect(api.openWorkspace).toHaveBeenCalledTimes(2);
+  expect(api.openWorkspace).toHaveBeenLastCalledWith(true, 'business');
+  expect(upgrade).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Refresh' })).toBeDisabled();
+  await act(async () => finish({ session: 'business', workspace: { ...empty(), demo_seed: 'business-v1' } }));
+  expect(await screen.findByRole('region', { name: 'Current demo dataset' })).toHaveTextContent('Full business portfolio');
+  expect(screen.queryByRole('region', { name: 'Full dashboard demo available' })).not.toBeInTheDocument();
+  expect(api.request).not.toHaveBeenCalled();
+});
+
+test('a refused full portfolio load leaves the previous small books visible and retryable', async () => {
+  location.hash = '/dashboard';
+  vi.mocked(api.openWorkspace).mockReset()
+    .mockResolvedValueOnce({ session: 'small', workspace: { ...filled(), demo_seed: 'joinery-v1' } })
+    .mockRejectedValueOnce(new Error('Portfolio temporarily unavailable'));
+  render(<App />);
+  await userEvent.click(await screen.findByRole('button', { name: 'Load full dashboard · 240 records' }));
+  expect(screen.getByRole('alert')).toHaveTextContent('Portfolio temporarily unavailable');
+  expect(screen.getByTestId('metric-outstanding')).toHaveTextContent('1,260.00 EUR');
+  expect(screen.getByRole('button', { name: 'Load full dashboard · 240 records' })).toBeEnabled();
+  expect(screen.queryByRole('region', { name: 'Current demo dataset' })).not.toBeInTheDocument();
+  expect(api.request).not.toHaveBeenCalled();
+});
+
+test.each(['queued', 'running', 'unknown'] as const)('full dashboard switching is blocked by a %s provider job', async status => {
+  location.hash = '/dashboard';
+  const workspace = { ...filled(), demo_seed: 'joinery-v1', live: { model: true, mail: true, data: 'fictional business examples',
+    job: { id: 'pending-job', operation: 'reason', status, created_at: new Date().toISOString() } } };
+  vi.mocked(api.openWorkspace).mockResolvedValueOnce({ session: 'small', workspace });
+  render(<App />);
+  const upgrade = await screen.findByRole('button', { name: 'Load full dashboard · 240 records' });
+  expect(upgrade).toBeDisabled(); await userEvent.click(upgrade);
+  expect(api.openWorkspace).toHaveBeenCalledTimes(1);
+  expect(screen.getByRole('region', { name: 'Full dashboard demo available' })).toHaveTextContent('before switching');
+});
+
+test('offline small books cannot be switched and custom books are never silently seeded', async () => {
+  location.hash = '/dashboard';
+  vi.mocked(api.openWorkspace).mockResolvedValueOnce({ session: 'small', workspace: { ...filled(), demo_seed: 'joinery-v1' } });
+  const mounted = render(<App />);
+  await screen.findByRole('button', { name: 'Load full dashboard · 240 records' });
+  fireEvent(window, new Event('offline'));
+  expect(screen.getByRole('button', { name: 'Load full dashboard · 240 records' })).toBeDisabled();
+  expect(api.openWorkspace).toHaveBeenCalledTimes(1);
+  mounted.unmount();
+  vi.mocked(api.openWorkspace).mockReset().mockResolvedValue({ session: 'custom', workspace: filled() });
+  render(<App />); await screen.findByRole('heading', { name: 'Dashboard' });
+  expect(screen.queryByRole('region', { name: 'Full dashboard demo available' })).not.toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Demo data' })).toHaveAttribute('href', '#/demo');
+  expect(api.openWorkspace).toHaveBeenCalledExactlyOnceWith(false);
+});
+
 test('new workspace on History clears an existing evidence bundle at the same revision', async () => {
   location.hash = '/history';
   const state = empty();

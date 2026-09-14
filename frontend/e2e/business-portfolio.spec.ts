@@ -30,9 +30,10 @@ test('business portfolio preserves previous books with zero AI or send requests 
   expect(previous.data.sources).toHaveLength(5);
   const posts: string[] = [];
   page.on('request', req => { if (req.method() === 'POST') posts.push(new URL(req.url()).pathname); });
-  await page.goto('/#/demo');
-  await expect(page.getByText(/240 records, six types/)).toBeVisible();
-  await page.getByRole('button', { name: 'Load business portfolio' }).click();
+  await expect(page.getByRole('region', { name: 'Full dashboard demo available' })).toBeVisible();
+  await page.getByRole('button', { name: 'Load full dashboard · 240 records' }).click();
+  // The Dashboard heading already exists: wait for the new dataset, not navigation.
+  await expect(page.getByRole('region', { name: 'Current demo dataset' })).toContainText('240 source records');
   await expect(page.getByRole('heading', { name: 'Dashboard', exact: true })).toBeVisible();
   const seeded = await state(page);
   expect(seeded.session).not.toBe(previous.session);
@@ -41,8 +42,24 @@ test('business portfolio preserves previous books with zero AI or send requests 
   expect(seeded.data.graph).toBeNull(); expect(seeded.data.draft).toBeNull();
   expect(seeded.data.receipts).toEqual([]); expect(seeded.data.live?.job ?? null).toBeNull();
   expect(seeded.data.sources.every(s => s.origin === 'fictional-business-fixture')).toBe(true);
+  await expect(page.getByRole('region', { name: 'Current demo dataset' })).toContainText('240 source records');
+  for (const [id, amount] of [
+    ['business-net-sales', '117,590.00 EUR'], ['business-net-purchases', '31,895.75 EUR'],
+    ['business-sales-credits', '16,130.00 EUR'], ['business-purchase-credits', '4,179.25 EUR'],
+  ]) await expect(page.getByTestId(id)).toContainText(amount);
   await expect(page.getByTestId('business-cash-in')).toContainText(cash(seeded.data, 'Receipt'));
   await expect(page.getByTestId('business-cash-out')).toContainText(cash(seeded.data, 'Payment'));
+  const monthly = page.getByRole('table', { name: /Monthly cash records/ });
+  for (const [month, inflow, outflow] of [
+    ['July', '25,070.32 EUR', '2,509.76 EUR'], ['August', '43,075.74 EUR', '9,517.62 EUR'],
+    ['September', '19,332.22 EUR', '8,559.72 EUR'],
+  ]) {
+    const row = monthly.getByRole('row').filter({ hasText: month });
+    await expect(row).toContainText(inflow); await expect(row).toContainText(outflow);
+  }
+  for (const label of ['Top clients', 'Top suppliers']) {
+    await expect(page.getByRole('table', { name: label, exact: true }).locator('tbody tr')).toHaveCount(5);
+  }
   await expect(page.getByRole('region', { name: 'Populated fictional demo' })).toContainText('not AI-extracted');
   await page.screenshot({ path: info.outputPath('business-dashboard.png'), fullPage: true });
   for (const [view, label, kind, count] of [
@@ -72,6 +89,10 @@ test('business portfolio preserves previous books with zero AI or send requests 
 
 test('business credits retain source origin and invoice links while filters and cash drilldowns survive reload', async ({ page }, info) => {
   await page.goto('/#/demo');
+  const recommended = page.getByRole('region', { name: 'Business portfolio demo' });
+  await expect(recommended).toContainText('RECOMMENDED');
+  await expect(page.getByRole('button').first()).toHaveText('Load business portfolio');
+  await expect(recommended.getByRole('button')).toHaveClass('primary');
   const posts: string[] = [];
   page.on('request', req => { if (req.method() === 'POST') posts.push(new URL(req.url()).pathname); });
   await page.getByRole('button', { name: 'Load business portfolio' }).click();
