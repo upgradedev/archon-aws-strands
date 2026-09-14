@@ -1,8 +1,16 @@
 # Archon film: source-backed books, human-approved email
 
-**Production script, not a completed video.** The executable narration
+**This document is the script, not a completed video.** The executable narration
 and scene order live in [video/story.json](../video/story.json). This page explains the cut,
 its evidence boundaries and how to reproduce it.
+
+The first complete cut was produced by the [successful media run](https://github.com/upgradedev/archon-aws-strands/actions/runs/34847819316):
+**290.96 seconds, 1920 × 1080, 25 fps**, with English ElevenLabs narration and subtitles.
+Its captured session contains thirteen real Bedrock calls and one controlled SES acceptance,
+retained after reload. The video SHA-256 is
+`9e88923ef01bddac41b29aa073ab3f289cce72a85c2a6486583ec2b7449b3da3`.
+Technical media checks and representative-frame review passed; owner full-playback review
+and public YouTube upload remain pending. This artifact is not a new application deployment.
 
 For a joiner inspecting Records in the [AWS app](https://d2ssmv59q16d0b.cloudfront.net/),
 controlled-live uses real Bedrock and six Strands readers. Retained simulation uses a scripted
@@ -17,7 +25,7 @@ A person approves the exact recipient and content before the controlled SES atte
 
 The [official rules](https://agentsforhumans.devpost.com/rules), checked on 2026-09-14,
 cap the video at **five minutes**. The measured narration and current scene holds imply a
-290.96-second cut. Final encoded duration remains a separate verification gate.
+290.96-second cut, also confirmed by the final encoded-media verification gate.
 The real app starts at 29.88 seconds.
 
 | Scene | Narration-derived seconds | What is shown |
