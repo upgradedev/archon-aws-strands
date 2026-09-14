@@ -6,7 +6,10 @@ and simulated acceptance. Verify [release.json](https://d2ssmv59q16d0b.cloudfron
 [/api/health](https://d2ssmv59q16d0b.cloudfront.net/api/health) and
 [acceptance](https://d2ssmv59q16d0b.cloudfront.net/acceptance.html) together.
 [Evaluation](EVALUATION.md) and [disclosures](../README.md#pre-existing-work-disclosed) apply.
-Choose **Explore populated demo → Load business portfolio**. The small five-source guided example
+Choose **Explore populated demo → Load business portfolio**, the first and recommended option.
+An existing small or empty Dashboard also offers **Load full dashboard · 240 records** directly.
+The **Demo data** link is always available in the header; the current dataset is labelled above
+the dashboard. The small five-source guided example
 remains available through **Load demo workspace**. Both create a separate workspace and retain
 access to the previous one; neither silently adds records to your existing books.
 

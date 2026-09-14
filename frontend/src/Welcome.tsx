@@ -28,7 +28,7 @@ export function Welcome() {
           <p>Alex's joinery · illustrative example</p><h2>A payment just arrived.</h2>
           <dl><div><dt>Invoice</dt><dd>1,860.00 EUR</dd></div><div><dt>Recorded payment</dt><dd>− 600.00 EUR</dd></div><div className="preview-total"><dt>Still owed</dt><dd>1,260.00 EUR</dd></div></dl>
           <div className="preview-decision"><span aria-hidden="true">↳</span><p>Review a reminder for the remaining balance.<strong>You decide whether to approve.</strong></p></div>
-          <small>Illustration only. Load the populated demo to explore these balances, or post the source emails yourself in the guided check.</small>
+          <small>Illustration only. The recommended full demo has 240 records and a populated financial dashboard. This single-case example is available as the optional five-email tutorial or guided check.</small>
         </aside>
       </section>
       <div className="welcome-boundary"><strong>You control the next action.</strong><p>{live === null ? 'Provider status has not been confirmed. Your workspace shows its exact mode before you act.' : live ? 'Invented examples, real Bedrock and Strands, deterministic ledger checks. A real SES email goes only to the verified test recipient after you review the exact draft. No bank connection or payment execution. Saved simulation workspaces keep their original provider mode.' : 'Synthetic data only · real Strands orchestration with a scripted model · simulated mail. No real AI judgment, bank connection, email or payment.'}</p></div>

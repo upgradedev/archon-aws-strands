@@ -81,6 +81,16 @@ export function App() {
   }, [page]);
   const hasData = data !== null;
   const providerPending = !!data?.live?.job && ['queued', 'running', 'unknown'].includes(data.live.job.status);
+  async function loadBusinessPortfolio() {
+    if (inFlight.current || providerPending || stale) return;
+    inFlight.current = true; setBusy(true); setError(''); setNotice('');
+    setProgress('Loading the full business portfolio. Your current books stay available…');
+    try {
+      adoptWorkspace(await openWorkspace(true, 'business'));
+      setNotice('Full business portfolio loaded. Financial widgets now use its posted records.');
+    } catch (failure) { setError(errorText(failure)); }
+    finally { inFlight.current = false; setBusy(false); }
+  }
   useEffect(() => {
     const pending = data?.live?.job && ['queued', 'running'].includes(data.live.job.status);
     const incoming = page === 'incoming' && data?.live;
@@ -131,14 +141,19 @@ export function App() {
   return <div className="app-shell">
     <a className="skip-link" href="#main" onClick={e => { e.preventDefault(); document.getElementById('main')?.focus(); }}>Skip to workspace</a>
     <aside className="sidebar"><a href="#/welcome" className="brand"><span className="brand-mark" aria-hidden="true">A</span><span>ARCHON<small>THE INBOX LEDGER</small></span></a>
-      <div className="workspace-name"><span className="avatar">MJ</span><div><strong>My Joinery</strong><small>Fictional business workspace</small></div></div>
+      <div className="workspace-name"><span className="avatar">{data?.demo_seed === 'business-v1' ? 'BP' : 'MJ'}</span><div><strong>{data?.demo_seed === 'business-v1' ? 'Business portfolio' : 'My Joinery'}</strong><small>Fictional business workspace</small></div></div>
       <p className="nav-label">YOUR BUSINESS</p><nav aria-label="Workspace"><a href="#/journey" aria-current={page === 'journey' ? 'page' : undefined}><Icon name="approvals" /><span>Guided check</span></a>{navigation.map(([key, label, task]) => <a key={key} href={navLink(key)} aria-label={label} aria-current={page === key ? 'page' : undefined}><Icon name={key} /><span>{label}<small className="nav-task">{task}</small></span>{key === 'workspace' && data && data.queue.ready.length ? <span className="nav-count" aria-hidden="true">{data.queue.ready.length}</span> : null}</a>)}</nav>
       <div className="sidebar-bottom"><div className="provider-dot" /><strong>Bounded by your approval</strong><p>{data?.live ? 'Real Bedrock · real Strands · controlled SES' : 'Local rule reader · real Strands · scripted model · simulated outbox'}</p><a href={navLink('history')}>Understand the receipt states ↗</a></div>
     </aside>
-    <div className="workspace-shell"><header className="topbar"><div><span className="demo-pill">{data?.live ? 'LIVE AI · TEST DATA' : 'SYNTHETIC DEMO'}</span><span className="asof">As of {data?.as_of ?? 'Unknown'}{stale ? ' · Last known snapshot' : ''}</span></div><div className="flex gap-2"><button id="refresh-workspace" className="ghost" disabled={busy} onClick={() => void refresh()}>Refresh</button><button className="secondary small" disabled={busy} onClick={() => setNewSession(true)}>New workspace</button></div></header>
+    <div className="workspace-shell"><header className="topbar"><div><span className="demo-pill">{data?.live ? 'LIVE AI · TEST DATA' : 'SYNTHETIC DEMO'}</span><span className="asof">As of {data?.as_of ?? 'Unknown'}{stale ? ' · Last known snapshot' : ''}</span></div><div className="flex flex-wrap gap-2"><a className="secondary small" href="#/demo">Demo data</a><button id="refresh-workspace" className="ghost" disabled={busy} onClick={() => void refresh()}>Refresh</button><button className="secondary small" disabled={busy} onClick={() => setNewSession(true)}>New workspace</button></div></header>
       <main id="main" tabIndex={-1} aria-busy={busy || providerPending}>
         {storageWarning ? <p className="notice warning">{storageWarning}</p> : null}
         {data ? <WorkspaceMode live={!!data.live} available={data.live_available} /> : null}
+        {data?.demo_seed === 'business-v1' ? <section className="notice" aria-label="Current demo dataset"><strong>Full business portfolio · {data.sources.length} source records</strong><p>Financial widgets use these posted books. Zero draft, approval or email counts mean those actions have not happened; loading data never fabricates activity.</p></section>
+          : data && (data.demo_seed === 'joinery-v1' || data.sources.length === 0) ? <section className="notice demo-upgrade" aria-label="Full dashboard demo available"><strong>{data.demo_seed === 'joinery-v1' ? `Small tutorial · ${data.sources.length} source records` : 'This workspace has no source records'}</strong><p>Want the full financial dashboard? Load 240 records with sales, purchases, credit notes, receipts and supplier payments. Your current books stay available through Return to previous workspace. This does not call AI or send email.</p>
+            {page === 'dashboard' ? <button className="primary" disabled={busy || providerPending || stale} onClick={() => void loadBusinessPortfolio()}>Load full dashboard · 240 records</button> : <a className="primary" href="#/demo">Choose full dashboard demo</a>}
+            {busy || providerPending || stale ? <p className="field-help">Finish the current operation and refresh uncertain state before switching workspaces.</p> : null}
+          </section> : null}
         {hasPreviousWorkspace() ? <button className="secondary small" disabled={busy || providerPending} onClick={() => void restore()}>Return to previous workspace</button> : null}
         {data?.live ? <ProviderStatus live={data.live} /> : null}
         {newSession ? <section className="notice" role="region" aria-label="Start a new workspace"><h2>Start an empty workspace?</h2><p>This opens separate empty books using the currently available providers. Switching does not delete its stored records. Your previous workspace stays accessible through Return to previous workspace. Session access expires after seven days. Nothing calls AI or sends email on creation.</p><div className="flex gap-3"><button className="primary" onClick={() => void refresh(true)} disabled={busy}>Start new workspace</button><button className="secondary" onClick={() => setNewSession(false)}>Keep current workspace</button><a href="#/demo">Prefer populated demo books?</a></div></section> : null}

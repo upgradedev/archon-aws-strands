@@ -9,7 +9,7 @@ export function Dashboard({ data, stale }: { data: Workspace; stale: boolean }) 
   const metrics = dashboardMetrics(data, useClock(data.draft?.at));
   const target = reasonTarget(data);
   return <>
-    <Heading eyebrow="COLLECTIONS / MY JOINERY" title="Dashboard">Check what is still owed before chasing.</Heading>
+    <Heading eyebrow={data.demo_seed === 'business-v1' ? 'COLLECTIONS / BUSINESS PORTFOLIO' : 'COLLECTIONS / MY JOINERY'} title="Dashboard">Check what is still owed before chasing.</Heading>
     <ReconciliationStart data={data} stale={stale} />
     <div className="dashboard-help"><span>Want a step-by-step view of your next decision?</span><a href="#/journey">Open guided check →</a></div>
     <div className="scope-line"><span>{data.live ? 'All fictional business records in this session' : 'All records in this synthetic session'} · As of {data.as_of}</span><Badge tone={stale || data.holds.length ? 'amber' : 'blue'}>{stale ? 'Last known snapshot' : `Ledger revision ${data.revision}`}</Badge></div>

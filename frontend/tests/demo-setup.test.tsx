@@ -58,9 +58,23 @@ test('business portfolio is an explicit separate choice with typed-source bounda
   const workspace = { ...empty(), demo_seed: 'business-v1' };
   vi.mocked(api.openWorkspace).mockResolvedValue({ session: 'business', workspace });
   const opened = vi.fn(); render(<DemoSetup onOpened={opened} />);
+  expect(screen.getAllByRole('button')[0]).toHaveAccessibleName('Load business portfolio');
+  expect(screen.getByRole('button', { name: 'Load business portfolio' })).toHaveClass('primary');
+  expect(screen.getByRole('button', { name: 'Load demo workspace' })).toHaveClass('secondary');
+  expect(screen.getByText(/those financial widgets will show zero/)).toBeVisible();
   expect(screen.getByRole('heading', { name: 'Explore a quarter · 240 records, six types' })).toBeVisible();
   expect(screen.getByText(/raw-mail reader does not yet support credit notes/)).toBeVisible();
   await userEvent.click(screen.getByRole('button', { name: 'Load business portfolio' }));
   expect(api.openWorkspace).toHaveBeenCalledExactlyOnceWith(true, 'business');
   expect(opened).toHaveBeenCalledExactlyOnceWith({ session: 'business', workspace });
+});
+
+test('only the selected dataset claims to be loading', async () => {
+  let finish!: (result: { session: string; workspace: ReturnType<typeof empty> }) => void;
+  vi.mocked(api.openWorkspace).mockImplementation(() => new Promise(resolve => { finish = resolve; }));
+  render(<DemoSetup onOpened={vi.fn()} />);
+  await userEvent.click(screen.getByRole('button', { name: 'Load business portfolio' }));
+  expect(screen.getByRole('button', { name: 'Loading business portfolio…' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Load demo workspace' })).toBeDisabled();
+  await act(async () => finish({ session: 'business', workspace: { ...empty(), demo_seed: 'business-v1' } }));
 });
