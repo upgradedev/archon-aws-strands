@@ -1,6 +1,11 @@
 # Business portfolio
 
 An opt-in fictional quarter for exploring the [Archon workstation](https://d2ssmv59q16d0b.cloudfront.net/).
+Controlled-live mode uses Bedrock and restricted SES; retained simulation uses a scripted model
+and simulated acceptance. Verify [release.json](https://d2ssmv59q16d0b.cloudfront.net/release.json),
+[/api/health](https://d2ssmv59q16d0b.cloudfront.net/api/health) and
+[acceptance](https://d2ssmv59q16d0b.cloudfront.net/acceptance.html) together.
+[Evaluation](EVALUATION.md) and [disclosures](../README.md#pre-existing-work-disclosed) apply.
 Choose **Explore populated demo → Load business portfolio**. The small five-source guided example
 remains available through **Load demo workspace**. Both create a separate workspace and retain
 access to the previous one; neither silently adds records to your existing books.

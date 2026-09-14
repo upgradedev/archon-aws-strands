@@ -38,16 +38,16 @@ reference cannot credit the same payment again. Missing or conflicting evidence 
 **Demo data and execution mode are separate choices.** The examples are entirely invented in
 both modes. A loaded sample workspace is ready to inspect, but it is not an AI result.
 
-Want more than the guided example? Choose **Load business portfolio** for **240 fictional
-records across six document types**, 16 clients and 10 suppliers. Explore invoices, credit notes,
-cash movements and source-linked dashboard charts. The same ledger validates every posting;
-loading the portfolio calls no model and sends no email. [Dataset and limits](docs/BUSINESS-DEMO.md).
-
 | Path | What actually happens | Email boundary |
 |---|---|---|
 | Load populated demo | Deterministic seed, no model call or draft | No email |
 | Controlled-live session | Source-checked Bedrock intake; real Strands six-reader graph and composer | Exact human approval; SES restricted to a verified test recipient |
 | Retained simulation | Real Strands graph; model is **scripted**, outbox is **simulated** | No real email; the script walks the graph, it does not judge |
+
+Want more than the guided example? Choose **Load business portfolio** for **240 fictional
+records across six document types**, 16 clients and 10 suppliers. Explore invoices, credit notes,
+cash movements and source-linked dashboard charts. The same ledger validates every posting;
+loading the portfolio calls no model and sends no email. [Dataset and limits](docs/BUSINESS-DEMO.md).
 
 Check [frontend identity](https://d2ssmv59q16d0b.cloudfront.net/release.json),
 [backend identity and mode](https://d2ssmv59q16d0b.cloudfront.net/api/health), and
