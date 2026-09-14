@@ -31,6 +31,15 @@ export function recordLink(params: Record<string, string>): string {
   return `#/records?${new URLSearchParams(params)}`;
 }
 export function sourceLink(id: string): string { return recordLink({ source: id }); }
+export function duplicateReceiptMail(data: Workspace, invoice: string | null): string {
+  const source = data.sources.filter(s => s.status === 'posted' && s.kind === 'Receipt' && s.document?.settles === invoice).at(-1);
+  if (!source) return '';
+  if (source.origin !== 'fictional-business-fixture') return source.body + '\nForwarded for reference.';
+  const doc = source.document!;
+  const original = data.sources.find(s => s.status === 'posted' && s.kind === 'SalesInvoice' && s.document?.doc_id === invoice)?.document;
+  if (!doc.transfer_id || !doc.received_on || !doc.amount || !original?.client_email) return '';
+  return `From: ${original.client_email}\nSubject: Remittance for ${invoice}\n\nWe have paid ${doc.amount} EUR on ${doc.received_on} against invoice ${invoice}.\nTransfer ID: ${doc.transfer_id}\n\nFictional remittance reconstructed from typed fixture ${source.id}; not an original email.\nForwarded for reference.`;
+}
 export function sourceOrigin(source: Source): string {
   if (source.origin === 'fictional-demo-template') return 'Fictional email template · local rule reader';
   if (source.origin?.includes('business') || source.origin?.includes('typed')) return 'Fictional typed demo document · deterministic books checks · no AI extraction';
@@ -101,7 +110,7 @@ export function businessPortfolio(data: Workspace) {
     const day = documentDay(s);
     return day && validDay(day) && day >= QUARTER_START && day <= end;
   }) : [];
-  const sourceDates = new Map(supported.map(s => [s.document!.doc_id, documentDay(s)]));
+  const sourceDates = new Map(supported.filter(s => ['SalesInvoice', 'PurchaseInvoice'].includes(s.kind)).map(s => [s.document!.doc_id, documentDay(s)]));
   const currentBalances = (rows: Settlement[]) => unique(rows, r => r.doc_id).filter(r => {
     const day = sourceDates.get(r.doc_id);
     return !day || !validDay(day) || day <= data.as_of;

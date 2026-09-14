@@ -183,7 +183,7 @@ def intake(state: dict, body: str, replace_id: str | None = None, *, reader=None
     try:
         # Native fixture credits do not widen the mail reader's schema. An
         # invoice-shaped credit must never be booked as new positive debt.
-        if re.search(r"\b(?:credit[ -]+(?:note|memo)|refund)\b", body, re.I):
+        if re.search(r"\b(?:credit[\s-]+(?:note|memo)|refund)\b", body, re.I):
             raise ValueError(
                 "Credit notes and refunds are not supported by mail intake. "
                 "The business portfolio contains explicit validated credit fixtures only."

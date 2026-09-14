@@ -4,6 +4,7 @@ import { intakeLink, reconciliation, reviewReset } from './decision';
 import { money } from './ui';
 import { cents, reasonTarget, workspaceLink } from './ledger';
 import { useClock } from './useClock';
+import { duplicateReceiptMail } from './portfolio';
 
 function jump(event: MouseEvent<HTMLAnchorElement>, id: string) {
   event.preventDefault();
@@ -51,7 +52,7 @@ export function Reconciliation({ data, invoice, stale, view = 'draft' }: { data:
     {latest ? <p className="latest-evidence">Latest session evidence: <a href={`#/records?source=${encodeURIComponent(latest.id)}`}>{latest.id} · {latest.status}</a>. {latest.status === 'refused' ? latest.error : latest.resolution ? `Human resolution: ${latest.resolution.decision}. No additional payment posted.` : 'Open the retained source to inspect the reader decision.'}</p> : null}
     {decision.balance ? <details className="reconciliation-next"><summary>Try new evidence before approving</summary><p>Would you still chase if the client just paid? Add their remittance here before approving. These links only fill editable text in Records. Review and submit it to change the books.</p><div className="flex flex-wrap gap-3">
       <a href={intakeLink(invoice === 'JN-4410' && !decision.latest ? 'payment' : 'custom', invoice)}>Add payment evidence →</a>
-      {decision.latest ? <a href={intakeLink('duplicate', invoice)}>Check a forwarded duplicate →</a> : null}
+      {decision.latest && duplicateReceiptMail(data, invoice) ? <a href={intakeLink('duplicate', invoice)}>Check a forwarded duplicate →</a> : null}
     </div><p>Use the original transfer reference for a duplicate. Only a genuinely distinct payment gets a distinct identity. Sample references represent invented events.</p></details> : null}
     <p className="reconciliation-limit">Source-backed means retained post, not verified bank settlement. {data.live ? 'Email approval can send real SES mail to the verified test recipient. No payment is executed.' : 'All approvals here record simulated mail; no actual email or payment occurs.'}</p>
   </section>;

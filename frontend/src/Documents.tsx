@@ -4,6 +4,7 @@ import { Heading } from './ui';
 import { routeInfo, workspaceLink } from './ledger';
 import { RecordViews } from './RecordViews';
 import { FileIntake } from './FileIntake';
+import { duplicateReceiptMail } from './portfolio';
 
 const samples = ['invoice', 'payment', 'supplier', 'refusal'] as const;
 
@@ -13,10 +14,7 @@ export function Documents({ data, busy, mutate, route }: { data: Workspace; busy
   const [body, setBody] = useState(() => {
     if (journey === 'invoice' && !data.sales.length) return data.samples.invoice;
     if (journey === 'payment' && params.get('invoice') === 'JN-4410') return data.samples.payment;
-    if (journey === 'duplicate') {
-      const receipt = data.sources.filter(s => s.status === 'posted' && s.kind === 'Receipt' && s.document?.settles === params.get('invoice')).at(-1);
-      if (receipt) return receipt.body + '\nForwarded for reference.';
-    }
+    if (journey === 'duplicate') return duplicateReceiptMail(data, params.get('invoice'));
     return '';
   });
   const [submitted, setSubmitted] = useState(false);
@@ -41,6 +39,7 @@ export function Documents({ data, busy, mutate, route }: { data: Workspace; busy
       <section className="panel intake"><h2>{replaceId ? `Correct ${replaceId}` : 'Read an email'}</h2><p>{data.live ? 'Real Bedrock semantic extraction with source checks. Use explicit ISO dates and EUR decimals such as 1,234.56. Unsupported or ambiguous evidence is refused.' : 'The bounded reader supports explicit EUR invoices and remittances. No live model call.'}</p>
         {journey ? <div className="notice"><h3>{journey === 'invoice' ? 'First, prepare a draft from the invoice' : journey === 'duplicate' ? 'Is this the same payment arriving twice?' : 'New evidence must change the review'}</h3><p>{journey === 'invoice' ? 'Review and post this editable invoice. Then open its decision and prepare a draft before adding payment evidence.' : journey === 'duplicate' ? 'This is a forward of the selected case’s latest posted receipt, retaining its Transfer ID. Submit it to observe the hold, then link the original in the human resolution form.' : 'Review and submit the payment. The server invalidates any previous draft; return to the case for a fresh decision. For your own synthetic example, supply the matching invoice and actual invented event reference.'}</p></div> : null}
         <FileIntake disabled={busy} onUse={text => { setBody(text); setSubmitted(false); }} />
+        {journey === 'duplicate' && body.includes('Fictional remittance reconstructed from typed fixture') ? <p className="notice">This editable remittance was reconstructed from a typed fictional receipt, not received from a mailbox. Its original transfer identity, amount and financial date are preserved for the duplicate check.</p> : null}
         <section className="workflow-guide" aria-label="Three editable API workflows"><h3>Try a complete decision</h3>
           <p>These controls fill the editable source below. Nothing posts until you submit it.</p>
           <div className="flex flex-wrap gap-3">

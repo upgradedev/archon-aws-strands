@@ -1,4 +1,4 @@
-import { ageBucket, barPercent, businessPortfolio, documentDay, documentParty, pageOf, partyIndex, postedDocuments, recordDay, sourceOrigin } from '../src/portfolio';
+import { ageBucket, barPercent, businessPortfolio, documentDay, documentParty, duplicateReceiptMail, pageOf, partyIndex, postedDocuments, recordDay, sourceOrigin } from '../src/portfolio';
 import { businessFixture } from './business-fixture';
 import { empty } from './fixtures';
 
@@ -94,4 +94,21 @@ test('pagination starts from independent offsets, clamps bad pages, and opens se
   expect(pageOf(rows, null, 79).page).toBe(4);
   for (const input of ['bad', '-2', '0', '1.5', '999999999999999999999999999999']) expect(pageOf(rows, input).page).toBe(1);
   expect(pageOf([], null)).toMatchObject({ page: 1, pages: 1, total: 0 });
+});
+
+test('typed duplicate examples preserve the exact payment identity and disclose reconstruction', () => {
+  const data = businessFixture();
+  const receipt = data.sources.find(s => s.kind === 'Receipt')!;
+  receipt.document!.transfer_id = 'FICTIONAL-EVENT-123';
+  const body = duplicateReceiptMail(data, 'SI-001');
+  expect(body).toContain('From: client1@fiction.example');
+  expect(body).toContain('paid 50.00 EUR on 2026-07-15 against invoice SI-001');
+  expect(body).toContain('Transfer ID: FICTIONAL-EVENT-123');
+  expect(body).toContain('reconstructed from typed fixture');
+  expect(body).not.toContain('"transfer_id"');
+  delete receipt.document!.transfer_id;
+  expect(duplicateReceiptMail(data, 'SI-001')).toBe('');
+  receipt.origin = 'fictional-demo-template';
+  expect(duplicateReceiptMail(data, 'SI-001')).toBe(receipt.body + '\nForwarded for reference.');
+  expect(duplicateReceiptMail(data, 'absent')).toBe('');
 });

@@ -183,7 +183,10 @@ def test_evidence_export_discloses_fixture_origin_and_retains_every_source():
     assert "demo:001" in result["text"] and "demo:240" in result["text"]
 
 
-@pytest.mark.parametrize("label", ["Credit note", "credit-note", "CREDIT MEMO", "Refund"])
+@pytest.mark.parametrize("label", [
+    "Credit note", "credit-note", "CREDIT MEMO", "Refund",
+    "Credit\tnote", "Credit\nnote", "Credit\r\nmemo", "Credit\u00a0note",
+])
 def test_invoice_shaped_credit_mail_is_held_before_reader(label):
     class MustNotRead:
         def converse(self, **kwargs):
@@ -215,3 +218,21 @@ def test_large_books_use_existing_strands_decision_and_exact_approval():
     assert after["receipts"][0]["message_id"].startswith("simulated-")
     assert after["metrics"] == shown["metrics"]
     assert after["sources"] == shown["sources"]
+
+
+def test_reconstructed_fixture_remittance_reaches_duplicate_guard_without_new_cash():
+    state = new_state()
+    before = workspace.snapshot(state)
+    body = (
+        "From: demo-client@archon.example\nSubject: Remittance for SV-0001\n\n"
+        "We have paid 111.60 EUR on 2026-07-13 against invoice SV-0001.\n"
+        "Transfer ID: FICTIONAL-IN-0001\n\n"
+        "Fictional remittance reconstructed from typed fixture demo:161; not an original email.\n"
+        "Forwarded for reference."
+    )
+    workspace.intake(state, body)
+    after = workspace.snapshot(state)
+    held = state["sources"][-1]
+    assert held["status"] == "refused" and held["kind"] == "Receipt"
+    assert "transfer identity is already recorded" in held["error"]
+    assert after["cashflow"] == before["cashflow"] and after["sales"] == before["sales"]

@@ -28,10 +28,10 @@ function CashFlows({ months }: { months: Portfolio['months'] }) {
   </section>;
 }
 
-function TopParties({ title, rows, view }: { title: string; rows: Portfolio['clients']; view: 'sales' | 'purchases' }) {
+function TopParties({ title, rows, view, asOf }: { title: string; rows: Portfolio['clients']; view: 'sales' | 'purchases'; asOf: string }) {
   return <section className="panel business-widget" aria-label={title}><div className="panel-heading"><div><h3>{title}</h3><p>Up to five parties by open balance · all invoices through the ledger date.</p></div></div>
     {rows.length ? <div className="table-scroll" tabIndex={0} role="region" aria-label={`${title} values`}><table className="compact-table"><caption className="sr-only">{title}</caption><thead><tr><th>Party / invoices</th><th className="numeric">Outstanding</th></tr></thead><tbody>
-      {rows.map(row => <tr key={row.party}><td><a href={recordLink({ view, party: row.party })}>{row.party || 'Unnamed party'}</a><span className="subline">{row.count} invoice(s)</span></td><td className="numeric">{money(row.outstanding)}</td></tr>)}
+      {rows.map(row => <tr key={row.party}><td><a href={recordLink({ view, party: row.party, to: asOf, undated: 'include' })}>{row.party || 'Unnamed party'}</a><span className="subline">{row.count} invoice(s)</span></td><td className="numeric">{money(row.outstanding)}</td></tr>)}
     </tbody></table></div> : <p className="section-note">No posted invoices.</p>}
   </section>;
 }
@@ -56,11 +56,11 @@ export function BusinessWidgets({ data }: { data: Workspace }) {
     <div className="business-grid"><CashFlows months={portfolio.months} />
       <section className="panel business-widget" aria-labelledby="aging-heading"><div className="panel-heading"><div><h3 id="aging-heading">Open balance aging</h3><p>As of {data.as_of} · includes balances held by arrangements.</p></div></div>
         <div className="table-scroll" tabIndex={0} role="region" aria-label="Aging values"><table className="compact-table"><caption className="sr-only">Open client and supplier balances by days overdue</caption><thead><tr><th>Age</th><th className="numeric">Clients</th><th className="numeric">Suppliers</th></tr></thead><tbody>
-          {portfolio.aging.map(row => <tr key={row.id}><th scope="row">{row.label}</th><td className="numeric"><a href={recordLink({ view: 'sales', filter: 'outstanding', age: row.id })}>{money(row.clients)}</a></td><td className="numeric"><a href={recordLink({ view: 'purchases', filter: 'outstanding', age: row.id })}>{money(row.suppliers)}</a></td></tr>)}
+          {portfolio.aging.map(row => <tr key={row.id}><th scope="row">{row.label}</th><td className="numeric"><a href={recordLink({ view: 'sales', filter: 'outstanding', age: row.id, to: data.as_of, undated: 'include' })}>{money(row.clients)}</a></td><td className="numeric"><a href={recordLink({ view: 'purchases', filter: 'outstanding', age: row.id, to: data.as_of, undated: 'include' })}>{money(row.suppliers)}</a></td></tr>)}
         </tbody></table></div><p className="section-note">Credits are already included in outstanding. No payment is executed from these links.</p>
       </section>
-      <TopParties title="Top clients" rows={portfolio.clients} view="sales" />
-      <TopParties title="Top suppliers" rows={portfolio.suppliers} view="purchases" />
+      <TopParties title="Top clients" rows={portfolio.clients} view="sales" asOf={data.as_of} />
+      <TopParties title="Top suppliers" rows={portfolio.suppliers} view="purchases" asOf={data.as_of} />
       <section className="panel business-widget document-mix" aria-labelledby="document-mix-heading"><div className="panel-heading"><div><h3 id="document-mix-heading">Document-type mix</h3><p>Posted documents dated in this quarter through {end}.</p></div></div>
         <table className="compact-table"><caption className="sr-only">Document-type counts and record drilldowns</caption><thead><tr><th>Document type</th><th className="numeric">Records</th></tr></thead><tbody>{portfolio.mix.map(row => <tr key={row.kind}><td><a href={recordLink({ view: row.view, ...period })}>{row.label}</a><span className="mix-track" aria-hidden="true"><span style={{ width: `${barPercent(String(row.count), portfolio.mix.map(r => String(r.count)))}%` }} /></span></td><td className="numeric">{row.count}</td></tr>)}</tbody></table>
       </section>

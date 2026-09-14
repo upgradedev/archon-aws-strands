@@ -96,6 +96,38 @@ test('dashboard widgets expose exact cash, partial month, source links and incom
   expect(screen.getAllByText('No posted invoices.')).toHaveLength(2);
 });
 
+test('party and aging drilldowns preserve the as-of cutoff without excluding older or undated balances', () => {
+  const data = businessFixture();
+  data.sources = data.sources.filter(s => s.kind === 'SalesInvoice').slice(0, 3);
+  data.sales = data.sales.slice(0, 3).map(s => ({ ...s, counterparty: 'Cutoff client', due: '2026-10-01' }));
+  data.purchases = [];
+  data.sources[0].document!.issued = '2026-06-01';
+  data.sources[1].document!.issued = '2026-09-10';
+  delete data.sources[2].document!.issued;
+  const { unmount } = render(<Dashboard data={data} stale={false} />);
+  const partyLink = within(screen.getByRole('table', { name: 'Top clients' })).getByRole('link', { name: 'Cutoff client' });
+  const route = partyLink.getAttribute('href')!.slice(1);
+  expect(route).toContain('to=2026-09-09'); expect(route).not.toContain('from=');
+  const agingLink = within(screen.getByRole('table', { name: /Open client and supplier balances/ })).getAllByRole('link')[0];
+  expect(agingLink.getAttribute('href')).toContain('to=2026-09-09');
+  unmount();
+  render(<Documents data={data} busy={false} mutate={mutate} route={route} />);
+  expect(screen.getByRole('table')).toHaveTextContent('SI-001');
+  expect(screen.getByRole('table')).toHaveTextContent('SI-003');
+  expect(screen.getByRole('table')).not.toHaveTextContent('SI-002');
+  expect(screen.getByText(/without a known invoice issue date are included/)).toBeVisible();
+});
+
+test('duplicate journey prefills editable email rather than typed JSON and explains its origin', () => {
+  const data = businessFixture();
+  const submit = vi.fn();
+  data.sources.find(s => s.kind === 'Receipt')!.document!.transfer_id = 'FIXTURE-BANK-1';
+  render(<Documents data={data} busy={false} mutate={submit} route="/records?intake=open&journey=duplicate&invoice=SI-001" />);
+  expect((screen.getByLabelText(/Email headers and body/) as HTMLTextAreaElement).value).toContain('Transfer ID: FIXTURE-BANK-1');
+  expect(screen.getByText(/This editable remittance was reconstructed/)).toBeVisible();
+  expect(submit).not.toHaveBeenCalled();
+});
+
 test('credit evidence is separate from cash in the draft and collection decision', () => {
   const data = businessFixture(); data.sales[0].outstanding = '0.00'; data.sales[0].credited = '74.00';
   render(<DraftEvidence data={data} invoiceId="SI-001" />);

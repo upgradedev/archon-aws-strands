@@ -62,14 +62,15 @@ export function RecordViews({ data, busy, mutate, route, correct }: { data: Work
   const matches = (text: string) => text.toLowerCase().includes(query.trim().toLowerCase());
   const inRange = (day?: string) => !invalidRange && ((!from && !to) || !!day && validDay(day) && (!from || day >= from) && (!to || day <= to));
   const parties = partyIndex(data);
-  const byId = new Map(data.sources.filter(s => s.status === 'posted' && s.document).map(s => [s.document!.doc_id, s]));
+  const byId = new Map(data.sources.filter(s => s.status === 'posted' && s.document && ['SalesInvoice', 'PurchaseInvoice'].includes(s.kind)).map(s => [s.document!.doc_id, s]));
+  const balanceInRange = (day?: string) => inRange(day) || !invalidRange && params.get('undated') === 'include' && (!day || !validDay(day));
   const matchSource = (s: Source) => matches(`${s.id} ${s.document?.doc_id ?? ''} ${s.document?.settles ?? ''} ${documentParty(s, parties)} ${s.body}`)
     && (!party || documentParty(s, parties) === party) && inRange(sourceView ? recordDay(s) : documentDay(s));
   const sources = sourceView ? unique([...data.holds.filter(s => s.kind === 'LegacyPaymentReview'), ...data.sources], s => s.id).filter(s => (filter === 'all' || s.status === filter) && matchSource(s))
     : postedDocuments(data.sources).filter(s => s.kind === (typed?.kind ?? 'Receipt') && matchSource(s));
   const rows = (view === 'purchases' ? data.purchases : data.sales).filter(s => matches(`${s.doc_id} ${s.counterparty}`) && (!party || s.counterparty === party)
     && (filter === 'outstanding' ? (cents(s.outstanding) ?? -1n) > 0n : filter === 'overdue' ? (cents(s.outstanding) ?? -1n) > 0n && s.due < data.as_of : filter === 'closed' ? cents(s.outstanding) === 0n : true)
-    && (!age || ageBucket(s, data.as_of) === age) && inRange(byId.get(s.doc_id)?.document?.issued));
+    && (!age || ageBucket(s, data.as_of) === age) && balanceInRange(byId.get(s.doc_id)?.document?.issued));
   const sourcePage = pageOf(sources, params.get('page'), sources.findIndex(s => s.id === selected || s.document?.doc_id === selected));
   const balancePage = pageOf(rows, params.get('page'));
   function change(key: string, value: string) {
@@ -89,6 +90,7 @@ export function RecordViews({ data, busy, mutate, route, correct }: { data: Work
       <div className="record-filters"><label className="records-search">Search records<input type="search" value={query} onChange={e => change('q', e.target.value)} placeholder="Invoice, party or source reference" /></label><label>From date<input type="date" value={from} onChange={e => change('from', e.target.value)} /></label><label>To date<input type="date" value={to} onChange={e => change('to', e.target.value)} /></label></div>
       <p className="field-help">Inclusive date range · {sourceView ? 'financial date where recorded; otherwise retained source date' : balances ? 'invoice issue date' : 'issued / received-on / paid-on date'} · All dates unless selected. {party ? `Party: ${party}. ` : ''}{age ? `Aging: ${age}. ` : ''}<a href={recordLink({ view })}>Clear filter</a></p>
       {invalidRange ? <p className="notice warning" role="alert">Choose valid dates with From date on or before To date. No records match an invalid range.</p> : null}
+      {balances && params.get('undated') === 'include' ? <p className="field-help">Records without a known invoice issue date are included, matching the dashboard balance snapshot.</p> : null}
       {balances ? <div className="workspace-tabs" role="group" aria-label="Balance filter">{[['all', 'All balances'], ['outstanding', 'Open balances'], ['overdue', 'Overdue balances'], ['closed', 'Closed balances']].map(([key, label]) => <button className="secondary small" key={key} aria-pressed={filter === key} onClick={() => change('filter', key)}>{label}</button>)}</div> : null}
       {sourceView ? <section className="panel"><div className="panel-heading"><div><h2>Source register <span className="count">{sources.length}</span></h2><p>Original post, document reference, and the reader's decision.</p></div><label className="inline-label">Show <select value={filter} onChange={e => change('filter', e.target.value)}><option value="all">All sources</option><option value="posted">Posted</option><option value="refused">Refused</option><option value="corrected">Corrected</option><option value="resolved">Resolved</option></select></label></div>
         {selected && !sources.some(s => s.id === selected || s.document?.doc_id === selected) ? <p className="notice warning">Selected source is unavailable in this view. Clear the filter or choose a current source.</p> : null}
