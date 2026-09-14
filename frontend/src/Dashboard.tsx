@@ -3,6 +3,7 @@ import { Badge, Empty, Heading, money } from './ui';
 import { dashboardMetrics, reasonTarget, workspaceLink } from './ledger';
 import { useClock } from './useClock';
 import { ReconciliationStart } from './Reconciliation';
+import { BusinessWidgets } from './BusinessWidgets';
 
 export function Dashboard({ data, stale }: { data: Workspace; stale: boolean }) {
   const metrics = dashboardMetrics(data, useClock(data.draft?.at));
@@ -22,7 +23,8 @@ export function Dashboard({ data, stale }: { data: Workspace; stale: boolean }) 
     </section><section className="panel"><div className="panel-heading"><div><h2>Recent activity</h2><p>Recorded events · latest first</p></div><a href="#/history">All history →</a></div>
       {data.activity.length ? <ol className="timeline">{data.activity.slice(-5).reverse().map(event => <li key={event.id}><span className="timeline-dot" aria-hidden="true" /><div><h3>{event.title}</h3><p>{event.detail}</p><time>{event.at}</time></div></li>)}</ol> : <Empty title="No recorded activity">Post your first synthetic email from Records. Reading a page creates no financial event.</Empty>}
     </section></div>
+    <BusinessWidgets data={data} />
     <section className="panel" aria-label="Observed session outcomes"><div className="panel-heading"><h2>Observed session outcomes</h2></div><dl className="report-grid"><div><dt>Posted sources</dt><dd>{data.sources.filter(s => s.status === 'posted').length}</dd></div><div><dt>Unresolved sources</dt><dd>{data.holds.length}</dd></div><div><dt>Corrections retained</dt><dd>{data.sources.filter(s => s.status === 'corrected').length}</dd></div><div><dt>Human resolutions</dt><dd>{data.sources.filter(s => s.status === 'resolved').length + (data.resolutions?.length ?? 0)}</dd></div><div><dt>Recorded approval outcomes</dt><dd>{data.receipts.length}</dd></div></dl><p className="section-note">Human active time, time saved and money recovered: Unknown. These are counts of this session's recorded outcomes, not measured benefits.</p><a href="#/history">Inspect decisions and evidence →</a></section>
-    <p className="section-note">Recorded receipts are retained remittances, not independent proof of bank settlement. {data.live?.mail ? 'Email can be sent through controlled SES after approval.' : 'Email delivery is simulated.'} No estimated savings or trends.</p>
+    <p className="section-note">Recorded receipts are retained remittances, not independent proof of bank settlement. {data.live?.mail ? 'Email can be sent through controlled SES after approval.' : 'Email delivery is simulated.'} No forecasts or estimated savings.</p>
   </>;
 }

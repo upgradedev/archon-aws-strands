@@ -1,13 +1,19 @@
+export interface SourceDocument {
+  doc_id: string; source_ref: string; settles?: string; amount?: string; transfer_id?: string;
+  issued?: string; due?: string; net?: string; vat?: string; gross?: string;
+  client?: string; supplier?: string; client_email?: string; paid_on?: string; received_on?: string;
+}
 export interface Source {
   id: string; body: string; at: string; status: 'posted' | 'refused' | 'corrected' | 'resolved';
   error: string; kind: string; redactions: number; corrected_by?: string;
   legacy_documents?: { doc_id: string; amount: string }[];
   resolution?: { decision: string; note: string; at: string; duplicate_of: string | null };
-  document: { doc_id: string; source_ref: string; settles?: string; amount?: string; transfer_id?: string } | null;
+  origin?: string;
+  document: SourceDocument | null;
 }
 export interface Settlement {
   doc_id: string; counterparty: string; contact: string; gross: string; settled: string; due: string;
-  outstanding: string;
+  outstanding: string; credited?: string;
 }
 export interface QueueItem {
   invoice_id: string; client: string; recipient: string; outstanding: string;

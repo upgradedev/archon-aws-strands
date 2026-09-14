@@ -35,6 +35,17 @@ test('demo switching waits for old reads and keeps navigation actions locked whi
   expect(api.request).not.toHaveBeenCalled();
 });
 
+test('business demo notice never claims five emails or AI ingestion', async () => {
+  location.hash = '/dashboard';
+  vi.mocked(api.openWorkspace).mockResolvedValue({ session: 'business', workspace: { ...empty(), demo_seed: 'business-v1' } });
+  render(<App />);
+  const notice = await screen.findByRole('region', { name: 'Populated fictional demo' });
+  expect(notice).toHaveTextContent('240 fictional typed source documents');
+  expect(notice).toHaveTextContent('not AI-extracted');
+  expect(notice).not.toHaveTextContent('Five fictional source emails');
+  expect(api.request).not.toHaveBeenCalled();
+});
+
 test('new workspace on History clears an existing evidence bundle at the same revision', async () => {
   location.hash = '/history';
   const state = empty();
