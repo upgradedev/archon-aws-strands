@@ -1,4 +1,33 @@
 {
+  "product_tour_wave": {
+    "status": "EXACT_SOURCE_CI_AND_RELEASE_RECEIPT_REQUIRED",
+    "human_uat": "NOT_RUN",
+    "scope": "Optional read-only guide; no automatic navigation, model invocation, import, key activation or email approval.",
+    "cases": [
+      {
+        "id": "AR-UAT-43",
+        "steps": ["Open a loaded workspace", "Choose Take a tour", "Read all six stops with Next and Previous", "Close with Escape", "Reopen and Finish tour"],
+        "expected": "Each step heading receives focus. Next and Previous leave the current page unchanged. Close returns focus to Take a tour; reopening starts at step one. Reload does not start a tour automatically.",
+        "automated_test": "frontend/tests/product-tour.test.tsx; frontend/e2e/business-portfolio.spec.ts",
+        "human_signoff": "NOT_RUN"
+      },
+      {
+        "id": "AR-UAT-44",
+        "steps": ["Type an unsaved fictional email in Records", "Open, step through and close the tour without opening another page", "Finish that input before explicitly following Open [page] links", "Inspect History and reload"],
+        "expected": "Explanations preserve the visible unsaved textarea and route. Explicit page links use existing case context; leaving a page can discard unsaved input, as warned. Retained books and activity stay unchanged; no seed, AI, consent, incoming activation or send request.",
+        "automated_test": "frontend/tests/app.test.tsx; frontend/e2e/business-portfolio.spec.ts",
+        "human_signoff": "NOT_RUN"
+      },
+      {
+        "id": "AR-UAT-45",
+        "steps": ["In an isolated test, observe a queued, running or unknown provider job", "Open the tour", "Separately observe an offline stale workspace", "Inspect the optional page link"],
+        "expected": "Guide navigation is absent while the app reports busy, provider-pending or stale state; explanations and Close remain available. CI supplies these states without new paid calls. The guide is not a global lock on every navigation control.",
+        "automated_test": "frontend/tests/app.test.tsx; frontend/tests/product-tour.test.tsx",
+        "human_signoff": "NOT_RUN"
+      }
+    ],
+    "evidence": "Exact-head unit/browser results and business-product-tour.png on desktop, mobile Chromium and 375px WebKit. Deployed acceptance is separate from source CI. Human ten-second comprehension remains NOT_RUN."
+  },
   "business_portfolio_wave": {
     "status": "SOURCE_CANDIDATE_REQUIRES_EXACT_SHA_CI",
     "human_uat": "NOT_RUN",
