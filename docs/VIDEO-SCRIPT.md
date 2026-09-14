@@ -1,87 +1,89 @@
-# Video script: sample records to an exact reviewed email
+# Archon film: source-backed books, human-approved email
 
-**Draft script, not a completed video. No recording or submission is represented by this file.**
-Recording and publication remain deferred. These corrections align a retained draft with the product.
+**In production, not yet a finished or publicly uploaded video.** The executable narration
+and scene order live in [video/story.json](../video/story.json). This page explains the cut,
+its evidence boundaries and how to reproduce it.
 
-For a joiner reconciling invoice and remittance emails alone, open
-[the AWS workstation](https://d2ssmv59q16d0b.cloudfront.net/) and inspect Records.
-The Strands graph is real in both modes. Controlled-live uses actual Bedrock and restricted SES;
-retained simulation uses a scripted model and simulated acceptance, with no real email.
-[Evidence and limits](EVALUATION.md) · [Required disclosures](../README.md#pre-existing-work-disclosed)
+## The story
 
-Before recording, inspect [release.json](https://d2ssmv59q16d0b.cloudfront.net/release.json),
-[/api/health](https://d2ssmv59q16d0b.cloudfront.net/api/health) and matching acceptance.
-Record those identities with the footage. The 2026-09-14 accepted snapshot is `3e89590` / `2e2b375`;
-its [AWS run 34822838436](https://github.com/upgradedev/archon-aws-strands/actions/runs/34822838436)
-is recorded in [Evaluation](EVALUATION.md). This script is not footage of that run;
-new source changes require their own acceptance before being presented as shipped.
-The seven planned segments total 175 seconds. Actual video duration is unmeasured.
-Use only fictional inputs; a recording plan is not new permission for provider calls or email.
+Alex runs a small joinery. An invoice for 1,860.00 EUR has a recorded payment of 600.00 EUR.
+Archon prepares a collection email for the remaining 1,260.00 EUR after checking the books.
+A person approves the exact recipient and content before the controlled SES attempt.
 
-## 1. The joiner — 20 seconds
+The [official rules](https://agentsforhumans.devpost.com/rules), checked on 2026-09-14,
+cap the video at **five minutes**. The planned cut is 290 seconds; this is a target, not a
+measured final duration. The real app starts at approximately 28 seconds.
 
-Show the introduction and name the task: compare a client invoice with the remittance before
-asking for the remaining balance. Explain that the business and records are fictional.
-No customer time saving or recovered-money figure has been measured.
+| Scene | Planned seconds | What is shown |
+|---|---:|---|
+| Introduction | 8 | Archon and its mechanism |
+| Problem | 12 | Invoice, payment, remaining balance |
+| Solution | 8 | Evidence, ledger checks, human approval |
+| Enter the app | 15 | Actual public welcome and demo setup |
+| Dashboard | 23 | 240 fictional records and populated financial widgets |
+| Records | 23 | Sales, credits and supplier payments |
+| One case | 23 | Separate five-source tutorial and linked payment |
+| AWS infrastructure | 20 | CloudFront/S3, API Gateway, Lambda API/worker, S3 persistence, Bedrock and SES |
+| Strands orchestration | 16 | Suppliers, sales, payroll, trading, cash and metrics readers; tool-less composer |
+| Real model execution | 22 | Actual saved job and Bedrock usage |
+| Draft and evidence | 23 | Actual generated wording and linked figures |
+| Exact review | 22 | Disabled send, review binding and fingerprint |
+| Controlled send | 20 | One explicitly approved SES attempt |
+| Durable outcome | 20 | Receipt survives reload; acceptance is not delivery |
+| Product tour | 15 | Optional explanatory navigation |
+| Limits | 10 | Fictional data, controlled recipient, no bank feed |
+| Closing | 10 | Product promise and Strands on AWS |
 
-## 2. Load and inspect evidence — 25 seconds
+## Recording identity
 
-Choose **Explore populated demo → Load business portfolio**. Show the populated dashboard and
-six Records views. Explain that its 240 records are typed fictional fixtures, not AI-extracted mail.
-For the remaining collection example, use **Demo data → Load demo workspace**, the optional
-five-source tutorial. Loading either demo uses deterministic ledger checks, with no AI report,
-Bedrock call, draft or email. Inspect the smaller example's invoice and client payment reference.
-For the partially paid invoice show 1,860.00 EUR minus 600.00 EUR equals 1,260.00 EUR remaining.
-These are supplied source figures, not bank-verified transactions.
+The recording freeze is frontend `2932fdc6fc90d2a3c965c31316c1c945c0b380c6` and
+backend `2e2b3757f9d2bb8e95e2338fdc5ae40c6a35c3a4`.
+Its accepted [AWS run](https://github.com/upgradedev/archon-aws-strands/actions/runs/34833237908)
+is separate from the new video take. Before capture, the pipeline fetches the public app,
+[release.json](https://d2ssmv59q16d0b.cloudfront.net/release.json) and
+[/api/health](https://d2ssmv59q16d0b.cloudfront.net/api/health), and refuses a different pair.
 
-## 3. Show the execution mode — 20 seconds
+No application, infrastructure or provider configuration is changed by producing the film.
+New media commits are not represented as a new deployed runtime.
 
-Show the session's actual mode label. In controlled-live mode, later semantic intake and
-Strands reasoning make real Bedrock calls under a finite operating grant.
-A retained simulation remains scripted and its email acceptance remains simulated.
-Do not edit the mode label into a shot or treat a sample-loaded screen as a live model result.
+## Measured narration and honest footage
 
-## 4. Run the six readers — 25 seconds
+[The CI workflow](../.github/workflows/archon-film.yml) verifies deliberately broken media
+before it can generate speech. Local installations, builds and rendering are not needed.
 
-With the existing operation authorization, run Strands and show the actual pending/completed
-state and six domain reports. The composer holds no tools and waits for all six readers.
-Bedrock supplies interpretation and wording; ledger code verifies and inserts the figures.
-If it fails, show the failure; no scripted replacement stands in for live inference.
+1. `video/media.py narrate` uses ElevenLabs with exact-content caching, character-aligned
+   captions, a cumulative 12,000-character attempt ceiling and a subscription-credit check.
+2. Each visual window is measured speech plus a tail, rounded to a 25 fps frame boundary,
+   or the planned scene minimum if longer. There is no whole-film time stretch.
+3. `video/render.py` animates the original introduction, problem and architecture slides.
+4. `video/capture.py` drives the frozen live application, keeps actual browser pixels, and
+   captures original project-media PNGs. It never substitutes mocked provider responses.
+5. Only explicitly logged processing waits may be shortened, with an on-screen disclosure.
+   The approved email and provider result are actual outputs from the recorded session.
+6. The composer emits 1080p H.264/AAC video, selectable English captions, a separate SRT,
+   measured timings and a hash-bound receipt. Audio/video drift beyond one frame fails.
+   Sampled output pixels must match the corresponding source clips.
 
-## 5. Exact review and changed evidence — 35 seconds
+Reuse the narration and capture cache when editing. An incomplete provider take refuses
+automatic replay and needs reconciliation; creating a new CI run is not authorization for
+another send. An incomplete billed speech attempt also stops instead of being silently charged again.
 
-Show the draft beside the recipient, source invoice, remittance and remaining balance.
-Explain that changed sources, ledger revision, holds or expiry require a fresh review.
-Use a retained, real refusal/correction or duplicate-resolution entry if available in the recorded
-workspace. Otherwise explain the control without staging an invented successful outcome.
-A human resolution records an external decision; it does not arbitrate a dispute or move money.
+## Claims and limits
 
-## 6. Controlled outcome and recovery — 30 seconds
+- The 240-record portfolio is typed fictional data, **not** a 240-document AI extraction test.
+- The smaller example is seeded before the live Strands graph runs. Do not narrate seed loading as AI.
+- Strands and Bedrock produce reports and wording. Ledger code checks and inserts monetary claims.
+- The film does not display private chain-of-thought. It shows observable execution and results.
+- A recorded payment is source evidence, not verified bank settlement.
+- Real email is limited to the verified test recipient and requires exact approval.
+- SES acceptance and an identifier do not prove mailbox delivery. Sending does not collect money.
+- No deployed Aurora, AgentCore, Gmail/Outlook connection, bank feed, OCR or payment execution is claimed.
+- No measured time-saving, independent benchmark win, legal compliance or competitive rank is claimed.
+- [Cover artwork](GRAPHICS.md) is editorial, not a screenshot or evidence of a connector.
 
-If an exact controlled send is already authorized, review the actual recipient and body,
-approve real-email consent, then show the returned durable outcome and reload History.
-Otherwise use an already-retained receipt, clearly labeled with its original run, or demonstrate
-simulated approval in a visibly synthetic session. Neither option is a fresh live send.
-If the API is unavailable, show the error and refresh durable state before any retry.
-There is no SES fallback shot. Provider acceptance does not prove arrival.
-
-## 7. Evidence and limits — 20 seconds
-
-Show readable evidence and the dated acceptance record. A hash identifies bytes, not truth.
-The prior actual AWS run recorded three cases, 45 model calls and three SES acceptances.
-Its six separate portfolio journeys made no model or mail calls; they are not 240-document AI evidence.
-The owner's six received messages are separately HUMAN-ATTESTED; ID correlation remains unknown.
-Earlier comparisons are withdrawn; the retained evaluation had zero Archon chases, achieved by
-not acting. Full human UAT and benefit measurement remain NOT_RUN. End on the AWS URL and repository.
-
-## What must not be said
-
-- Do not call the offline run agentic reasoning; the scripted model walks the graph.
-- Do not claim a live mailbox, bank verification, OCR, AgentCore or Aurora deployment.
-- Do not claim real email delivery from an SES ID; preserve the narrower human attestation and its unknown correlation.
-- Do not present a withdrawn or circular benchmark as current evidence.
-- Do not claim compliance, competitive superiority, measured time savings or collected money.
-- Do not narrate a scripted decision as a live model result or the deterministic seed as AI extraction.
-- Do not imply raw-mail support for supplier payments or credits; public intake supports sales invoices, purchase invoices and client receipts only.
-- Do not show [concept art](GRAPHICS.md) as product screenshots, GBP support or connected banks.
-- Before demonstrating the [incoming webhook](incoming-webhook.md), check served identities and matching acceptance; explain the disabled initial key and required producer setup.
+The video must show the product actually working, explain the problem and solution, and name
+**Strands Agents** and its load-bearing role. Design is demonstrated by the coherent user journey;
+impact is the specific collection decision, not an invented economic result. Technical implementation
+is supported by the real execution and architecture. Creativity is the separation of model wording,
+source-grounded money and human authorization. Public hosting, final playback review and upload
+remain separate completion gates.

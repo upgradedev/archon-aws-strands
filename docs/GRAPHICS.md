@@ -22,7 +22,21 @@ roles and boundaries. They are diagrams, not screen captures or proof of deploym
 [Architecture](ARCHITECTURE.md) links their source basis; [Evaluation](EVALUATION.md) identifies
 the accepted release. Neither a banner nor a diagram establishes a newer release's acceptance.
 
-## Four supplied JPGs
+## Approved replacement covers
+
+Two new editorial covers are staged for the product film and project listing:
+
+| Asset | Intended use |
+|---|---|
+| [archon-youtube-cover-v2.png](../graphics/archon-youtube-cover-v2.png) | YouTube: invoice 1,860 EUR, recorded payment 600 EUR, remaining balance 1,260 EUR and exact email approval. |
+| [archon-devpost-cover-v2.png](../graphics/archon-devpost-cover-v2.png) | Devpost: source-backed books and human-approved collection emails, built with Strands Agents on AWS. |
+
+These are AI-generated editorial illustrations, not captured UI. They do not assert bank
+matching, GBP support or Aurora deployment. The [prompt record](../video/cover-prompts.json)
+retains the generation instructions. Real, unaltered application screenshots are captured
+separately by the [video pipeline](VIDEO-SCRIPT.md); no completed capture is claimed here.
+
+## Retained original JPGs
 
 These owner-supplied JPGs are preserved unchanged under `graphics/`. They were inspected visually
 for this disclosure. Their filenames indicate possible uses, not a completed video, a submission,
